@@ -1,0 +1,4354 @@
+{
+  "bomFormat": "CycloneDX",
+  "components": [
+    {
+      "description": "A simple clean-room implementation of the Adler-32 checksum",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "320119579fcad9c21884f5c4861d16174d0e06250625266f50fe6898340abefa"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "0BSD OR MIT OR Apache-2.0"
+        }
+      ],
+      "name": "adler2",
+      "purl": "pkg:cargo/adler2@2.0.1",
+      "scope": "required",
+      "type": "library",
+      "version": "2.0.1"
+    },
+    {
+      "description": "Fast multiple substring searching.",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "c982642fa9e8606056828ee9a8505737230110bb1099153c79efe865c59d12ba"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "Unlicense OR MIT"
+        }
+      ],
+      "name": "aho-corasick",
+      "purl": "pkg:cargo/aho-corasick@1.1.5",
+      "scope": "required",
+      "type": "library",
+      "version": "1.1.5"
+    },
+    {
+      "description": "IO stream adapters for writing colored text that will gracefully degrade according to your terminal's capabilities.",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "824a212faf96e9acacdbd09febd34438f8f711fb84e09a8916013cd7815ca28d"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "anstream",
+      "purl": "pkg:cargo/anstream@1.0.0",
+      "scope": "required",
+      "type": "library",
+      "version": "1.0.0"
+    },
+    {
+      "description": "ANSI text styling",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "940b3a0ca603d1eade50a4846a2afffd5ef57a9feac2c0e2ec2e14f9ead76000"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "anstyle",
+      "purl": "pkg:cargo/anstyle@1.0.14",
+      "scope": "required",
+      "type": "library",
+      "version": "1.0.14"
+    },
+    {
+      "description": "Parse ANSI Style Escapes",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "52ce7f38b242319f7cabaa6813055467063ecdc9d355bbb4ce0c68908cd8130e"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "anstyle-parse",
+      "purl": "pkg:cargo/anstyle-parse@1.0.0",
+      "scope": "required",
+      "type": "library",
+      "version": "1.0.0"
+    },
+    {
+      "description": "Look up colored console capabilities",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "40c48f72fd53cd289104fc64099abca73db4166ad86ea0b4341abe65af83dadc"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "anstyle-query",
+      "purl": "pkg:cargo/anstyle-query@1.1.5",
+      "scope": "required",
+      "type": "library",
+      "version": "1.1.5"
+    },
+    {
+      "description": "Styling legacy Windows terminals",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "291e6a250ff86cd4a820112fb8898808a366d8f9f58ce16d1f538353ad55747d"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "anstyle-wincon",
+      "purl": "pkg:cargo/anstyle-wincon@3.0.11",
+      "scope": "required",
+      "type": "library",
+      "version": "3.0.11"
+    },
+    {
+      "description": "Automatically generates Rust FFI bindings to C and C++ libraries.",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "993776b509cfb49c750f11b8f07a46fa23e0a1386ffc01fb1e7d343efc387895"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "BSD-3-Clause"
+          }
+        }
+      ],
+      "name": "bindgen",
+      "purl": "pkg:cargo/bindgen@0.72.1",
+      "scope": "required",
+      "type": "library",
+      "version": "0.72.1"
+    },
+    {
+      "description": "A collection of common biomedical types for use in rust-bio and rust-htslib.",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "f4dcf54f8b7f51450207d54780bab09c05f30b8b0caa991545082842e466ad7e"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "name": "bio-types",
+      "purl": "pkg:cargo/bio-types@1.0.4",
+      "scope": "required",
+      "type": "library",
+      "version": "1.0.4"
+    },
+    {
+      "description": "Shared exit codes, diagnostics, summary-JSON contract and provenance for the bioinfo-tools binaries",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "name": "bioinfo-common",
+      "properties": [
+        {
+          "name": "bioinfo-tools:workspace-member",
+          "value": "true"
+        }
+      ],
+      "purl": "pkg:cargo/bioinfo-common@0.1.0",
+      "scope": "required",
+      "type": "application",
+      "version": "0.1.0"
+    },
+    {
+      "description": "Streaming FASTQ/FASTA reading and writing with strict and lenient parsing, compression detection and BGZF",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "name": "bioinfo-fastx",
+      "properties": [
+        {
+          "name": "bioinfo-tools:workspace-member",
+          "value": "true"
+        }
+      ],
+      "purl": "pkg:cargo/bioinfo-fastx@0.1.0",
+      "scope": "required",
+      "type": "application",
+      "version": "0.1.0"
+    },
+    {
+      "description": "A vector of bits",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "5727b15fa97d4f4fee0a3b7c3d550ed0269f54329207b86388de918604e31269"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "Apache-2.0 OR MIT"
+        }
+      ],
+      "name": "bit-vec",
+      "purl": "pkg:cargo/bit-vec@0.10.1",
+      "scope": "required",
+      "type": "library",
+      "version": "0.10.1"
+    },
+    {
+      "description": "A macro to generate structures which behave like bitflags.\n",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "3ded4057c258ba199e2d26386d3af3780957ecaee6c4ef4041c6b4b8b97c0b06"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "bitflags",
+      "purl": "pkg:cargo/bitflags@2.13.2",
+      "scope": "required",
+      "type": "library",
+      "version": "2.13.2"
+    },
+    {
+      "description": "Binary Object Representation Serializer for Hashing\n",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "553c5d846a6ba5150c65e3b1b8ec073bcf1abc20f9b7220de384a4443ea4e20a"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "borsh",
+      "purl": "pkg:cargo/borsh@1.8.1",
+      "scope": "required",
+      "type": "library",
+      "version": "1.8.1"
+    },
+    {
+      "description": "Binary Object Representation Serializer for Hashing\n",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "12cdfe656708a01f89b451a7d36466e6fe6c414de0aa18fc54f864f6f9ca9f56"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ],
+      "name": "borsh-derive",
+      "purl": "pkg:cargo/borsh-derive@1.8.1",
+      "scope": "required",
+      "type": "library",
+      "version": "1.8.1"
+    },
+    {
+      "description": "A string type that is not required to be valid UTF-8.",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "6bb31b46c14244e20ee9984b11bf5c992b91fb6939fea616e3512c8baecdbe5f"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "bstr",
+      "purl": "pkg:cargo/bstr@1.13.1",
+      "scope": "required",
+      "type": "library",
+      "version": "1.13.1"
+    },
+    {
+      "description": "Library for reading/writing numbers in big-endian and little-endian.",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "1fd0f2584146f6f2ef48085050886acf353beff7305ebd1ae69500e27c67f64b"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "Unlicense OR MIT"
+        }
+      ],
+      "name": "byteorder",
+      "purl": "pkg:cargo/byteorder@1.5.0",
+      "scope": "required",
+      "type": "library",
+      "version": "1.5.0"
+    },
+    {
+      "description": "Types and traits for working with bytes",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "fc652a48c352aef3ea3aed32080501cf3ef6ed5da78602a020c991775b0aff04"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "name": "bytes",
+      "purl": "pkg:cargo/bytes@1.12.1",
+      "scope": "required",
+      "type": "library",
+      "version": "1.12.1"
+    },
+    {
+      "description": "Bindings to libbzip2 for bzip2 compression and decompression exposed as\nReader/Writer streams.\n",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "f3a53fac24f34a81bc9954b5d6cfce0c21e18ec6959f44f56e8e90e4bb7c346c"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "bzip2",
+      "purl": "pkg:cargo/bzip2@0.6.1",
+      "scope": "required",
+      "type": "library",
+      "version": "0.6.1"
+    },
+    {
+      "description": "Bindings to libbzip2 for bzip2 compression and decompression exposed as\nReader/Writer streams.\n",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "225bff33b2141874fe80d71e07d6eec4f85c5c216453dd96388240f96e1acc14"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT/Apache-2.0"
+          }
+        }
+      ],
+      "name": "bzip2-sys",
+      "purl": "pkg:cargo/bzip2-sys@0.1.13+1.0.8",
+      "scope": "required",
+      "type": "library",
+      "version": "0.1.13+1.0.8"
+    },
+    {
+      "description": "A build-time dependency for Cargo build scripts to assist in invoking the native\nC compiler to compile native C code into a static archive to be linked into Rust\ncode.\n",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "f74872d07caf508b30a21f6836e7d7016a2eaf7d9ff4f48deaa58cd8a0407630"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "cc",
+      "purl": "pkg:cargo/cc@1.6.0",
+      "scope": "required",
+      "type": "library",
+      "version": "1.6.0"
+    },
+    {
+      "description": "A C expression parser and evaluator",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "6fac387a98bb7c37292057cffc56d62ecb629900026402633ae9160df93a8766"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0/MIT"
+          }
+        }
+      ],
+      "name": "cexpr",
+      "purl": "pkg:cargo/cexpr@0.6.0",
+      "scope": "required",
+      "type": "library",
+      "version": "0.6.0"
+    },
+    {
+      "description": "A macro to ergonomically define an item depending on a large number of #[cfg]\nparameters. Structured like an if-else chain, the first matching branch is the\nitem that gets emitted.\n",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "4e7648175b45a9a48536d676f68d918270699102aa8dab5496df06904c914600"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "cfg-if",
+      "purl": "pkg:cargo/cfg-if@1.0.5",
+      "scope": "required",
+      "type": "library",
+      "version": "1.0.5"
+    },
+    {
+      "description": "A tiny utility to help save you a lot of effort with long winded `#[cfg()]` checks.",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "f079e83a288787bcd14a6aea84cee5c87a67c5a3e660c30f557a3d24761b3527"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "name": "cfg_aliases",
+      "purl": "pkg:cargo/cfg_aliases@0.2.2",
+      "scope": "required",
+      "type": "library",
+      "version": "0.2.2"
+    },
+    {
+      "description": "Rust bindings for libclang.",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "157a8ba7b480713b56f4c09fd13fc3e0a22a5dfab8097ba61cbc5feef950788a"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ],
+      "name": "clang-sys",
+      "purl": "pkg:cargo/clang-sys@1.9.1",
+      "scope": "required",
+      "type": "library",
+      "version": "1.9.1"
+    },
+    {
+      "description": "A simple to use, efficient, and full-featured Command Line Argument Parser",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "aa8876b300ab35ba921adea3dfd70157a46249b33f95c9084ae5709785478946"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "clap",
+      "purl": "pkg:cargo/clap@4.6.7",
+      "scope": "required",
+      "type": "library",
+      "version": "4.6.7"
+    },
+    {
+      "description": "A simple to use, efficient, and full-featured Command Line Argument Parser",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "ec0797fb7aeb1406c84efac526901f7ec3ead2124f946b494e72879d4b54704d"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "clap_builder",
+      "purl": "pkg:cargo/clap_builder@4.6.7",
+      "scope": "required",
+      "type": "library",
+      "version": "4.6.7"
+    },
+    {
+      "description": "Parse command line argument by defining a struct, derive crate.",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "f9c751b79415d4e559e3d1fcf128e09e720eb673a06d26cf6f392d37d75b66e0"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "clap_derive",
+      "purl": "pkg:cargo/clap_derive@4.6.7",
+      "scope": "required",
+      "type": "library",
+      "version": "4.6.7"
+    },
+    {
+      "description": "Minimal, flexible command line parser",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "1c133bc6a41be0d194c306b5506d15e6feeea7b1d6604bd3f8310dfb2ca96486"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "clap_lex",
+      "purl": "pkg:cargo/clap_lex@1.1.1",
+      "scope": "required",
+      "type": "library",
+      "version": "1.1.1"
+    },
+    {
+      "description": "A build dependency for running `cmake` to build a native library\n",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "c0f78a02292a74a88ac736019ab962ece0bc380e3f977bf72e376c5d78ff0678"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "cmake",
+      "purl": "pkg:cargo/cmake@0.1.58",
+      "scope": "required",
+      "type": "library",
+      "version": "0.1.58"
+    },
+    {
+      "description": "Global override of color control",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "1d07550c9036bf2ae0c684c4297d503f838287c83c53686d05370d0e139ae570"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "colorchoice",
+      "purl": "pkg:cargo/colorchoice@1.0.5",
+      "scope": "required",
+      "type": "library",
+      "version": "1.0.5"
+    },
+    {
+      "description": "Fast, SIMD-accelerated CRC32 (IEEE) checksum computation",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "01a7799fd6b852db0e61728dde9a204c423b44d689dbd432522543614b490e78"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "crc32fast",
+      "purl": "pkg:cargo/crc32fast@1.5.2",
+      "scope": "required",
+      "type": "library",
+      "version": "1.5.2"
+    },
+    {
+      "description": "Multi-producer multi-consumer channels for message passing",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "98b0cc327b5bc766e7fda9c9260cc0fa81b43a8e240440422dff70788e3f9ef1"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "crossbeam-channel",
+      "purl": "pkg:cargo/crossbeam-channel@0.5.17",
+      "scope": "required",
+      "type": "library",
+      "version": "0.5.17"
+    },
+    {
+      "description": "Concurrent work-stealing deque",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "622f3fc73690be383c7214310406f28a90e6edeadc3cea882f9d71e495b9711a"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "crossbeam-deque",
+      "purl": "pkg:cargo/crossbeam-deque@0.8.8",
+      "scope": "required",
+      "type": "library",
+      "version": "0.8.8"
+    },
+    {
+      "description": "Epoch-based garbage collection",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "dc74980687109a3b14c72fd458107bf0baa1da1a1a805e178d15501ba9b86d9d"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "crossbeam-epoch",
+      "purl": "pkg:cargo/crossbeam-epoch@0.9.21",
+      "scope": "required",
+      "type": "library",
+      "version": "0.9.21"
+    },
+    {
+      "description": "Utilities for concurrent programming",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "a31eee39dddec8330830986fcd7625edb5a24ec90ea038215273bbc3adb08ac6"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "crossbeam-utils",
+      "purl": "pkg:cargo/crossbeam-utils@0.8.23",
+      "scope": "required",
+      "type": "library",
+      "version": "0.8.23"
+    },
+    {
+      "description": "Type aliases to C types like c_int for use with bindgen",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "b365fabc795046672053e29c954733ec3b05e4be654ab130fe8f1f94d7051f35"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "cty",
+      "purl": "pkg:cargo/cty@0.2.2",
+      "scope": "required",
+      "type": "library",
+      "version": "0.2.2"
+    },
+    {
+      "description": "(Note: superseded by `macro-attr`) This crate provides a macro that enables the use of custom derive attributes.",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "ef8ae57c4978a2acd8b869ce6b9ca1dfe817bff704c220209fdef2c0b75a01b9"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT/Apache-2.0"
+          }
+        }
+      ],
+      "name": "custom_derive",
+      "purl": "pkg:cargo/custom_derive@0.1.7",
+      "scope": "required",
+      "type": "library",
+      "version": "0.1.7"
+    },
+    {
+      "description": "`#[derive(new)]` implements simple constructor functions for structs and enums.",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "d150dea618e920167e5973d70ae6ece4385b7164e0d799fe7c122dd0a5d912ad"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "name": "derive-new",
+      "purl": "pkg:cargo/derive-new@0.6.0",
+      "scope": "required",
+      "type": "library",
+      "version": "0.6.0"
+    },
+    {
+      "description": "`#[derive(new)]` implements simple constructor functions for structs and enums.",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "2cdc8d50f426189eef89dac62fabfa0abb27d5cc008f25bf4156a0203325becc"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "name": "derive-new",
+      "purl": "pkg:cargo/derive-new@0.7.0",
+      "scope": "required",
+      "type": "library",
+      "version": "0.7.0"
+    },
+    {
+      "description": "A derive macro for implementing the display Trait via a doc comment and string interpolation\n",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "c6232dd377dcc64799954cbd3a9bb882e9cdc1308ccd87b1c098f1fb2eaf82a8"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "displaydoc",
+      "purl": "pkg:cargo/displaydoc@0.2.7",
+      "scope": "required",
+      "type": "library",
+      "version": "0.2.7"
+    },
+    {
+      "description": "The enum `Either` with variants `Left` and `Right` is a general purpose sum type with two cases.\n",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "252afb9ae5eaa683babdc6a068b3f5726eb19e05070c731f9b2a23a7c3e8ed34"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "either",
+      "purl": "pkg:cargo/either@1.18.0",
+      "scope": "required",
+      "type": "library",
+      "version": "1.18.0"
+    },
+    {
+      "description": "Traits for key comparison in maps.",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "00d174d5400e5e8fd687ad1049e2f578285fa914201b1af7e8b112a4546bd826"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "Apache-2.0 OR MIT"
+        }
+      ],
+      "name": "equivalent",
+      "purl": "pkg:cargo/equivalent@1.0.3",
+      "scope": "required",
+      "type": "library",
+      "version": "1.0.3"
+    },
+    {
+      "description": "Find windows-specific tools, read MSVC versions from the registry and from COM interfaces",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "aedcfb3409746eddb02b9e19ebda1c3394f759a152e48ee875a0844d1b955484"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "find-msvc-tools",
+      "purl": "pkg:cargo/find-msvc-tools@0.1.14",
+      "scope": "required",
+      "type": "library",
+      "version": "0.1.14"
+    },
+    {
+      "description": "DEFLATE compression and decompression exposed as Read/BufRead/Write streams.\nSupports miniz_oxide and multiple zlib implementations. Supports zlib, gzip,\nand raw deflate streams.\n",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "6e634e2e0ebac1ee034020da1ca582e17ffe4e0f5e985823721e168928136dcb"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "flate2",
+      "purl": "pkg:cargo/flate2@1.1.10",
+      "scope": "required",
+      "type": "library",
+      "version": "1.1.10"
+    },
+    {
+      "description": "Parser and serializer for the application/x-www-form-urlencoded syntax, as used by HTML forms.",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "cb4cb245038516f5f85277875cdaa4f7d2c9a0fa0468de06ed190163b1581fcf"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "form_urlencoded",
+      "purl": "pkg:cargo/form_urlencoded@1.2.2",
+      "scope": "required",
+      "type": "library",
+      "version": "1.2.2"
+    },
+    {
+      "description": "Utilities to help working with the filesytem",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "6fc7a9dc005c944c98a935e7fd626faf5bf7e5a609f94bc13e42fc4a02e52593"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "fs-utils",
+      "purl": "pkg:cargo/fs-utils@1.1.4",
+      "scope": "required",
+      "type": "library",
+      "version": "1.1.4"
+    },
+    {
+      "description": "A small cross-platform library for retrieving random data from system source",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "300e883d756b2e4ec94e02791f39b04b522276138852cfc41d9fb7e904106099"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "getrandom",
+      "purl": "pkg:cargo/getrandom@0.4.3",
+      "scope": "required",
+      "type": "library",
+      "version": "0.4.3"
+    },
+    {
+      "description": "Support for matching file paths against Unix shell style patterns.\n",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "e4eba85ea1d0a966a983acd07deee566e67395d2d96b6fb39e62b5a833f1eb0b"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "glob",
+      "purl": "pkg:cargo/glob@0.3.4",
+      "scope": "required",
+      "type": "library",
+      "version": "0.3.4"
+    },
+    {
+      "description": "A Rust port of Google's SwissTable hash map",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "ed5909b6e89a2db4456e54cd5f673791d7eca6732202bbf2a9cc504fe2f9b84a"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "hashbrown",
+      "purl": "pkg:cargo/hashbrown@0.17.1",
+      "scope": "required",
+      "type": "library",
+      "version": "0.17.1"
+    },
+    {
+      "description": "heck is a case conversion library.",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "2304e00983f87ffb38b55b444b5e3b60a884b5d30c0fca7d82fe33449bbe55ea"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "heck",
+      "purl": "pkg:cargo/heck@0.5.0",
+      "scope": "required",
+      "type": "library",
+      "version": "0.5.0"
+    },
+    {
+      "description": "This library provides HTSlib bindings.",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "fc7e68eb880b02c80cfb41e8dc7904062a3ea7e27b7c4556e88d648dd2f038da"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "name": "hts-sys",
+      "purl": "pkg:cargo/hts-sys@2.2.1",
+      "scope": "required",
+      "type": "library",
+      "version": "2.2.1"
+    },
+    {
+      "description": "Collection of API for use in ICU libraries.",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "fa68d21081c4a05d5a901a1c62add574c77048b6a1c67be3b50ce0b60d4ca513"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "Unicode-3.0"
+          }
+        }
+      ],
+      "name": "icu_collections",
+      "purl": "pkg:cargo/icu_collections@2.3.0",
+      "scope": "required",
+      "type": "library",
+      "version": "2.3.0"
+    },
+    {
+      "description": "API for managing Unicode Language and Locale Identifiers",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "d56e28588da92eee5c3201a6eff33fabdd49b62269c8938d4ff050ce4d900deb"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "Unicode-3.0"
+          }
+        }
+      ],
+      "name": "icu_locale_core",
+      "purl": "pkg:cargo/icu_locale_core@2.3.0",
+      "scope": "required",
+      "type": "library",
+      "version": "2.3.0"
+    },
+    {
+      "description": "API for normalizing text into Unicode Normalization Forms",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "12f9cf5f235641ed274641dd81c3f28d870e276763d0797aeeab72317b1c646f"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "Unicode-3.0"
+          }
+        }
+      ],
+      "name": "icu_normalizer",
+      "purl": "pkg:cargo/icu_normalizer@2.3.0",
+      "scope": "required",
+      "type": "library",
+      "version": "2.3.0"
+    },
+    {
+      "description": "Data for the icu_normalizer crate",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "1563da1ed3e0b3bf3d74c9b85917ac9c56464d2f57242270c09c9e752f8021a0"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "Unicode-3.0"
+          }
+        }
+      ],
+      "name": "icu_normalizer_data",
+      "purl": "pkg:cargo/icu_normalizer_data@2.3.0",
+      "scope": "required",
+      "type": "library",
+      "version": "2.3.0"
+    },
+    {
+      "description": "Definitions for Unicode properties",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "7e7ca276ad3145661a65914e6daf131ca5120cd3dcee8f8f3214b8875184a148"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "Unicode-3.0"
+          }
+        }
+      ],
+      "name": "icu_properties",
+      "purl": "pkg:cargo/icu_properties@2.3.0",
+      "scope": "required",
+      "type": "library",
+      "version": "2.3.0"
+    },
+    {
+      "description": "Data for the icu_properties crate",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "e590f038c1464a96894fd6d10127e90a8be4509f56ff7ecef851b15cee0b7caa"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "Unicode-3.0"
+          }
+        }
+      ],
+      "name": "icu_properties_data",
+      "purl": "pkg:cargo/icu_properties_data@2.3.0",
+      "scope": "required",
+      "type": "library",
+      "version": "2.3.0"
+    },
+    {
+      "description": "Trait and struct definitions for the ICU data provider",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "d27bbb9d3abbefac45d55f647c9de1d44aafcd1186eb91879afef17c396c3e73"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "Unicode-3.0"
+          }
+        }
+      ],
+      "name": "icu_provider",
+      "purl": "pkg:cargo/icu_provider@2.3.1",
+      "scope": "required",
+      "type": "library",
+      "version": "2.3.1"
+    },
+    {
+      "description": "IDNA (Internationalizing Domain Names in Applications) and Punycode.",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "3b0875f23caa03898994f6ddc501886a45c7d3d62d04d2d90788d47be1b1e4de"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "idna",
+      "purl": "pkg:cargo/idna@1.1.0",
+      "scope": "required",
+      "type": "library",
+      "version": "1.1.0"
+    },
+    {
+      "description": "Back end adapter for idna",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "cb68373c0d6620ef8105e855e7745e18b0d00d3bdb07fb532e434244cdb9a714"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "Apache-2.0 OR MIT"
+        }
+      ],
+      "name": "idna_adapter",
+      "purl": "pkg:cargo/idna_adapter@1.2.2",
+      "scope": "required",
+      "type": "library",
+      "version": "1.2.2"
+    },
+    {
+      "description": "Low-level manipulations of IEEE754 floating-point numbers.\n",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "9007da9cacbd3e6343da136e98b0d2df013f553d35bdec8b518f07bea768e19c"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT/Apache-2.0"
+          }
+        }
+      ],
+      "name": "ieee754",
+      "purl": "pkg:cargo/ieee754@0.2.6",
+      "scope": "required",
+      "type": "library",
+      "version": "0.2.6"
+    },
+    {
+      "description": "A hash table with consistent order and fast iteration.",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "cc4e190f5d26ca7051642629da2c52fc03bde85a03197c99408dcd291734c855"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "Apache-2.0 OR MIT"
+        }
+      ],
+      "name": "indexmap",
+      "purl": "pkg:cargo/indexmap@2.14.2",
+      "scope": "required",
+      "type": "library",
+      "version": "2.14.2"
+    },
+    {
+      "description": "Polyfill for `is_terminal` stdlib feature for use with older MSRVs",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "a6cb138bb79a146c1bd460005623e142ef0181e3d0219cb493e02f7d08a35695"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "is_terminal_polyfill",
+      "purl": "pkg:cargo/is_terminal_polyfill@1.70.2",
+      "scope": "required",
+      "type": "library",
+      "version": "1.70.2"
+    },
+    {
+      "description": "Extra iterator adaptors, iterator methods, free functions, and macros.",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "413ee7dfc52ee1a4949ceeb7dbc8a33f2d6c088194d9f922fb8318faf1f01186"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "itertools",
+      "purl": "pkg:cargo/itertools@0.13.0",
+      "scope": "required",
+      "type": "library",
+      "version": "0.13.0"
+    },
+    {
+      "description": "An implementation of the GNU Make jobserver for Rust.\n",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "1c00acbd29eabad4a2392fa0e921c874934dbbf4194312ad20f04a0ed67a3cb3"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "jobserver",
+      "purl": "pkg:cargo/jobserver@0.1.35",
+      "scope": "required",
+      "type": "library",
+      "version": "0.1.35"
+    },
+    {
+      "description": "A macro for declaring lazily evaluated statics in Rust.",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "bbd2bcb4c963f2ddae06a2efc7e9f3591312473c50c6685e1f298068316e66fe"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "lazy_static",
+      "purl": "pkg:cargo/lazy_static@1.5.0",
+      "scope": "required",
+      "type": "library",
+      "version": "1.5.0"
+    },
+    {
+      "description": "Lexical, to- and from-string conversion routines.",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "7d8d125a277f807e55a77304455eb7b1cb52f2b18c143b60e766c120bd64a594"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT/Apache-2.0"
+          }
+        }
+      ],
+      "name": "lexical-core",
+      "purl": "pkg:cargo/lexical-core@1.0.6",
+      "scope": "required",
+      "type": "library",
+      "version": "1.0.6"
+    },
+    {
+      "description": "Efficient parsing of floats from strings.",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "52a9f232fbd6f550bc0137dcb5f99ab674071ac2d690ac69704593cb4abbea56"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT/Apache-2.0"
+          }
+        }
+      ],
+      "name": "lexical-parse-float",
+      "purl": "pkg:cargo/lexical-parse-float@1.0.6",
+      "scope": "required",
+      "type": "library",
+      "version": "1.0.6"
+    },
+    {
+      "description": "Efficient parsing of integers from strings.",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "9a7a039f8fb9c19c996cd7b2fcce303c1b2874fe1aca544edc85c4a5f8489b34"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT/Apache-2.0"
+          }
+        }
+      ],
+      "name": "lexical-parse-integer",
+      "purl": "pkg:cargo/lexical-parse-integer@1.0.6",
+      "scope": "required",
+      "type": "library",
+      "version": "1.0.6"
+    },
+    {
+      "description": "Shared utilities for lexical creates.",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "2604dd126bb14f13fb5d1bd6a66155079cb9fa655b37f875b3a742c705dbed17"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT/Apache-2.0"
+          }
+        }
+      ],
+      "name": "lexical-util",
+      "purl": "pkg:cargo/lexical-util@1.0.7",
+      "scope": "required",
+      "type": "library",
+      "version": "1.0.7"
+    },
+    {
+      "description": "Efficient formatting of floats to strings.",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "50c438c87c013188d415fbabbb1dceb44249ab81664efbd31b14ae55dabb6361"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT/Apache-2.0"
+          }
+        }
+      ],
+      "name": "lexical-write-float",
+      "purl": "pkg:cargo/lexical-write-float@1.0.6",
+      "scope": "required",
+      "type": "library",
+      "version": "1.0.6"
+    },
+    {
+      "description": "Efficient formatting of integers to strings.",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "409851a618475d2d5796377cad353802345cba92c867d9fbcde9cf4eac4e14df"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT/Apache-2.0"
+          }
+        }
+      ],
+      "name": "lexical-write-integer",
+      "purl": "pkg:cargo/lexical-write-integer@1.0.6",
+      "scope": "required",
+      "type": "library",
+      "version": "1.0.6"
+    },
+    {
+      "description": "a drop-in compatible rust bzip2 implementation",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "2c4a545a15244c7d945065b5d392b2d2d7f21526fba56ce51467b06ed445e8f7"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "bzip2-1.0.6"
+          }
+        }
+      ],
+      "name": "libbz2-rs-sys",
+      "purl": "pkg:cargo/libbz2-rs-sys@0.2.2",
+      "scope": "required",
+      "type": "library",
+      "version": "0.2.2"
+    },
+    {
+      "description": "Raw FFI bindings to platform libraries like libc.",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "3eaf3ede3fee6db1a4c2ee091bf8a8b4dccdc6d17f656fb07896ee72867612f2"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "libc",
+      "purl": "pkg:cargo/libc@0.2.189",
+      "scope": "required",
+      "type": "library",
+      "version": "0.2.189"
+    },
+    {
+      "description": "Bindings to libdeflate for DEFLATE (de)compression exposed as non-streaming buffer\noperations. Contains bindings for raw deflate, zlib, and gzip data.\n",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "d7870e5fbd2766179a937c725fb11f4ca0ef025d982beb61bd3ce755425bd19c"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ],
+      "name": "libdeflate-sys",
+      "purl": "pkg:cargo/libdeflate-sys@1.26.1",
+      "scope": "required",
+      "type": "library",
+      "version": "1.26.1"
+    },
+    {
+      "description": "Bindings around the platform's dynamic library loading primitives with greatly improved memory safety.",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "d7c4b02199fee7c5d21a5ae7d8cfa79a6ef5bb2fc834d6e9058e89c825efdc55"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "ISC"
+          }
+        }
+      ],
+      "name": "libloading",
+      "purl": "pkg:cargo/libloading@0.8.9",
+      "scope": "required",
+      "type": "library",
+      "version": "0.8.9"
+    },
+    {
+      "description": "Sys crate wrapping the mimalloc allocator",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "6a45a52f43e1c16f667ccfe4dd8c85b7f7c204fd5e3bf46c5b0db9a5c3c0b8e9"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "name": "libmimalloc-sys",
+      "purl": "pkg:cargo/libmimalloc-sys@0.1.49",
+      "scope": "required",
+      "type": "library",
+      "version": "0.1.49"
+    },
+    {
+      "description": "Low-level bindings to the system libz library (also known as zlib).",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "85bc9657773828b90eeb625adff10eeac83cc21bbfd8e23a03eaa8a33c9e28d9"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "libz-sys",
+      "purl": "pkg:cargo/libz-sys@1.1.29",
+      "scope": "required",
+      "type": "library",
+      "version": "1.1.29"
+    },
+    {
+      "description": "A map implemented by searching linearly in a vector.",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "bfae20f6b19ad527b550c223fddc3077a547fc70cda94b9b566575423fd303ee"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT/Apache-2.0"
+          }
+        }
+      ],
+      "name": "linear-map",
+      "purl": "pkg:cargo/linear-map@1.2.0",
+      "scope": "required",
+      "type": "library",
+      "version": "1.2.0"
+    },
+    {
+      "description": "A key-value Map implementation based on a flat, sorted Vec.",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "47d9d19d1d6efa0109d2f65ff4c85cddd50bd572e5a00127ab10987290bcefae"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "Unicode-3.0"
+          }
+        }
+      ],
+      "name": "litemap",
+      "purl": "pkg:cargo/litemap@0.8.3",
+      "scope": "required",
+      "type": "library",
+      "version": "0.8.3"
+    },
+    {
+      "description": "Raw bindings to liblzma which contains an implementation of LZMA and xz stream\nencoding/decoding.\n\nHigh level Rust bindings are available in the `xz2` crate.\n",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "5fda04ab3764e6cde78b9974eec4f779acaba7c4e84b36eca3cf77c581b85d27"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT/Apache-2.0"
+          }
+        }
+      ],
+      "name": "lzma-sys",
+      "purl": "pkg:cargo/lzma-sys@0.1.20",
+      "scope": "required",
+      "type": "library",
+      "version": "0.1.20"
+    },
+    {
+      "description": "Provides extremely fast (uses SIMD on x86_64, aarch64 and wasm32) routines for\n1, 2 or 3 byte search and single substring search.\n",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "cf8baf1c55e62ffcace7a9f06f4bd9cd3f0c4beb022d3b367256b91b87513d98"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "Unlicense OR MIT"
+        }
+      ],
+      "name": "memchr",
+      "purl": "pkg:cargo/memchr@2.8.3",
+      "scope": "required",
+      "type": "library",
+      "version": "2.8.3"
+    },
+    {
+      "description": "Performance and security oriented drop-in allocator",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "2d4139bb28d14ad1facf21d5eb8825051b326e172d216b39f6d31df53cc97862"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "name": "mimalloc",
+      "purl": "pkg:cargo/mimalloc@0.1.52",
+      "scope": "required",
+      "type": "library",
+      "version": "0.1.52"
+    },
+    {
+      "description": "Fast float parsing conversion routines.",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "68354c5c6bd36d73ff3feceb05efa59b6acb7626617f4962be322a825e61f79a"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT/Apache-2.0"
+          }
+        }
+      ],
+      "name": "minimal-lexical",
+      "purl": "pkg:cargo/minimal-lexical@0.2.1",
+      "scope": "required",
+      "type": "library",
+      "version": "0.2.1"
+    },
+    {
+      "description": "DEFLATE compression and decompression library rewritten in Rust based on miniz",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "b63fbc4a50860e98e7b2aa7804ded1db5cbc3aff9193adaff57a6931bf7c4b4c"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Zlib OR Apache-2.0"
+        }
+      ],
+      "name": "miniz_oxide",
+      "purl": "pkg:cargo/miniz_oxide@0.9.1",
+      "scope": "required",
+      "type": "library",
+      "version": "0.9.1"
+    },
+    {
+      "description": "This crate provides macros for deriving common traits for newtype structures.",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "ac8cd24d9f185bb7223958d8c1ff7a961b74b1953fd05dba7cc568a63b3861ec"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT/Apache-2.0"
+          }
+        }
+      ],
+      "name": "newtype_derive",
+      "purl": "pkg:cargo/newtype_derive@0.1.6",
+      "scope": "required",
+      "type": "library",
+      "version": "0.1.6"
+    },
+    {
+      "description": "A byte-oriented, zero-copy, parser combinators library",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "d273983c5a657a70a3e8f2a01329822f3b8c8172b73826411a55751e404a0a4a"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "name": "nom",
+      "purl": "pkg:cargo/nom@7.1.3",
+      "scope": "required",
+      "type": "library",
+      "version": "7.1.3"
+    },
+    {
+      "description": "Bioinformatics I/O libraries",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "1fbc48a82baed442e5cb56837d5d6896d825a60612460562fb6e3e0229e375b3"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "name": "noodles",
+      "purl": "pkg:cargo/noodles@0.118.0",
+      "scope": "required",
+      "type": "library",
+      "version": "0.118.0"
+    },
+    {
+      "description": "Binary Alignment/Map (BAM) format reader and writer",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "37641331aad54cbc213d9e4be79d3ceffed2a0f954ed3ae47e464dc06c665615"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "name": "noodles-bam",
+      "purl": "pkg:cargo/noodles-bam@0.97.0",
+      "scope": "required",
+      "type": "library",
+      "version": "0.97.0"
+    },
+    {
+      "description": "Blocked gzip format (BGZF) reader and writer",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "950a8570bb43a68697bb34ba39a44f1171faacceb852104d4a35701b86d7ef29"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "name": "noodles-bgzf",
+      "purl": "pkg:cargo/noodles-bgzf@0.52.0",
+      "scope": "required",
+      "type": "library",
+      "version": "0.52.0"
+    },
+    {
+      "description": "Shared utilities when working with noodles",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "d99b2bca1b3816b186b4c10ab067a8a9d8331542c14cbd16f10c32dee345bc6a"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "name": "noodles-core",
+      "purl": "pkg:cargo/noodles-core@0.21.0",
+      "scope": "required",
+      "type": "library",
+      "version": "0.21.0"
+    },
+    {
+      "description": "Coordinate-sorted index (CSI) format reader and writer",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "2a08a8df410c420e7282328537e003de1bf4d88f45de891e7acfd2be80171a33"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "name": "noodles-csi",
+      "purl": "pkg:cargo/noodles-csi@0.62.0",
+      "scope": "required",
+      "type": "library",
+      "version": "0.62.0"
+    },
+    {
+      "description": "Sequence Alignment/Map (SAM) format reader and writer",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "2dcd7dda5f8e4b51b3927803df8a27839e99677aa14334c23e451d5b6feb9628"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "name": "noodles-sam",
+      "purl": "pkg:cargo/noodles-sam@0.92.0",
+      "scope": "required",
+      "type": "library",
+      "version": "0.92.0"
+    },
+    {
+      "description": "Single assignment cells and lazy values.",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "9f7c3e4beb33f85d45ae3e3a1792185706c8e16d043238c593331cc7cd313b50"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "once_cell",
+      "purl": "pkg:cargo/once_cell@1.21.4",
+      "scope": "required",
+      "type": "library",
+      "version": "1.21.4"
+    },
+    {
+      "description": "Polyfill for `OnceCell` stdlib feature for use with older MSRVs",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "384b8ab6d37215f3c5301a95a4accb5d64aa607f1fcb26a11b5303878451b4fe"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "once_cell_polyfill",
+      "purl": "pkg:cargo/once_cell_polyfill@1.70.2",
+      "scope": "required",
+      "type": "library",
+      "version": "1.70.2"
+    },
+    {
+      "description": "Percent encoding and decoding",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "9b4f627cb1b25917193a259e49bdad08f671f8d9708acfd5fe0a8c1455d87220"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "percent-encoding",
+      "purl": "pkg:cargo/percent-encoding@2.3.2",
+      "scope": "required",
+      "type": "library",
+      "version": "2.3.2"
+    },
+    {
+      "description": "A library to run the pkg-config system tool at build time in order to be used in\nCargo build scripts.\n",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "f6b464fbc74e149a392436b17d523f769e057cb6877f6a5c4618bc6f11800548"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "pkg-config",
+      "purl": "pkg:cargo/pkg-config@0.3.34",
+      "scope": "required",
+      "type": "library",
+      "version": "0.3.34"
+    },
+    {
+      "description": "Unvalidated string and character types",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "d83eb9bc6d8e5cf568e7a1101d60ee05e81ed50ea106026f3d18deeb046d7661"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "Unicode-3.0"
+          }
+        }
+      ],
+      "name": "potential_utf",
+      "purl": "pkg:cargo/potential_utf@0.1.6",
+      "scope": "required",
+      "type": "library",
+      "version": "0.1.6"
+    },
+    {
+      "description": "Replacement for crate (macro_rules keyword) in proc-macros\n",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "e67ba7e9b2b56446f1d419b1d807906278ffa1a658a8a5d8a39dcb1f5a78614f"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "proc-macro-crate",
+      "purl": "pkg:cargo/proc-macro-crate@3.5.0",
+      "scope": "required",
+      "type": "library",
+      "version": "3.5.0"
+    },
+    {
+      "description": "A substitute implementation of the compiler's `proc_macro` API to decouple token-based libraries from the procedural macro use case.",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "985e7ec9bb745e6ce6535b544d84d6cd6f7ad8bd711c398938ae983b91a766d9"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "proc-macro2",
+      "purl": "pkg:cargo/proc-macro2@1.0.107",
+      "scope": "required",
+      "type": "library",
+      "version": "1.0.107"
+    },
+    {
+      "description": "    A macro which makes error types pleasant to write.\n",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "a1d01941d82fa2ab50be1e79e6714289dd7cde78eba4c074bc5a4374f650dfe0"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT/Apache-2.0"
+          }
+        }
+      ],
+      "name": "quick-error",
+      "purl": "pkg:cargo/quick-error@1.2.3",
+      "scope": "required",
+      "type": "library",
+      "version": "1.2.3"
+    },
+    {
+      "description": "Quasi-quoting macro quote!(...)",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "1fbf4db142a473a8d80c26bbf18454ed458bf8d26c8219c331daecfdbd079001"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "quote",
+      "purl": "pkg:cargo/quote@1.0.47",
+      "scope": "required",
+      "type": "library",
+      "version": "1.0.47"
+    },
+    {
+      "description": "UEFI Reference Specification Protocol Constants and Definitions",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "f8dcc9c7d52a811697d2151c701e0d08956f92b0e24136cf4cf27b57a6a0d9bf"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0 OR LGPL-2.1-or-later"
+        }
+      ],
+      "name": "r-efi",
+      "purl": "pkg:cargo/r-efi@6.0.0",
+      "scope": "required",
+      "type": "library",
+      "version": "6.0.0"
+    },
+    {
+      "description": "Simple work-stealing parallelism for Rust",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "fb39b166781f92d482534ef4b4b1b2568f42613b53e5b6c160e24cfbfa30926d"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "rayon",
+      "purl": "pkg:cargo/rayon@1.12.0",
+      "scope": "required",
+      "type": "library",
+      "version": "1.12.0"
+    },
+    {
+      "description": "Core APIs for Rayon",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "22e18b0f0062d30d4230b2e85ff77fdfe4326feb054b9783a3460d8435c8ab91"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "rayon-core",
+      "purl": "pkg:cargo/rayon-core@1.13.0",
+      "scope": "required",
+      "type": "library",
+      "version": "1.13.0"
+    },
+    {
+      "description": "An implementation of regular expressions for Rust. This implementation uses\nfinite automata and guarantees linear time matching on all inputs.\n",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "f020237b6c8eed93db2e2cb53c00c60a8e1bc73da7d073199a1180401450218d"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "regex",
+      "purl": "pkg:cargo/regex@1.13.1",
+      "scope": "required",
+      "type": "library",
+      "version": "1.13.1"
+    },
+    {
+      "description": "Automata construction and matching using regular expressions.",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "ad8553b9b26413251cbf30e620595c7a41b3887f03da04579c0e6b0d6a06b4b2"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "regex-automata",
+      "purl": "pkg:cargo/regex-automata@0.4.18",
+      "scope": "required",
+      "type": "library",
+      "version": "0.4.18"
+    },
+    {
+      "description": "A regular expression parser.",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "d6f6ff9a378485b298a5286656da665ba74413d36db0979633275d2e708145d4"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "regex-syntax",
+      "purl": "pkg:cargo/regex-syntax@0.8.11",
+      "scope": "required",
+      "type": "library",
+      "version": "0.8.11"
+    },
+    {
+      "description": "SAM/BAM view, flagstat, idxstats, quickcheck, index and sort on noodles",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "name": "rust-bam",
+      "properties": [
+        {
+          "name": "bioinfo-tools:workspace-member",
+          "value": "true"
+        }
+      ],
+      "purl": "pkg:cargo/rust-bam@0.1.0",
+      "scope": "required",
+      "type": "application",
+      "version": "0.1.0"
+    },
+    {
+      "description": "Adapter trimming for FASTQ/FASTA reads with the documented cutadapt 4.6 command-line surface",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "name": "rust-cutadapt",
+      "properties": [
+        {
+          "name": "bioinfo-tools:workspace-member",
+          "value": "true"
+        }
+      ],
+      "purl": "pkg:cargo/rust-cutadapt@0.1.0",
+      "scope": "required",
+      "type": "application",
+      "version": "0.1.0"
+    },
+    {
+      "description": "FastQC-compatible QC prototype emitting fastqc_data.txt",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "name": "rust-fastqc",
+      "properties": [
+        {
+          "name": "bioinfo-tools:workspace-member",
+          "value": "true"
+        }
+      ],
+      "purl": "pkg:cargo/rust-fastqc@0.1.0",
+      "scope": "required",
+      "type": "application",
+      "version": "0.1.0"
+    },
+    {
+      "description": "FASTX manipulation: stats, seq, fq2fa, fx2tab, sample, split, lint",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "name": "rust-fx",
+      "properties": [
+        {
+          "name": "bioinfo-tools:workspace-member",
+          "value": "true"
+        }
+      ],
+      "purl": "pkg:cargo/rust-fx@0.1.0",
+      "scope": "required",
+      "type": "application",
+      "version": "0.1.0"
+    },
+    {
+      "description": "This library provides HTSlib bindings and a high level Rust API for reading and writing BAM files.",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "115ae57b89deb942275566eca8c31da053d8df0d8bda12e50c4c4aa994877068"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "name": "rust-htslib",
+      "purl": "pkg:cargo/rust-htslib@0.49.0",
+      "scope": "required",
+      "type": "library",
+      "version": "0.49.0"
+    },
+    {
+      "description": "Rust high-performance implementation of UMI-tools workflows",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "name": "rust-umitools",
+      "properties": [
+        {
+          "name": "bioinfo-tools:workspace-member",
+          "value": "true"
+        }
+      ],
+      "purl": "pkg:cargo/rust-umitools@0.2.0",
+      "scope": "required",
+      "type": "application",
+      "version": "0.2.0"
+    },
+    {
+      "description": "A speedy, non-cryptographic hashing algorithm used by rustc",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "6b1e7f9a428571be2dc5bc0505c13fb6bf936822b894ec87abf8a08a4e51742d"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "Apache-2.0 OR MIT"
+        }
+      ],
+      "name": "rustc-hash",
+      "purl": "pkg:cargo/rustc-hash@2.1.3",
+      "scope": "required",
+      "type": "library",
+      "version": "2.1.3"
+    },
+    {
+      "description": "A library for querying the version of a installed rustc compiler",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "c5f5376ea5e30ce23c03eb77cbe4962b988deead10910c372b226388b594c084"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "rustc_version",
+      "purl": "pkg:cargo/rustc_version@0.1.7",
+      "scope": "required",
+      "type": "library",
+      "version": "0.1.7"
+    },
+    {
+      "description": "Conditional compilation according to rustc compiler version",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "cf54715a573b99ac80df0bc206da022bcd442c974952c7b9720069370852e21f"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "rustversion",
+      "purl": "pkg:cargo/rustversion@1.0.23",
+      "scope": "required",
+      "type": "library",
+      "version": "1.0.23"
+    },
+    {
+      "description": "Semantic version parsing and comparison.\n",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "d4f410fedcf71af0345d7607d246e7ad15faaadd49d240ee3b24e5dc21a820ac"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT/Apache-2.0"
+          }
+        }
+      ],
+      "name": "semver",
+      "purl": "pkg:cargo/semver@0.1.20",
+      "scope": "required",
+      "type": "library",
+      "version": "0.1.20"
+    },
+    {
+      "description": "A generic serialization/deserialization framework",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "4148590afebada386688f18773da617792bf2ef03ffc1e4cbd2b1d45b023e0ba"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "serde",
+      "purl": "pkg:cargo/serde@1.0.229",
+      "scope": "required",
+      "type": "library",
+      "version": "1.0.229"
+    },
+    {
+      "description": "Serde traits only, with no support for derive -- use the `serde` crate instead",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "67dca2c9c51e58a4791a4b1ed58308b39c64224d349a935ab5039aa360942a48"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "serde_core",
+      "purl": "pkg:cargo/serde_core@1.0.229",
+      "scope": "required",
+      "type": "library",
+      "version": "1.0.229"
+    },
+    {
+      "description": "Macros 1.1 implementation of #[derive(Serialize, Deserialize)]",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "e7a5d71263a5a7d47b41f6b3f06ba276f10cc18b0931f1799f710578e2309348"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "serde_derive",
+      "purl": "pkg:cargo/serde_derive@1.0.229",
+      "scope": "required",
+      "type": "library",
+      "version": "1.0.229"
+    },
+    {
+      "description": "Split a string into shell words, like Python's shlex.",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "0fda2ff0d084019ba4d7c6f371c95d8fd75ce3524c3cb8fb653a3023f6323e64"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "shlex",
+      "purl": "pkg:cargo/shlex@1.3.0",
+      "scope": "required",
+      "type": "library",
+      "version": "1.3.0"
+    },
+    {
+      "description": "Split a string into shell words, like Python's shlex.",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "f8fadd59c855ef2080decdef8ff161eb6661b86933c9d82e5ba29dc602a55aba"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "shlex",
+      "purl": "pkg:cargo/shlex@2.0.1",
+      "scope": "required",
+      "type": "library",
+      "version": "2.0.1"
+    },
+    {
+      "description": "A SIMD-accelerated Adler-32 hash algorithm implementation.",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "3a219298ac11a56ea9a6d2120044824d6f01aeb034955e7af7bc16858527deea"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "name": "simd-adler32",
+      "purl": "pkg:cargo/simd-adler32@0.3.10",
+      "scope": "required",
+      "type": "library",
+      "version": "0.3.10"
+    },
+    {
+      "description": "'Small vector' optimization: store up to a small number of items on the stack",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "ba467056f1b547ed52077911161fc86985becbc60e8e1857c8a144dab0def891"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "smallvec",
+      "purl": "pkg:cargo/smallvec@1.16.1",
+      "scope": "required",
+      "type": "library",
+      "version": "1.16.1"
+    },
+    {
+      "description": "An unsafe marker trait for types like Box and Rc that dereference to a stable address even when moved, and hence can be used with libraries such as owning_ref and rental.\n",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "6ce2be8dc25455e1f91df71bfa12ad37d7af1092ae736f3a6cd0e37bc7810596"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "stable_deref_trait",
+      "purl": "pkg:cargo/stable_deref_trait@1.2.1",
+      "scope": "required",
+      "type": "library",
+      "version": "1.2.1"
+    },
+    {
+      "description": "Implementations of string similarity metrics. Includes Hamming, Levenshtein,\nOSA, Damerau-Levenshtein, Jaro, Jaro-Winkler, and S\u00f8rensen-Dice.\n",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "7da8b5736845d9f2fcb837ea5d9e2628564b3b043a70948a3f0b778838c5fb4f"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "name": "strsim",
+      "purl": "pkg:cargo/strsim@0.11.1",
+      "scope": "required",
+      "type": "library",
+      "version": "0.11.1"
+    },
+    {
+      "description": "Helpful macros for working with enums and strings",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "4c6bee85a5a24955dc440386795aa378cd9cf82acd5f764469152d2270e581be"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "name": "strum_macros",
+      "purl": "pkg:cargo/strum_macros@0.26.4",
+      "scope": "required",
+      "type": "library",
+      "version": "0.26.4"
+    },
+    {
+      "description": "Parser for Rust source code",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "872831b642d1a07999a962a351ed35b955ea2cfc8f3862091e2a240a84f17297"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "syn",
+      "purl": "pkg:cargo/syn@2.0.119",
+      "scope": "required",
+      "type": "library",
+      "version": "2.0.119"
+    },
+    {
+      "description": "Parser for Rust source code",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "8593e8e72159ed2257d083c7a454a85cbf854f37a0966d8d483aff8c8a3ebcee"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "syn",
+      "purl": "pkg:cargo/syn@3.0.6",
+      "scope": "required",
+      "type": "library",
+      "version": "3.0.6"
+    },
+    {
+      "description": "Helper methods and macros for custom derives",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "728a70f3dbaf5bab7f0c4b1ac8d7ae5ea60a4b5549c8a5914361c99147a709d2"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "name": "synstructure",
+      "purl": "pkg:cargo/synstructure@0.13.2",
+      "scope": "required",
+      "type": "library",
+      "version": "0.13.2"
+    },
+    {
+      "description": "Helper methods and macros for custom derives",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "901704edd0dfe137f1987838ee4f259e4e063c31371bdb423f7ae38ec6f77f02"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "name": "synstructure",
+      "purl": "pkg:cargo/synstructure@0.14.0",
+      "scope": "required",
+      "type": "library",
+      "version": "0.14.0"
+    },
+    {
+      "description": "derive(Error)",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "b6aaf5339b578ea85b50e080feb250a3e8ae8cfcdff9a461c9ec2904bc923f52"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "thiserror",
+      "purl": "pkg:cargo/thiserror@1.0.69",
+      "scope": "required",
+      "type": "library",
+      "version": "1.0.69"
+    },
+    {
+      "description": "derive(Error)",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "09e52cb86a36cede5cb101bf8908837b3e4c6e5e59fe7fd85c23fb56200d189e"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "thiserror",
+      "purl": "pkg:cargo/thiserror@2.0.21",
+      "scope": "required",
+      "type": "library",
+      "version": "2.0.21"
+    },
+    {
+      "description": "Implementation detail of the `thiserror` crate",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "4fee6c4efc90059e10f81e6d42c60a18f76588c3d74cb83a0b242a2b6c7504c1"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "thiserror-impl",
+      "purl": "pkg:cargo/thiserror-impl@1.0.69",
+      "scope": "required",
+      "type": "library",
+      "version": "1.0.69"
+    },
+    {
+      "description": "Implementation detail of the `thiserror` crate",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "fe5197923287db20a58125f0bc85c062f7f2c892de97b18c356f9efb14b28524"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "thiserror-impl",
+      "purl": "pkg:cargo/thiserror-impl@2.0.21",
+      "scope": "required",
+      "type": "library",
+      "version": "2.0.21"
+    },
+    {
+      "description": "A small ASCII-only bounded length string representation.",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "b1e27c91459209c2986af3dcf603a5a74a4368754ce37414f59acc971167f643"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "Unicode-3.0"
+          }
+        }
+      ],
+      "name": "tinystr",
+      "purl": "pkg:cargo/tinystr@0.8.4",
+      "scope": "required",
+      "type": "library",
+      "version": "0.8.4"
+    },
+    {
+      "description": "A TOML-compatible datetime type",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "2b86d767906c6c42421dcba507eb9d203e779497710a47782a224bb871653053"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "toml_datetime",
+      "purl": "pkg:cargo/toml_datetime@1.1.2+spec-1.1.0",
+      "scope": "required",
+      "type": "library",
+      "version": "1.1.2+spec-1.1.0"
+    },
+    {
+      "description": "Yet another format-preserving TOML parser.",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "e3641d5bbb5349a79e1020a242d251efbc546ad8048d133958323ce9c40a9c9c"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "toml_edit",
+      "purl": "pkg:cargo/toml_edit@0.25.17+spec-1.1.0",
+      "scope": "required",
+      "type": "library",
+      "version": "0.25.17+spec-1.1.0"
+    },
+    {
+      "description": "Yet another format-preserving TOML parser.",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "baa693a8032d7e1cada7d0041e96126df243179ff061456783ac7f12bda4744c"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "toml_parser",
+      "purl": "pkg:cargo/toml_parser@1.1.5+spec-1.1.0",
+      "scope": "required",
+      "type": "library",
+      "version": "1.1.5+spec-1.1.0"
+    },
+    {
+      "description": "Determine whether characters have the XID_Start or XID_Continue properties according to Unicode Standard Annex #31",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "d245f478577f809a851594d02313b640fb437e0bb33866753cff937863096954"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "(MIT OR Apache-2.0) AND Unicode-3.0"
+        }
+      ],
+      "name": "unicode-ident",
+      "purl": "pkg:cargo/unicode-ident@1.0.26",
+      "scope": "required",
+      "type": "library",
+      "version": "1.0.26"
+    },
+    {
+      "description": "URL library for Rust, based on the WHATWG URL Standard",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "ff67a8a4397373c3ef660812acab3268222035010ab8680ec4215f38ba3d0eed"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "url",
+      "purl": "pkg:cargo/url@2.5.8",
+      "scope": "required",
+      "type": "library",
+      "version": "2.5.8"
+    },
+    {
+      "description": "Iterator by char over potentially-invalid UTF-8 in &[u8]",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "b6c140620e7ffbb22c2dee59cafe6084a59b5ffc27a8859a5f0d494b5d52b6be"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "Apache-2.0 OR MIT"
+        }
+      ],
+      "name": "utf8_iter",
+      "purl": "pkg:cargo/utf8_iter@1.0.4",
+      "scope": "required",
+      "type": "library",
+      "version": "1.0.4"
+    },
+    {
+      "description": "Table-driven UTF-8 parser",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "06abde3611657adf66d383f00b093d7faecc7fa57071cce2578660c9f1010821"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "Apache-2.0 OR MIT"
+        }
+      ],
+      "name": "utf8parse",
+      "purl": "pkg:cargo/utf8parse@0.2.2",
+      "scope": "required",
+      "type": "library",
+      "version": "0.2.2"
+    },
+    {
+      "description": "A library to find native dependencies in a vcpkg tree at build\ntime in order to be used in Cargo build scripts.\n",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "accd4ea62f7bb7a82fe23066fb0957d48ef677f6eeb8215f372f52e48bb32426"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT/Apache-2.0"
+          }
+        }
+      ],
+      "name": "vcpkg",
+      "purl": "pkg:cargo/vcpkg@0.2.15",
+      "scope": "required",
+      "type": "library",
+      "version": "0.2.15"
+    },
+    {
+      "description": "Linking for Windows",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "f0805222e57f7521d6a62e36fa9163bc891acd422f971defe97d64e70d0a4fe5"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "windows-link",
+      "purl": "pkg:cargo/windows-link@0.2.1",
+      "scope": "required",
+      "type": "library",
+      "version": "0.2.1"
+    },
+    {
+      "description": "Rust for Windows",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "ae137229bcbd6cdf0f7b80a31df61766145077ddf49416a728b02cb3921ff3fc"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "windows-sys",
+      "purl": "pkg:cargo/windows-sys@0.61.2",
+      "scope": "required",
+      "type": "library",
+      "version": "0.61.2"
+    },
+    {
+      "description": "A byte-oriented, zero-copy, parser combinators library",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "23b97319f7b8343df12cc98938e5c3eb436064524c8d2b4e30a1d3a36eecdf81"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "name": "winnow",
+      "purl": "pkg:cargo/winnow@1.0.4",
+      "scope": "required",
+      "type": "library",
+      "version": "1.0.4"
+    },
+    {
+      "description": "A more efficient alternative to fmt::Display",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "3ad82d2a33cdc9674dc7465672f271e096168fcdbe0f799d9e6db8c5892679dc"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "Unicode-3.0"
+          }
+        }
+      ],
+      "name": "writeable",
+      "purl": "pkg:cargo/writeable@0.6.4",
+      "scope": "required",
+      "type": "library",
+      "version": "0.6.4"
+    },
+    {
+      "description": "Rust bindings to liblzma providing Read/Write streams as well as low-level\nin-memory encoding/decoding.\n",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "388c44dc09d76f1536602ead6d325eb532f5c122f17782bd57fb47baeeb767e2"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT/Apache-2.0"
+          }
+        }
+      ],
+      "name": "xz2",
+      "purl": "pkg:cargo/xz2@0.1.7",
+      "scope": "required",
+      "type": "library",
+      "version": "0.1.7"
+    },
+    {
+      "description": "Abstraction allowing borrowed data to be carried along with the backing data it borrows from",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "709fe23a0424b6a435d82152b1bd3fdfb0833487d5fa90d05d42762a9891fef5"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "Unicode-3.0"
+          }
+        }
+      ],
+      "name": "yoke",
+      "purl": "pkg:cargo/yoke@0.8.3",
+      "scope": "required",
+      "type": "library",
+      "version": "0.8.3"
+    },
+    {
+      "description": "Custom derive for the yoke crate",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "de844c262c8848816172cef550288e7dc6c7b7814b4ee56b3e1553f275f1858e"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "Unicode-3.0"
+          }
+        }
+      ],
+      "name": "yoke-derive",
+      "purl": "pkg:cargo/yoke-derive@0.8.2",
+      "scope": "required",
+      "type": "library",
+      "version": "0.8.2"
+    },
+    {
+      "description": "ZeroFrom trait for constructing",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "0ec05a11813ea801ff6d75110ad09cd0824ddba17dfe17128ea0d5f68e6c5272"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "Unicode-3.0"
+          }
+        }
+      ],
+      "name": "zerofrom",
+      "purl": "pkg:cargo/zerofrom@0.1.8",
+      "scope": "required",
+      "type": "library",
+      "version": "0.1.8"
+    },
+    {
+      "description": "Custom derive for the zerofrom crate",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "f75b4683f6c7f45248d4d64056a24298c6281e0993356d7d1b4a1a962ef10d4a"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "Unicode-3.0"
+          }
+        }
+      ],
+      "name": "zerofrom-derive",
+      "purl": "pkg:cargo/zerofrom-derive@0.1.8",
+      "scope": "required",
+      "type": "library",
+      "version": "0.1.8"
+    },
+    {
+      "description": "A data structure that efficiently maps strings to integers",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "4ea269c3bd32f0a32c321907a2ae912ba6f4649bb0fc764a15627e99a7095a3f"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "Unicode-3.0"
+          }
+        }
+      ],
+      "name": "zerotrie",
+      "purl": "pkg:cargo/zerotrie@0.2.5",
+      "scope": "required",
+      "type": "library",
+      "version": "0.2.5"
+    },
+    {
+      "description": "Zero-copy vector backed by a byte array",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "bb0464e17806c1d976d5cba29399c7f08e516e279e2ba493f63123b5fca67dd8"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "Unicode-3.0"
+          }
+        }
+      ],
+      "name": "zerovec",
+      "purl": "pkg:cargo/zerovec@0.11.8",
+      "scope": "required",
+      "type": "library",
+      "version": "0.11.8"
+    },
+    {
+      "description": "Custom derive for the zerovec crate",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "34df6fc39dbd26ddc9c10e6a2984476e13acce22e64e4487636ef494369225da"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "Unicode-3.0"
+          }
+        }
+      ],
+      "name": "zerovec-derive",
+      "purl": "pkg:cargo/zerovec-derive@0.11.6",
+      "scope": "required",
+      "type": "library",
+      "version": "0.11.6"
+    },
+    {
+      "description": "A memory-safe zlib implementation written in rust",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "b268e58e7c693d7c271f93ffc4ba3b380412554231c85bf61ca7af91042a4112"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "Zlib"
+          }
+        }
+      ],
+      "name": "zlib-rs",
+      "purl": "pkg:cargo/zlib-rs@0.6.8",
+      "scope": "required",
+      "type": "library",
+      "version": "0.6.8"
+    },
+    {
+      "description": "Binding for the zstd compression library.",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "e91ee311a569c327171651566e07972200e76fcfe2242a4fa446149a3881c08a"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "name": "zstd",
+      "purl": "pkg:cargo/zstd@0.13.3",
+      "scope": "required",
+      "type": "library",
+      "version": "0.13.3"
+    },
+    {
+      "description": "Safe low-level bindings for the zstd compression library.",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "8f49c4d5f0abb602a93fb8736af2a4f4dd9512e36f7f570d66e65ff867ed3b9d"
+        }
+      ],
+      "licenses": [
+        {
+          "expression": "MIT OR Apache-2.0"
+        }
+      ],
+      "name": "zstd-safe",
+      "purl": "pkg:cargo/zstd-safe@7.2.4",
+      "scope": "required",
+      "type": "library",
+      "version": "7.2.4"
+    },
+    {
+      "description": "Low-level bindings for the zstd compression library.",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "91e19ebc2adc8f83e43039e79776e3fda8ca919132d68a1fed6a5faca2683748"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT/Apache-2.0"
+          }
+        }
+      ],
+      "name": "zstd-sys",
+      "purl": "pkg:cargo/zstd-sys@2.0.16+zstd.1.5.7",
+      "scope": "required",
+      "type": "library",
+      "version": "2.0.16+zstd.1.5.7"
+    }
+  ],
+  "dependencies": [
+    {
+      "dependsOn": [],
+      "ref": "pkg:cargo/adler2@2.0.1"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/memchr@2.8.3"
+      ],
+      "ref": "pkg:cargo/aho-corasick@1.1.5"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/anstyle-parse@1.0.0",
+        "pkg:cargo/anstyle-query@1.1.5",
+        "pkg:cargo/anstyle-wincon@3.0.11",
+        "pkg:cargo/anstyle@1.0.14",
+        "pkg:cargo/colorchoice@1.0.5",
+        "pkg:cargo/is_terminal_polyfill@1.70.2",
+        "pkg:cargo/utf8parse@0.2.2"
+      ],
+      "ref": "pkg:cargo/anstream@1.0.0"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/utf8parse@0.2.2"
+      ],
+      "ref": "pkg:cargo/anstyle-parse@1.0.0"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/windows-sys@0.61.2"
+      ],
+      "ref": "pkg:cargo/anstyle-query@1.1.5"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/anstyle@1.0.14",
+        "pkg:cargo/once_cell_polyfill@1.70.2",
+        "pkg:cargo/windows-sys@0.61.2"
+      ],
+      "ref": "pkg:cargo/anstyle-wincon@3.0.11"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:cargo/anstyle@1.0.14"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/bitflags@2.13.2",
+        "pkg:cargo/cexpr@0.6.0",
+        "pkg:cargo/clang-sys@1.9.1",
+        "pkg:cargo/itertools@0.13.0",
+        "pkg:cargo/proc-macro2@1.0.107",
+        "pkg:cargo/quote@1.0.47",
+        "pkg:cargo/regex@1.13.1",
+        "pkg:cargo/rustc-hash@2.1.3",
+        "pkg:cargo/shlex@1.3.0",
+        "pkg:cargo/syn@2.0.119"
+      ],
+      "ref": "pkg:cargo/bindgen@0.72.1"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/derive-new@0.6.0",
+        "pkg:cargo/lazy_static@1.5.0",
+        "pkg:cargo/regex@1.13.1",
+        "pkg:cargo/strum_macros@0.26.4",
+        "pkg:cargo/thiserror@1.0.69"
+      ],
+      "ref": "pkg:cargo/bio-types@1.0.4"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:cargo/bioinfo-common@0.1.0"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/bioinfo-common@0.1.0",
+        "pkg:cargo/bzip2@0.6.1",
+        "pkg:cargo/crc32fast@1.5.2",
+        "pkg:cargo/flate2@1.1.10",
+        "pkg:cargo/lzma-sys@0.1.20",
+        "pkg:cargo/xz2@0.1.7",
+        "pkg:cargo/zstd@0.13.3"
+      ],
+      "ref": "pkg:cargo/bioinfo-fastx@0.1.0"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/borsh@1.8.1",
+        "pkg:cargo/serde@1.0.229"
+      ],
+      "ref": "pkg:cargo/bit-vec@0.10.1"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:cargo/bitflags@2.13.2"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/once_cell@1.21.4",
+        "pkg:cargo/proc-macro-crate@3.5.0",
+        "pkg:cargo/proc-macro2@1.0.107",
+        "pkg:cargo/quote@1.0.47",
+        "pkg:cargo/syn@3.0.6"
+      ],
+      "ref": "pkg:cargo/borsh-derive@1.8.1"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/borsh-derive@1.8.1",
+        "pkg:cargo/bytes@1.12.1",
+        "pkg:cargo/cfg_aliases@0.2.2"
+      ],
+      "ref": "pkg:cargo/borsh@1.8.1"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/memchr@2.8.3",
+        "pkg:cargo/serde_core@1.0.229"
+      ],
+      "ref": "pkg:cargo/bstr@1.13.1"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:cargo/byteorder@1.5.0"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:cargo/bytes@1.12.1"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/cc@1.6.0",
+        "pkg:cargo/pkg-config@0.3.34"
+      ],
+      "ref": "pkg:cargo/bzip2-sys@0.1.13+1.0.8"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/libbz2-rs-sys@0.2.2"
+      ],
+      "ref": "pkg:cargo/bzip2@0.6.1"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/find-msvc-tools@0.1.14",
+        "pkg:cargo/jobserver@0.1.35",
+        "pkg:cargo/libc@0.2.189",
+        "pkg:cargo/shlex@2.0.1"
+      ],
+      "ref": "pkg:cargo/cc@1.6.0"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/nom@7.1.3"
+      ],
+      "ref": "pkg:cargo/cexpr@0.6.0"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:cargo/cfg-if@1.0.5"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:cargo/cfg_aliases@0.2.2"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/glob@0.3.4",
+        "pkg:cargo/libc@0.2.189",
+        "pkg:cargo/libloading@0.8.9"
+      ],
+      "ref": "pkg:cargo/clang-sys@1.9.1"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/clap_builder@4.6.7",
+        "pkg:cargo/clap_derive@4.6.7"
+      ],
+      "ref": "pkg:cargo/clap@4.6.7"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/anstream@1.0.0",
+        "pkg:cargo/anstyle@1.0.14",
+        "pkg:cargo/clap_lex@1.1.1",
+        "pkg:cargo/strsim@0.11.1"
+      ],
+      "ref": "pkg:cargo/clap_builder@4.6.7"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/heck@0.5.0",
+        "pkg:cargo/proc-macro2@1.0.107",
+        "pkg:cargo/quote@1.0.47",
+        "pkg:cargo/syn@3.0.6"
+      ],
+      "ref": "pkg:cargo/clap_derive@4.6.7"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:cargo/clap_lex@1.1.1"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/cc@1.6.0"
+      ],
+      "ref": "pkg:cargo/cmake@0.1.58"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:cargo/colorchoice@1.0.5"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/cfg-if@1.0.5"
+      ],
+      "ref": "pkg:cargo/crc32fast@1.5.2"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/crossbeam-utils@0.8.23"
+      ],
+      "ref": "pkg:cargo/crossbeam-channel@0.5.17"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/crossbeam-epoch@0.9.21",
+        "pkg:cargo/crossbeam-utils@0.8.23"
+      ],
+      "ref": "pkg:cargo/crossbeam-deque@0.8.8"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/crossbeam-utils@0.8.23"
+      ],
+      "ref": "pkg:cargo/crossbeam-epoch@0.9.21"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:cargo/crossbeam-utils@0.8.23"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:cargo/cty@0.2.2"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:cargo/custom_derive@0.1.7"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/proc-macro2@1.0.107",
+        "pkg:cargo/quote@1.0.47",
+        "pkg:cargo/syn@2.0.119"
+      ],
+      "ref": "pkg:cargo/derive-new@0.6.0"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/proc-macro2@1.0.107",
+        "pkg:cargo/quote@1.0.47",
+        "pkg:cargo/syn@2.0.119"
+      ],
+      "ref": "pkg:cargo/derive-new@0.7.0"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/proc-macro2@1.0.107",
+        "pkg:cargo/quote@1.0.47",
+        "pkg:cargo/syn@3.0.6"
+      ],
+      "ref": "pkg:cargo/displaydoc@0.2.7"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:cargo/either@1.18.0"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:cargo/equivalent@1.0.3"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:cargo/find-msvc-tools@0.1.14"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/crc32fast@1.5.2",
+        "pkg:cargo/miniz_oxide@0.9.1",
+        "pkg:cargo/zlib-rs@0.6.8"
+      ],
+      "ref": "pkg:cargo/flate2@1.1.10"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/percent-encoding@2.3.2"
+      ],
+      "ref": "pkg:cargo/form_urlencoded@1.2.2"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/quick-error@1.2.3"
+      ],
+      "ref": "pkg:cargo/fs-utils@1.1.4"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/cfg-if@1.0.5",
+        "pkg:cargo/libc@0.2.189",
+        "pkg:cargo/r-efi@6.0.0"
+      ],
+      "ref": "pkg:cargo/getrandom@0.4.3"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:cargo/glob@0.3.4"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:cargo/hashbrown@0.17.1"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:cargo/heck@0.5.0"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/bindgen@0.72.1",
+        "pkg:cargo/bzip2-sys@0.1.13+1.0.8",
+        "pkg:cargo/cc@1.6.0",
+        "pkg:cargo/fs-utils@1.1.4",
+        "pkg:cargo/glob@0.3.4",
+        "pkg:cargo/libdeflate-sys@1.26.1",
+        "pkg:cargo/libz-sys@1.1.29",
+        "pkg:cargo/lzma-sys@0.1.20"
+      ],
+      "ref": "pkg:cargo/hts-sys@2.2.1"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/displaydoc@0.2.7",
+        "pkg:cargo/potential_utf@0.1.6",
+        "pkg:cargo/utf8_iter@1.0.4",
+        "pkg:cargo/yoke@0.8.3",
+        "pkg:cargo/zerofrom@0.1.8",
+        "pkg:cargo/zerovec@0.11.8"
+      ],
+      "ref": "pkg:cargo/icu_collections@2.3.0"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/displaydoc@0.2.7",
+        "pkg:cargo/litemap@0.8.3",
+        "pkg:cargo/tinystr@0.8.4",
+        "pkg:cargo/writeable@0.6.4",
+        "pkg:cargo/zerovec@0.11.8"
+      ],
+      "ref": "pkg:cargo/icu_locale_core@2.3.0"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/icu_collections@2.3.0",
+        "pkg:cargo/icu_normalizer_data@2.3.0",
+        "pkg:cargo/icu_properties@2.3.0",
+        "pkg:cargo/icu_provider@2.3.1",
+        "pkg:cargo/smallvec@1.16.1",
+        "pkg:cargo/zerovec@0.11.8"
+      ],
+      "ref": "pkg:cargo/icu_normalizer@2.3.0"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:cargo/icu_normalizer_data@2.3.0"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/displaydoc@0.2.7",
+        "pkg:cargo/icu_collections@2.3.0",
+        "pkg:cargo/icu_locale_core@2.3.0",
+        "pkg:cargo/icu_properties_data@2.3.0",
+        "pkg:cargo/icu_provider@2.3.1",
+        "pkg:cargo/zerotrie@0.2.5",
+        "pkg:cargo/zerovec@0.11.8"
+      ],
+      "ref": "pkg:cargo/icu_properties@2.3.0"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:cargo/icu_properties_data@2.3.0"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/displaydoc@0.2.7",
+        "pkg:cargo/icu_locale_core@2.3.0",
+        "pkg:cargo/writeable@0.6.4",
+        "pkg:cargo/yoke@0.8.3",
+        "pkg:cargo/zerofrom@0.1.8",
+        "pkg:cargo/zerotrie@0.2.5",
+        "pkg:cargo/zerovec@0.11.8"
+      ],
+      "ref": "pkg:cargo/icu_provider@2.3.1"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/idna_adapter@1.2.2",
+        "pkg:cargo/smallvec@1.16.1",
+        "pkg:cargo/utf8_iter@1.0.4"
+      ],
+      "ref": "pkg:cargo/idna@1.1.0"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/icu_normalizer@2.3.0",
+        "pkg:cargo/icu_properties@2.3.0"
+      ],
+      "ref": "pkg:cargo/idna_adapter@1.2.2"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:cargo/ieee754@0.2.6"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/equivalent@1.0.3",
+        "pkg:cargo/hashbrown@0.17.1"
+      ],
+      "ref": "pkg:cargo/indexmap@2.14.2"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:cargo/is_terminal_polyfill@1.70.2"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/either@1.18.0"
+      ],
+      "ref": "pkg:cargo/itertools@0.13.0"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/getrandom@0.4.3",
+        "pkg:cargo/libc@0.2.189"
+      ],
+      "ref": "pkg:cargo/jobserver@0.1.35"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:cargo/lazy_static@1.5.0"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/lexical-parse-float@1.0.6",
+        "pkg:cargo/lexical-parse-integer@1.0.6",
+        "pkg:cargo/lexical-util@1.0.7",
+        "pkg:cargo/lexical-write-float@1.0.6",
+        "pkg:cargo/lexical-write-integer@1.0.6"
+      ],
+      "ref": "pkg:cargo/lexical-core@1.0.6"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/lexical-parse-integer@1.0.6",
+        "pkg:cargo/lexical-util@1.0.7"
+      ],
+      "ref": "pkg:cargo/lexical-parse-float@1.0.6"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/lexical-util@1.0.7"
+      ],
+      "ref": "pkg:cargo/lexical-parse-integer@1.0.6"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:cargo/lexical-util@1.0.7"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/lexical-util@1.0.7",
+        "pkg:cargo/lexical-write-integer@1.0.6"
+      ],
+      "ref": "pkg:cargo/lexical-write-float@1.0.6"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/lexical-util@1.0.7"
+      ],
+      "ref": "pkg:cargo/lexical-write-integer@1.0.6"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:cargo/libbz2-rs-sys@0.2.2"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:cargo/libc@0.2.189"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/cc@1.6.0"
+      ],
+      "ref": "pkg:cargo/libdeflate-sys@1.26.1"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/cfg-if@1.0.5",
+        "pkg:cargo/windows-link@0.2.1"
+      ],
+      "ref": "pkg:cargo/libloading@0.8.9"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/cc@1.6.0",
+        "pkg:cargo/cty@0.2.2"
+      ],
+      "ref": "pkg:cargo/libmimalloc-sys@0.1.49"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/cc@1.6.0",
+        "pkg:cargo/cmake@0.1.58",
+        "pkg:cargo/libc@0.2.189",
+        "pkg:cargo/pkg-config@0.3.34",
+        "pkg:cargo/vcpkg@0.2.15"
+      ],
+      "ref": "pkg:cargo/libz-sys@1.1.29"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:cargo/linear-map@1.2.0"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:cargo/litemap@0.8.3"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/cc@1.6.0",
+        "pkg:cargo/libc@0.2.189",
+        "pkg:cargo/pkg-config@0.3.34"
+      ],
+      "ref": "pkg:cargo/lzma-sys@0.1.20"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:cargo/memchr@2.8.3"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/libmimalloc-sys@0.1.49"
+      ],
+      "ref": "pkg:cargo/mimalloc@0.1.52"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:cargo/minimal-lexical@0.2.1"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/adler2@2.0.1",
+        "pkg:cargo/simd-adler32@0.3.10"
+      ],
+      "ref": "pkg:cargo/miniz_oxide@0.9.1"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/rustc_version@0.1.7"
+      ],
+      "ref": "pkg:cargo/newtype_derive@0.1.6"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/memchr@2.8.3",
+        "pkg:cargo/minimal-lexical@0.2.1"
+      ],
+      "ref": "pkg:cargo/nom@7.1.3"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/bstr@1.13.1",
+        "pkg:cargo/indexmap@2.14.2",
+        "pkg:cargo/memchr@2.8.3",
+        "pkg:cargo/noodles-bgzf@0.52.0",
+        "pkg:cargo/noodles-core@0.21.0",
+        "pkg:cargo/noodles-csi@0.62.0",
+        "pkg:cargo/noodles-sam@0.92.0"
+      ],
+      "ref": "pkg:cargo/noodles-bam@0.97.0"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/bytes@1.12.1",
+        "pkg:cargo/crossbeam-channel@0.5.17",
+        "pkg:cargo/rayon@1.12.0",
+        "pkg:cargo/zlib-rs@0.6.8"
+      ],
+      "ref": "pkg:cargo/noodles-bgzf@0.52.0"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/bstr@1.13.1"
+      ],
+      "ref": "pkg:cargo/noodles-core@0.21.0"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/bit-vec@0.10.1",
+        "pkg:cargo/bstr@1.13.1",
+        "pkg:cargo/indexmap@2.14.2",
+        "pkg:cargo/noodles-bgzf@0.52.0",
+        "pkg:cargo/noodles-core@0.21.0"
+      ],
+      "ref": "pkg:cargo/noodles-csi@0.62.0"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/bitflags@2.13.2",
+        "pkg:cargo/bstr@1.13.1",
+        "pkg:cargo/indexmap@2.14.2",
+        "pkg:cargo/lexical-core@1.0.6",
+        "pkg:cargo/memchr@2.8.3",
+        "pkg:cargo/noodles-bgzf@0.52.0",
+        "pkg:cargo/noodles-core@0.21.0",
+        "pkg:cargo/noodles-csi@0.62.0"
+      ],
+      "ref": "pkg:cargo/noodles-sam@0.92.0"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/noodles-bam@0.97.0",
+        "pkg:cargo/noodles-bgzf@0.52.0",
+        "pkg:cargo/noodles-core@0.21.0",
+        "pkg:cargo/noodles-csi@0.62.0",
+        "pkg:cargo/noodles-sam@0.92.0"
+      ],
+      "ref": "pkg:cargo/noodles@0.118.0"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:cargo/once_cell@1.21.4"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:cargo/once_cell_polyfill@1.70.2"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:cargo/percent-encoding@2.3.2"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:cargo/pkg-config@0.3.34"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/zerovec@0.11.8"
+      ],
+      "ref": "pkg:cargo/potential_utf@0.1.6"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/toml_edit@0.25.17+spec-1.1.0"
+      ],
+      "ref": "pkg:cargo/proc-macro-crate@3.5.0"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/unicode-ident@1.0.26"
+      ],
+      "ref": "pkg:cargo/proc-macro2@1.0.107"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:cargo/quick-error@1.2.3"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/proc-macro2@1.0.107"
+      ],
+      "ref": "pkg:cargo/quote@1.0.47"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:cargo/r-efi@6.0.0"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/crossbeam-deque@0.8.8",
+        "pkg:cargo/crossbeam-utils@0.8.23"
+      ],
+      "ref": "pkg:cargo/rayon-core@1.13.0"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/either@1.18.0",
+        "pkg:cargo/rayon-core@1.13.0"
+      ],
+      "ref": "pkg:cargo/rayon@1.12.0"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/aho-corasick@1.1.5",
+        "pkg:cargo/memchr@2.8.3",
+        "pkg:cargo/regex-syntax@0.8.11"
+      ],
+      "ref": "pkg:cargo/regex-automata@0.4.18"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:cargo/regex-syntax@0.8.11"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/aho-corasick@1.1.5",
+        "pkg:cargo/memchr@2.8.3",
+        "pkg:cargo/regex-automata@0.4.18",
+        "pkg:cargo/regex-syntax@0.8.11"
+      ],
+      "ref": "pkg:cargo/regex@1.13.1"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/bioinfo-common@0.1.0",
+        "pkg:cargo/clap@4.6.7",
+        "pkg:cargo/flate2@1.1.10",
+        "pkg:cargo/noodles@0.118.0"
+      ],
+      "ref": "pkg:cargo/rust-bam@0.1.0"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/bioinfo-common@0.1.0",
+        "pkg:cargo/bioinfo-fastx@0.1.0",
+        "pkg:cargo/bzip2@0.6.1",
+        "pkg:cargo/clap@4.6.7",
+        "pkg:cargo/flate2@1.1.10",
+        "pkg:cargo/lzma-sys@0.1.20",
+        "pkg:cargo/xz2@0.1.7"
+      ],
+      "ref": "pkg:cargo/rust-cutadapt@0.1.0"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/bioinfo-common@0.1.0",
+        "pkg:cargo/bioinfo-fastx@0.1.0",
+        "pkg:cargo/clap@4.6.7"
+      ],
+      "ref": "pkg:cargo/rust-fastqc@0.1.0"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/bioinfo-common@0.1.0",
+        "pkg:cargo/bioinfo-fastx@0.1.0",
+        "pkg:cargo/clap@4.6.7"
+      ],
+      "ref": "pkg:cargo/rust-fx@0.1.0"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/bio-types@1.0.4",
+        "pkg:cargo/byteorder@1.5.0",
+        "pkg:cargo/custom_derive@0.1.7",
+        "pkg:cargo/derive-new@0.7.0",
+        "pkg:cargo/hts-sys@2.2.1",
+        "pkg:cargo/ieee754@0.2.6",
+        "pkg:cargo/lazy_static@1.5.0",
+        "pkg:cargo/libc@0.2.189",
+        "pkg:cargo/libz-sys@1.1.29",
+        "pkg:cargo/linear-map@1.2.0",
+        "pkg:cargo/newtype_derive@0.1.6",
+        "pkg:cargo/regex@1.13.1",
+        "pkg:cargo/thiserror@2.0.21",
+        "pkg:cargo/url@2.5.8"
+      ],
+      "ref": "pkg:cargo/rust-htslib@0.49.0"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/bioinfo-common@0.1.0",
+        "pkg:cargo/bioinfo-fastx@0.1.0",
+        "pkg:cargo/clap@4.6.7",
+        "pkg:cargo/flate2@1.1.10",
+        "pkg:cargo/libc@0.2.189",
+        "pkg:cargo/libmimalloc-sys@0.1.49",
+        "pkg:cargo/mimalloc@0.1.52",
+        "pkg:cargo/rayon@1.12.0",
+        "pkg:cargo/regex@1.13.1",
+        "pkg:cargo/rust-htslib@0.49.0",
+        "pkg:cargo/rustc-hash@2.1.3"
+      ],
+      "ref": "pkg:cargo/rust-umitools@0.2.0"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:cargo/rustc-hash@2.1.3"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/semver@0.1.20"
+      ],
+      "ref": "pkg:cargo/rustc_version@0.1.7"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:cargo/rustversion@1.0.23"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:cargo/semver@0.1.20"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/serde_core@1.0.229",
+        "pkg:cargo/serde_derive@1.0.229"
+      ],
+      "ref": "pkg:cargo/serde@1.0.229"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/serde_derive@1.0.229"
+      ],
+      "ref": "pkg:cargo/serde_core@1.0.229"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/proc-macro2@1.0.107",
+        "pkg:cargo/quote@1.0.47",
+        "pkg:cargo/syn@3.0.6"
+      ],
+      "ref": "pkg:cargo/serde_derive@1.0.229"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:cargo/shlex@1.3.0"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:cargo/shlex@2.0.1"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:cargo/simd-adler32@0.3.10"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:cargo/smallvec@1.16.1"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:cargo/stable_deref_trait@1.2.1"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:cargo/strsim@0.11.1"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/heck@0.5.0",
+        "pkg:cargo/proc-macro2@1.0.107",
+        "pkg:cargo/quote@1.0.47",
+        "pkg:cargo/rustversion@1.0.23",
+        "pkg:cargo/syn@2.0.119"
+      ],
+      "ref": "pkg:cargo/strum_macros@0.26.4"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/proc-macro2@1.0.107",
+        "pkg:cargo/quote@1.0.47",
+        "pkg:cargo/unicode-ident@1.0.26"
+      ],
+      "ref": "pkg:cargo/syn@2.0.119"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/proc-macro2@1.0.107",
+        "pkg:cargo/quote@1.0.47",
+        "pkg:cargo/unicode-ident@1.0.26"
+      ],
+      "ref": "pkg:cargo/syn@3.0.6"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/proc-macro2@1.0.107",
+        "pkg:cargo/quote@1.0.47",
+        "pkg:cargo/syn@2.0.119"
+      ],
+      "ref": "pkg:cargo/synstructure@0.13.2"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/proc-macro2@1.0.107",
+        "pkg:cargo/quote@1.0.47",
+        "pkg:cargo/syn@3.0.6"
+      ],
+      "ref": "pkg:cargo/synstructure@0.14.0"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/proc-macro2@1.0.107",
+        "pkg:cargo/quote@1.0.47",
+        "pkg:cargo/syn@2.0.119"
+      ],
+      "ref": "pkg:cargo/thiserror-impl@1.0.69"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/proc-macro2@1.0.107",
+        "pkg:cargo/quote@1.0.47",
+        "pkg:cargo/syn@3.0.6"
+      ],
+      "ref": "pkg:cargo/thiserror-impl@2.0.21"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/thiserror-impl@1.0.69"
+      ],
+      "ref": "pkg:cargo/thiserror@1.0.69"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/thiserror-impl@2.0.21"
+      ],
+      "ref": "pkg:cargo/thiserror@2.0.21"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/displaydoc@0.2.7",
+        "pkg:cargo/zerovec@0.11.8"
+      ],
+      "ref": "pkg:cargo/tinystr@0.8.4"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/serde_core@1.0.229"
+      ],
+      "ref": "pkg:cargo/toml_datetime@1.1.2+spec-1.1.0"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/indexmap@2.14.2",
+        "pkg:cargo/toml_datetime@1.1.2+spec-1.1.0",
+        "pkg:cargo/toml_parser@1.1.5+spec-1.1.0",
+        "pkg:cargo/winnow@1.0.4"
+      ],
+      "ref": "pkg:cargo/toml_edit@0.25.17+spec-1.1.0"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/winnow@1.0.4"
+      ],
+      "ref": "pkg:cargo/toml_parser@1.1.5+spec-1.1.0"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:cargo/unicode-ident@1.0.26"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/form_urlencoded@1.2.2",
+        "pkg:cargo/idna@1.1.0",
+        "pkg:cargo/percent-encoding@2.3.2",
+        "pkg:cargo/serde@1.0.229"
+      ],
+      "ref": "pkg:cargo/url@2.5.8"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:cargo/utf8_iter@1.0.4"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:cargo/utf8parse@0.2.2"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:cargo/vcpkg@0.2.15"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:cargo/windows-link@0.2.1"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/windows-link@0.2.1"
+      ],
+      "ref": "pkg:cargo/windows-sys@0.61.2"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/memchr@2.8.3"
+      ],
+      "ref": "pkg:cargo/winnow@1.0.4"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:cargo/writeable@0.6.4"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/lzma-sys@0.1.20"
+      ],
+      "ref": "pkg:cargo/xz2@0.1.7"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/proc-macro2@1.0.107",
+        "pkg:cargo/quote@1.0.47",
+        "pkg:cargo/syn@2.0.119",
+        "pkg:cargo/synstructure@0.13.2"
+      ],
+      "ref": "pkg:cargo/yoke-derive@0.8.2"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/stable_deref_trait@1.2.1",
+        "pkg:cargo/yoke-derive@0.8.2",
+        "pkg:cargo/zerofrom@0.1.8"
+      ],
+      "ref": "pkg:cargo/yoke@0.8.3"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/proc-macro2@1.0.107",
+        "pkg:cargo/quote@1.0.47",
+        "pkg:cargo/syn@3.0.6",
+        "pkg:cargo/synstructure@0.14.0"
+      ],
+      "ref": "pkg:cargo/zerofrom-derive@0.1.8"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/zerofrom-derive@0.1.8"
+      ],
+      "ref": "pkg:cargo/zerofrom@0.1.8"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/displaydoc@0.2.7",
+        "pkg:cargo/yoke@0.8.3",
+        "pkg:cargo/zerofrom@0.1.8"
+      ],
+      "ref": "pkg:cargo/zerotrie@0.2.5"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/proc-macro2@1.0.107",
+        "pkg:cargo/quote@1.0.47",
+        "pkg:cargo/syn@3.0.6"
+      ],
+      "ref": "pkg:cargo/zerovec-derive@0.11.6"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/yoke@0.8.3",
+        "pkg:cargo/zerofrom@0.1.8",
+        "pkg:cargo/zerovec-derive@0.11.6"
+      ],
+      "ref": "pkg:cargo/zerovec@0.11.8"
+    },
+    {
+      "dependsOn": [],
+      "ref": "pkg:cargo/zlib-rs@0.6.8"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/zstd-sys@2.0.16+zstd.1.5.7"
+      ],
+      "ref": "pkg:cargo/zstd-safe@7.2.4"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/cc@1.6.0",
+        "pkg:cargo/pkg-config@0.3.34"
+      ],
+      "ref": "pkg:cargo/zstd-sys@2.0.16+zstd.1.5.7"
+    },
+    {
+      "dependsOn": [
+        "pkg:cargo/zstd-safe@7.2.4"
+      ],
+      "ref": "pkg:cargo/zstd@0.13.3"
+    }
+  ],
+  "metadata": {
+    "component": {
+      "description": "Rust bioinformatics tools workspace",
+      "name": "bioinfo-tools",
+      "type": "application",
+      "version": "0.1.0"
+    },
+    "properties": [
+      {
+        "name": "bioinfo-tools:input",
+        "value": "Cargo.lock"
+      },
+      {
+        "name": "bioinfo-tools:input-sha256",
+        "value": "f6a95b462b2bffa326810e451788214d59d6c1dbaad5dd41de18044297edf8bc"
+      },
+      {
+        "name": "bioinfo-tools:component-count",
+        "value": "162"
+      },
+      {
+        "name": "bioinfo-tools:generator-note",
+        "value": "stdlib generator; no SBOM tooling was installed"
+      }
+    ],
+    "tools": [
+      {
+        "name": "packaging/sbom.py",
+        "vendor": "bioinfo-tools",
+        "version": "1"
+      }
+    ]
+  },
+  "serialNumber": "urn:uuid:ed6df66e-4f3d-578e-8b6e-d023f31bca02",
+  "specVersion": "1.5",
+  "version": 1
+}

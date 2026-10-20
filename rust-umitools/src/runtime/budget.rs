@@ -278,6 +278,12 @@ fn largest_cache_bytes() -> Option<u64> {
     (largest > 0).then_some(largest)
 }
 
+// `f_bavail` and `f_frsize` are `c_ulong`, which is 64-bit on 64-bit Linux but
+// 32-bit on 32-bit targets and on Windows. The `as u64` casts are therefore
+// load-bearing for portability, and `clippy::unnecessary_cast` only sees the
+// x86_64 case where the cast is a no-op. Allowing the lint with this reason is
+// correct; removing the casts would silently truncate on a 32-bit target.
+#[allow(clippy::unnecessary_cast)]
 fn statvfs_free(path: &Path) -> Option<u64> {
     use std::os::unix::ffi::OsStrExt;
     let c_path = std::ffi::CString::new(path.as_os_str().as_bytes()).ok()?;

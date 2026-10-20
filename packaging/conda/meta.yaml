@@ -1,0 +1,94 @@
+# Conda recipe draft for rust-cutadapt.
+#
+# ## STATUS: DRAFT, NEVER BUILT OR LINTED
+#
+# `conda-build` is not installed in the environment where this was written, so this
+# recipe has not been rendered, linted or built. It is a draft that states what a
+# real recipe would need, not a verified recipe. See
+# docs/EVIDENCE-PACKAGING.md.
+#
+# ## The build approach, and why it is written this way
+#
+# `rust-cutadapt` is a member of a Cargo **workspace** and uses **path
+# dependencies** on `bioinfo-common` and `bioinfo-fastx`. That has two
+# consequences a real recipe must respect:
+#
+#   1. A published crates.io release would not be enough to build it: there are no
+#      published `bioinfo-common`/`bioinfo-fastx` crates. The sdist must be the
+#      whole workspace.
+#   2. `cargo install --path rust-cutadapt` alone fails to resolve the path
+#      dependencies unless the sibling directories are present, so the recipe must
+#      ship the whole tree.
+#
+# The `build:` block below therefore assumes an sdist containing the workspace root,
+# and it is deliberately explicit about `--locked` so the dependency set matches the
+# committed `Cargo.lock`.
+#
+# ## Toolchain
+#
+# The workspace pins Rust 1.91.0 in `rust-toolchain.toml`. The `rust` package from
+# conda-forge tracks versions that may not include 1.91.0 on every platform, so a
+# real recipe should either depend on a `rust` build that provides 1.91.0 or set
+# `RUSTUP_TOOLCHAIN`/use a vendored toolchain. That decision is left open rather
+# than guessed, because guessing it would produce a recipe that silently builds with
+# the wrong compiler.
+
+{% set name = "rust-cutadapt" %}
+{% set version = "0.1.0" %}
+
+package:
+  name: {{ name }}
+  version: {{ version }}
+
+source:
+  # The sdist must contain the WHOLE workspace: the crate uses path dependencies
+  # on bioinfo-common and bioinfo-fastx, which are not published separately.
+  path: ..
+
+build:
+  number: 0
+  # The binary is the deliverable; no Python or R entry points.
+  script:
+    # --locked honours the committed Cargo.lock; --release matches the profile the
+    # evidence records.
+    - cargo build --release --locked -p rust-cutadapt
+    - mkdir -p $PREFIX/bin
+    - install -m 0755 target/release/rust-cutadapt $PREFIX/bin/rust-cutadapt
+  # Skip on platforms where the pinned toolchain is unavailable; a real recipe
+  # should narrow this to what CI actually validates.
+  skip: true  # [win]
+
+requirements:
+  build:
+    # Rust toolchain. See the note above about the 1.91.0 pin.
+    - {{ compiler('rust') }}
+    # Native C compiler for zstd-sys and lzma-sys, which compile vendored C.
+    - {{ compiler('c') }}
+    - cargo
+    - make
+  host: []
+  run:
+    # The binary links dynamically against glibc/libgcc only; conda-forge's
+    # __glibc run constraint covers this.
+    - __glibc >=2.17
+
+test:
+  commands:
+    # A version check plus one real trim, so the test would catch a broken binary
+    # rather than only a missing file.
+    - rust-cutadapt --version
+    - printf '@r1\nACGTACGT\n+\nIIIIIIII\n' > test.fq
+    - rust-cutadapt -a ACGT -o /dev/null test.fq
+
+about:
+  home: https://github.com/seek-hope/bioinfo-tools
+  license: MIT
+  summary: cutadapt 4.6-compatible adapter trimmer, implemented in Rust
+  description: |
+    Pure-Rust reimplementation of cutadapt 4.6's adapter-trimming subset, verified
+    against cutadapt 4.6 by differential test. Part of the bioinfo-tools workspace.
+  dev_url: https://github.com/seek-hope/bioinfo-tools
+
+extra:
+  recipe-maintainers:
+    - seek-hope

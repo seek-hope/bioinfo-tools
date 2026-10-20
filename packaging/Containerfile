@@ -1,0 +1,78 @@
+# Containerfile for rust-cutadapt.
+#
+# Multi-stage: a builder stage compiles the binary from the pinned toolchain, and a
+# minimal runtime stage carries only the binary and its dynamic libraries. The
+# binary is statically linked for every Rust dependency and dynamically linked only
+# against glibc/libgcc, which is why the runtime stage can stay small.
+#
+# ## Build
+#
+#   docker build -f packaging/Containerfile -t rust-cutadapt:local .
+#
+# ## Run
+#
+#   docker run --rm -v "$PWD:/data" rust-cutadapt:local -a AGATCGGA -o /data/out.fq /data/in.fq
+#
+# ## IMPORTANT: this recipe has NOT been built or run
+#
+# The Docker daemon is unavailable in the environment where this file was written
+# (`docker info` fails with "failed to connect to the docker API ... no such file or
+# directory"). Nothing here is claimed to work. See docs/EVIDENCE-PACKAGING.md for
+# what was and was not validated.
+#
+# ## Why the builder stage copies Cargo.toml files first
+#
+# Copying only the manifests and creating a stub `src/main.rs` before copying the
+# real sources lets Docker cache the dependency compilation layer. That is a build
+# *speed* optimisation. It is cosmetic for correctness here because the workspace
+# members use path dependencies, so the whole workspace has to be present anyway;
+# the layer split is kept simple and honest rather than faking a dependency cache.
+
+# ---------- builder ----------
+FROM rust:1.91.0-bookworm AS builder
+
+# Build-time native dependencies for the compression codecs:
+#   zstd-sys and lzma-sys compile C sources, so `cc` and `make` are required.
+#   They are vendored in their crates, so no `-dev` packages are needed for them.
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends ca-certificates \
+ && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /build
+
+# The whole workspace is required: every member uses path dependencies, so a
+# partial copy would not resolve.
+COPY Cargo.toml Cargo.lock rust-toolchain.toml ./
+COPY bioinfo-common ./bioinfo-common
+COPY bioinfo-fastx ./bioinfo-fastx
+COPY rust-bam ./rust-bam
+COPY rust-cutadapt ./rust-cutadapt
+COPY rust-fastqc ./rust-fastqc
+COPY rust-fx ./rust-fx
+COPY rust-umitools ./rust-umitools
+
+# `--locked` uses the committed Cargo.lock unchanged, so the dependency set is the
+# one the evidence records. `--offline` is NOT used here: a container build starts
+# with an empty cargo registry and must fetch crates. The offline requirement
+# applies to the agent environment, not to the container image build.
+RUN cargo build --release --locked -p rust-cutadapt \
+ && strip target/release/rust-cutadapt
+
+# ---------- runtime ----------
+FROM debian:bookworm-slim AS runtime
+
+LABEL org.opencontainers.image.title="rust-cutadapt" \
+      org.opencontainers.image.description="cutadapt 4.6-compatible adapter trimmer (Rust)" \
+      org.opencontainers.image.licenses="MIT"
+
+# Only glibc and libgcc_s are needed at run time; both are in the base image.
+# `ca-certificates` is omitted deliberately: the tool makes no network calls.
+COPY --from=builder /build/target/release/rust-cutadapt /usr/local/bin/rust-cutadapt
+
+# Run unprivileged. The working directory is a mount point for user data.
+RUN useradd --create-home --uid 10001 appuser
+USER appuser
+WORKDIR /data
+
+ENTRYPOINT ["rust-cutadapt"]
+CMD ["--help"]

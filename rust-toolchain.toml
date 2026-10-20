@@ -1,0 +1,26 @@
+# Pinned Rust toolchain.
+#
+# The channel is pinned to the workspace MSRV so that a build is reproducible from
+# the repository alone, rather than depending on whatever `stable` happens to be on
+# the machine. `[workspace.package] rust-version = "1.91"` in Cargo.toml is the
+# declaration; this file is the enforcement.
+#
+# Why 1.91.0 and not the newer default:
+#
+#   * `noodles` 0.118.0 (used by rust-bam) declares `rust-version = "1.91.0"`, so
+#     1.91 is the workspace floor. Building at the floor proves the MSRV claim
+#     instead of only asserting it.
+#   * Pinning the exact patch release means the compiler version is part of the
+#     reproducible-build recipe. A `stable` channel pin would silently change the
+#     compiler (and potentially the emitted code) over time.
+#
+# `components` are only what the workspace actually needs: rustfmt and clippy for
+# the gates. No `rust-src`, no `llvm-tools`.
+#
+# Updating this file is a deliberate act: bump it together with
+# `[workspace.package] rust-version`, re-run the reproducible-build check, and
+# record the new hash in docs/EVIDENCE-PACKAGING.md.
+[toolchain]
+channel = "1.91.0"
+components = ["rustfmt", "clippy"]
+profile = "minimal"
