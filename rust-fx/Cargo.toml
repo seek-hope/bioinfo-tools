@@ -1,0 +1,30 @@
+[package]
+name = "rust-fx"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.88"
+description = "FASTX manipulation: stats, seq, fq2fa, fx2tab, sample, split, lint"
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/seek-hope/bioinfo-tools"
+keywords = ["bioinformatics", "fastq", "fasta", "stats", "seqkit"]
+categories = ["science::bioinformatics", "command-line-utilities"]
+
+[[bin]]
+name = "rust-fx"
+path = "src/main.rs"
+
+[lib]
+name = "rust_fx"
+path = "src/lib.rs"
+
+# `bioinfo-fastx` owns all FASTX parsing and compression; `bioinfo-common` owns
+# the exit-code classes, diagnostics and diagnostics formatting. `clap` mirrors
+# the dependency both existing binaries already use for their option grammars.
+# Deliberately no checksum crate: `fx2tab -s` needs MD5, which is implemented in
+# this crate (src/md5.rs) rather than pulling in a new runtime dependency — see
+# DR-2 in docs/EVIDENCE-W1-3.md.
+[dependencies]
+bioinfo-common = { path = "../bioinfo-common" }
+bioinfo-fastx = { path = "../bioinfo-fastx" }
+clap = { version = "4", features = ["derive"] }

@@ -1,0 +1,46 @@
+{
+  "argv": [
+    "count_tab",
+    "-I",
+    "reads.tsv",
+    "-S",
+    "out.tsv",
+    "--summary-json",
+    "s.json"
+  ],
+  "exit_code": 0,
+  "guard": "L1 count_tab output bytes + --summary-json contract",
+  "level": "L1",
+  "name": "umitools_count_tab",
+  "rules_fired": {
+    "s.json": [
+      "umitools_summary_timings",
+      "umitools_summary_resources"
+    ],
+    "stderr": [
+      "umitools_log_timing_lines"
+    ]
+  },
+  "streams": {
+    "out.tsv": {
+      "bytes": 21,
+      "kind": "text",
+      "text": "gene\tcount\nG1\t2\nG2\t1\n"
+    },
+    "s.json": {
+      "bytes": 249,
+      "kind": "text",
+      "text": "{\"program\":\"rust-umitools\",\"version\":\"0.2.0\",\"command\":\"count_tab\",\"input\":\"reads.tsv\",\"outputs\":[{\"role\":\"tsv\",\"path\":\"out.tsv\"}],\"resources\":<RESOURCES>,\"counters\":{\"genes\":2},\"timings\":<TIMINGS>}\n"
+    },
+    "stderr": {
+      "bytes": 75,
+      "kind": "text",
+      "text": "rust-umitools count_tab\ngenes               : 2\nwall time           : <TIME>s\n"
+    },
+    "stdout": {
+      "bytes": 0,
+      "kind": "text",
+      "text": ""
+    }
+  }
+}

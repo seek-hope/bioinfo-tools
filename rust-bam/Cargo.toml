@@ -1,0 +1,37 @@
+[package]
+name = "rust-bam"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.91"
+description = "SAM/BAM view, flagstat, idxstats, quickcheck, index and sort on noodles"
+license = "MIT"
+
+[dependencies]
+# Plan decision D2: new SAM/BAM work uses noodles, which keeps the C toolchain and
+# the htslib CVE surface out of the build. `rust-htslib` is deliberately NOT used.
+noodles = { version = "0.118.0", default-features = false, features = [
+    "bam",
+    "bgzf",
+    "core",
+    "csi",
+    "sam",
+] }
+
+# Shared exit-code classes, diagnostics and provenance block (W1-1).
+bioinfo-common = { path = "../bioinfo-common" }
+
+# Command-line parsing: already a declared workspace dependency.
+clap = { version = "4", features = ["derive"] }
+
+# gzip/BGZF magic sniffing for format detection. Already a declared workspace
+# dependency (W1-2 uses it for gzip/bzip2/xz/zstd input), so no new crate is
+# introduced for W1-4.
+flate2 = "1"
+
+[lib]
+name = "rust_bam"
+path = "src/lib.rs"
+
+[[bin]]
+name = "rust-bam"
+path = "src/main.rs"

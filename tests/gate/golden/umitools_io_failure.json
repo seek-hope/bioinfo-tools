@@ -1,0 +1,30 @@
+{
+  "argv": [
+    "count_tab",
+    "-I",
+    "reads.tsv",
+    "-S",
+    "locked/out.tsv"
+  ],
+  "exit_code": 4,
+  "guard": "exit class 4 + exact IO diagnostic when the output parent is not a directory",
+  "level": "L2",
+  "name": "umitools_io_failure",
+  "rules_fired": {
+    "stderr": [
+      "umitools_temp_staging_name"
+    ]
+  },
+  "streams": {
+    "stderr": {
+      "bytes": 103,
+      "kind": "text",
+      "text": "rust-umitools count_tab\nERROR: locked/.umitools-count-tab.<PID>.<N>.tmp: Not a directory (os error 20)\n"
+    },
+    "stdout": {
+      "bytes": 0,
+      "kind": "text",
+      "text": ""
+    }
+  }
+}

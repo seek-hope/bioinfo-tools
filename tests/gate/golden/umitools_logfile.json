@@ -1,0 +1,44 @@
+{
+  "argv": [
+    "count_tab",
+    "-I",
+    "reads.tsv",
+    "-S",
+    "out.tsv",
+    "-L",
+    "run.log"
+  ],
+  "exit_code": 0,
+  "guard": "L1 -L log bytes unchanged + log/stderr mirroring",
+  "level": "L1",
+  "name": "umitools_logfile",
+  "rules_fired": {
+    "run.log": [
+      "umitools_log_timing_lines"
+    ],
+    "stderr": [
+      "umitools_log_timing_lines"
+    ]
+  },
+  "streams": {
+    "mirror:run.log==stderr": {
+      "kind": "text",
+      "text": "equal\n"
+    },
+    "run.log": {
+      "bytes": 75,
+      "kind": "text",
+      "text": "rust-umitools count_tab\ngenes               : 2\nwall time           : <TIME>s\n"
+    },
+    "stderr": {
+      "bytes": 75,
+      "kind": "text",
+      "text": "rust-umitools count_tab\ngenes               : 2\nwall time           : <TIME>s\n"
+    },
+    "stdout": {
+      "bytes": 0,
+      "kind": "text",
+      "text": ""
+    }
+  }
+}

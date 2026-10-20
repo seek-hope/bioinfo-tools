@@ -1,0 +1,28 @@
+{
+  "argv": [
+    "group",
+    "-I",
+    "in.bam",
+    "--group-out",
+    "g.tsv",
+    "--progress",
+    "sometimes"
+  ],
+  "exit_code": 2,
+  "guard": "exit class 2 + exact 'unknown --progress value' diagnostic + hint",
+  "level": "L2",
+  "name": "umitools_bad_progress",
+  "rules_fired": {},
+  "streams": {
+    "stderr": {
+      "bytes": 80,
+      "kind": "text",
+      "text": "ERROR: unknown --progress value 'sometimes'\n       choose one of: auto, on, off\n"
+    },
+    "stdout": {
+      "bytes": 0,
+      "kind": "text",
+      "text": ""
+    }
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "argv": [
+    "count_tab",
+    "-I",
+    "bad.tsv",
+    "-S",
+    "out.tsv"
+  ],
+  "exit_code": 3,
+  "guard": "input-precondition diagnostic + its exit code (BadTable)",
+  "level": "L2",
+  "name": "umitools_count_tab_bad_table",
+  "rules_fired": {},
+  "streams": {
+    "stderr": {
+      "bytes": 75,
+      "kind": "text",
+      "text": "rust-umitools count_tab\nERROR: line 1: expected exactly 2 columns, found 3\n"
+    },
+    "stdout": {
+      "bytes": 0,
+      "kind": "text",
+      "text": ""
+    }
+  }
+}

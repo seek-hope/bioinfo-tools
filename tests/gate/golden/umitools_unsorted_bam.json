@@ -1,0 +1,33 @@
+{
+  "argv": [
+    "dedup",
+    "-I",
+    "unsorted.bam",
+    "-S",
+    "out.bam"
+  ],
+  "exit_code": 3,
+  "guard": "exit class 3 + exact NotSorted diagnostic",
+  "level": "L2",
+  "name": "umitools_unsorted_bam",
+  "rules_fired": {
+    "stderr": [
+      "umitools_log_threads",
+      "umitools_log_memory",
+      "umitools_log_hardware_line",
+      "umitools_log_container_line"
+    ]
+  },
+  "streams": {
+    "stderr": {
+      "bytes": 417,
+      "kind": "text",
+      "text": "rust-umitools 0.2.0 dedup: threads=<N> memory=<N>MiB method=directional threshold=1 representative=upstream\nhardware            : <HARDWARE>\ncontainer limits     : <LIMITS>\nERROR: input is not sorted by coordinate: record 2 has position 99, previous record had 499. Run 'samtools sort' first.\n"
+    },
+    "stdout": {
+      "bytes": 0,
+      "kind": "text",
+      "text": ""
+    }
+  }
+}

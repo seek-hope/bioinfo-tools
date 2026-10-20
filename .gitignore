@@ -1,0 +1,27 @@
+# Build artefacts
+/target/
+**/target/
+
+# Local oracle installs. The pins live in tests/ci/PINS.md; the binaries are
+# downloaded by a human or by CI provisioning and must never be committed.
+tests/ci/env/bin/
+tests/ci/env/**/bin/
+
+# Scratch space used during development.
+.work/
+/gg.fa
+
+# The two existing crates keep their own Git histories and remotes. The root
+# overlay repository deliberately does not swallow them.
+/rust-cutadapt/
+/rust-umitools/
+
+# Trial harness/config directories, not project source.
+/AGENTS.md
+/TASK.md
+/.pi/
+/.leader-verify/
+
+# Python bytecode/
+__pycache__/
+*.pyc

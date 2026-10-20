@@ -1,0 +1,30 @@
+[package]
+name = "bioinfo-fastx"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.88"
+description = "Streaming FASTQ/FASTA reading and writing with strict and lenient parsing, compression detection and BGZF"
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/seek-hope/bioinfo-tools"
+keywords = ["bioinformatics", "fastq", "fasta", "gzip", "bgzf"]
+categories = ["science::bioinformatics", "parser-implementations"]
+
+# Dependencies are exactly the compression backends the plan's crate table allows
+# (`flate2`, `bzip2`, `liblzma`, `zstd`), with the xz binding in its `lzma-sys`
+# form for the reason recorded in rust-cutadapt's ADR 0001: Cargo permits only
+# one package per `links` value, and `rust-htslib` already provides
+# `links = "lzma"` through `lzma-sys`. `crc32fast` is required by the BGZF
+# writer, which must compute the same CRC32 as every other BGZF implementation.
+[dependencies]
+bioinfo-common = { path = "../bioinfo-common" }
+bzip2 = "0.6.1"
+crc32fast = "1"
+flate2 = "1"
+lzma-sys = { version = "0.1.20", features = ["static"] }
+xz2 = "0.1.7"
+zstd = "0.13.3"
+
+[lib]
+name = "bioinfo_fastx"
+path = "src/lib.rs"

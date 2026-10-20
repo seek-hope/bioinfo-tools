@@ -1,0 +1,23 @@
+{
+  "argv": [
+    "--version",
+    "--verbose"
+  ],
+  "exit_code": 0,
+  "guard": "PROVENANCE BLOCK: byte-exact --version --verbose, zero normalisation",
+  "level": "L1",
+  "name": "umitools_version_verbose",
+  "rules_fired": {},
+  "streams": {
+    "stderr": {
+      "bytes": 0,
+      "kind": "text",
+      "text": ""
+    },
+    "stdout": {
+      "bytes": 323,
+      "kind": "text",
+      "text": "rust-umitools 0.2.0\nreference        : UMI-tools 1.1.6 (3f2cb4f41e07fe4a6cea3b3389f534bee957176b)\nhtslib           : via rust-htslib, libdeflate compression\nparallel         : rayon worker pool, bounded BGZF threads\ncommands         : dedup, group, count, count_tab\nexit codes       : 0 ok, 2 usage, 3 input, 4 io/resource\n"
+    }
+  }
+}

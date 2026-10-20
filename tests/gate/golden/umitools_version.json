@@ -1,0 +1,21 @@
+{
+  "argv": [
+    "--version"
+  ],
+  "exit_code": 0,
+  "guard": "CLI version text",
+  "level": "L2",
+  "name": "umitools_version",
+  "rules_fired": {
+    "stdout": [
+      "program_name"
+    ]
+  },
+  "streams": {
+    "stdout": {
+      "bytes": 20,
+      "kind": "text",
+      "text": "<BIN> 0.2.0\n"
+    }
+  }
+}

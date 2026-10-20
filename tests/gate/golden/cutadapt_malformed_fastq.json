@@ -1,0 +1,32 @@
+{
+  "argv": [
+    "-a",
+    "AGATCGGAAGAGC",
+    "-m",
+    "10",
+    "-o",
+    "out.fastq",
+    "malformed.fastq"
+  ],
+  "exit_code": 1,
+  "guard": "exit class 1 + exact malformed-FASTQ diagnostic",
+  "level": "L2",
+  "name": "cutadapt_malformed_fastq",
+  "rules_fired": {
+    "stdout": [
+      "cutadapt_core_count"
+    ]
+  },
+  "streams": {
+    "stderr": {
+      "bytes": 0,
+      "kind": "text",
+      "text": ""
+    },
+    "stdout": {
+      "bytes": 283,
+      "kind": "text",
+      "text": "This is cutadapt 0.1.0 with Python 3\nCommand line parameters: -a AGATCGGAAGAGC -m 10 -o out.fastq malformed.fastq\nProcessing single-end reads on <N> cores ...\nERROR: malformed FASTQ at line 5 (byte offset 19): sequence and quality lengths differ (8 != 3)\nThe input is not valid FASTQ.\n"
+    }
+  }
+}

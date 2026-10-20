@@ -1,0 +1,22 @@
+{
+  "argv": [
+    "count_tab",
+    "--help"
+  ],
+  "exit_code": 0,
+  "guard": "count_tab --help text (option grammar + after_help block)",
+  "level": "L2",
+  "name": "umitools_count_tab_help",
+  "rules_fired": {
+    "stdout": [
+      "program_name"
+    ]
+  },
+  "streams": {
+    "stdout": {
+      "bytes": 1211,
+      "kind": "text",
+      "text": "Count unique UMIs from a two column read/gene table\n\nUsage: <BIN> count_tab [OPTIONS] --input <FILE>\n\nOptions:\n  -I, --input <FILE>\n          Two column table: read_id<sep>UMI and gene, sorted by gene\n  -S, --output <FILE>\n          Output table (defaults to stdout)\n  -L, --log <FILE>\n          Log file\n      --barcode-separator <BARCODE_SEPARATOR>\n          Separator between read id and UMI [default: _]\n      --per-cell\n          Read names also carry a cell barcode\n      --threads <THREADS>\n          Worker threads\n      --memory-limit <MEMORY_LIMIT>\n          Memory budget, e.g. 4GiB\n      --verbose\n          Print detailed build information together with --version\n      --tmpdir <TMPDIR>\n          Directory for temporary files\n      --quiet\n          Suppress informational output; errors are still printed\n      --summary-json <FILE>\n          Write a machine readable run summary to this file\n  -h, --help\n          Print help\n\nEXAMPLES:\n  <BIN> count_tab -I reads.tsv -S counts.tsv\n  <BIN> count_tab -I reads.tsv -S counts.tsv --per-cell\n\nNOTES:\n  Input is a two column table (read_id<sep>UMI and gene) sorted by gene.\n  Malformed rows fail with the line number.\n"
+    }
+  }
+}

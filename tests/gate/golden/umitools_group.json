@@ -1,0 +1,52 @@
+{
+  "argv": [
+    "group",
+    "-I",
+    "in.bam",
+    "-S",
+    "out.bam",
+    "--random-seed",
+    "1",
+    "--summary-json",
+    "s.json"
+  ],
+  "exit_code": 0,
+  "guard": "group: output bytes + --summary-json contract",
+  "level": "L1",
+  "name": "umitools_group",
+  "rules_fired": {
+    "out.bam": [
+      "absolute_temp_path"
+    ],
+    "s.json": [
+      "umitools_summary_timings",
+      "umitools_summary_resources"
+    ],
+    "stderr": [
+      "umitools_log_timing_lines",
+      "umitools_log_threads"
+    ]
+  },
+  "streams": {
+    "out.bam": {
+      "bytes": 3777,
+      "kind": "text",
+      "text": "@HD\tVN:1.6\tSO:coordinate\n@SQ\tSN:chr1\tLN:1000000\n@SQ\tSN:chr2\tLN:1000000\n@PG\tID:samtools\tPN:samtools\tVN:1.24\tCL:samtools sort -o <TMP>/in.bam <TMP>/in.sam\n@PG\tID:samtools.1\tPN:samtools\tPP:samtools\tVN:1.24\tCL:/home/rimuru/Projects/Code/homework/AI4Biomedicine/dedup/envs/dedup/bin/samtools view -h <TMP>/out.bam\nr0_AAAAAAAA\t0\tchr1\t100\t60\t10M\t*\t0\t0\tAAAAAAAAAA\tIIIIIIIIII\tUG:i:0\tBX:Z:AAAAAAAA\nr1_AAAAAAAA\t0\tchr1\t100\t60\t10M\t*\t0\t0\tAAAAAAAAAA\tIIIIIIIIII\tUG:i:0\tBX:Z:AAAAAAAA\nr2_AAAAAAAA\t0\tchr1\t100\t60\t10M\t*\t0\t0\tAAAAAAAAAA\tIIIIIIIIII\tUG:i:0\tBX:Z:AAAAAAAA\nr3_AAAAAAAA\t0\tchr1\t100\t60\t10M\t*\t0\t0\tAAAAAAAAAA\tIIIIIIIIII\tUG:i:0\tBX:Z:AAAAAAAA\nr4_AAAAAAAA\t0\tchr1\t100\t60\t10M\t*\t0\t0\tAAAAAAAAAA\tIIIIIIIIII\tUG:i:0\tBX:Z:AAAAAAAA\nr5_AAAAAAAA\t0\tchr1\t100\t60\t10M\t*\t0\t0\tAAAAAAAAAA\tIIIIIIIIII\tUG:i:0\tBX:Z:AAAAAAAA\nr6_CAAAAAAA\t0\tchr1\t100\t60\t10M\t*\t0\t0\tAAAAAAAAAA\tIIIIIIIIII\tUG:i:0\tBX:Z:AAAAAAAA\nr7_CAAAAAAA\t0\tchr1\t100\t60\t10M\t*\t0\t0\tAAAAAAAAAA\tIIIIIIIIII\tUG:i:0\tBX:Z:AAAAAAAA\nr8_CAAAAAAA\t0\tchr1\t100\t60\t10M\t*\t0\t0\tAAAAAAAAAA\tIIIIIIIIII\tUG:i:0\tBX:Z:AAAAAAAA\nr9_CCAAAAAA\t0\tchr1\t100\t60\t10M\t*\t0\t0\tAAAAAAAAAA\tIIIIIIIIII\tUG:i:0\tBX:Z:AAAAAAAA\nr10_GGGGGGGG\t16\tchr1\t100\t60\t10M\t*\t0\t0\tAAAAAAAAAA\tIIIIIIIIII\tUG:i:1\tBX:Z:GGGGGGGG\nr11_GGGGGGGG\t16\tchr1\t100\t60\t10M\t*\t0\t0\tAAAAAAAAAA\tIIIIIIIIII\tUG:i:1\tBX:Z:GGGGGGGG\nr12_GGGGGGGG\t16\tchr1\t100\t60\t10M\t*\t0\t0\tAAAAAAAAAA\tIIIIIIIIII\tUG:i:1\tBX:Z:GGGGGGGG\nr13_GGGGGGGG\t16\tchr1\t100\t60\t10M\t*\t0\t0\tAAAAAAAAAA\tIIIIIIIIII\tUG:i:1\tBX:Z:GGGGGGGG\nr14_GGGGGGGA\t16\tchr1\t100\t60\t10M\t*\t0\t0\tAAAAAAAAAA\tIIIIIIIIII\tUG:i:2\tBX:Z:GGGGGGGA\nr15_GGGGGGGA\t16\tchr1\t100\t60\t10M\t*\t0\t0\tAAAAAAAAAA\tIIIIIIIIII\tUG:i:2\tBX:Z:GGGGGGGA\nr16_GGGGGGGA\t16\tchr1\t100\t60\t10M\t*\t0\t0\tAAAAAAAAAA\tIIIIIIIIII\tUG:i:2\tBX:Z:GGGGGGGA\nr17_GGGGGGGA\t16\tchr1\t100\t60\t10M\t*\t0\t0\tAAAAAAAAAA\tIIIIIIIIII\tUG:i:2\tBX:Z:GGGGGGGA\nr18_ACGTACGT\t0\tchr1\t200\t60\t10M\t*\t0\t0\tAAAAAAAAAA\tIIIIIIIIII\tUG:i:3\tBX:Z:ACGTACGT\nr19_ACGTACGT\t0\tchr1\t200\t60\t10M\t*\t0\t0\tAAAAAAAAAA\tIIIIIIIIII\tUG:i:3\tBX:Z:ACGTACGT\nr20_ACGTACGT\t0\tchr1\t200\t60\t10M\t*\t0\t0\tAAAAAAAAAA\tIIIIIIIIII\tUG:i:3\tBX:Z:ACGTACGT\nr21_ACGTACGT\t0\tchr1\t200\t60\t10M\t*\t0\t0\tAAAAAAAAAA\tIIIIIIIIII\tUG:i:3\tBX:Z:ACGTACGT\nr22_ACGTACGT\t0\tchr1\t200\t60\t10M\t*\t0\t0\tAAAAAAAAAA\tIIIIIIIIII\tUG:i:3\tBX:Z:ACGTACGT\nr24_ACGTACCA\t0\tchr1\t200\t60\t10M\t*\t0\t0\tAAAAAAAAAA\tIIIIIIIIII\tUG:i:3\tBX:Z:ACGTACGT\nr23_ACGTACGA\t0\tchr1\t200\t60\t10M\t*\t0\t0\tAAAAAAAAAA\tIIIIIIIIII\tUG:i:3\tBX:Z:ACGTACGT\nr25_TTTTTTTT\t0\tchr1\t300\t40\t10M\t*\t0\t0\tAAAAAAAAAA\tIIIIIIIIII\tUG:i:4\tBX:Z:TTTTTTTT\nr26_TTTTTTTT\t0\tchr1\t300\t40\t10M\t*\t0\t0\tAAAAAAAAAA\tIIIIIIIIII\tUG:i:4\tBX:Z:TTTTTTTT\nr27_TTTTTTTA\t0\tchr1\t300\t40\t10M\t*\t0\t0\tAAAAAAAAAA\tIIIIIIIIII\tUG:i:5\tBX:Z:TTTTTTTA\nr28_TTTTTTTA\t0\tchr1\t300\t40\t10M\t*\t0\t0\tAAAAAAAAAA\tIIIIIIIIII\tUG:i:5\tBX:Z:TTTTTTTA\nr29_TTTTTTAA\t0\tchr1\t300\t40\t10M\t*\t0\t0\tAAAAAAAAAA\tIIIIIIIIII\tUG:i:6\tBX:Z:TTTTTTAA\nr30_TTTTTTAA\t0\tchr1\t300\t40\t10M\t*\t0\t0\tAAAAAAAAAA\tIIIIIIIIII\tUG:i:6\tBX:Z:TTTTTTAA\nr31_CCCCCCCC\t16\tchr1\t400\t60\t10M\t*\t0\t0\tAAAAAAAAAA\tIIIIIIIIII\tUG:i:7\tBX:Z:CCCCCCCC\nr32_CCCCCCCC\t16\tchr1\t400\t60\t10M\t*\t0\t0\tAAAAAAAAAA\tIIIIIIIIII\tUG:i:7\tBX:Z:CCCCCCCC\nr33_CCCCCCCC\t16\tchr1\t400\t60\t10M\t*\t0\t0\tAAAAAAAAAA\tIIIIIIIIII\tUG:i:7\tBX:Z:CCCCCCCC\nr34_CCCCCCCC\t16\tchr1\t400\t60\t10M\t*\t0\t0\tAAAAAAAAAA\tIIIIIIIIII\tUG:i:7\tBX:Z:CCCCCCCC\nr35_CCCCCCCC\t16\tchr1\t400\t60\t10M\t*\t0\t0\tAAAAAAAAAA\tIIIIIIIIII\tUG:i:7\tBX:Z:CCCCCCCC\nr36_CCCCCCCC\t16\tchr1\t400\t60\t10M\t*\t0\t0\tAAAAAAAAAA\tIIIIIIIIII\tUG:i:7\tBX:Z:CCCCCCCC\nr37_CCCCCCCC\t16\tchr1\t400\t60\t10M\t*\t0\t0\tAAAAAAAAAA\tIIIIIIIIII\tUG:i:7\tBX:Z:CCCCCCCC\nr38_CCCCCCCC\t16\tchr1\t400\t60\t10M\t*\t0\t0\tAAAAAAAAAA\tIIIIIIIIII\tUG:i:7\tBX:Z:CCCCCCCC\nr39_CCCCCCCC\t16\tchr1\t400\t60\t10M\t*\t0\t0\tAAAAAAAAAA\tIIIIIIIIII\tUG:i:7\tBX:Z:CCCCCCCC\nr40_CCCCCCCC\t16\tchr1\t400\t60\t10M\t*\t0\t0\tAAAAAAAAAA\tIIIIIIIIII\tUG:i:7\tBX:Z:CCCCCCCC\nr41_CCCCCCCA\t16\tchr1\t400\t60\t10M\t*\t0\t0\tAAAAAAAAAA\tIIIIIIIIII\tUG:i:7\tBX:Z:CCCCCCCC\n"
+    },
+    "s.json": {
+      "bytes": 261,
+      "kind": "text",
+      "text": "{\"program\":\"rust-umitools\",\"version\":\"0.2.0\",\"command\":\"group\",\"input\":\"in.bam\",\"outputs\":[{\"role\":\"output\",\"path\":\"out.bam\"}],\"resources\":<RESOURCES>,\"counters\":{\"groups\":8,\"reads_out\":42},\"timings\":<TIMINGS>}\n"
+    },
+    "stderr": {
+      "bytes": 108,
+      "kind": "text",
+      "text": "rust-umitools group: threads=<N>\ngroups              : 8\nreads out           : 42\nwall time           : <TIME>s\n"
+    },
+    "stdout": {
+      "bytes": 0,
+      "kind": "text",
+      "text": ""
+    }
+  }
+}

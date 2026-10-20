@@ -1,0 +1,22 @@
+[package]
+name = "bioinfo-common"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.88"
+description = "Shared exit codes, diagnostics, summary-JSON contract and provenance for the bioinfo-tools binaries"
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/seek-hope/bioinfo-tools"
+keywords = ["bioinformatics", "cli", "contract", "provenance"]
+categories = ["science::bioinformatics", "command-line-utilities"]
+
+# Deliberately no third-party dependencies. See DR-1 in docs/EVIDENCE-W1-1.md:
+# the `--summary-json` byte contract is produced by a hand-written renderer, and
+# `serde_json` would change key order, float formatting and escaping. Keeping the
+# crate std-only also keeps every workspace build satisfiable with
+# `cargo --offline` and adds no runtime dependency to either existing binary.
+[dependencies]
+
+[lib]
+name = "bioinfo_common"
+path = "src/lib.rs"

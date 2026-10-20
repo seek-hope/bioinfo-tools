@@ -1,0 +1,38 @@
+{
+  "argv": [
+    "-a",
+    "AGATCGGAAGAGC",
+    "-m",
+    "10",
+    "-o",
+    "out.fastq",
+    "empty.fastq"
+  ],
+  "exit_code": 0,
+  "guard": "L2 empty input: exit 0 + 'No reads processed!' + full report",
+  "level": "L2",
+  "name": "cutadapt_empty_input",
+  "rules_fired": {
+    "stdout": [
+      "cutadapt_core_count",
+      "cutadapt_finished_line"
+    ]
+  },
+  "streams": {
+    "out.fastq": {
+      "bytes": 0,
+      "kind": "text",
+      "text": ""
+    },
+    "stderr": {
+      "bytes": 0,
+      "kind": "text",
+      "text": ""
+    },
+    "stdout": {
+      "bytes": 235,
+      "kind": "text",
+      "text": "This is cutadapt 0.1.0 with Python 3\nCommand line parameters: -a AGATCGGAAGAGC -m 10 -o out.fastq empty.fastq\nProcessing single-end reads on <N> cores ...\nFinished in <TIME> s (<TIME> \u00b5s/read; <TIME> M reads/minute).\n\nNo reads processed!\n"
+    }
+  }
+}

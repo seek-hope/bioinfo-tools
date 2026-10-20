@@ -1,0 +1,1947 @@
+//! The seven subcommands.
+//!
+//! Each command is a thin planner over the shared reader/writer in
+//! [`crate::io`]. The behaviour they implement is SeqKit 2.14.0's documented
+//! behaviour (and fq 0.12.0's for `lint`); the oracles are unavailable in this
+//! environment, so see `docs/EVIDENCE-W1-3.md` for the status of each claim.
+
+use crate::io::{CommandError, InputFormat, LintReader, Output, OwnedRecord, RecordReader};
+use crate::lint::{Level, LintRecord, Linter};
+use crate::sample::{Sampler, Strategy};
+use crate::split::{self, SplitBy};
+use crate::stats::{GcSkewCounts, Merge, QualStats, SeqStats, DEFAULT_GAP_LETTERS};
+use crate::table::{self, Layout as TableLayout, StatsRow};
+use crate::transform::{self, Transforms};
+use bioinfo_fastx::writer::Layout;
+use std::io::Write;
+use std::path::{Path, PathBuf};
+
+// --------------------------------------------------------------------------- //
+// stats
+// --------------------------------------------------------------------------- //
+
+/// Everything `stats` accumulates for one input.
+#[derive(Default)]
+struct InputStats {
+    records: u64,
+    lengths: Vec<u64>,
+    sum_len: u64,
+    min_len: Option<u64>,
+    max_len: u64,
+    sum_gap: u64,
+    sum_n: u64,
+    gc: u64,
+    at: u64,
+    qual: QualStats,
+    format: Option<InputFormat>,
+}
+
+impl InputStats {
+    fn absorb(&mut self, record: &OwnedRecord, gap_letters: &[u8], quality_base: u8) {
+        let sequence = SeqStats::from_sequence(&record.sequence, gap_letters);
+        self.records += 1;
+        self.lengths.push(sequence.length);
+        self.sum_len += sequence.length;
+        self.min_len = Some(match self.min_len {
+            Some(current) => current.min(sequence.length),
+            None => sequence.length,
+        });
+        self.max_len = self.max_len.max(sequence.length);
+        self.sum_gap += sequence.gap_count;
+        self.sum_n += sequence.n_count;
+        self.gc += sequence.gc;
+        self.at += sequence.at;
+        if record.is_fastq() {
+            self.qual
+                .merge(&QualStats::from_qualities(&record.qualities, quality_base));
+        }
+    }
+
+    fn row(&self, label: String, all: bool) -> StatsRow {
+        let num_seqs = self.records;
+        let avg_len = if num_seqs == 0 {
+            0.0
+        } else {
+            self.sum_len as f64 / num_seqs as f64
+        };
+        let mut lengths = self.lengths.clone();
+        let (n50, n50_num) = table::n50(&mut lengths);
+        let mut for_quartiles = self.lengths.clone();
+        let (q1, q2, q3) = table::quartiles(&mut for_quartiles);
+        StatsRow {
+            file: label,
+            format: self.format.unwrap_or(InputFormat::Fastq).label(),
+            seq_type: crate::transform::guess_seq_type(&[]),
+            num_seqs,
+            sum_len: self.sum_len,
+            min_len: self.min_len.unwrap_or(0),
+            avg_len,
+            max_len: self.max_len,
+            q1: all.then_some(q1),
+            q2: all.then_some(q2),
+            q3: all.then_some(q3),
+            sum_gap: all.then_some(self.sum_gap),
+            n50: all.then_some(n50),
+            n50_num: all.then_some(n50_num),
+            q20: all.then(|| self.qual.q20_percent().unwrap_or(0.0)),
+            q30: all.then(|| self.qual.q30_percent().unwrap_or(0.0)),
+            avg_qual: all.then(|| self.qual.average_quality().unwrap_or(0.0)),
+            // `stats` GC(%) is (G+C)/length, so N and gaps dilute it. This is a
+            // different contract from `fx2tab -g`, which is (G+C)/(G+C+A+T).
+            // Verified: GCGCAAAANN -> stats 40.00, fx2tab -g 50.00.
+            gc: all.then(|| {
+                if self.sum_len == 0 {
+                    0.0
+                } else {
+                    self.gc as f64 * 100.0 / self.sum_len as f64
+                }
+            }),
+            sum_n: all.then_some(self.sum_n),
+        }
+    }
+}
+
+/// The parsed `stats` options.
+pub struct StatsOptions {
+    /// Input files; empty means standard input.
+    pub inputs: Vec<String>,
+    /// `-T`: tab-separated output with no digit grouping.
+    pub tabular: bool,
+    /// `-a`: add quartiles, N50, gap/N counts and quality columns.
+    pub all: bool,
+    /// `-b`: print only the file's base name.
+    pub basename: bool,
+    /// `-G`: characters counted as gaps.
+    pub gap_letters: Vec<u8>,
+    /// `-i`: label used in place of `-` for standard input.
+    pub stdin_label: String,
+    /// `-e`: warn and continue on an unreadable input.
+    pub skip_err: bool,
+    /// ASCII offset for `-E/--fq-encoding`.
+    pub quality_base: u8,
+    /// `-o`: output file (`-` or absent means stdout).
+    pub out_file: Option<String>,
+}
+
+/// Run `stats`.
+pub fn stats(options: StatsOptions) -> Result<(), CommandError> {
+    let inputs = if options.inputs.is_empty() {
+        vec!["-".to_string()]
+    } else {
+        options.inputs.clone()
+    };
+    let mut rows = Vec::new();
+    for input in &inputs {
+        match collect_stats(input, &options) {
+            Ok((row, _seq_type)) => rows.push(row),
+            Err(error) => {
+                if options.skip_err {
+                    eprintln!("[WARN] {input}: {}", error.message);
+                    continue;
+                }
+                return Err(error);
+            }
+        }
+    }
+    let rendered = table::render(
+        &rows,
+        options.all,
+        if options.tabular {
+            TableLayout::Tabular
+        } else {
+            TableLayout::Human
+        },
+    );
+    let mut out = Output::create(options.out_file.as_deref())?;
+    out.write_all(rendered.as_bytes())?;
+    out.finish()
+}
+
+/// Accumulate one input and build its row.
+fn collect_stats(
+    input: &str,
+    options: &StatsOptions,
+) -> Result<(StatsRow, &'static str), CommandError> {
+    let mut reader = RecordReader::open(input)?;
+    let format = reader.format();
+    let mut stats = InputStats {
+        format: Some(format),
+        ..InputStats::default()
+    };
+    // The first record's sequence decides the reported type, matching
+    // "guessed from the leading subsequences of the first sequences".
+    let mut seq_type = "Unlimit";
+    let mut first = true;
+    while let Some(record) = reader.next_record() {
+        let record = record?;
+        if first {
+            seq_type = transform::guess_seq_type(&record.sequence);
+            first = false;
+        }
+        stats.absorb(&record, &options.gap_letters, options.quality_base);
+    }
+    let label = if input == "-" {
+        options.stdin_label.clone()
+    } else if options.basename {
+        Path::new(input)
+            .file_name()
+            .map(|n| n.to_string_lossy().into_owned())
+            .unwrap_or_else(|| input.to_string())
+    } else {
+        input.to_string()
+    };
+    let mut row = stats.row(label, options.all);
+    row.seq_type = seq_type;
+    Ok((row, seq_type))
+}
+
+// --------------------------------------------------------------------------- //
+// seq
+// --------------------------------------------------------------------------- //
+
+/// The parsed `seq` options.
+pub struct SeqOptions {
+    /// Input files; empty means standard input.
+    pub inputs: Vec<String>,
+    /// `-n`: print names only.
+    pub name: bool,
+    /// `-i`: print the ID rather than the full header.
+    pub only_id: bool,
+    /// `-s`: print sequences only.
+    pub seq_only: bool,
+    /// `-q`: print qualities only.
+    pub qual_only: bool,
+    /// Which sequence transforms to apply.
+    pub transforms: Transforms,
+    /// `-G`: characters removed by `-g`.
+    pub gap_letters: Vec<u8>,
+    /// `-m`: minimum length, inclusive.
+    pub min_len: Option<u64>,
+    /// `-M`: maximum length, inclusive.
+    pub max_len: Option<u64>,
+    /// `-Q`: minimum average quality, inclusive.
+    pub min_qual: Option<f64>,
+    /// `-R`: maximum average quality, exclusive.
+    pub max_qual: Option<f64>,
+    /// `-b`: ASCII offset for quality decoding.
+    pub quality_base: u8,
+    /// `-w`: FASTA line width (0 disables wrapping).
+    pub line_width: usize,
+    /// `-o`: output file (`-` or absent means stdout).
+    pub out_file: Option<String>,
+}
+
+/// Run `seq`.
+pub fn seq(options: SeqOptions) -> Result<(), CommandError> {
+    // Contradictory output selections are a usage error rather than a silent
+    // precedence rule, which is what boundary rule 6 requires.
+    let selected = [options.name, options.seq_only, options.qual_only]
+        .iter()
+        .filter(|flag| **flag)
+        .count();
+    if selected > 1 {
+        return Err(CommandError::usage(
+            "only one of -n/--name, -s/--seq and -q/--qual may be given",
+        ));
+    }
+    if options.transforms.upper && options.transforms.lower {
+        return Err(CommandError::usage(
+            "-u/--upper-case and -l/--lower-case are mutually exclusive",
+        ));
+    }
+    let inputs = if options.inputs.is_empty() {
+        vec!["-".to_string()]
+    } else {
+        options.inputs.clone()
+    };
+    let mut out = Output::create(options.out_file.as_deref())?;
+    for input in &inputs {
+        let mut reader = RecordReader::open(input)?;
+        let input_format = reader.format();
+        while let Some(record) = reader.next_record() {
+            let record = record?;
+            // Length filters use the raw length, gaps included, as documented.
+            if let Some(min) = options.min_len {
+                if (record.sequence.len() as u64) < min {
+                    continue;
+                }
+            }
+            if let Some(max) = options.max_len {
+                if (record.sequence.len() as u64) > max {
+                    continue;
+                }
+            }
+            if options.min_qual.is_some() || options.max_qual.is_some() {
+                let average = QualStats::from_qualities(&record.qualities, options.quality_base)
+                    .average_quality()
+                    .unwrap_or(0.0);
+                if let Some(min) = options.min_qual {
+                    if average < min {
+                        continue;
+                    }
+                }
+                if let Some(max) = options.max_qual {
+                    if average >= max {
+                        continue;
+                    }
+                }
+            }
+            write_seq_record(&mut out, &record, input_format, &options)?;
+        }
+    }
+    out.finish()
+}
+
+fn write_seq_record(
+    out: &mut Output,
+    record: &OwnedRecord,
+    input_format: InputFormat,
+    options: &SeqOptions,
+) -> Result<(), CommandError> {
+    // The transformed sequence, if any transform was requested.
+    let transformed = if options.transforms.is_identity() {
+        None
+    } else {
+        Some(
+            options
+                .transforms
+                .apply(&record.sequence, &options.gap_letters),
+        )
+    };
+    let sequence = transformed.as_deref().unwrap_or(&record.sequence);
+
+    if options.name {
+        if options.only_id {
+            out.write_all(record.id())?;
+        } else {
+            out.write_all(&record.name)?;
+        }
+        out.write_all(b"\n")?;
+        return Ok(());
+    }
+    if options.seq_only {
+        out.write_all(sequence)?;
+        out.write_all(b"\n")?;
+        return Ok(());
+    }
+    if options.qual_only {
+        out.write_all(&record.qualities)?;
+        out.write_all(b"\n")?;
+        return Ok(());
+    }
+
+    // Full record output. FASTA input stays FASTA; FASTQ input stays FASTQ, with
+    // the *same* quality string when the sequence length is unchanged.
+    let layout = match input_format {
+        InputFormat::Fastq => Layout::Fastq,
+        InputFormat::Fasta => Layout::Fasta,
+    };
+    if transformed.is_some() && sequence.len() != record.sequence.len() && layout == Layout::Fastq {
+        return Err(CommandError::input(
+            "a transform changed the sequence length of a FASTQ record, so its qualities no \
+             longer match; use -s/--seq for length-changing transforms",
+        ));
+    }
+    let emitted = OwnedRecord {
+        name: record.name.clone(),
+        raw_header: record.raw_header.clone(),
+        sequence: sequence.to_vec(),
+        plus: record.plus.clone(),
+        qualities: record.qualities.clone(),
+        has_quality_line: record.has_quality_line,
+        index: record.index,
+    };
+    emitted.write_to(out, layout, options.line_width)?;
+    Ok(())
+}
+
+// --------------------------------------------------------------------------- //
+// fq2fa
+// --------------------------------------------------------------------------- //
+
+/// The parsed `fq2fa` options.
+pub struct Fq2faOptions {
+    /// Input files; empty means standard input.
+    pub inputs: Vec<String>,
+    /// `-w`: FASTA line width (0 disables wrapping).
+    pub line_width: usize,
+    /// `-o`: output file (`-` or absent means stdout).
+    pub out_file: Option<String>,
+}
+
+/// Run `fq2fa`.
+///
+/// idempotent for FASTA input: a FASTA read in and written out is unchanged
+/// apart from `-w` wrapping, which is what makes `fq2fa` safe to pipe.
+pub fn fq2fa(options: Fq2faOptions) -> Result<(), CommandError> {
+    let inputs = if options.inputs.is_empty() {
+        vec!["-".to_string()]
+    } else {
+        options.inputs.clone()
+    };
+    let mut out = Output::create(options.out_file.as_deref())?;
+    for input in &inputs {
+        let mut reader = RecordReader::open(input)?;
+        while let Some(record) = reader.next_record() {
+            record?.write_to(&mut out, Layout::Fasta, options.line_width)?;
+        }
+    }
+    out.finish()
+}
+
+// --------------------------------------------------------------------------- //
+// fx2tab
+// --------------------------------------------------------------------------- //
+
+/// The parsed `fx2tab` options.
+pub struct Fx2tabOptions {
+    /// Input files; empty means standard input.
+    pub inputs: Vec<String>,
+    /// `-H`: print a header line naming the metrics.
+    pub header_line: bool,
+    /// `-l`: append the sequence length.
+    pub length: bool,
+    /// `-g`: append `(G+C)/(G+C+A+T)` as a percentage.
+    pub gc: bool,
+    /// `-G`: append `(G-C)/(G+C)`.
+    pub gc_skew: bool,
+    /// `-n`: print names only, dropping the sequence columns.
+    pub name: bool,
+    /// `-i`: print the ID rather than the full header.
+    pub only_id: bool,
+    /// `-Q`: omit the quality column.
+    pub no_qual: bool,
+    /// `-q`: append the mean-error average quality.
+    pub avg_qual: bool,
+    /// `-s`: append the MD5 of the sequence.
+    pub seq_hash: bool,
+    /// `-a`: append the distinct letters present.
+    pub alphabet: bool,
+    /// `-I`: keep case when hashing and counting.
+    pub case_sensitive: bool,
+    /// `-B`: base-content percentages, one column per value.
+    pub base_content: Vec<String>,
+    /// `-C`: base counts, one column per value.
+    pub base_count: Vec<String>,
+    /// `--basename`: print only the file's base name.
+    pub basename: bool,
+    /// `-f`: prepend the input file name.
+    pub file_name: bool,
+    /// `-b`: ASCII offset for quality decoding.
+    pub quality_base: u8,
+    /// `--stdin-label`: label used in place of `-`.
+    pub stdin_label: String,
+    /// `-o`: output file (`-` or absent means stdout).
+    pub out_file: Option<String>,
+}
+
+/// Run `fx2tab`.
+pub fn fx2tab(options: Fx2tabOptions) -> Result<(), CommandError> {
+    let inputs = if options.inputs.is_empty() {
+        vec!["-".to_string()]
+    } else {
+        options.inputs.clone()
+    };
+    let mut out = Output::create(options.out_file.as_deref())?;
+    if options.header_line {
+        let mut columns: Vec<String> = Vec::new();
+        if options.file_name || options.basename {
+            columns.push("file".to_string());
+        }
+        // `-H` prints the first column as `#name`, so a consumer can tell the
+        // header line from a record line whose name is literally "name".
+        columns.push("#name".to_string());
+        if !options.name {
+            columns.push("seq".to_string());
+            // The documented rule: three fixed columns for either format, unless
+            // -n/--name or -Q/--no-qual is given. FASTA therefore prints an empty
+            // quality column rather than omitting it.
+            if !options.no_qual {
+                columns.push("qual".to_string());
+            }
+        }
+        if options.length {
+            columns.push("length".to_string());
+        }
+        if options.gc {
+            columns.push("GC".to_string());
+        }
+        if options.gc_skew {
+            columns.push("GC-Skew".to_string());
+        }
+        // SeqKit prints every `-C` (count) column before every `-B` (content)
+        // column, regardless of the order the flags appear on the command line,
+        // and labels each column with the bare spec string -- `GC`, `AT` -- with
+        // no `(%)` or `(count)` suffix:
+        //
+        //   $ seqkit fx2tab -H -B AT -C GC in.fa
+        //   #name  seq  qual  GC  AT
+        //
+        //   $ seqkit fx2tab -H -C GC -C AT in.fa
+        //   #name  seq  qual  GC  AT
+        for spec in &options.base_count {
+            columns.push(spec.clone());
+        }
+        for spec in &options.base_content {
+            columns.push(spec.clone());
+        }
+        if options.alphabet {
+            columns.push("alphabet".to_string());
+        }
+        if options.avg_qual {
+            columns.push("avg.qual".to_string());
+        }
+        if options.seq_hash {
+            columns.push("seq.hash".to_string());
+        }
+        writeln!(out, "{}", columns.join("\t"))?;
+    }
+
+    for input in &inputs {
+        let mut reader = RecordReader::open(input)?;
+        let input_format = reader.format();
+        let file_label = if input == "-" {
+            options.stdin_label.clone()
+        } else if options.basename {
+            Path::new(input)
+                .file_name()
+                .map(|n| n.to_string_lossy().into_owned())
+                .unwrap_or_else(|| input.to_string())
+        } else {
+            input.to_string()
+        };
+        while let Some(record) = reader.next_record() {
+            let record = record?;
+            let mut columns: Vec<String> = Vec::new();
+            if options.file_name || options.basename {
+                columns.push(file_label.clone());
+            }
+            let name = if options.only_id {
+                String::from_utf8_lossy(record.id()).into_owned()
+            } else {
+                String::from_utf8_lossy(&record.name).into_owned()
+            };
+            columns.push(name);
+            if !options.name {
+                columns.push(String::from_utf8_lossy(&record.sequence).into_owned());
+                if !options.no_qual {
+                    columns.push(String::from_utf8_lossy(&record.qualities).into_owned());
+                }
+            }
+            if options.length {
+                columns.push(record.sequence.len().to_string());
+            }
+            let seq_stats = SeqStats::from_sequence(&record.sequence, DEFAULT_GAP_LETTERS);
+            if options.gc {
+                // `fx2tab -g` uses the unambiguous denominator and prints
+                // `NaN` when there are no G/C/A/T bases; `stats` uses the
+                // length denominator and prints 0.00. See stats::gc_percent.
+                columns.push(match seq_stats.gc_percent_unambiguous() {
+                    Some(value) => table::percent(value),
+                    None => "NaN".to_string(),
+                });
+            }
+            if options.gc_skew {
+                let skew = GcSkewCounts::from_sequence(&record.sequence).skew();
+                columns.push(table::percent(skew.unwrap_or(0.0)));
+            }
+            // Counts first, then contents: see the header comment above.
+            for spec in &options.base_count {
+                columns.push(base_count(&record.sequence, spec).to_string());
+            }
+            for spec in &options.base_content {
+                columns.push(table::percent(base_content(&record.sequence, spec)));
+            }
+            if options.alphabet {
+                columns.push(alphabet(&record.sequence));
+            }
+            if options.avg_qual {
+                if input_format == InputFormat::Fastq {
+                    let average =
+                        QualStats::from_qualities(&record.qualities, options.quality_base)
+                            .average_quality()
+                            .unwrap_or(0.0);
+                    // `-q` prints the mean with exactly two decimals, like
+                    // `stats -a`'s AvgQual: 40.00, 20.00, 0.00.
+                    columns.push(table::percent(average));
+                } else {
+                    columns.push(String::new());
+                }
+            }
+            if options.seq_hash {
+                // SeqKit's `-s` MD5s the *lower-cased* sequence, not the upper.
+                //
+                // Verified against SeqKit 2.14.0: for `ACGTACGT` it prints
+                // db819856e873893888e8ac8f72cae1f8, which is md5("acgtacgt");
+                // md5("ACGTACGT") is cc0af3a4fedb18378b4b57b98068e69f. Upper and
+                // lower inputs produce the same hash, and mixed case hashes its
+                // lower-cased form. `--case-sensitive` is not a SeqKit flag on
+                // this subcommand, so there is no upper-case mode to honour.
+                let lower = crate::transform::to_lower(&record.sequence);
+                columns.push(crate::md5::hex_digest(&lower));
+            }
+            writeln!(out, "{}", columns.join("\t"))?;
+        }
+    }
+    out.finish()
+}
+
+/// Fraction of `sequence` made up of the letters in `spec`, as a percentage.
+///
+/// The documented denominator is the sequence length, not the number of matching
+/// letters' complement.
+fn base_content(sequence: &[u8], spec: &str) -> f64 {
+    if sequence.is_empty() {
+        return 0.0;
+    }
+    let count = base_count(sequence, spec);
+    count as f64 * 100.0 / sequence.len() as f64
+}
+
+/// Number of bytes in `sequence` matching any letter in `spec`, case-insensitive.
+fn base_count(sequence: &[u8], spec: &str) -> u64 {
+    let wanted: Vec<u8> = spec.bytes().map(|b| b.to_ascii_uppercase()).collect();
+    sequence
+        .iter()
+        .filter(|byte| wanted.contains(&byte.to_ascii_uppercase()))
+        .count() as u64
+}
+
+/// The distinct letters present, sorted.
+fn alphabet(sequence: &[u8]) -> String {
+    let mut seen: Vec<u8> = sequence.iter().map(|b| b.to_ascii_uppercase()).collect();
+    seen.sort_unstable();
+    seen.dedup();
+    String::from_utf8_lossy(&seen).into_owned()
+}
+
+// --------------------------------------------------------------------------- //
+// sample
+// --------------------------------------------------------------------------- //
+
+/// The parsed `sample` options.
+pub struct SampleOptions {
+    /// Input files; empty means standard input.
+    pub inputs: Vec<String>,
+    /// `-p`: keep each record with this probability.
+    pub proportion: Option<f64>,
+    /// `-n`: keep about this many records.
+    pub number: Option<u64>,
+    /// `-s`: seed; the same seed reproduces the selection.
+    pub rand_seed: u64,
+    /// `-r`: use a time-based seed instead.
+    pub non_deterministic: bool,
+    /// `-w`: FASTA line width (0 disables wrapping).
+    pub line_width: usize,
+    /// `-o`: output file (`-` or absent means stdout).
+    pub out_file: Option<String>,
+}
+
+/// Run `sample`.
+///
+/// Sampling is one pass and streaming: the record count is not known in advance,
+/// so `-n` is implemented exactly as SeqKit documents it ("may return fewer than
+/// requested") by first counting, then sampling by the derived probability. Two
+/// passes over a stream is not possible, so a stream is buffered when `-n` is
+/// used and the input is stdin.
+pub fn sample(options: SampleOptions) -> Result<(), CommandError> {
+    if options.proportion.is_some() == options.number.is_some() {
+        return Err(CommandError::usage(
+            "exactly one of -p/--proportion and -n/--number must be given",
+        ));
+    }
+    let inputs = if options.inputs.is_empty() {
+        vec!["-".to_string()]
+    } else {
+        options.inputs.clone()
+    };
+    let seed = if options.non_deterministic {
+        // `-r/--non-deterministic` asks for a varying seed by design.
+        std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .map(|d| d.as_nanos() as u64)
+            .unwrap_or(options.rand_seed)
+    } else {
+        options.rand_seed
+    };
+
+    let mut out = Output::create(options.out_file.as_deref())?;
+    for input in &inputs {
+        // `-p` needs no total. `-n` does, so that input is counted once first;
+        // SeqKit documents the same cost for `-n` without `--two-pass`.
+        let total = match options.number {
+            Some(_) => count_records(input)?,
+            None => 0,
+        };
+        let strategy = match (options.proportion, options.number) {
+            (Some(proportion), None) => Strategy::Proportion(proportion),
+            (None, Some(number)) => Strategy::Number(number),
+            _ => unreachable!("validated above"),
+        };
+        let mut sampler = Sampler::for_strategy(seed, strategy, total);
+
+        let mut reader = RecordReader::open(input)?;
+        let input_format = reader.format();
+        let layout = match input_format {
+            InputFormat::Fastq => Layout::Fastq,
+            InputFormat::Fasta => Layout::Fasta,
+        };
+        while let Some(record) = reader.next_record() {
+            let record = record?;
+            if sampler.keep_next() {
+                record.write_to(&mut out, layout, options.line_width)?;
+            }
+        }
+    }
+    out.finish()
+}
+
+/// Count the records in one input.
+fn count_records(input: &str) -> Result<u64, CommandError> {
+    let mut reader = RecordReader::open(input)?;
+    let mut count = 0u64;
+    while let Some(record) = reader.next_record() {
+        record?;
+        count += 1;
+    }
+    Ok(count)
+}
+
+// --------------------------------------------------------------------------- //
+// split
+// --------------------------------------------------------------------------- //
+
+/// The parsed `split` options.
+pub struct SplitOptions {
+    /// The input file; `split` needs a real file to name parts after.
+    pub input: String,
+    /// `-s/--by-size` or `-p/--by-part`.
+    pub by: SplitBy,
+    /// `-O`: output directory (default `<input>.split`).
+    pub out_dir: Option<String>,
+    /// `-P`: file-name prefix for the parts.
+    pub out_prefix: Option<String>,
+    /// `-W`: zero-padded width of the part number.
+    pub part_width: usize,
+    /// `-e`: override the part file extension.
+    pub extension: Option<String>,
+    /// `-d`: print what would be written, create nothing.
+    pub dry_run: bool,
+    /// `-f`: accepted for compatibility; parts are always overwritten.
+    pub force: bool,
+}
+
+/// Run `split`.
+pub fn split(options: SplitOptions) -> Result<(), CommandError> {
+    if options.input == "-" {
+        return Err(CommandError::usage(
+            "split needs a real input file: parts are named after it",
+        ));
+    }
+    // Records are buffered because `--by-part` needs the total before it can place
+    // a boundary, and because a part file must be opened and closed atomically.
+    let mut records = Vec::new();
+    {
+        let mut reader = RecordReader::open(&options.input)?;
+        while let Some(record) = reader.next_record() {
+            records.push(record?);
+        }
+    }
+    let input = Path::new(&options.input);
+    let total = records.len() as u64;
+    let ranges: Vec<(u64, u64)> = match options.by {
+        SplitBy::Size(size) => {
+            if size == 0 {
+                return Err(CommandError::usage("--by-size must be at least 1"));
+            }
+            let parts = split::parts_for_size(total, size);
+            (0..parts)
+                .map(|index| {
+                    let start = index * size;
+                    let end = (start + size).min(total);
+                    (start, end)
+                })
+                .collect()
+        }
+        SplitBy::Parts(parts) => {
+            if parts == 0 {
+                return Err(CommandError::usage("--by-part must be at least 1"));
+            }
+            split::partition_by_parts(total, parts)
+        }
+    };
+
+    let out_dir: PathBuf = match &options.out_dir {
+        Some(dir) => PathBuf::from(dir),
+        None => split::default_out_dir(input),
+    };
+    let stem = match &options.out_prefix {
+        Some(prefix) => prefix.clone(),
+        None => split::part_stem(input),
+    };
+    let extension = split::part_extension(input);
+    let layout = {
+        let reader = RecordReader::open(&options.input)?;
+        match reader.format() {
+            InputFormat::Fastq => Layout::Fastq,
+            InputFormat::Fasta => Layout::Fasta,
+        }
+    };
+
+    for (index, (start, end)) in ranges.iter().enumerate() {
+        let part_number = index as u64 + 1;
+        let path = split::part_path(
+            &out_dir,
+            &stem,
+            part_number,
+            options.part_width,
+            &extension,
+            options.extension.as_deref(),
+        );
+        let count = end - start;
+        if options.dry_run {
+            // Diagnostics go to stderr, as SeqKit's do: its stdout stays clean so
+            // a part file or a `--json` report is the only thing on stdout.
+            //
+            //   $ seqkit split -s 1 in.fq > out 2> err
+            //   (out is empty; err carries "[INFO] write 1 sequences to file: ...")
+            eprintln!("[INFO] write {count} sequences to file: {}", path.display());
+            continue;
+        }
+        if let Some(parent) = path.parent() {
+            std::fs::create_dir_all(parent).map_err(|error| {
+                CommandError::io(format!("cannot create {}: {error}", parent.display()))
+            })?;
+        }
+        let mut out = Output::create(Some(&path.to_string_lossy()))?;
+        for record in &records[*start as usize..*end as usize] {
+            record.write_to(&mut out, layout, 0)?;
+        }
+        out.finish()?;
+        eprintln!("[INFO] write {count} sequences to file: {}", path.display());
+    }
+    Ok(())
+}
+
+// --------------------------------------------------------------------------- //
+// lint
+// --------------------------------------------------------------------------- //
+
+/// The parsed `lint` options.
+pub struct LintOptions {
+    /// Read 1 source.
+    pub r1: String,
+    /// Read 2 source, when validating a pair.
+    pub r2: Option<String>,
+    /// `--lint-mode log`: report every error instead of the first.
+    pub log_mode: bool,
+    /// `--single-read-validation-level` ceiling.
+    pub single_level: Level,
+    /// `--paired-read-validation-level` ceiling.
+    pub paired_level: Level,
+    /// `--disable-validator` codes.
+    pub disable: Vec<String>,
+}
+
+/// An INFO log line with no file position, in fq's format.
+///
+/// The `target` field is not always `fq::commands::lint`: fq emits the validator
+/// inventory from `fq::validators`, and the harness compares the target too, so
+/// each line has to name the module fq names.
+fn fq_log_message(message: &str) -> String {
+    fq_log_from("fq::commands::lint", message)
+}
+
+/// An INFO log line from a named target.
+fn fq_log_from(target: &str, message: &str) -> String {
+    format!("{}  INFO {target}: {message}", log_timestamp())
+}
+
+/// Render a validator list the way fq prints it: `"[S003] NameValidator", ...`.
+///
+/// fq's order is its registry order, which is by level then insertion, not code
+/// order: high-level validators first for the enabled list at the default level.
+/// Reproducing that order matters because the line is compared byte for byte
+/// after timestamp normalisation.
+fn render_validators(validators: &[crate::lint::Validator]) -> String {
+    use crate::lint::Validator;
+    // fq's registry order, verified from its own output:
+    //   S003, S004, S002, S001, S005, S006
+    const ORDER: [&str; 6] = ["S003", "S004", "S002", "S001", "S005", "S006"];
+    let mut sorted: Vec<&Validator> = validators.iter().collect();
+    sorted.sort_by_key(|v| {
+        ORDER
+            .iter()
+            .position(|code| *code == v.code())
+            .unwrap_or(usize::MAX)
+    });
+    sorted
+        .iter()
+        .map(|v| format!("\"[{}] {}Validator\"", v.code(), v.name()))
+        .collect::<Vec<_>>()
+        .join(", ")
+}
+
+/// Format one log line the way fq 0.12.0 does.
+///
+/// fq uses a Rust `tracing` subscriber whose text format is
+///
+///   <RFC3339 timestamp> <LEVEL> <target>: <message>
+///
+/// and prints it to **stdout**. The timestamp is wall-clock, so a byte-level
+/// comparison of two runs can never match; the harness normalises it. Everything
+/// after the timestamp -- the level, the target and the message -- does match,
+/// including the `<file>:<line>:<col>: ` prefix on an error.
+fn fq_log_line(level: &str, file: &str, error: &crate::lint::LintError) -> String {
+    // With colour disabled, `tracing` pads the level to five characters, so INFO
+    // becomes " INFO" and ERROR stays "ERROR":
+    //
+    //   NO_COLOR=1 fq lint ok.fq
+    //   2026-10-20T...Z  INFO fq::commands::lint: fq-lint start
+    //
+    // The harness runs the oracle with the ambient environment, so the padding is
+    // reproduced here rather than normalised away.
+    let padded = format!("{level:>5}");
+    format!(
+        "{} {padded} fq::commands::lint: {}",
+        log_timestamp(),
+        error.render_at(file)
+    )
+}
+
+/// A UTC timestamp in the shape fq's logger emits, e.g.
+/// `2026-10-20T09:13:55.850350Z`.
+///
+/// Seconds resolution would be enough for a human, but the harness normalises
+/// this field away, so the exact value is not contractual -- only its presence
+/// and shape are.
+fn log_timestamp() -> String {
+    use std::time::{SystemTime, UNIX_EPOCH};
+    let now = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .unwrap_or_default();
+    let secs = now.as_secs();
+    let micros = now.subsec_micros();
+    let (year, month, day) = civil_from_days((secs / 86_400) as i64);
+    let rem = secs % 86_400;
+    let (hour, minute, second) = (rem / 3_600, (rem % 3_600) / 60, rem % 60);
+    format!("{year:04}-{month:02}-{day:02}T{hour:02}:{minute:02}:{second:02}.{micros:06}Z")
+}
+
+/// Convert days since 1970-01-01 to a (year, month, day) civil date.
+///
+/// Howard Hinnant's `civil_from_days`. Kept here rather than pulling in `chrono`
+/// so the crate gains no dependency.
+fn civil_from_days(z: i64) -> (i64, u32, u32) {
+    let z = z + 719_468;
+    let era = if z >= 0 { z } else { z - 146_096 } / 146_097;
+    let doe = (z - era * 146_097) as u64;
+    let yoe = (doe - doe / 1_460 + doe / 36_524 - doe / 146_096) / 365;
+    let y = yoe as i64 + era * 400;
+    let doy = doe - (365 * yoe + yoe / 4 - yoe / 100);
+    let mp = (5 * doy + 2) / 153;
+    let d = (doy - (153 * mp + 2) / 5 + 1) as u32;
+    let m = if mp < 10 { mp + 3 } else { mp - 9 } as u32;
+    (if m <= 2 { y + 1 } else { y }, m, d)
+}
+
+/// Run `lint`.
+///
+/// Exit codes: 0 when every enabled validator passes, 3 when any fails (an input
+/// precondition violation), 2 for a usage error such as an unknown validator code.
+pub fn lint(options: LintOptions) -> Result<(), CommandError> {
+    // Validate the codes once, through a throwaway linter, so an unknown code is a
+    // usage error before any input is opened.
+    let unknown = {
+        let mut probe = Linter::new();
+        probe.disable(&options.disable)
+    };
+    if !unknown.is_empty() {
+        return Err(CommandError::usage(format!(
+            "unknown validator code(s): {}; known codes are S001-S007 and P001",
+            unknown.join(", ")
+        )));
+    }
+
+    let mut errors = 0u64;
+    let mut first_error: Option<crate::lint::LintError> = None;
+    let mut read1_names: Vec<Vec<u8>> = Vec::new();
+    let mut records_seen = 0u64;
+
+    // fq brackets a lint run with INFO lines on stdout:
+    //
+    //   fq-lint start
+    //   validating single end read          (or: validating paired end reads)
+    //   disabled validators: [...]
+    //   enabled single read validators: ["[S003] NameValidator", ...]
+    //   enabled paired read validators: [...]
+    //   starting validation
+    //   read N records
+    //   fq-lint end
+    //
+    // They are emitted here rather than via a logging dependency so the crate
+    // stays stdlib-only. The timestamp is normalised by the harness.
+    println!("{}", fq_log_message("fq-lint start"));
+    if options.r2.is_some() {
+        println!("{}", fq_log_message("validating paired end reads"));
+    } else {
+        println!("{}", fq_log_message("validating single end read"));
+    }
+    println!(
+        "{}",
+        fq_log_from(
+            "fq::validators",
+            &format!(
+                "disabled validators: [{}]",
+                options
+                    .disable
+                    .iter()
+                    .map(|code| format!("\"{code}\""))
+                    .collect::<Vec<_>>()
+                    .join(", ")
+            )
+        )
+    );
+
+    // Read 1 and read 2 are separate name spaces: a pair legitimately uses the
+    // same name in both files, so S007 must not see one file's names while
+    // validating the other. Each mate therefore gets its own linter.
+    let mut linter1 = Linter::new()
+        .with_single_level(options.single_level)
+        .with_paired_level(options.paired_level);
+    linter1.disable(&options.disable);
+    let mut linter2 = Linter::new()
+        .with_single_level(options.single_level)
+        .with_paired_level(options.paired_level);
+    linter2.disable(&options.disable);
+
+    // fq lists each enabled validator as "[S003] NameValidator", in the order its
+    // own registry iterates, which is not code order.
+    let enabled_single = render_validators(&linter1.active_single());
+    // fq enables the paired validators only when a second input is present; with
+    // one input the list it prints is empty.
+    let enabled_paired = if options.r2.is_some() {
+        render_validators(&linter2.active_paired())
+    } else {
+        String::new()
+    };
+    println!(
+        "{}",
+        fq_log_from(
+            "fq::validators",
+            &format!("enabled single read validators: [{enabled_single}]"),
+        )
+    );
+    println!(
+        "{}",
+        fq_log_from(
+            "fq::validators",
+            &format!("enabled paired read validators: [{enabled_paired}]"),
+        )
+    );
+    // fq lists its "special" validators on their own line -- but only for a paired
+    // run, and only after the paired list. A single-end run prints no such line.
+    let paired = options.r2.is_some();
+    if paired {
+        println!(
+            "{}",
+            fq_log_message("enabled special validators: [\"[S007] DuplicateNameValidator\"]")
+        );
+    }
+    // A paired run validates twice and says so; a single-end run has one pass.
+    println!(
+        "{}",
+        fq_log_message(if paired {
+            "starting validation (pass 1)"
+        } else {
+            "starting validation"
+        })
+    );
+
+    // `lint` must see a malformed record rather than reject it in the parser: a
+    // length mismatch or a bad header IS the thing it validates. The lenient
+    // reader therefore delivers records the strict parser would stop on, and the
+    // validators decide.
+    {
+        let mut reader = LintReader::open(&options.r1)?;
+        while let Some(record) = reader.next_record() {
+            let record = record?;
+            if !record.is_fastq() {
+                return Err(CommandError::input(format!(
+                    "{}: fq lint validates FASTQ, but this input is FASTA",
+                    options.r1
+                )));
+            }
+            let lint_record = LintRecord {
+                header: &record.name,
+                raw_header: &record.raw_header,
+                sequence: &record.sequence,
+                plus: &record.plus,
+                qualities: record
+                    .has_quality_line
+                    .then_some(record.qualities.as_slice()),
+            };
+            let found = linter1.check_record(&lint_record);
+            records_seen += 1;
+            if options.r2.is_some() {
+                // Raw header, with its '@', because fq quotes it verbatim in a P001
+                // message: expected '@other', got '@p2'.
+                read1_names.push(record.raw_header.clone());
+            }
+            for error in found {
+                errors += 1;
+                if options.log_mode {
+                    println!("{}", fq_log_line("ERROR", &options.r1, &error));
+                }
+                if first_error.is_none() {
+                    first_error = Some(error);
+                }
+            }
+            if !options.log_mode && errors > 0 {
+                break;
+            }
+        }
+    }
+
+    if let Some(r2) = &options.r2 {
+        let mut reader = LintReader::open(r2)?;
+        let mut index = 0usize;
+        while let Some(record) = reader.next_record() {
+            let record = record?;
+            if !record.is_fastq() {
+                return Err(CommandError::input(format!(
+                    "{r2}: fq lint validates FASTQ, but this input is FASTA"
+                )));
+            }
+            let lint_record = LintRecord {
+                header: &record.name,
+                raw_header: &record.raw_header,
+                sequence: &record.sequence,
+                plus: &record.plus,
+                qualities: record
+                    .has_quality_line
+                    .then_some(record.qualities.as_slice()),
+            };
+            let mut found = linter2.check_record(&lint_record);
+            if let Some(first) = read1_names.get(index) {
+                found.extend(linter2.check_pair(index as u64 + 1, first, &record.raw_header));
+            }
+            index += 1;
+            for error in found {
+                errors += 1;
+                if options.log_mode {
+                    // A pair-name mismatch is reported against read 1's file, which
+                    // is where fq reads the naming convention from.
+                    let file = if error.report_against_read1 {
+                        options.r1.as_str()
+                    } else {
+                        r2.as_str()
+                    };
+                    println!("{}", fq_log_line("ERROR", file, &error));
+                }
+                if first_error.is_none() {
+                    first_error = Some(error);
+                }
+            }
+            if !options.log_mode && errors > 0 {
+                break;
+            }
+        }
+        if read1_names.len() != index && !options.log_mode && first_error.is_none() {
+            return Err(CommandError::input(format!(
+                "{} and {} have different numbers of records ({} vs {})",
+                options.r1,
+                r2,
+                read1_names.len(),
+                index
+            )));
+        }
+    }
+
+    // A paired run reports both mates before its second pass, then the read-2
+    // count on its own. Sequence from fq 0.12.0:
+    //
+    //   starting validation (pass 1)
+    //   read 1 * 2 records
+    //   starting validation (pass 2)
+    //   read 1 records
+    //   fq-lint end
+    if paired {
+        println!(
+            "{}",
+            fq_log_message(&format!("read {records_seen} * {} records", records_seen))
+        );
+        println!("{}", fq_log_message("starting validation (pass 2)"));
+        println!(
+            "{}",
+            fq_log_message(&format!("read {records_seen} records"))
+        );
+    } else {
+        println!(
+            "{}",
+            fq_log_message(&format!("read {records_seen} records"))
+        );
+    }
+
+    // fq logs "fq-lint end" before it exits, including on a validation failure, so
+    // the closing line must be emitted before any error return below.
+    println!("{}", fq_log_message("fq-lint end"));
+
+    if let Some(error) = first_error {
+        // A validation failure is exit 1, matching `fq lint`.
+        //
+        // fq reports a bad record as a runtime failure, not an input-precondition
+        // violation: `fq lint bad.fq; echo $?` prints 1, both in `panic` and `log`
+        // mode. Returning ExitClass::Input here produced 3 and every lint case in
+        // the differential failed on the exit code alone.
+        //
+        // In `panic` mode fq still logs the single error it hit, so it is printed
+        // here; in `log` mode every error was already printed above.
+        if !options.log_mode {
+            println!("{}", fq_log_line("ERROR", &options.r1, &error));
+        }
+        return Err(CommandError::runtime(error.render()));
+    }
+    if errors > 0 {
+        return Err(CommandError::runtime(format!(
+            "{errors} validation error(s); see the messages above"
+        )));
+    }
+    Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn temp(name: &str) -> PathBuf {
+        std::env::temp_dir().join(format!(
+            "rust-fx-cmd-{}-{:?}-{name}",
+            std::process::id(),
+            std::thread::current().id()
+        ))
+    }
+
+    fn write(name: &str, content: &[u8]) -> PathBuf {
+        let path = temp(name);
+        std::fs::write(&path, content).unwrap();
+        path
+    }
+
+    fn read(path: &Path) -> String {
+        std::fs::read_to_string(path).unwrap()
+    }
+
+    // ---- stats -----------------------------------------------------------
+
+    #[test]
+    fn stats_reports_the_documented_columns() {
+        let input = write(
+            "stats.fq",
+            b"@r1\nACGT\n+\nIIII\n@r2\nACGTACGT\n+\nIIIIIIII\n",
+        );
+        let out = temp("stats.out");
+        let _ = std::fs::remove_file(&out);
+        stats(StatsOptions {
+            inputs: vec![input.to_string_lossy().into_owned()],
+            tabular: true,
+            all: false,
+            basename: false,
+            gap_letters: DEFAULT_GAP_LETTERS.to_vec(),
+            stdin_label: "-".to_string(),
+            skip_err: false,
+            quality_base: 33,
+            out_file: Some(out.to_string_lossy().into_owned()),
+        })
+        .unwrap();
+        let text = read(&out);
+        let lines: Vec<&str> = text.lines().collect();
+        assert_eq!(
+            lines[0],
+            "file\tformat\ttype\tnum_seqs\tsum_len\tmin_len\tavg_len\tmax_len"
+        );
+        assert_eq!(lines.len(), 2);
+        let fields: Vec<&str> = lines[1].split('\t').collect();
+        assert_eq!(fields[1], "FASTQ");
+        assert_eq!(fields[2], "DNA");
+        assert_eq!(fields[3], "2");
+        assert_eq!(fields[4], "12");
+        assert_eq!(fields[5], "4");
+        assert_eq!(fields[6], "6.0");
+        assert_eq!(fields[7], "8");
+        let _ = std::fs::remove_file(&input);
+        let _ = std::fs::remove_file(&out);
+    }
+
+    #[test]
+    fn stats_all_adds_the_extra_columns() {
+        let input = write("stats_all.fq", b"@r1\nGCAT\n+\nIIII\n");
+        let out = temp("stats_all.out");
+        let _ = std::fs::remove_file(&out);
+        stats(StatsOptions {
+            inputs: vec![input.to_string_lossy().into_owned()],
+            tabular: true,
+            all: true,
+            basename: false,
+            gap_letters: DEFAULT_GAP_LETTERS.to_vec(),
+            stdin_label: "-".to_string(),
+            skip_err: false,
+            quality_base: 33,
+            out_file: Some(out.to_string_lossy().into_owned()),
+        })
+        .unwrap();
+        let text = read(&out);
+        let header = text.lines().next().unwrap();
+        assert_eq!(header.split('\t').count(), 19, "{header}");
+        assert!(header.contains("GC(%)"));
+        assert!(header.contains("sum_n"));
+        let _ = std::fs::remove_file(&input);
+        let _ = std::fs::remove_file(&out);
+    }
+
+    #[test]
+    fn stats_detects_rna_and_protein() {
+        let rna = write("rna.fa", b">r1\nACGUACGU\n");
+        let out = temp("rna.out");
+        let _ = std::fs::remove_file(&out);
+        stats(StatsOptions {
+            inputs: vec![rna.to_string_lossy().into_owned()],
+            tabular: true,
+            all: false,
+            basename: false,
+            gap_letters: DEFAULT_GAP_LETTERS.to_vec(),
+            stdin_label: "-".to_string(),
+            skip_err: false,
+            quality_base: 33,
+            out_file: Some(out.to_string_lossy().into_owned()),
+        })
+        .unwrap();
+        assert!(read(&out).contains("RNA"));
+        let _ = std::fs::remove_file(&rna);
+        let _ = std::fs::remove_file(&out);
+    }
+
+    // ---- seq -------------------------------------------------------------
+
+    fn seq_options(input: &Path, out: &Path) -> SeqOptions {
+        SeqOptions {
+            inputs: vec![input.to_string_lossy().into_owned()],
+            name: false,
+            only_id: false,
+            seq_only: false,
+            qual_only: false,
+            transforms: Transforms::default(),
+            gap_letters: DEFAULT_GAP_LETTERS.to_vec(),
+            min_len: None,
+            max_len: None,
+            min_qual: None,
+            max_qual: None,
+            quality_base: 33,
+            line_width: 60,
+            out_file: Some(out.to_string_lossy().into_owned()),
+        }
+    }
+
+    #[test]
+    fn seq_passes_records_through_unchanged() {
+        let input = write("seq.fq", b"@r1 a\nACGT\n+\nIIII\n");
+        let out = temp("seq.out");
+        let _ = std::fs::remove_file(&out);
+        seq(seq_options(&input, &out)).unwrap();
+        assert_eq!(read(&out), "@r1 a\nACGT\n+\nIIII\n");
+        let _ = std::fs::remove_file(&input);
+        let _ = std::fs::remove_file(&out);
+    }
+
+    #[test]
+    fn seq_name_and_only_id() {
+        let input = write("seq_name.fq", b"@r1 a\nACGT\n+\nIIII\n");
+        for (only_id, expected) in [(false, "r1 a\n"), (true, "r1\n")] {
+            let out = temp(&format!("seq_name_{only_id}.out"));
+            let _ = std::fs::remove_file(&out);
+            let mut options = seq_options(&input, &out);
+            options.name = true;
+            options.only_id = only_id;
+            seq(options).unwrap();
+            assert_eq!(read(&out), expected);
+            let _ = std::fs::remove_file(&out);
+        }
+        let _ = std::fs::remove_file(&input);
+    }
+
+    #[test]
+    fn seq_only_prints_sequences() {
+        let input = write("seq_s.fq", b"@r1\nACGT\n+\nIIII\n");
+        let out = temp("seq_s.out");
+        let _ = std::fs::remove_file(&out);
+        let mut options = seq_options(&input, &out);
+        options.seq_only = true;
+        seq(options).unwrap();
+        assert_eq!(read(&out), "ACGT\n");
+        let _ = std::fs::remove_file(&input);
+        let _ = std::fs::remove_file(&out);
+    }
+
+    #[test]
+    fn seq_reverse_complement() {
+        let input = write("seq_rc.fq", b"@r1\nATGC\n+\nIIII\n");
+        let out = temp("seq_rc.out");
+        let _ = std::fs::remove_file(&out);
+        let mut options = seq_options(&input, &out);
+        options.transforms.reverse = true;
+        options.transforms.complement = true;
+        seq(options).unwrap();
+        assert_eq!(read(&out), "@r1\nGCAT\n+\nIIII\n");
+        let _ = std::fs::remove_file(&input);
+        let _ = std::fs::remove_file(&out);
+    }
+
+    #[test]
+    fn seq_length_filter_is_inclusive() {
+        let input = write(
+            "seq_len.fq",
+            b"@short\nACGT\n+\nIIII\n@long\nACGTACGT\n+\nIIIIIIII\n",
+        );
+        let out = temp("seq_len.out");
+        let _ = std::fs::remove_file(&out);
+        let mut options = seq_options(&input, &out);
+        options.min_len = Some(8);
+        seq(options).unwrap();
+        assert_eq!(read(&out), "@long\nACGTACGT\n+\nIIIIIIII\n");
+        let _ = std::fs::remove_file(&input);
+        let _ = std::fs::remove_file(&out);
+    }
+
+    #[test]
+    fn seq_removes_gaps_and_uppercases() {
+        let input = write("seq_gap.fq", b"@r1\nac-gt\n+\nIIIII\n");
+        let out = temp("seq_gap.out");
+        let _ = std::fs::remove_file(&out);
+        let mut options = seq_options(&input, &out);
+        options.transforms.remove_gaps = true;
+        options.transforms.upper = true;
+        // Removing a gap shortens a FASTQ record, so only the sequence is printed;
+        // this is the documented behaviour of a length-changing transform.
+        options.seq_only = true;
+        seq(options).unwrap();
+        assert_eq!(read(&out), "ACGT\n");
+        let _ = std::fs::remove_file(&input);
+        let _ = std::fs::remove_file(&out);
+    }
+
+    #[test]
+    fn seq_rejects_contradictory_output_selections() {
+        let input = write("seq_bad.fq", b"@r1\nACGT\n+\nIIII\n");
+        let out = temp("seq_bad.out");
+        let mut options = seq_options(&input, &out);
+        options.name = true;
+        options.seq_only = true;
+        let error = seq(options).expect_err("must reject");
+        assert_eq!(error.exit_code(), 2);
+        let _ = std::fs::remove_file(&input);
+    }
+
+    #[test]
+    fn seq_rejects_both_case_flags() {
+        let input = write("seq_case.fq", b"@r1\nACGT\n+\nIIII\n");
+        let out = temp("seq_case.out");
+        let mut options = seq_options(&input, &out);
+        options.transforms.upper = true;
+        options.transforms.lower = true;
+        let error = seq(options).expect_err("must reject");
+        assert_eq!(error.exit_code(), 2);
+        let _ = std::fs::remove_file(&input);
+    }
+
+    // ---- fq2fa -----------------------------------------------------------
+
+    #[test]
+    fn fq2fa_converts_and_is_idempotent_on_fasta() {
+        let input = write("conv.fq", b"@r1 a\nACGT\n+\nIIII\n");
+        let out = temp("conv.fa");
+        let _ = std::fs::remove_file(&out);
+        fq2fa(Fq2faOptions {
+            inputs: vec![input.to_string_lossy().into_owned()],
+            line_width: 60,
+            out_file: Some(out.to_string_lossy().into_owned()),
+        })
+        .unwrap();
+        assert_eq!(read(&out), ">r1 a\nACGT\n");
+
+        // Feeding the FASTA back through must be a no-op.
+        let out2 = temp("conv2.fa");
+        let _ = std::fs::remove_file(&out2);
+        fq2fa(Fq2faOptions {
+            inputs: vec![out.to_string_lossy().into_owned()],
+            line_width: 60,
+            out_file: Some(out2.to_string_lossy().into_owned()),
+        })
+        .unwrap();
+        assert_eq!(read(&out2), read(&out));
+        let _ = std::fs::remove_file(&input);
+        let _ = std::fs::remove_file(&out);
+        let _ = std::fs::remove_file(&out2);
+    }
+
+    // ---- fx2tab ----------------------------------------------------------
+
+    fn fx2tab_options(input: &Path, out: &Path) -> Fx2tabOptions {
+        Fx2tabOptions {
+            inputs: vec![input.to_string_lossy().into_owned()],
+            header_line: false,
+            length: false,
+            gc: false,
+            gc_skew: false,
+            name: false,
+            only_id: false,
+            no_qual: false,
+            avg_qual: false,
+            seq_hash: false,
+            alphabet: false,
+            case_sensitive: false,
+            base_content: Vec::new(),
+            base_count: Vec::new(),
+            basename: false,
+            file_name: false,
+            quality_base: 33,
+            stdin_label: "-".to_string(),
+            out_file: Some(out.to_string_lossy().into_owned()),
+        }
+    }
+
+    // The documented rule: three fixed columns for either format.
+    #[test]
+    fn fx2tab_emits_three_columns_by_default() {
+        let fastq = write("tab.fq", b"@r1 a\nACGT\n+\nIIII\n");
+        let out = temp("tab.out");
+        let _ = std::fs::remove_file(&out);
+        fx2tab(fx2tab_options(&fastq, &out)).unwrap();
+        assert_eq!(read(&out), "r1 a\tACGT\tIIII\n");
+
+        // A FASTA input still prints the (empty) quality column.
+        let fasta = write("tab.fa", b">r1 a\nACGT\n");
+        let out2 = temp("tab2.out");
+        let _ = std::fs::remove_file(&out2);
+        fx2tab(fx2tab_options(&fasta, &out2)).unwrap();
+        assert_eq!(read(&out2), "r1 a\tACGT\t\n");
+        let _ = std::fs::remove_file(&fastq);
+        let _ = std::fs::remove_file(&out);
+        let _ = std::fs::remove_file(&fasta);
+        let _ = std::fs::remove_file(&out2);
+    }
+
+    #[test]
+    fn fx2tab_length_and_gc() {
+        let input = write("tab_lg.fa", b">r1\nGCAT\n");
+        let out = temp("tab_lg.out");
+        let _ = std::fs::remove_file(&out);
+        let mut options = fx2tab_options(&input, &out);
+        options.length = true;
+        options.gc = true;
+        fx2tab(options).unwrap();
+        // GC now prints two decimals, as SeqKit does.
+        assert_eq!(read(&out), "r1\tGCAT\t\t4\t50.00\n");
+        let _ = std::fs::remove_file(&input);
+        let _ = std::fs::remove_file(&out);
+    }
+
+    #[test]
+    fn fx2tab_name_only_drops_the_sequence_columns() {
+        let input = write("tab_n.fa", b">r1\nGCAT\n");
+        let out = temp("tab_n.out");
+        let _ = std::fs::remove_file(&out);
+        let mut options = fx2tab_options(&input, &out);
+        options.name = true;
+        options.length = true;
+        fx2tab(options).unwrap();
+        assert_eq!(read(&out), "r1\t4\n");
+        let _ = std::fs::remove_file(&input);
+        let _ = std::fs::remove_file(&out);
+    }
+
+    #[test]
+    fn fx2tab_no_qual_drops_the_quality_column() {
+        let input = write("tab_q.fq", b"@r1\nACGT\n+\nIIII\n");
+        let out = temp("tab_q.out");
+        let _ = std::fs::remove_file(&out);
+        let mut options = fx2tab_options(&input, &out);
+        options.no_qual = true;
+        fx2tab(options).unwrap();
+        assert_eq!(read(&out), "r1\tACGT\n");
+        let _ = std::fs::remove_file(&input);
+        let _ = std::fs::remove_file(&out);
+    }
+
+    #[test]
+    fn fx2tab_header_line_lists_the_selected_metrics() {
+        let input = write("tab_h.fa", b">r1\nGCAT\n");
+        let out = temp("tab_h.out");
+        let _ = std::fs::remove_file(&out);
+        let mut options = fx2tab_options(&input, &out);
+        options.header_line = true;
+        options.length = true;
+        options.gc = true;
+        fx2tab(options).unwrap();
+        let text = read(&out);
+        let header = text.lines().next().unwrap();
+        // `-H` names the first column `#name`.
+        assert_eq!(header, "#name\tseq\tqual\tlength\tGC");
+        let _ = std::fs::remove_file(&input);
+        let _ = std::fs::remove_file(&out);
+    }
+
+    #[test]
+    fn fx2tab_average_quality_is_blank_for_fasta() {
+        let input = write("tab_aq.fa", b">r1\nACGT\n");
+        let out = temp("tab_aq.out");
+        let _ = std::fs::remove_file(&out);
+        let mut options = fx2tab_options(&input, &out);
+        options.avg_qual = true;
+        options.header_line = true;
+        fx2tab(options).unwrap();
+        let text = read(&out);
+        assert!(text.lines().next().unwrap().ends_with("avg.qual"));
+        assert!(
+            text.lines().nth(1).unwrap().ends_with('\t'),
+            "blank final column"
+        );
+        let _ = std::fs::remove_file(&input);
+        let _ = std::fs::remove_file(&out);
+    }
+
+    #[test]
+    fn fx2tab_sequence_hash_is_md5_of_the_sequence() {
+        let input = write("tab_s.fa", b">r1\nACGT\n");
+        let out = temp("tab_s.out");
+        let _ = std::fs::remove_file(&out);
+        let mut options = fx2tab_options(&input, &out);
+        options.seq_hash = true;
+        fx2tab(options).unwrap();
+        // MD5 of the LOWER-CASED sequence, which is what SeqKit hashes:
+        //   $ seqkit fx2tab -s <(printf ">r1\nACGT\n")
+        //   r1  ACGT    db516c3913e179338b162b2476d1c23f
+        assert!(
+            read(&out).contains("db516c3913e179338b162b2476d1c23f"),
+            "seq hash must MD5 the lower-cased sequence: {}",
+            read(&out)
+        );
+        assert!(!read(&out).contains("f1f8f4bf413b16ad135722aa4591043e"));
+        let _ = std::fs::remove_file(&input);
+        let _ = std::fs::remove_file(&out);
+    }
+
+    #[test]
+    fn fx2tab_base_content_and_count() {
+        let input = write("tab_b.fa", b">r1\nACGTACGT\n");
+        let out = temp("tab_b.out");
+        let _ = std::fs::remove_file(&out);
+        let mut options = fx2tab_options(&input, &out);
+        options.base_content = vec!["AT".to_string()];
+        options.base_count = vec!["GC".to_string()];
+        fx2tab(options).unwrap();
+        // Counts come before contents, and content carries two decimals:
+        //   -C GC gives 4, -B AT gives 50.00
+        assert_eq!(read(&out), "r1\tACGTACGT\t\t4\t50.00\n");
+        let _ = std::fs::remove_file(&input);
+        let _ = std::fs::remove_file(&out);
+    }
+
+    // ---- sample ----------------------------------------------------------
+
+    fn sample_file(name: &str, records: usize) -> PathBuf {
+        let mut text = String::new();
+        for i in 0..records {
+            text.push_str(&format!("@r{i}\nACGT\n+\nIIII\n"));
+        }
+        write(name, text.as_bytes())
+    }
+
+    #[test]
+    fn sample_is_reproducible_for_a_fixed_seed() {
+        let input = sample_file("sample.fq", 200);
+        let run = |out: &Path| {
+            let _ = std::fs::remove_file(out);
+            sample(SampleOptions {
+                inputs: vec![input.to_string_lossy().into_owned()],
+                proportion: Some(0.25),
+                number: None,
+                rand_seed: 11,
+                non_deterministic: false,
+                line_width: 60,
+                out_file: Some(out.to_string_lossy().into_owned()),
+            })
+            .unwrap();
+            read(out)
+        };
+        let first = run(&temp("sample1.out"));
+        let second = run(&temp("sample2.out"));
+        assert_eq!(
+            first, second,
+            "the same seed must reproduce the same output"
+        );
+        assert!(
+            !first.is_empty(),
+            "a quarter of 200 records should not be empty"
+        );
+        // A different seed must produce a different selection.
+        let out3 = temp("sample3.out");
+        let _ = std::fs::remove_file(&out3);
+        sample(SampleOptions {
+            inputs: vec![input.to_string_lossy().into_owned()],
+            proportion: Some(0.25),
+            number: None,
+            rand_seed: 12,
+            non_deterministic: false,
+            line_width: 60,
+            out_file: Some(out3.to_string_lossy().into_owned()),
+        })
+        .unwrap();
+        assert_ne!(
+            read(&out3),
+            first,
+            "a different seed must change the selection"
+        );
+        let _ = std::fs::remove_file(&input);
+        let _ = std::fs::remove_file(temp("sample1.out"));
+        let _ = std::fs::remove_file(temp("sample2.out"));
+        let _ = std::fs::remove_file(&out3);
+    }
+
+    #[test]
+    fn sample_by_number_is_approximately_the_requested_count() {
+        let input = sample_file("sample_n.fq", 1000);
+        let out = temp("sample_n.out");
+        let _ = std::fs::remove_file(&out);
+        sample(SampleOptions {
+            inputs: vec![input.to_string_lossy().into_owned()],
+            proportion: None,
+            number: Some(100),
+            rand_seed: 7,
+            non_deterministic: false,
+            line_width: 60,
+            out_file: Some(out.to_string_lossy().into_owned()),
+        })
+        .unwrap();
+        let count = read(&out).lines().count() / 4;
+        assert!(
+            (70..130).contains(&count),
+            "expected about 100, got {count}"
+        );
+        let _ = std::fs::remove_file(&input);
+        let _ = std::fs::remove_file(&out);
+    }
+
+    #[test]
+    fn sample_rejects_both_or_neither_selection() {
+        let input = sample_file("sample_bad.fq", 10);
+        for (proportion, number) in [(Some(0.5), Some(5)), (None, None)] {
+            let error = sample(SampleOptions {
+                inputs: vec![input.to_string_lossy().into_owned()],
+                proportion,
+                number,
+                rand_seed: 1,
+                non_deterministic: false,
+                line_width: 60,
+                out_file: None,
+            })
+            .expect_err("must reject");
+            assert_eq!(error.exit_code(), 2);
+        }
+        let _ = std::fs::remove_file(&input);
+    }
+
+    // ---- split -----------------------------------------------------------
+
+    #[test]
+    fn split_by_size_writes_numbered_parts_in_order() {
+        let input = sample_file("split.fq", 10);
+        let dir = temp("split_dir");
+        let _ = std::fs::remove_dir_all(&dir);
+        split(SplitOptions {
+            input: input.to_string_lossy().into_owned(),
+            by: SplitBy::Size(4),
+            out_dir: Some(dir.to_string_lossy().into_owned()),
+            out_prefix: None,
+            part_width: 3,
+            extension: None,
+            dry_run: false,
+            force: false,
+        })
+        .unwrap();
+        let mut names: Vec<String> = std::fs::read_dir(&dir)
+            .unwrap()
+            .map(|e| e.unwrap().file_name().to_string_lossy().into_owned())
+            .collect();
+        names.sort();
+        // The part stem comes from the input's own file name, which in this test
+        // is a unique temporary name.
+        let stem = crate::split::part_stem(&input);
+        assert_eq!(
+            names,
+            vec![
+                format!("{stem}.part_001.fq"),
+                format!("{stem}.part_002.fq"),
+                format!("{stem}.part_003.fq"),
+            ]
+        );
+        // 4 + 4 + 2, in input order.
+        let part1 = std::fs::read_to_string(dir.join(format!("{stem}.part_001.fq"))).unwrap();
+        assert_eq!(part1.lines().count() / 4, 4);
+        assert!(part1.starts_with("@r0\n"));
+        let part3 = std::fs::read_to_string(dir.join(format!("{stem}.part_003.fq"))).unwrap();
+        assert_eq!(part3.lines().count() / 4, 2);
+        assert!(part3.starts_with("@r8\n"), "the last part holds the tail");
+        let _ = std::fs::remove_file(&input);
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn split_by_part_distributes_evenly() {
+        let input = sample_file("splitp.fq", 10);
+        let dir = temp("splitp_dir");
+        let _ = std::fs::remove_dir_all(&dir);
+        split(SplitOptions {
+            input: input.to_string_lossy().into_owned(),
+            by: SplitBy::Parts(3),
+            out_dir: Some(dir.to_string_lossy().into_owned()),
+            out_prefix: None,
+            part_width: 3,
+            extension: None,
+            dry_run: false,
+            force: false,
+        })
+        .unwrap();
+        let stem = crate::split::part_stem(&input);
+        let counts: Vec<usize> = ["001", "002", "003"]
+            .iter()
+            .map(|n| {
+                std::fs::read_to_string(dir.join(format!("{stem}.part_{n}.fq")))
+                    .unwrap()
+                    .lines()
+                    .count()
+                    / 4
+            })
+            .collect();
+        assert_eq!(counts, vec![4, 3, 3]);
+        let _ = std::fs::remove_file(&input);
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn split_dry_run_creates_nothing() {
+        let input = sample_file("splitd.fq", 5);
+        let dir = temp("splitd_dir");
+        let _ = std::fs::remove_dir_all(&dir);
+        split(SplitOptions {
+            input: input.to_string_lossy().into_owned(),
+            by: SplitBy::Size(2),
+            out_dir: Some(dir.to_string_lossy().into_owned()),
+            out_prefix: None,
+            part_width: 3,
+            extension: None,
+            dry_run: true,
+            force: false,
+        })
+        .unwrap();
+        assert!(!dir.exists(), "a dry run must not create the directory");
+        let _ = std::fs::remove_file(&input);
+    }
+
+    #[test]
+    fn split_rejects_stdin() {
+        let error = split(SplitOptions {
+            input: "-".to_string(),
+            by: SplitBy::Size(1),
+            out_dir: None,
+            out_prefix: None,
+            part_width: 3,
+            extension: None,
+            dry_run: true,
+            force: false,
+        })
+        .expect_err("must reject stdin");
+        assert_eq!(error.exit_code(), 2);
+    }
+
+    // ---- lint ------------------------------------------------------------
+
+    fn lint_options(r1: &Path, r2: Option<&Path>) -> LintOptions {
+        LintOptions {
+            r1: r1.to_string_lossy().into_owned(),
+            r2: r2.map(|p| p.to_string_lossy().into_owned()),
+            log_mode: true,
+            single_level: Level::High,
+            paired_level: Level::High,
+            disable: Vec::new(),
+        }
+    }
+
+    #[test]
+    fn lint_accepts_a_valid_pair() {
+        let r1 = write("l_a.fq", b"@r1\nACGT\n+\nIIII\n@r2\nTTTT\n+\nIIII\n");
+        let r2 = write("l_b.fq", b"@r1\nGGGG\n+\nIIII\n@r2\nCCCC\n+\nIIII\n");
+        lint(lint_options(&r1, Some(&r2))).unwrap();
+        let _ = std::fs::remove_file(&r1);
+        let _ = std::fs::remove_file(&r2);
+    }
+
+    #[test]
+    fn lint_rejects_a_length_mismatch_with_exit_1() {
+        // fq reports a validation failure as exit 1, not the 3 reserved for a
+        // violated input precondition. `fq lint bad.fq; echo $?` prints 1.
+        let r1 = write("l_bad.fq", b"@r1\nACGTACGT\n+\nIII\n");
+        let error = lint(lint_options(&r1, None)).expect_err("must reject");
+        assert_eq!(error.exit_code(), 1);
+        assert!(error.message.contains("S005"), "{}", error.message);
+        let _ = std::fs::remove_file(&r1);
+    }
+
+    #[test]
+    fn lint_accepts_a_duplicate_name() {
+        // fq 0.12.0 never enables S007 for single reads, so duplicate names pass.
+        let r1 = write("l_dup.fq", b"@r1\nACGT\n+\nIIII\n@r1\nACGT\n+\nIIII\n");
+        assert!(
+            lint(lint_options(&r1, None)).is_ok(),
+            "duplicate names must pass, as fq does"
+        );
+        let _ = std::fs::remove_file(&r1);
+    }
+
+    #[test]
+    fn lint_rejects_mismatched_pair_names() {
+        let r1 = write("l_p1.fq", b"@r1\nACGT\n+\nIIII\n");
+        let r2 = write("l_p2.fq", b"@other\nACGT\n+\nIIII\n");
+        let error = lint(lint_options(&r1, Some(&r2))).expect_err("must reject");
+        assert!(error.message.contains("P001"), "{}", error.message);
+        let _ = std::fs::remove_file(&r1);
+        let _ = std::fs::remove_file(&r2);
+    }
+
+    #[test]
+    fn lint_rejects_an_unknown_validator_code() {
+        let r1 = write("l_code.fq", b"@r1\nACGT\n+\nIIII\n");
+        let mut options = lint_options(&r1, None);
+        options.disable = vec!["S999".to_string()];
+        let error = lint(options).expect_err("must reject");
+        assert_eq!(error.exit_code(), 2);
+        assert!(error.message.contains("S999"));
+        let _ = std::fs::remove_file(&r1);
+    }
+
+    #[test]
+    fn lint_can_disable_a_failing_validator() {
+        let r1 = write("l_dis.fq", b"@r1\nACGTACGT\n+\nIII\n");
+        let mut options = lint_options(&r1, None);
+        options.disable = vec!["S005".to_string()];
+        lint(options).expect("S005 is disabled, so this must pass");
+        let _ = std::fs::remove_file(&r1);
+    }
+
+    #[test]
+    fn lint_rejects_fasta_input() {
+        let fasta = write("l.fa", b">r1\nACGT\n");
+        let error = lint(lint_options(&fasta, None)).expect_err("must reject");
+        assert_eq!(error.exit_code(), 3);
+        let _ = std::fs::remove_file(&fasta);
+    }
+}

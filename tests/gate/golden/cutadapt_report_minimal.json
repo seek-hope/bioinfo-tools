@@ -1,0 +1,35 @@
+{
+  "argv": [
+    "--report",
+    "minimal",
+    "-a",
+    "AGATCGGAAGAGC",
+    "-m",
+    "10",
+    "-o",
+    "out.fastq",
+    "simple.fastq"
+  ],
+  "exit_code": 0,
+  "guard": "L1 --report minimal stdout bytes (no banner, no timing line)",
+  "level": "L1",
+  "name": "cutadapt_report_minimal",
+  "rules_fired": {},
+  "streams": {
+    "out.fastq": {
+      "bytes": 714,
+      "kind": "text",
+      "text": "@full\nGCTAAAGACAATTACATAACATACACGTCAGCACGAAACT\n+\nIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII\n@internal\nTGTTGGCCCAGTGTGAATCGCTTAAGGGTT\n+\nIIIIIIIIIIIIIIIIIIIIIIIIIIIIII\n@partial\nGATGCATACGCCTTTACTTGCTGTGTCCACCCCATCGGACTGGCA\n+\nIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII\n@none\nTTTTTATTACACTCAGAAACAGAACTCGGGTAATTTTGACAGGTCACGCA\n+\nIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII\n@mismatch\nGAGGCGCGCCCTCCTGAAGTGCGTGGACACTCGCTATGAA\n+\nIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII\n@long\nCACTCTGCCAAACTCCAGCGCGGTCAGTTCCATCACCCTAAGTAACCGAATAATGCGTTC\n+\nIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII\n@reversecomp\nTTATGGAACAAGGACGCTGTCTGAGACTAGAAGACGCTCTTCCGATCT\n+\nIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII\n"
+    },
+    "stderr": {
+      "bytes": 0,
+      "kind": "text",
+      "text": ""
+    },
+    "stdout": {
+      "bytes": 118,
+      "kind": "text",
+      "text": "status\tin_reads\tin_bp\ttoo_short\ttoo_long\ttoo_many_n\tout_reads\tw/adapters\tqualtrim_bp\tout_bp\nOK\t10\t460\t3\t0\t0\t7\t7\t0\t313\n"
+    }
+  }
+}

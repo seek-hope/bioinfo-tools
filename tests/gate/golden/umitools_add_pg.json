@@ -1,0 +1,46 @@
+{
+  "argv": [
+    "dedup",
+    "-I",
+    "in.bam",
+    "-S",
+    "out.bam",
+    "--random-seed",
+    "1",
+    "--add-pg"
+  ],
+  "exit_code": 0,
+  "guard": "provenance @PG record: ID/PN/VN/CL tags and order unchanged",
+  "level": "L1",
+  "name": "umitools_add_pg",
+  "rules_fired": {
+    "out.bam": [
+      "binary_invocation_path",
+      "absolute_temp_path"
+    ],
+    "stderr": [
+      "umitools_log_timing_lines",
+      "umitools_log_threads",
+      "umitools_log_memory",
+      "umitools_log_hardware_line",
+      "umitools_log_container_line"
+    ]
+  },
+  "streams": {
+    "out.bam": {
+      "bytes": 1086,
+      "kind": "text",
+      "text": "@HD\tVN:1.6\tSO:coordinate\n@SQ\tSN:chr1\tLN:1000000\n@SQ\tSN:chr2\tLN:1000000\n@PG\tID:samtools\tPN:samtools\tVN:1.24\tCL:samtools sort -o <TMP>/in.bam <TMP>/in.sam\n@PG\tID:rust-umitools\tPN:rust-umitools\tVN:0.2.0\tCL:<BINPATH> dedup -I in.bam -S out.bam --random-seed 1 --add-pg\n@PG\tID:samtools.1\tPN:samtools\tPP:rust-umitools\tVN:1.24\tCL:/home/rimuru/Projects/Code/homework/AI4Biomedicine/dedup/envs/dedup/bin/samtools view -h <TMP>/out.bam\nr1_AAAAAAAA\t0\tchr1\t100\t60\t10M\t*\t0\t0\tAAAAAAAAAA\tIIIIIIIIII\nr13_GGGGGGGG\t16\tchr1\t100\t60\t10M\t*\t0\t0\tAAAAAAAAAA\tIIIIIIIIII\nr16_GGGGGGGA\t16\tchr1\t100\t60\t10M\t*\t0\t0\tAAAAAAAAAA\tIIIIIIIIII\nr22_ACGTACGT\t0\tchr1\t200\t60\t10M\t*\t0\t0\tAAAAAAAAAA\tIIIIIIIIII\nr26_TTTTTTTT\t0\tchr1\t300\t40\t10M\t*\t0\t0\tAAAAAAAAAA\tIIIIIIIIII\nr28_TTTTTTTA\t0\tchr1\t300\t40\t10M\t*\t0\t0\tAAAAAAAAAA\tIIIIIIIIII\nr30_TTTTTTAA\t0\tchr1\t300\t40\t10M\t*\t0\t0\tAAAAAAAAAA\tIIIIIIIIII\nr38_CCCCCCCC\t16\tchr1\t400\t60\t10M\t*\t0\t0\tAAAAAAAAAA\tIIIIIIIIII\n"
+    },
+    "stderr": {
+      "bytes": 681,
+      "kind": "text",
+      "text": "rust-umitools 0.2.0 dedup: threads=<N> memory=<N>MiB method=directional threshold=1 representative=upstream\nhardware            : <HARDWARE>\ncontainer limits     : <LIMITS>\nreads in            : 43\nbundles             : 5\noutput reads        : 8\nunmapped removed    : 1\nno-UMI skipped      : 0\nMAPQ ties sampled   : 29\nmates recovered     : 0\nevents              : input=43 read2=0 unmapped=1 mate_unmapped=0 chimeric=0 unpaired=0 below_mapq=0 passthrough=0 subset_excluded=0\nparse+cluster       : <TIME>s\nsort+commit         : <TIME>s\nwall time           : <TIME>s\n"
+    },
+    "stdout": {
+      "bytes": 0,
+      "kind": "text",
+      "text": ""
+    }
+  }
+}

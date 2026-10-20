@@ -1,0 +1,49 @@
+{
+  "argv": [
+    "-a",
+    "AGATCGGAAGAGC",
+    "-A",
+    "ACGT",
+    "-m",
+    "0",
+    "-o",
+    "out1.fastq",
+    "-p",
+    "out2.fastq",
+    "simple.fastq",
+    "simple.fastq"
+  ],
+  "exit_code": 0,
+  "guard": "read-2 adapter -A: trims read 2 the way cutadapt 4.6 does",
+  "level": "L2",
+  "name": "cutadapt_read2_3prime",
+  "rules_fired": {
+    "stdout": [
+      "cutadapt_core_count_any_plural",
+      "cutadapt_finished_line",
+      "cutadapt_version_banner"
+    ]
+  },
+  "streams": {
+    "out1.fastq": {
+      "bytes": 791,
+      "kind": "text",
+      "text": "@full\nGCTAAAGACAATTACATAACATACACGTCAGCACGAAACT\n+\nIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII\n@internal\nTGTTGGCCCAGTGTGAATCGCTTAAGGGTT\n+\nIIIIIIIIIIIIIIIIIIIIIIIIIIIIII\n@partial\nGATGCATACGCCTTTACTTGCTGTGTCCACCCCATCGGACTGGCA\n+\nIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII\n@none\nTTTTTATTACACTCAGAAACAGAACTCGGGTAATTTTGACAGGTCACGCA\n+\nIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII\n@mismatch\nGAGGCGCGCCCTCCTGAAGTGCGTGGACACTCGCTATGAA\n+\nIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII\n@short-trim\nTCTCT\n+\nIIIII\n@short-none\nGATTTACC\n+\nIIIIIIII\n@long\nCACTCTGCCAAACTCCAGCGCGGTCAGTTCCATCACCCTAAGTAACCGAATAATGCGTTC\n+\nIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII\n@adapter-start\n\n+\n\n@reversecomp\nTTATGGAACAAGGACGCTGTCTGAGACTAGAAGACGCTCTTCCGATCT\n+\nIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII\n"
+    },
+    "out2.fastq": {
+      "bytes": 1001,
+      "kind": "text",
+      "text": "@full\nGCTAAAGACAATTACATAACATAC\n+\nIIIIIIIIIIIIIIIIIIIIIIII\n@internal\nTGTTGGCCCAGTGTGAATCGCTTAAGGGTTAGATCGGAAGAGCAAGTAAGTGT\n+\nIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII\n@partial\nGATGCATACGCCTTTACTTGCTGTGTCCACCCCATCGGACTGGCAAGATCG\n+\nIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII\n@none\nTTTTTATTACACTCAGAAACAGAACTCGGGTAATTTTGACAGGTCACGCA\n+\nIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII\n@mismatch\nGAGGCGCGCCCTCCTGAAGTGCGTGGACACTCGCTATGAAAGATCGTAAGAGC\n+\nIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII\n@short-trim\nTCTCTAGATCGGAAGAGC\n+\nIIIIIIIIIIIIIIIIII\n@short-none\nGATTTACC\n+\nIIIIIIII\n@long\nCACTCTGCCAAACTCCAGCGCGGTCAGTTCCATCACCCTAAGTAACCGAATAATGCGTTCAGATCGGAAGAGC\n+\nIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII\n@adapter-start\nAGATCGGAAGAGCGCTCTATTGACTACGACGCGCTCATTCCCTTGTCGGAGAG\n+\nIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII\n@reversecomp\nTTATGGAACAAGGACGCTGTCTGAGACTAGAAGACGCTCTTCCGATCT\n+\nIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII\n"
+    },
+    "stderr": {
+      "bytes": 0,
+      "kind": "text",
+      "text": ""
+    },
+    "stdout": {
+      "bytes": 1492,
+      "kind": "text",
+      "text": "This is <PROGRAM> <VERSION> with Python <PYVER>\nCommand line parameters: -a AGATCGGAAGAGC -A ACGT -m 0 -o out1.fastq -p out2.fastq simple.fastq simple.fastq\nProcessing paired-end reads on <N> cores ...\nFinished in <TIME> s (<TIME> \u00b5s/read; <TIME> M reads/minute).\n\n=== Summary ===\n\nTotal read pairs processed:                 10\n  Read 1 with adapter:                       7 (70.0%)\n  Read 2 with adapter:                       1 (10.0%)\n\n== Read fate breakdown ==\nPairs that were too short:                   0 (0.0%)\nPairs written (passing filters):            10 (100.0%)\n\nTotal basepairs processed:           920 bp\n  Read 1:           460 bp\n  Read 2:           460 bp\nTotal written (filtered):            757 bp (82.3%)\n  Read 1:           326 bp\n  Read 2:           431 bp\n\n=== First read: Adapter 1 ===\n\nSequence: AGATCGGAAGAGC; Type: regular 3'; Length: 13; Trimmed: 7 times\n\nMinimum overlap: 3\nNo. of allowed errors:\n1-9 bp: 0; 10-13 bp: 1\n\nBases preceding removed adapters:\n  A: 28.6%\n  C: 14.3%\n  G: 0.0%\n  T: 42.9%\n  none/other: 14.3%\n\nOverview of removed sequences\nlength\tcount\texpect\tmax.err\terror counts\n6\t1\t0.0\t0\t1\n13\t4\t0.0\t1\t3 1\n23\t1\t0.0\t1\t1\n53\t1\t0.0\t1\t1\n\n\n=== Second read: Adapter 2 ===\n\nSequence: ACGT; Type: regular 3'; Length: 4; Trimmed: 1 times\n\nMinimum overlap: 3\nNo. of allowed errors:\n1-4 bp: 0\n\nBases preceding removed adapters:\n  A: 0.0%\n  C: 100.0%\n  G: 0.0%\n  T: 0.0%\n  none/other: 0.0%\n\nOverview of removed sequences\nlength\tcount\texpect\tmax.err\terror counts\n29\t1\t0.0\t0\t1\n"
+    }
+  }
+}

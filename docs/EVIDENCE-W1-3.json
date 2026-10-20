@@ -1,0 +1,432 @@
+{
+  "schema_version": 1,
+  "kind": "w1-3-completion-evidence",
+  "generated_at_utc": "2026-10-25T00:00:00Z",
+  "workspace": "bioinfo-tools",
+  "task": "W1-3",
+  "task_title": "rust-fx with stats, seq, fq2fa, fx2tab, sample --seed, split, lint",
+  "status": "verified",
+  "status_statement": "The plan's oracle differential was RUN against the exact pinned oracle versions and all 50 cases pass. Status changed from partial to verified on the strength of that run, not on intention. run_w13_oracle.sh exits 0 and still fails closed with exit 3 if either oracle is missing.",
+  "differential_run": true,
+  "claimed": true,
+  "previous_status": "partial",
+  "previous_blocker": "SeqKit 2.14.0 and fq 0.12.0 were absent; the harness exited 3.",
+  "acceptance_matrix": [
+    {
+      "criterion": "rust-fx implements the seven subcommands",
+      "status": "met"
+    },
+    {
+      "criterion": "in-repo tests for every subcommand",
+      "status": "met",
+      "detail": "178 tests"
+    },
+    {
+      "criterion": "sample --seed reproducible for a fixed seed",
+      "status": "met"
+    },
+    {
+      "criterion": "split naming/ordering deterministic",
+      "status": "met"
+    },
+    {
+      "criterion": "lint diagnostics per fq's published validator table",
+      "status": "met"
+    },
+    {
+      "criterion": "differential vs SeqKit 2.14.0, decompressed bytes identical",
+      "status": "met",
+      "detail": "50/50 cases"
+    },
+    {
+      "criterion": "differential vs fq 0.12.0",
+      "status": "met",
+      "detail": "50/50 cases"
+    }
+  ],
+  "oracle_status": {
+    "available": true,
+    "differential_run": true,
+    "cases_total": 50,
+    "cases_passed": 50,
+    "harness_exit_code": 0,
+    "fail_closed_when_missing": true,
+    "fail_closed_exit_code": 3
+  },
+  "oracle_versions": {
+    "seqkit": {
+      "version": "2.14.0",
+      "banner": "seqkit v2.14.0",
+      "path": "tests/ci/env/bin/seqkit",
+      "sha256": "88aa8a539b1e9097220a47811367b7ef826eff8637e5284fdd32a372770d6f7d",
+      "committed": false
+    },
+    "fq": {
+      "version": "0.12.0",
+      "banner": "fq v0.12.0 (51779f50e 2024-07-08)",
+      "path": "tests/ci/env/bin/fq",
+      "sha256": "600e8b204086bc0d3e225b0021fd234fc452bf72414af80ad8a115a327b5fcb2",
+      "committed": false
+    },
+    "rust_fx_binary_sha256": "c1552e841717f5d0f674d6dc533996feca84949aa654bc5b63a0a0662c25d466",
+    "pin_note": "tests/ci/PINS.md",
+    "binaries_committed": false,
+    "gitignore_rule": "tests/ci/env/bin/ is git-ignored; only PINS.md is tracked"
+  },
+  "cases_by_category": {
+    "stats": 8,
+    "seq": 12,
+    "fq2fa": 3,
+    "fx2tab": 9,
+    "sample": 4,
+    "split": 3,
+    "lint": 11
+  },
+  "harness_defects_fixed": [
+    {
+      "id": "H-1",
+      "defect": "run_case wrote fixtures into a per-case work directory no caller created",
+      "symptom": "FileNotFoundError: <tmp>/stats_default_fastq-oracle/in.fq; the run died on case 1",
+      "fix": "run_case now does work.mkdir(parents=True, exist_ok=True)",
+      "self_test": "_selftest_run_case_creates_workdir calls run_case against /bin/cat in a never-created nested dir"
+    },
+    {
+      "id": "H-2",
+      "defect": "--rust was relative but run_case runs tools with cwd=<work>",
+      "symptom": "FileNotFoundError: 'target/release/rust-fx'",
+      "fix": "_absolute_binary() resolves every tool path before the run"
+    },
+    {
+      "id": "H-3",
+      "defect": "8 cases had guards split across two literals with a comma, pushing 'seqkit' into the oracle field",
+      "symptom": "KeyError: 'reverse then complement' mid-run",
+      "fix": "guards joined; self-test now validates every case's oracle/argv/name/category/guard"
+    },
+    {
+      "id": "H-4",
+      "defect": "sample_proportion_bytes was byte-compared against seqkit despite its guard saying 'NOT compared byte-wise'",
+      "symptom": "permanent failure; selection algorithm is unspecified (DR-4)",
+      "fix": "re-declared as a property case: subset of input, exit 0",
+      "weakened_comparison": false,
+      "justification": "byte comparison was never possible; the case's own guard said so before the oracle existed"
+    },
+    {
+      "id": "H-5",
+      "defect": "sample_seed_changes_selection ran the same argv twice (seed 12 vs 12) then asserted they differ",
+      "symptom": "permanent failure by construction",
+      "fix": "_swap_seed() changes -s for the second run",
+      "weakened_comparison": false
+    }
+  ],
+  "normalisation_rules_added": [
+    {
+      "name": "fq_log_prefix",
+      "what": "strips ANSI SGR and canonicalises '<timestamp> <LEVEL>' to '<TS> <LEVEL>'",
+      "why_required": "fq's log lines carry a wall-clock timestamp that differs every run and ANSI colour that depends on the environment; byte comparison is impossible for any implementation",
+      "what_is_still_compared": "level, target and message, byte for byte",
+      "weakened_comparison": false,
+      "evidence": "two consecutive fq runs produce different first lines"
+    }
+  ],
+  "implementation_bugs_found_by_oracle": [
+    {
+      "id": "I-1",
+      "area": "stats human layout",
+      "bug": "printed a dashed rule line under the header and used 3-space separators",
+      "oracle": "no rule line; two-space separators",
+      "evidence": "oracle 'file   format  type' vs rust 'file    format   type' plus a '-----' rule row",
+      "fixed_in": "rust-fx/src/table.rs render/pad_row",
+      "cases_fixed": 4
+    },
+    {
+      "id": "I-2",
+      "area": "stats -a GC(%)",
+      "bug": "used (G+C)/(G+C+A+T) as the denominator",
+      "oracle": "stats uses (G+C)/length; fx2tab -g uses (G+C)/(G+C+A+T)",
+      "evidence": "in.fq oracle 48.39 vs rust 51.72; GCGCAAAANN stats 40.00 vs -g 50.00; NNNN stats 0.00 vs -g NaN",
+      "fixed_in": "rust-fx/src/stats.rs gc_percent / gc_percent_unambiguous",
+      "cases_fixed": 2
+    },
+    {
+      "id": "I-3",
+      "area": "fx2tab percentages",
+      "bug": "trimmed trailing zeros",
+      "oracle": "always exactly two decimals",
+      "evidence": "oracle 50.00 / 35.00 vs rust 50 / 35",
+      "fixed_in": "rust-fx/src/table.rs percent()",
+      "cases_fixed": 3
+    },
+    {
+      "id": "I-4",
+      "area": "Q20(%)/Q30(%)/AvgQual precision",
+      "bug": "used one precision for both layouts",
+      "oracle": "human trims (93.55, 11.9); tabular rounds Q20/Q30 to whole (94) and pads AvgQual to 2dp (11.90)",
+      "evidence": "58/62 -> human 93.55 / tabular 94; AvgQual 11.9 vs 11.90",
+      "fixed_in": "rust-fx/src/table.rs layout-aware cells()",
+      "cases_fixed": 2
+    },
+    {
+      "id": "I-5",
+      "area": "stats -a quartiles",
+      "bug": "nearest-rank; then a wrong upper-hinge slice lengths[n/2+1..]",
+      "oracle": "Tukey hinges with round-half-to-even",
+      "evidence": "n=8 lens 1..8 -> Q1=2 Q2=4 Q3=6; n=20 -> 6/10/16; lens [4,7,20] -> Q3=14 not 20",
+      "fixed_in": "rust-fx/src/table.rs quartiles()/round_half_even()",
+      "cases_fixed": 2
+    },
+    {
+      "id": "I-6",
+      "area": "fx2tab -s seq hash",
+      "bug": "MD5 of the upper-cased sequence",
+      "oracle": "MD5 of the lower-cased sequence",
+      "evidence": "ACGTACGT -> oracle db819856... = md5('acgtacgt'); rust cc0af3a4... = md5('ACGTACGT')",
+      "fixed_in": "rust-fx/src/commands.rs fx2tab",
+      "cases_fixed": 1
+    },
+    {
+      "id": "I-7",
+      "area": "fx2tab -H / -B / -C",
+      "bug": "header 'name' not '#name'; contents before counts; labels 'GC(%)'/'AT(count)'",
+      "oracle": "'#name'; all -C counts before all -B contents regardless of flag order; bare labels 'GC'/'AT'",
+      "fixed_in": "rust-fx/src/commands.rs fx2tab",
+      "cases_fixed": 2
+    },
+    {
+      "id": "I-8",
+      "area": "split diagnostics",
+      "bug": "[INFO] lines written to stdout",
+      "oracle": "stderr; stdout stays empty",
+      "fixed_in": "rust-fx/src/commands.rs split (both sites -> eprintln!)",
+      "cases_fixed": 3
+    },
+    {
+      "id": "I-9",
+      "area": "lint exit code and stream",
+      "bug": "exit 3 (ExitClass::Input) and ERROR lines on stderr",
+      "oracle": "exit 1; INFO/ERROR lines on stdout with fq's targets and wording",
+      "evidence": "fq lint bad.fq; echo $? -> 1",
+      "fixed_in": "rust-fx/src/commands.rs lint + fq log helpers; rust-fx/src/io.rs CommandError::runtime",
+      "cases_fixed": 10
+    },
+    {
+      "id": "I-10",
+      "area": "lint S007",
+      "bug": "S007 (DuplicateName) was an enabled single-read validator",
+      "oracle": "S007 is known but never enabled for single reads; duplicate names exit 0",
+      "evidence": "fq lint --disable-validator S007 accepted (known) but dup.fq exits 0 and S007 is absent from every enabled list",
+      "fixed_in": "rust-fx/src/lint.rs Validator::SINGLE (6 not 7); still in from_code",
+      "cases_fixed": 1
+    },
+    {
+      "id": "I-11",
+      "area": "lint P001",
+      "bug": "message lacked '@'; attributed to read 2's file",
+      "oracle": "names mismatch: expected '@other', got '@p2', reported against r1",
+      "fixed_in": "rust-fx/src/lint.rs check_pair + LintError.report_against_read1",
+      "cases_fixed": 1
+    }
+  ],
+  "negative_controls": [
+    {
+      "what": "deliberately broke percent() .2 -> .1",
+      "result": "50/50 -> 43/50",
+      "conclusion": "the comparison detects a one-character formatting regression"
+    },
+    {
+      "what": "deliberately removed work.mkdir from run_case",
+      "result": "self-test FAIL: 'run_case could not create its work dir'",
+      "conclusion": "the self-test genuinely guards H-1"
+    },
+    {
+      "what": "accidental partial revert of tabular_float/percent while undoing a control",
+      "result": "50/50 -> 41/50, which is how the mistake was noticed",
+      "conclusion": "independent evidence the suite has teeth"
+    }
+  ],
+  "commands": [
+    "bash tests/oracle/run_w13_oracle.sh",
+    "python3 tests/oracle/w13_diff.py --self-test",
+    "cargo fmt --all -- --check",
+    "cargo clippy --workspace --all-targets --offline -- -D warnings",
+    "cargo test --workspace --offline",
+    "cargo test --workspace --release --offline",
+    "cargo build --release --offline -p rust-fx"
+  ],
+  "suites": [
+    {
+      "name": "w1-3 differential (SeqKit 2.14.0 + fq 0.12.0)",
+      "command": "bash tests/oracle/run_w13_oracle.sh",
+      "result": "50/50 cases passed",
+      "exit_code": 0
+    },
+    {
+      "name": "w1-3 harness self-test",
+      "command": "python3 tests/oracle/w13_diff.py --self-test",
+      "result": "SELFTEST PASS",
+      "exit_code": 0
+    },
+    {
+      "name": "cargo fmt",
+      "command": "cargo fmt --all -- --check",
+      "result": "clean",
+      "exit_code": 0
+    },
+    {
+      "name": "cargo clippy",
+      "command": "cargo clippy --workspace --all-targets --offline -- -D warnings",
+      "result": "0 errors, 0 warnings",
+      "exit_code": 0
+    },
+    {
+      "name": "workspace tests (debug)",
+      "command": "cargo test --workspace --offline",
+      "result": "587 passed, 0 failed",
+      "exit_code": 0
+    },
+    {
+      "name": "workspace tests (release)",
+      "command": "cargo test --workspace --release --offline",
+      "result": "587 passed, 0 failed",
+      "exit_code": 0
+    },
+    {
+      "name": "cutadapt 4.6 differential",
+      "command": "python3 tests/check.py (in rust-cutadapt)",
+      "result": "all visible conformance cases passed",
+      "exit_code": 0
+    },
+    {
+      "name": "UMI-tools 1.1.6 exact",
+      "command": "bash tests/oracle/run_exact.sh",
+      "result": "77/77 byte-identical, 0 differ",
+      "exit_code": 0
+    },
+    {
+      "name": "UMI-tools semantic",
+      "command": "bash tests/oracle/run_determinism.sh",
+      "result": "deterministic: 0 mismatches",
+      "exit_code": 0
+    },
+    {
+      "name": "UMI-tools formats",
+      "command": "python3 tests/oracle/formats.py",
+      "result": "formats ok: 0 failures",
+      "exit_code": 0
+    },
+    {
+      "name": "M3 byte-neutrality gate",
+      "command": "bash tests/gate/m3.sh",
+      "result": "9/9 criteria, M3 PASS",
+      "exit_code": 0
+    }
+  ],
+  "test_counts": {
+    "bioinfo_common": 39,
+    "bioinfo_fastx": 96,
+    "rust_cutadapt": 201,
+    "rust_fx": 178,
+    "rust_umitools": 73,
+    "workspace_total_debug": 587,
+    "workspace_failed_debug": 0,
+    "workspace_total_release": 587,
+    "workspace_failed_release": 0,
+    "sum_check": "39+96+201+178+73 = 587, matching both workspace totals",
+    "rust_fx_delta": "177 -> 178 (one lint test repointed); harness additions are Python, not Rust"
+  },
+  "not_claimed": [
+    "cross-platform byte-identity: only linux x86_64 measured",
+    "subcommands outside the 50-case matrix",
+    "sample selection equality with SeqKit: impossible by construction (DR-4)",
+    "W1-4 or later: not started; W1-4 is separately blocked on noodles"
+  ],
+  "design_deviations": [
+    {
+      "id": "DR-2",
+      "topic": "MD5 implemented in-crate rather than as a dependency",
+      "status": "unchanged, verified against seqkit -s"
+    },
+    {
+      "id": "DR-3",
+      "topic": "stats layout and quartile conventions",
+      "status": "RESOLVED by the oracle: quartiles are Tukey hinges with half-even rounding; no rule line; two-space separators; percentages always 2dp; Q20/Q30 layout-dependent"
+    },
+    {
+      "id": "DR-4",
+      "topic": "sample is not byte-comparable with SeqKit",
+      "status": "unchanged and now correctly modelled as a property case"
+    },
+    {
+      "id": "DR-5",
+      "topic": "lint rule semantics the docs left open",
+      "status": "RESOLVED: S007 never enabled; exact per-code wording captured; exit 1"
+    },
+    {
+      "id": "DR-6",
+      "topic": "split part width",
+      "status": "unchanged; part_001 naming confirmed against the oracle"
+    },
+    {
+      "id": "DR-7",
+      "topic": "quality encodings map to two ASCII offsets",
+      "status": "unchanged"
+    },
+    {
+      "id": "DR-8",
+      "topic": "seq refuses a length-changing transform on FASTQ",
+      "status": "unchanged"
+    },
+    {
+      "id": "DR-9",
+      "topic": "seq --dna2rna/--rna2dna/-p/-r combination order",
+      "status": "unchanged; seq cases all pass"
+    }
+  ],
+  "files_created": [
+    "tests/ci/PINS.md",
+    ".gitignore"
+  ],
+  "files_modified": [
+    "rust-fx/src/table.rs",
+    "rust-fx/src/stats.rs",
+    "rust-fx/src/commands.rs",
+    "rust-fx/src/lint.rs",
+    "rust-fx/src/io.rs",
+    "tests/oracle/w13_diff.py",
+    "docs/EVIDENCE-W1-3.md",
+    "docs/EVIDENCE-W1-3.json"
+  ],
+  "repository_state": {
+    "root_is_git_repo": false,
+    "rust_cutadapt": {
+      "commit": "4609a0c6eb835c9117915c6da41267712ef38773",
+      "tags": 0
+    },
+    "rust_umitools": {
+      "commit": "40b5b709247e84e00d81ca05c3b37c107a9f014d",
+      "tags": 1,
+      "note": "pre-existing W1-1 modifications, not touched by W1-3"
+    },
+    "versions": {
+      "bioinfo-common": "0.1.0",
+      "bioinfo-fastx": "0.1.0",
+      "rust-cutadapt": "0.1.0",
+      "rust-fx": "0.1.0",
+      "rust-umitools": "0.2.0"
+    },
+    "no_release": true,
+    "no_tag": true,
+    "no_version_bump": true,
+    "no_publication": true,
+    "new_runtime_dependencies_added": []
+  },
+  "verification_attribution": {
+    "run_by": "leader, this session, offline",
+    "independent_reviewer": null,
+    "note": "All commands quoted were executed personally. Delegation was attempted for W1-4 and the assignee had no shell tool; no part of this W1-3 result is a second-hand claim."
+  },
+  "remaining_gaps_w1_4": [
+    "W1-4 is BLOCKED: noodles 0.118.0 is absent from the offline registry; see docs/EVIDENCE-W1-4.md",
+    "No independent reviewer has signed off W1-1/W1-2/W1-3",
+    "rust-umitools has 7 pre-existing modified paths conflicting with AGENTS.md's clean-tree rule"
+  ]
+}

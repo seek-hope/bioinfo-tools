@@ -1,0 +1,22 @@
+{
+  "argv": [
+    "count",
+    "--help"
+  ],
+  "exit_code": 0,
+  "guard": "count --help text (option grammar + after_help block)",
+  "level": "L2",
+  "name": "umitools_count_help",
+  "rules_fired": {
+    "stdout": [
+      "program_name"
+    ]
+  },
+  "streams": {
+    "stdout": {
+      "bytes": 3991,
+      "kind": "text",
+      "text": "Count unique UMIs per gene (or per cell and gene)\n\nUsage: <BIN> count [OPTIONS] --stdin <FILE>\n\nOptions:\n  -I, --stdin <FILE>\n          Input file: BAM, or SAM when the name ends in .sam (- for stdin) [alias: --input]\n  -S, --stdout <FILE>\n          Output file; the format depends on the command (- for stdout) [alias: --output]\n  -L, --log <FILE>\n          Log file (defaults to stderr)\n      --method <METHOD>\n          Merge method: unique, percentile, cluster, adjacency, directional [default: directional]\n      --edit-distance-threshold <THRESHOLD>\n          Maximum Hamming distance between UMIs in a cluster [default: 1]\n      --extract-umi-method <EXTRACT_UMI_METHOD>\n          Where the UMI comes from: read_id, tag, umis [default: read_id]\n      --umi-tag <UMI_TAG>\n          UMI tag when --extract-umi-method=tag [default: RX]\n      --verbose\n          Print detailed build information together with --version\n      --umi-separator <UMI_SEPARATOR>\n          Separator for the UMI in the read name [default: _]\n      --umi-tag-split <UMI_TAG_SPLIT>\n          Split the UMI tag on this string and keep the first part\n      --umi-tag-delim <UMI_TAG_DELIM>\n          Remove this string from the UMI tag\n      --cell-tag <CELL_TAG>\n          Cell barcode tag (used with --per-cell) [default: CB]\n      --per-cell\n          Group by cell barcode as well as UMI\n      --random-seed <RANDOM_SEED>\n          Seed for the representative read draw [default: 0]\n      --representative <REPRESENTATIVE>\n          Representative read strategy: upstream, stable [default: upstream]\n      --soft-clip-threshold <SOFT_CLIP_THRESHOLD>\n          Soft clip length above which a read counts as spliced [default: 4]\n      --spliced-is-unique\n          Treat spliced reads as unique\n      --ignore-tlen\n          Ignore the template length when grouping\n      --read-length\n          Include the read length in the bundle key\n      --mapping-quality <MAPPING_QUALITY>\n          Discard reads below this MAPQ\n      --multimapping-detection-method <DETECTION_METHOD>\n          Multimapping detection tag: NH, X0 or XT\n      --add-pg\n          Append a @PG provenance record (changes the output bytes)\n      --threads <THREADS>\n          Worker threads\n      --memory-limit <MEMORY_LIMIT>\n          Memory budget, e.g. 4GiB\n      --tmpdir <TMPDIR>\n          Directory for temporary files\n      --quiet\n          Suppress informational output; errors are still printed\n      --progress <MODE>\n          Progress reporting: auto (terminal only), on, off [default: auto]\n      --summary-json <FILE>\n          Write a machine readable run summary to this file\n      --sort-strategy <MODE>\n          Sort strategy: auto, low-memory, high-throughput [default: auto]\n      --reference <FASTA>\n          Reference FASTA for CRAM input or output\n      --compresslevel <COMPRESSLEVEL>\n          BAM compression level (0-9; 0 stores uncompressed blocks) [default: 1]\n      --per-gene\n          Count per gene using this tag\n      --gene-tag <GENE_TAG>\n          Gene tag\n      --assigned-status-tag <ASSIGNED_STATUS_TAG>\n          Tag marking assignment status\n      --partition-genes <PARTITION_GENES>\n          Gene partitions for the bounded spill path (0 = automatic, 1 = disable) [default: 0]\n      --skip-regex <SKIP_REGEX>\n          Skip genes matching this regular expression\n      --per-contig\n          Treat each contig as a gene\n      --gene-transcript-map <FILE>\n          Tab separated gene/transcript map (requires --per-contig)\n      --wide\n          Output one line per (gene, cell) instead of a wide matrix\n  -h, --help\n          Print help\n\nEXAMPLES:\n  <BIN> count -I assigned.bam -S counts.tsv --per-gene --gene-tag GX\n  <BIN> count -I assigned.bam -S counts.tsv --per-contig\n\nNOTES:\n  Input is BAM/SAM; output is a TSV table, not BAM.\n  The default table is gene<TAB>count (or gene<TAB>cell<TAB>count with --per-cell);\n  --wide writes a dense gene x cell matrix.\n"
+    }
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "argv": [
+    "count",
+    "-I",
+    "in.bam",
+    "-S",
+    "out.tsv",
+    "--random-seed",
+    "1",
+    "--summary-json",
+    "s.json",
+    "--per-gene",
+    "--gene-tag",
+    "GX"
+  ],
+  "exit_code": 0,
+  "guard": "count: output bytes + --summary-json contract",
+  "level": "L1",
+  "name": "umitools_count",
+  "rules_fired": {
+    "s.json": [
+      "umitools_summary_timings",
+      "umitools_summary_resources"
+    ],
+    "stderr": [
+      "umitools_log_timing_lines",
+      "umitools_log_threads"
+    ]
+  },
+  "streams": {
+    "out.tsv": {
+      "bytes": 21,
+      "kind": "text",
+      "text": "gene\tcount\nG1\t2\nG2\t1\n"
+    },
+    "s.json": {
+      "bytes": 256,
+      "kind": "text",
+      "text": "{\"program\":\"rust-umitools\",\"version\":\"0.2.0\",\"command\":\"count\",\"input\":\"in.bam\",\"outputs\":[{\"role\":\"tsv\",\"path\":\"out.tsv\"}],\"resources\":<RESOURCES>,\"counters\":{\"genes\":2,\"molecules\":3},\"timings\":<TIMINGS>}\n"
+    },
+    "stderr": {
+      "bytes": 83,
+      "kind": "text",
+      "text": "rust-umitools count: threads=<N>\ngenes               : 2\nwall time           : <TIME>s\n"
+    },
+    "stdout": {
+      "bytes": 0,
+      "kind": "text",
+      "text": ""
+    }
+  }
+}

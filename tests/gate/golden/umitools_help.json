@@ -1,0 +1,21 @@
+{
+  "argv": [
+    "--help"
+  ],
+  "exit_code": 0,
+  "guard": "whole --help text",
+  "level": "L2",
+  "name": "umitools_help",
+  "rules_fired": {
+    "stdout": [
+      "program_name"
+    ]
+  },
+  "streams": {
+    "stdout": {
+      "bytes": 1400,
+      "kind": "text",
+      "text": "Rust high-performance implementation of UMI-tools workflows\n\nUsage: <BIN> [OPTIONS] [INPUT] [OUTPUT] [THREADS]\n       <BIN> <COMMAND>\n\nCommands:\n  whitelist  Estimate true cell barcodes from FASTQ\n  extract    Extract UMI from FASTQ reads into the read name\n  dedup      Deduplicate reads grouped by UMI\n  group      Group reads by UMI and tag them with UG/BX\n  count      Count unique UMIs per gene (or per cell and gene)\n  count_tab  Count unique UMIs from a two column read/gene table\n\nArguments:\n  [INPUT]    Legacy form: <input.bam> <output.bam> [threads]\n  [OUTPUT]   \n  [THREADS]  \n\nOptions:\n      --verbose  Print detailed build information together with --version\n  -h, --help     Print help\n  -V, --version  Print version\n\nEXAMPLES:\n  <BIN> dedup -I in.bam -S out.bam\n  <BIN> dedup -I in.bam -S out.bam --method=directional --random-seed 1\n  <BIN> group -I in.bam -S grouped.bam --output-bam --group-out groups.tsv\n  <BIN> count -I assigned.bam -S counts.tsv --per-gene --gene-tag GX\n  <BIN> count_tab -I reads.tsv -S counts.tsv\n\nDEFAULTS:\n  --method=directional  --edit-distance-threshold=1  --umi-separator=_\n  --compresslevel=1 (use --compresslevel 6 for smaller output)\n  threads = min(logical CPUs, 16); memory = half of MemAvailable (clamped)\n  The run summary reports the detected hardware and the chosen budget.\n"
+    }
+  }
+}

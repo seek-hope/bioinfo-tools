@@ -1,0 +1,45 @@
+{
+  "argv": [
+    "-a",
+    "AGATCGGAAGAGC",
+    "-m",
+    "10",
+    "--json",
+    "report.json",
+    "-o",
+    "out.fastq",
+    "simple.fastq"
+  ],
+  "exit_code": 0,
+  "guard": "L1 --json report bytes (the document has no timing fields)",
+  "level": "L1",
+  "name": "cutadapt_json_report",
+  "rules_fired": {
+    "stdout": [
+      "cutadapt_core_count",
+      "cutadapt_finished_line"
+    ]
+  },
+  "streams": {
+    "out.fastq": {
+      "bytes": 714,
+      "kind": "text",
+      "text": "@full\nGCTAAAGACAATTACATAACATACACGTCAGCACGAAACT\n+\nIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII\n@internal\nTGTTGGCCCAGTGTGAATCGCTTAAGGGTT\n+\nIIIIIIIIIIIIIIIIIIIIIIIIIIIIII\n@partial\nGATGCATACGCCTTTACTTGCTGTGTCCACCCCATCGGACTGGCA\n+\nIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII\n@none\nTTTTTATTACACTCAGAAACAGAACTCGGGTAATTTTGACAGGTCACGCA\n+\nIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII\n@mismatch\nGAGGCGCGCCCTCCTGAAGTGCGTGGACACTCGCTATGAA\n+\nIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII\n@long\nCACTCTGCCAAACTCCAGCGCGGTCAGTTCCATCACCCTAAGTAACCGAATAATGCGTTC\n+\nIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII\n@reversecomp\nTTATGGAACAAGGACGCTGTCTGAGACTAGAAGACGCTCTTCCGATCT\n+\nIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII\n"
+    },
+    "report.json": {
+      "bytes": 2041,
+      "kind": "text",
+      "text": "{\n  \"tag\": \"Cutadapt report\",\n  \"schema_version\": [0, 3],\n  \"cutadapt_version\": \"4.6\",\n  \"python_version\": \"\",\n  \"command_line_arguments\": [\n    \"rust-cutadapt\",\n    \"-a\",\n    \"AGATCGGAAGAGC\",\n    \"-m\",\n    \"10\",\n    \"--json\",\n    \"report.json\",\n    \"-o\",\n    \"out.fastq\",\n    \"simple.fastq\"\n  ],\n  \"cores\": 1,\n  \"input\": {\n    \"path1\": \"simple.fastq\",\n    \"path2\": null,\n    \"paired\": false\n  },\n  \"read_counts\": {\n    \"input\": 10,\n    \"filtered\": {\n      \"too_short\": 3,\n      \"too_long\": null,\n      \"too_many_n\": null,\n      \"too_many_expected_errors\": null,\n      \"casava_filtered\": null,\n      \"discard_trimmed\": null,\n      \"discard_untrimmed\": null\n    },\n    \"output\": 7,\n    \"reverse_complemented\": null,\n    \"read1_with_adapter\": 7,\n    \"read2_with_adapter\": null\n  },\n  \"basepair_counts\": {\n    \"input\": 460,\n    \"input_read1\": 460,\n    \"input_read2\": null,\n    \"quality_trimmed\": null,\n    \"quality_trimmed_read1\": null,\n    \"quality_trimmed_read2\": null,\n    \"poly_a_trimmed\": null,\n    \"poly_a_trimmed_read1\": null,\n    \"poly_a_trimmed_read2\": null,\n    \"output\": 313,\n    \"output_read1\": 313,\n    \"output_read2\": null\n  },\n  \"adapters_read1\": [\n    {\n      \"name\": \"1\",\n      \"total_matches\": 7,\n      \"on_reverse_complement\": null,\n      \"linked\": false,\n      \"five_prime_end\": null,\n      \"three_prime_end\": {\n        \"type\": \"regular_three_prime\",\n        \"sequence\": \"AGATCGGAAGAGC\",\n        \"error_rate\": 0.1,\n        \"indels\": true,\n        \"error_lengths\": [9, 13],\n        \"matches\": 7,\n        \"adjacent_bases\": {\n          \"A\": 2,\n          \"C\": 1,\n          \"G\": 0,\n          \"T\": 3,\n          \"\": 1\n        },\n        \"dominant_adjacent_base\": null,\n        \"trimmed_lengths\": [\n          {\"len\": 6, \"expect\": 0.0, \"counts\": [1]},\n          {\"len\": 13, \"expect\": 0.0, \"counts\": [3, 1]},\n          {\"len\": 23, \"expect\": 0.0, \"counts\": [1]},\n          {\"len\": 53, \"expect\": 0.0, \"counts\": [1]}\n        ]\n      }\n    }\n  ],\n  \"adapters_read2\": null,\n  \"poly_a_trimmed_read1\": null,\n  \"poly_a_trimmed_read2\": null\n}\n"
+    },
+    "stderr": {
+      "bytes": 0,
+      "kind": "text",
+      "text": ""
+    },
+    "stdout": {
+      "bytes": 968,
+      "kind": "text",
+      "text": "This is cutadapt 0.1.0 with Python 3\nCommand line parameters: -a AGATCGGAAGAGC -m 10 --json report.json -o out.fastq simple.fastq\nProcessing single-end reads on <N> cores ...\nFinished in <TIME> s (<TIME> \u00b5s/read; <TIME> M reads/minute).\n\n=== Summary ===\n\nTotal reads processed:                      10\nReads with adapters:                         7 (70.0%)\n\n== Read fate breakdown ==\nReads that were too short:                   3 (30.0%)\nReads written (passing filters):             7 (70.0%)\n\nTotal basepairs processed:           460 bp\nTotal written (filtered):            313 bp (68.0%)\n\n=== Adapter 1 ===\n\nSequence: AGATCGGAAGAGC; Type: regular 3'; Length: 13; Trimmed: 7 times\n\nMinimum overlap: 3\nNo. of allowed errors:\n1-9 bp: 0; 10-13 bp: 1\n\nBases preceding removed adapters:\n  A: 28.6%\n  C: 14.3%\n  G: 0.0%\n  T: 42.9%\n  none/other: 14.3%\n\nOverview of removed sequences\nlength\tcount\texpect\tmax.err\terror counts\n6\t1\t0.0\t0\t1\n13\t4\t0.0\t1\t3 1\n23\t1\t0.0\t1\t1\n53\t1\t0.0\t1\t1\n"
+    }
+  }
+}

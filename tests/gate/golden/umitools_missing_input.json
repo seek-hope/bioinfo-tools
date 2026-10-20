@@ -1,0 +1,26 @@
+{
+  "argv": [
+    "count_tab",
+    "-I",
+    "nope.tsv",
+    "-S",
+    "out.tsv"
+  ],
+  "exit_code": 4,
+  "guard": "exit class 4 + exact IO diagnostic for a missing input",
+  "level": "L2",
+  "name": "umitools_missing_input",
+  "rules_fired": {},
+  "streams": {
+    "stderr": {
+      "bytes": 80,
+      "kind": "text",
+      "text": "rust-umitools count_tab\nERROR: nope.tsv: No such file or directory (os error 2)\n"
+    },
+    "stdout": {
+      "bytes": 0,
+      "kind": "text",
+      "text": ""
+    }
+  }
+}

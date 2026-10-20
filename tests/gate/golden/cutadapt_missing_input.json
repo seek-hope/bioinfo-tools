@@ -1,0 +1,32 @@
+{
+  "argv": [
+    "-a",
+    "AGATCGGAAGAGC",
+    "-m",
+    "10",
+    "-o",
+    "out.fastq",
+    "definitely-missing.fastq"
+  ],
+  "exit_code": 1,
+  "guard": "exit class 1 + stdout ERROR line for a missing input file",
+  "level": "L2",
+  "name": "cutadapt_missing_input",
+  "rules_fired": {
+    "stdout": [
+      "cutadapt_core_count"
+    ]
+  },
+  "streams": {
+    "stderr": {
+      "bytes": 0,
+      "kind": "text",
+      "text": ""
+    },
+    "stdout": {
+      "bytes": 258,
+      "kind": "text",
+      "text": "This is cutadapt 0.1.0 with Python 3\nCommand line parameters: -a AGATCGGAAGAGC -m 10 -o out.fastq definitely-missing.fastq\nProcessing single-end reads on <N> cores ...\nERROR: cannot open input \"definitely-missing.fastq\": No such file or directory (os error 2)\n"
+    }
+  }
+}

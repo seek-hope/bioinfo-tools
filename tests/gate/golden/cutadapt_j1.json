@@ -1,0 +1,40 @@
+{
+  "argv": [
+    "-j",
+    "1",
+    "-a",
+    "AGATCGGAAGAGC",
+    "-m",
+    "10",
+    "-o",
+    "out.fastq",
+    "simple.fastq"
+  ],
+  "exit_code": 0,
+  "guard": "-j 1: identical output bytes, core-count line normalised",
+  "level": "L2",
+  "name": "cutadapt_j1",
+  "rules_fired": {
+    "stdout": [
+      "cutadapt_core_count",
+      "cutadapt_finished_line"
+    ]
+  },
+  "streams": {
+    "out.fastq": {
+      "bytes": 714,
+      "kind": "text",
+      "text": "@full\nGCTAAAGACAATTACATAACATACACGTCAGCACGAAACT\n+\nIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII\n@internal\nTGTTGGCCCAGTGTGAATCGCTTAAGGGTT\n+\nIIIIIIIIIIIIIIIIIIIIIIIIIIIIII\n@partial\nGATGCATACGCCTTTACTTGCTGTGTCCACCCCATCGGACTGGCA\n+\nIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII\n@none\nTTTTTATTACACTCAGAAACAGAACTCGGGTAATTTTGACAGGTCACGCA\n+\nIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII\n@mismatch\nGAGGCGCGCCCTCCTGAAGTGCGTGGACACTCGCTATGAA\n+\nIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII\n@long\nCACTCTGCCAAACTCCAGCGCGGTCAGTTCCATCACCCTAAGTAACCGAATAATGCGTTC\n+\nIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII\n@reversecomp\nTTATGGAACAAGGACGCTGTCTGAGACTAGAAGACGCTCTTCCGATCT\n+\nIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII\n"
+    },
+    "stderr": {
+      "bytes": 0,
+      "kind": "text",
+      "text": ""
+    },
+    "stdout": {
+      "bytes": 953,
+      "kind": "text",
+      "text": "This is cutadapt 0.1.0 with Python 3\nCommand line parameters: -j 1 -a AGATCGGAAGAGC -m 10 -o out.fastq simple.fastq\nProcessing single-end reads on <N> core ...\nFinished in <TIME> s (<TIME> \u00b5s/read; <TIME> M reads/minute).\n\n=== Summary ===\n\nTotal reads processed:                      10\nReads with adapters:                         7 (70.0%)\n\n== Read fate breakdown ==\nReads that were too short:                   3 (30.0%)\nReads written (passing filters):             7 (70.0%)\n\nTotal basepairs processed:           460 bp\nTotal written (filtered):            313 bp (68.0%)\n\n=== Adapter 1 ===\n\nSequence: AGATCGGAAGAGC; Type: regular 3'; Length: 13; Trimmed: 7 times\n\nMinimum overlap: 3\nNo. of allowed errors:\n1-9 bp: 0; 10-13 bp: 1\n\nBases preceding removed adapters:\n  A: 28.6%\n  C: 14.3%\n  G: 0.0%\n  T: 42.9%\n  none/other: 14.3%\n\nOverview of removed sequences\nlength\tcount\texpect\tmax.err\terror counts\n6\t1\t0.0\t0\t1\n13\t4\t0.0\t1\t3 1\n23\t1\t0.0\t1\t1\n53\t1\t0.0\t1\t1\n"
+    }
+  }
+}

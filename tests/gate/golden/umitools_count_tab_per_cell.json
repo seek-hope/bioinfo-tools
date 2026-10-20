@@ -1,0 +1,36 @@
+{
+  "argv": [
+    "count_tab",
+    "-I",
+    "reads_cell.tsv",
+    "-S",
+    "out.tsv",
+    "--per-cell"
+  ],
+  "exit_code": 0,
+  "guard": "L1 count_tab --per-cell output bytes",
+  "level": "L1",
+  "name": "umitools_count_tab_per_cell",
+  "rules_fired": {
+    "stderr": [
+      "umitools_log_timing_lines"
+    ]
+  },
+  "streams": {
+    "out.tsv": {
+      "bytes": 34,
+      "kind": "text",
+      "text": "cell\tgene\tcount\nCB1\tG1\t1\nCB2\tG1\t2\n"
+    },
+    "stderr": {
+      "bytes": 75,
+      "kind": "text",
+      "text": "rust-umitools count_tab\ngenes               : 1\nwall time           : <TIME>s\n"
+    },
+    "stdout": {
+      "bytes": 0,
+      "kind": "text",
+      "text": ""
+    }
+  }
+}

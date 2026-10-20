@@ -1,0 +1,43 @@
+{
+  "argv": [
+    "-a",
+    "AGATCGGAAGAGC",
+    "-m",
+    "10",
+    "-o",
+    "o_{name}.fastq",
+    "simple.fastq"
+  ],
+  "exit_code": 0,
+  "guard": "L1 demultiplex per-file bytes (o_1.fastq, o_unknown.fastq)",
+  "level": "L2",
+  "name": "cutadapt_demultiplex",
+  "rules_fired": {
+    "stdout": [
+      "cutadapt_core_count",
+      "cutadapt_finished_line"
+    ]
+  },
+  "streams": {
+    "o_1.fastq": {
+      "bytes": 491,
+      "kind": "text",
+      "text": "@full\nGCTAAAGACAATTACATAACATACACGTCAGCACGAAACT\n+\nIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII\n@internal\nTGTTGGCCCAGTGTGAATCGCTTAAGGGTT\n+\nIIIIIIIIIIIIIIIIIIIIIIIIIIIIII\n@partial\nGATGCATACGCCTTTACTTGCTGTGTCCACCCCATCGGACTGGCA\n+\nIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII\n@mismatch\nGAGGCGCGCCCTCCTGAAGTGCGTGGACACTCGCTATGAA\n+\nIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII\n@long\nCACTCTGCCAAACTCCAGCGCGGTCAGTTCCATCACCCTAAGTAACCGAATAATGCGTTC\n+\nIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII\n"
+    },
+    "o_unknown.fastq": {
+      "bytes": 223,
+      "kind": "text",
+      "text": "@none\nTTTTTATTACACTCAGAAACAGAACTCGGGTAATTTTGACAGGTCACGCA\n+\nIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII\n@reversecomp\nTTATGGAACAAGGACGCTGTCTGAGACTAGAAGACGCTCTTCCGATCT\n+\nIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII\n"
+    },
+    "stderr": {
+      "bytes": 0,
+      "kind": "text",
+      "text": ""
+    },
+    "stdout": {
+      "bytes": 1008,
+      "kind": "text",
+      "text": "This is cutadapt 0.1.0 with Python 3\nCommand line parameters: -a AGATCGGAAGAGC -m 10 -o o_{name}.fastq simple.fastq\nProcessing single-end reads on <N> cores ...\nFinished in <TIME> s (<TIME> \u00b5s/read; <TIME> M reads/minute).\n\n=== Summary ===\n\nTotal reads processed:                      10\nReads with adapters:                         7 (70.0%)\n\n== Read fate breakdown ==\nReads that were too short:                   3 (30.0%)\nReads discarded as untrimmed:                0 (0.0%)\nReads written (passing filters):             7 (70.0%)\n\nTotal basepairs processed:           460 bp\nTotal written (filtered):            313 bp (68.0%)\n\n=== Adapter 1 ===\n\nSequence: AGATCGGAAGAGC; Type: regular 3'; Length: 13; Trimmed: 7 times\n\nMinimum overlap: 3\nNo. of allowed errors:\n1-9 bp: 0; 10-13 bp: 1\n\nBases preceding removed adapters:\n  A: 28.6%\n  C: 14.3%\n  G: 0.0%\n  T: 42.9%\n  none/other: 14.3%\n\nOverview of removed sequences\nlength\tcount\texpect\tmax.err\terror counts\n6\t1\t0.0\t0\t1\n13\t4\t0.0\t1\t3 1\n23\t1\t0.0\t1\t1\n53\t1\t0.0\t1\t1\n"
+    }
+  }
+}

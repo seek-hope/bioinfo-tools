@@ -1,0 +1,54 @@
+{
+  "argv": [
+    "dedup",
+    "-I",
+    "in.bam",
+    "-S",
+    "out.bam",
+    "--random-seed",
+    "1",
+    "-L",
+    "run.log"
+  ],
+  "exit_code": 0,
+  "guard": "L2 dedup -L log: timings/budget/host lines normalised, rest exact",
+  "level": "L2",
+  "name": "umitools_logfile_dedup",
+  "rules_fired": {
+    "run.log": [
+      "umitools_log_timing_lines",
+      "umitools_log_threads",
+      "umitools_log_memory",
+      "umitools_log_hardware_line",
+      "umitools_log_container_line"
+    ],
+    "stderr": [
+      "umitools_log_timing_lines",
+      "umitools_log_threads",
+      "umitools_log_memory",
+      "umitools_log_hardware_line",
+      "umitools_log_container_line"
+    ]
+  },
+  "streams": {
+    "mirror:run.log==stderr": {
+      "kind": "text",
+      "text": "equal\n"
+    },
+    "run.log": {
+      "bytes": 681,
+      "kind": "text",
+      "text": "rust-umitools 0.2.0 dedup: threads=<N> memory=<N>MiB method=directional threshold=1 representative=upstream\nhardware            : <HARDWARE>\ncontainer limits     : <LIMITS>\nreads in            : 43\nbundles             : 5\noutput reads        : 8\nunmapped removed    : 1\nno-UMI skipped      : 0\nMAPQ ties sampled   : 29\nmates recovered     : 0\nevents              : input=43 read2=0 unmapped=1 mate_unmapped=0 chimeric=0 unpaired=0 below_mapq=0 passthrough=0 subset_excluded=0\nparse+cluster       : <TIME>s\nsort+commit         : <TIME>s\nwall time           : <TIME>s\n"
+    },
+    "stderr": {
+      "bytes": 681,
+      "kind": "text",
+      "text": "rust-umitools 0.2.0 dedup: threads=<N> memory=<N>MiB method=directional threshold=1 representative=upstream\nhardware            : <HARDWARE>\ncontainer limits     : <LIMITS>\nreads in            : 43\nbundles             : 5\noutput reads        : 8\nunmapped removed    : 1\nno-UMI skipped      : 0\nMAPQ ties sampled   : 29\nmates recovered     : 0\nevents              : input=43 read2=0 unmapped=1 mate_unmapped=0 chimeric=0 unpaired=0 below_mapq=0 passthrough=0 subset_excluded=0\nparse+cluster       : <TIME>s\nsort+commit         : <TIME>s\nwall time           : <TIME>s\n"
+    },
+    "stdout": {
+      "bytes": 0,
+      "kind": "text",
+      "text": ""
+    }
+  }
+}

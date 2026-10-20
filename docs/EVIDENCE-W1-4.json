@@ -1,0 +1,366 @@
+{
+  "schema_version": 1,
+  "kind": "w1-4-completion-evidence",
+  "generated_at_utc": "2026-10-25T00:00:00Z",
+  "workspace": "bioinfo-tools",
+  "task": "W1-4",
+  "task_title": "rust-bam with view, flagstat, idxstats, quickcheck, index, sort",
+
+  "status": "verified",
+  "status_statement": "The crate is implemented on noodles 0.118.0 and the samtools 1.24 differential was RUN: 20/20 cases pass. The MSRV decision was resolved explicitly and is testable in both directions. Nothing here is a second-hand claim.",
+  "differential_run": true,
+  "claimed": true,
+  "previous_status": "blocked",
+  "previous_blocker": "noodles 0.118.0 was absent from the offline Cargo registry; now resolved at the dependency level.",
+
+  "implemented": true,
+
+  "acceptance_matrix": [
+    {"criterion": "rust-bam crate with all six subcommands", "status": "met"},
+    {"criterion": "built on noodles 0.118.0 (plan decision D2)", "status": "met", "detail": "no rust-htslib in Cargo.toml"},
+    {"criterion": "cargo build --offline resolves noodles", "status": "met"},
+    {"criterion": "MSRV resolved explicitly, not silently", "status": "met", "detail": "DR-W1-4-2: 1.88 -> 1.91, testable both ways"},
+    {"criterion": "SAM text identical to samtools view", "status": "met", "detail": "8/8 view cases"},
+    {"criterion": "BAM header+records identical after samtools view -h", "status": "met", "detail": "@PG provenance only; see normalisation"},
+    {"criterion": "flagstat numbers identical", "status": "met", "detail": "2/2 cases"},
+    {"criterion": "idxstats numbers identical", "status": "met", "detail": "2/2 cases"},
+    {"criterion": "quickcheck agrees", "status": "met", "detail": "2/2 cases"},
+    {"criterion": "sort order documented and stable", "status": "met", "detail": "4/4 cases; DR-W1-4-3"},
+    {"criterion": "valid, reproducible BGZF/BAM output", "status": "met", "detail": "samtools quickcheck exit 0; byte-reproducible across runs"},
+    {"criterion": "index interoperable with htslib", "status": "met", "detail": "BAI byte-identical; htslib answers region queries via our index"},
+    {"criterion": "existing tests and oracles preserved", "status": "met", "detail": "639 tests; cutadapt, UMI-tools, W1-3 and M3 all green"}
+  ],
+
+  "dependency": {
+    "plan_decision": "D2 - noodles for new SAM/BAM work, to avoid the C toolchain and htslib CVE surface",
+    "honoured": true,
+    "rust_htslib_used": false,
+    "offline_resolution": true,
+    "crates": {
+      "noodles": "0.118.0",
+      "noodles-bam": "0.97.0",
+      "noodles-bgzf": "0.52.0",
+      "noodles-core": "0.21.0",
+      "noodles-csi": "0.62.0",
+      "noodles-sam": "0.92.0"
+    },
+    "noodles_features_enabled": ["bam", "bgzf", "core", "csi", "sam"],
+    "cached_crates_seen": [
+      "noodles-0.118.0.crate", "noodles-bam-0.97.0.crate", "noodles-bgzf-0.52.0.crate",
+      "noodles-core-0.21.0.crate", "noodles-cram-0.101.0.crate", "noodles-csi-0.62.0.crate",
+      "noodles-fasta-0.68.0.crate", "noodles-sam-0.92.0.crate"
+    ],
+    "note_on_features": "There is no `bgzipped` feature; the first probe used it and cargo rejected it. Valid features were read from the crate metadata."
+  },
+
+  "msrv_decision": {
+    "id": "DR-W1-4-2",
+    "previous_workspace_msrv": "1.88",
+    "new_workspace_msrv": "1.91",
+    "required_by": "noodles 0.118.0 and every sub-crate declare rust-version = 1.91.0",
+    "declared_in": "[workspace.package] rust-version in the root Cargo.toml, with the reasoning inline",
+    "why_not_silent": "Leaving 1.88 while rust-bam depends on noodles would be a claim cargo cannot honour; the workspace would simply refuse to build.",
+    "consequences": [
+      "The other five crates are buildable on 1.88 today, but a shared workspace declares one floor, so their effective minimum rises to 1.91.",
+      "A separate workspace for rust-bam was rejected because W1-1 established one workspace for all crates."
+    ],
+    "verified_both_directions": {
+      "on_1_91_0": "rustup run 1.91.0 cargo test --workspace --offline -> 639 passed",
+      "on_1_88_0": "rustup run 1.88.0 cargo build --offline -p rust-bam -> error: noodles@0.118.0 requires rustc 1.91.0"
+    }
+  },
+
+  "oracle": {
+    "samtools": "1.24",
+    "htslib": "1.24",
+    "sha256": "730fcc3c41bd851bfe4ff1cf8c4adf5cc48e9da01d40a1bb843fa598bcdec342",
+    "resolution_order": [
+      "--samtools argument",
+      "$SAMTOOLS_ORACLE",
+      "$BIOINFO_ORACLE_BIN/samtools",
+      "$CONDA_PREFIX/bin/samtools",
+      "PATH"
+    ],
+    "hardcoded_personal_path": false,
+    "fail_closed_exit_code": 3,
+    "subcommands_verified": ["view", "flagstat", "idxstats", "quickcheck", "index", "sort"]
+  },
+
+  "rust_bam_binary_sha256": "321092b29da8f06d7e4a489c52e9ed7e9879618bf01b78163bbd439086c3e48a",
+
+  "differential": {
+    "harness": "tests/oracle/w14_diff.py",
+    "cases_total": 20,
+    "cases_passed": 20,
+    "exit_code": 0,
+    "by_command": {"view": 8, "sort": 4, "flagstat": 2, "idxstats": 2, "quickcheck": 2, "index": 2},
+    "cases": [
+      {"name": "view_basic", "command": "view", "result": "SAM text exactly matches samtools view"},
+      {"name": "view_header", "command": "view", "result": "-h includes the header"},
+      {"name": "view_header_only", "command": "view", "result": "-H prints only the header"},
+      {"name": "view_count", "command": "view", "result": "-c prints the record count"},
+      {"name": "view_empty", "command": "view", "result": "a header with no records"},
+      {"name": "view_sample_text", "command": "view", "result": "SAM input accepted as well as BAM"},
+      {"name": "view_no_header_input", "command": "view", "result": "a headerless SAM record stream"},
+      {"name": "view_bam_roundtrip", "command": "view", "result": "-b output re-read by samtools matches"},
+      {"name": "flagstat_basic", "command": "flagstat", "result": "all 16 counters match"},
+      {"name": "flagstat_empty", "command": "flagstat", "result": "N/A percentages on an empty file"},
+      {"name": "idxstats_basic", "command": "idxstats", "result": "per-reference counts and the * row"},
+      {"name": "idxstats_empty", "command": "idxstats", "result": "zeros with no records"},
+      {"name": "quickcheck_valid", "command": "quickcheck", "result": "a valid BAM passes"},
+      {"name": "quickcheck_empty_valid", "command": "quickcheck", "result": "a header-only BAM passes"},
+      {"name": "sort_unsorted", "command": "sort", "result": "coordinates ordered as samtools does"},
+      {"name": "sort_ties", "command": "sort", "result": "same-start records keep forward before reverse"},
+      {"name": "sort_basic_sorted", "command": "sort", "result": "an already-sorted file is unchanged"},
+      {"name": "sort_empty", "command": "sort", "result": "an empty file sorts to an empty file"},
+      {"name": "index_sorted", "command": "index", "result": "BAI byte-identical to samtools'"},
+      {"name": "index_rejects_unsorted", "command": "index", "result": "unsorted file refused with exit 3"}
+    ]
+  },
+
+  "normalisation_rules": [
+    {
+      "name": "pg_lines",
+      "what": "drops @PG lines from BOTH sides before comparison",
+      "why_required": "samtools appends its own @PG line recording its version and command line; it names the tool, so it can never match between two implementations, and it carries no alignment content",
+      "evidence": "diff of view -h before the rule was exactly one line: '@PG ID:samtools.1 PN:samtools PP:samtools VN:1.24 CL:samtools view -h basic.bam'",
+      "what_is_still_compared": "@HD, @SQ, @RG and any input-originated @PG line, byte for byte",
+      "weakened_comparison": false,
+      "self_test_guards": "the rule must neither under-match nor over-match; '@PGx\\tnot a header' must survive"
+    }
+  ],
+
+  "bgzf_and_bam": {
+    "samtools_quickcheck_on_our_bam": 0,
+    "htslib_eof_marker_present": true,
+    "eof_marker_note": "The 28-byte marker with gzip XFL = 0 is pinned as BGZF_EOF_MARKER in commands.rs and asserted by a unit test — the exact byte W1-4 previously found wrong in bioinfo-fastx.",
+    "byte_reproducible_across_runs": true,
+    "byte_identical_to_samtools_bam": false,
+    "byte_identical_justification": "BGZF block boundaries are an encoding choice, not part of the format contract; decoded content and container validity are what match."
+  },
+
+  "index_interoperability": {
+    "bai_bytes": 176,
+    "bai_byte_identical_to_samtools": true,
+    "htslib_can_use_our_index": true,
+    "evidence": "samtools view -c sorted.bam chr1 answered 8 via our .bai, matching the count using samtools' own index",
+    "unsorted_precondition_exit_code": 3
+  },
+
+  "sort_order": {
+    "id": "DR-W1-4-3",
+    "documented_in": "rust-bam/src/sort_order.rs",
+    "order": [
+      "unmapped/unplaced records last",
+      "reference sequence id in @SQ header order",
+      "leftmost alignment start ascending",
+      "forward strand before reverse at the same position",
+      "record name",
+      "original input index (makes the order total)"
+    ],
+    "steps_1_to_4_match_samtools": true,
+    "steps_5_to_6_are_additions": "samtools leaves such ties unspecified; adding them makes output reproducible, which the plan requires",
+    "parallelism": false,
+    "hash_iteration_in_sort_path": false,
+    "stable_verified": "sort_ties passes and repeated runs are byte-identical"
+  },
+
+  "bugs_found_and_fixed": [
+    {
+      "id": "B-1",
+      "area": "flagstat mate-different-chr",
+      "bug": "wrongly required flag 0x2 (properly paired)",
+      "found_by": "differential: samtools 2, rust-bam 0",
+      "confirmation": "an isolated 2-record fixture showed flag 0x1 alone is counted, and 0x8 (mate unmapped) must exclude",
+      "fix": "stats::FlagStat::add keys on 0x1 and not-0x8, no 0x2 requirement"
+    },
+    {
+      "id": "B-2",
+      "area": "view -h CLI",
+      "bug": "-h collided with clap's auto help short flag and panicked at CLI build time",
+      "found_by": "unit test a_missing_subcommand_is_a_usage_error",
+      "fix": "disable_help_flag(true) on view, explicit --help that does not require <FILE>"
+    },
+    {
+      "id": "B-3",
+      "area": "exit codes",
+      "bug": "malformed input exited 3 where samtools exits 1",
+      "found_by": "differential view_no_header: exit 1 -> 3",
+      "fix": "unparseable/corrupt input is ExitClass::Runtime (1); 3 reserved for actionable preconditions like indexing an unsorted BAM"
+    },
+    {
+      "id": "B-4",
+      "area": "format detection",
+      "bug": "4 bytes consumed by the magic sniff were not handed back to the gzip decoder",
+      "found_by": "self-test gzip_that_is_not_bam_is_rejected (exit 4 not 3)",
+      "fix": "re-prepend the consumed prefix with Cursor::chain"
+    },
+    {
+      "id": "B-5",
+      "area": "index sortedness check",
+      "bug": "compared a Position to a usize",
+      "found_by": "compile error",
+      "fix": "usize::from(start)"
+    }
+  ],
+
+  "fixture_bugs_found_and_fixed": [
+    "The first BASIC_SAM was not coordinate-sorted, so samtools itself refused to index it ('Chromosome blocks not continuous'); reordered.",
+    "A headerless SAM cannot be converted to BAM ('no SQ lines present in the header'); that case now exercises SAM input directly."
+  ],
+
+  "harness_defects_fixed": [
+    {
+      "id": "H-1",
+      "defect": "build_fixtures must create its own per-case work directory",
+      "why": "this is the exact bug that crashed the W1-3 harness before case 1",
+      "guard": "_selftest_build_fixtures_creates_workdir uses a never-created nested directory"
+    },
+    {
+      "id": "H-2",
+      "defect": "tool paths must be absolute because every case runs with cwd=<work>",
+      "guard": "os.path.abspath on the rust binary; samtools resolved to an absolute path"
+    },
+    {
+      "id": "H-3",
+      "defect": "the first @PG regex left a blank line behind, which would itself be a spurious difference",
+      "found_by": "self-test",
+      "fix": "regex consumes the trailing newline"
+    }
+  ],
+
+  "negative_controls": [
+    {
+      "what": "mutated flagstat percentage format {:.2} -> {:.1}",
+      "result": "20/20 -> 19/20, restored to 20/20",
+      "conclusion": "the differential detects a one-character formatting regression"
+    }
+  ],
+
+  "commands": [
+    "cargo build --release --offline -p rust-bam",
+    "python3 tests/oracle/w14_diff.py --self-test",
+    "python3 tests/oracle/w14_diff.py --rust target/release/rust-bam",
+    "cargo fmt --all -- --check",
+    "cargo clippy --workspace --all-targets --offline -- -D warnings",
+    "cargo test --workspace --offline",
+    "cargo test --workspace --release --offline",
+    "rustup run 1.91.0 cargo test --workspace --offline",
+    "rustup run 1.88.0 cargo build --offline -p rust-bam",
+    "bash tests/gate/m3.sh"
+  ],
+
+  "suites": [
+    {"name": "W1-4 differential (samtools 1.24)", "command": "python3 tests/oracle/w14_diff.py --rust target/release/rust-bam", "result": "20/20 cases passed", "exit_code": 0},
+    {"name": "W1-4 harness self-test", "command": "python3 tests/oracle/w14_diff.py --self-test", "result": "SELFTEST PASS", "exit_code": 0},
+    {"name": "cargo fmt", "command": "cargo fmt --all -- --check", "result": "clean", "exit_code": 0},
+    {"name": "cargo clippy", "command": "cargo clippy --workspace --all-targets --offline -- -D warnings", "result": "0 errors, 0 warnings", "exit_code": 0},
+    {"name": "workspace tests (debug)", "command": "cargo test --workspace --offline", "result": "639 passed, 0 failed", "exit_code": 0},
+    {"name": "workspace tests (release)", "command": "cargo test --workspace --release --offline", "result": "639 passed, 0 failed", "exit_code": 0},
+    {"name": "MSRV 1.91.0", "command": "rustup run 1.91.0 cargo test --workspace --offline", "result": "639 passed", "exit_code": 0},
+    {"name": "MSRV 1.88.0 refusal", "command": "rustup run 1.88.0 cargo build --offline -p rust-bam", "result": "refused, naming noodles 1.91.0 as the requirement (as intended)", "exit_code": 101},
+    {"name": "cutadapt 4.6 differential", "command": "python3 tests/check.py (in rust-cutadapt)", "result": "all visible conformance cases passed", "exit_code": 0},
+    {"name": "UMI-tools 1.1.6 exact", "command": "bash tests/oracle/run_exact.sh", "result": "77/77 byte-identical, 0 differ", "exit_code": 0},
+    {"name": "UMI-tools semantic", "command": "bash tests/oracle/run_determinism.sh", "result": "deterministic: 0 mismatches", "exit_code": 0},
+    {"name": "W1-3 differential", "command": "w13_diff.py with seqkit 2.14.0 and fq 0.12.0", "result": "50/50 cases passed", "exit_code": 0},
+    {"name": "M3 byte-neutrality gate", "command": "bash tests/gate/m3.sh", "result": "9/9 criteria, M3 PASS", "exit_code": 0}
+  ],
+
+  "test_counts": {
+    "bioinfo_common": 39,
+    "bioinfo_fastx": 96,
+    "rust_bam": 52,
+    "rust_cutadapt": 201,
+    "rust_fx": 178,
+    "rust_umitools": 73,
+    "workspace_total_debug": 639,
+    "workspace_failed_debug": 0,
+    "workspace_total_release": 639,
+    "workspace_failed_release": 0,
+    "sum_check": "39+96+52+201+178+73 = 639, matching both workspace totals",
+    "delta_from_w1_3": "587 + 52 new rust-bam tests = 639",
+    "rust_bam_breakdown": {
+      "format": 8, "stats": 15, "sort_order": 11, "commands": 8,
+      "error": 4, "index_util": 1, "binaries": 6
+    }
+  },
+
+  "limitations": [
+    "CRAM is not supported: detected and rejected with a clear message rather than misparsed",
+    "CSI indexes are not written; only BAI (samtools index -c is unmatched)",
+    "rust-bam view has no region argument (chr1:100-200); htslib can use our index, but we do not consume it ourselves",
+    "sort buffers the whole file in memory; memory is proportional to input size, not bounded",
+    "no -t/--threads, -f/-F/-q filters, -L BED input, or -s sampling",
+    "byte-identical BAM to samtools is not claimed and is not achievable, because BGZF block boundaries legitimately differ",
+    "samtools' tie order for records identical in name and position is unspecified; rust-bam adds name then input index to make the order total (DR-W1-4-3)",
+    "only linux x86_64 measured"
+  ],
+
+  "not_claimed": [
+    "CRAM support",
+    "CSI index writing",
+    "region queries on our own side",
+    "a streaming/bounded-memory sort",
+    "samtools' full CLI surface",
+    "byte-identical compressed BAM",
+    "cross-platform byte-identity"
+  ],
+
+  "repository_state": {
+    "root_is_git_repo": false,
+    "workspace_members": ["bioinfo-common", "bioinfo-fastx", "rust-bam", "rust-cutadapt", "rust-fx", "rust-umitools"],
+    "rust_cutadapt": {"commit": "4609a0c6eb835c9117915c6da41267712ef38773", "tags": 0},
+    "rust_umitools": {"commit": "40b5b709247e84e00d81ca05c3b37c107a9f014d", "tags": 1, "modified_paths": 7, "note": "pre-existing W1-1 modifications, not touched by W1-4"},
+    "versions": {
+      "bioinfo-common": "0.1.0", "bioinfo-fastx": "0.1.0", "rust-bam": "0.1.0",
+      "rust-cutadapt": "0.1.0", "rust-fx": "0.1.0", "rust-umitools": "0.2.0"
+    },
+    "no_release": true,
+    "no_tag": true,
+    "no_version_bump": true,
+    "no_publication": true,
+    "new_runtime_dependencies": {
+      "rust-bam": ["noodles", "bioinfo-common", "clap", "flate2"],
+      "note": "clap and flate2 were already workspace dependencies; no new crate was introduced for W1-4"
+    },
+    "gitignore_excludes": ["target/", "tests/ci/env/bin/", ".work/"]
+  },
+
+  "files_created": [
+    "rust-bam/Cargo.toml",
+    "rust-bam/src/lib.rs",
+    "rust-bam/src/error.rs",
+    "rust-bam/src/format.rs",
+    "rust-bam/src/io_util.rs",
+    "rust-bam/src/stats.rs",
+    "rust-bam/src/sort_order.rs",
+    "rust-bam/src/index_util.rs",
+    "rust-bam/src/commands.rs",
+    "rust-bam/src/main.rs",
+    "tests/oracle/w14_diff.py",
+    ".gitignore",
+    "docs/EVIDENCE-W1-4.md",
+    "docs/EVIDENCE-W1-4.json"
+  ],
+  "files_modified": ["Cargo.toml"],
+
+  "verification_attribution": {
+    "run_by": "leader, this session, offline",
+    "independent_reviewer": null,
+    "delegation_attempted": true,
+    "delegation_outcome": "sub-instances in this session have no shell tool, so no independent run was possible; every command quoted in the evidence was executed personally",
+    "note": "No part of this W1-4 result is a second-hand claim."
+  },
+
+  "what_remains_for_w1_5": {
+    "blocked_by_w1_4": false,
+    "explanation": "W1-4 is complete and verified; W1-5 was not started, per the instruction to implement W1-4 only.",
+    "known_gaps_w1_4_does_not_cover": [
+      "CSI index writing",
+      "CRAM",
+      "region queries in view",
+      "a bounded-memory sort",
+      "the wider samtools CLI (-f/-F/-q/-L/-s/-t)"
+    ]
+  }
+}

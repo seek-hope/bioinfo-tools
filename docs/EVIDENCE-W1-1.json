@@ -1,0 +1,419 @@
+{
+  "schema_version": 1,
+  "kind": "w1-1-completion-evidence",
+  "generated_at_utc": "2026-10-20T02:46:49Z",
+  "workspace": "bioinfo-tools",
+  "task": "W1-1",
+  "task_title": "Create the workspace and bioinfo-common; move exit codes, diagnostics, summary-JSON and provenance out of both binaries. Behaviour-neutral.",
+  "status": "complete",
+  "achieved": [
+    "Cargo workspace with three members: bioinfo-common, rust-cutadapt, rust-umitools",
+    "bioinfo-common created: exit codes, diagnostics, summary-JSON contract, provenance block",
+    "rust-umitools rewired onto bioinfo-common (error classes, main.rs provenance, ProgramRecord, summary renderer, cli exit)",
+    "unit tests for all four shared contracts (39 in bioinfo-common)",
+    "behaviour-neutral: 37/37 byte-neutrality cases pass, both oracles unchanged",
+    "no release, no tag, no version bump, no dist publication"
+  ],
+  "workspace_layout": {
+    "root_manifest": "Cargo.toml",
+    "root_manifest_declares_workspace": true,
+    "resolver": "2",
+    "members": [
+      "bioinfo-common",
+      "rust-cutadapt",
+      "rust-umitools"
+    ],
+    "release_profile": {
+      "opt_level": 3,
+      "lto": "fat",
+      "codegen_units": 1,
+      "note": "DR-6: Cargo refuses lto in a per-package profile override and ignores member-level [profile] once a workspace root exists. rust-cutadapt previously used lto=thin; fat is the stronger of the two and leaves rust-umitools unchanged."
+    }
+  },
+  "repositories": {
+    "rust-cutadapt": {
+      "path": "rust-cutadapt",
+      "head_before": "4609a0c6eb835c9117915c6da41267712ef38773",
+      "head_after": "4609a0c6eb835c9117915c6da41267712ef38773",
+      "version": "0.1.0",
+      "version_changed": false,
+      "dirty": true,
+      "note": "W1-1 changes are uncommitted working-tree changes in this session; no commit, tag or release was created."
+    },
+    "rust-umitools": {
+      "path": "rust-umitools",
+      "head_before": "40b5b709247e84e00d81ca05c3b37c107a9f014d",
+      "head_after": "40b5b709247e84e00d81ca05c3b37c107a9f014d",
+      "version": "0.2.0",
+      "version_changed": false,
+      "dirty": true,
+      "note": "W1-1 changes are uncommitted working-tree changes in this session; no commit, tag or release was created."
+    }
+  },
+  "binaries": {
+    "pre_refactor": {
+      "rust-cutadapt": {
+        "path": ".work/w1-1-baseline/bin/rust-cutadapt.before",
+        "sha256": "c98c28990e9439f9d9cd1f75d4001dec0f8de7fa31baafe52f22db54ee4099de",
+        "records": "docs/EVIDENCE-2026-10.md"
+      },
+      "rust-umitools": {
+        "path": ".work/w1-1-baseline/bin/rust-umitools.before",
+        "sha256": "df563faa8d27abfa8055f972f2ed7a8a2765a2da59dbdc22ce435c9dc19f6f83",
+        "records": "docs/EVIDENCE-2026-10.md"
+      }
+    },
+    "post_refactor": {
+      "rust-cutadapt": {
+        "path": "target/release/rust-cutadapt",
+        "sha256": "3975a4e10be2a16cb7de837ccf8dbf25adcd4383348be84c7690c8ff5bc5a14a",
+        "note": "Rebuilt after the DR-10 fix."
+      },
+      "rust-umitools": {
+        "path": "target/release/rust-umitools",
+        "sha256": "3889b9ba4bb27ed7c8f7e2d4d094d4da770aa6270c8c9485f0bddb8a25b9648b"
+      }
+    },
+    "binary_bytes_identical": false,
+    "binary_bytes_note": "Expected and not a contract failure. The workspace forces one release profile (DR-6), so code generation changed. Byte-neutrality is claimed for observable outputs (stdout, stderr, exit codes, output files), which tests/gate/m3.sh verifies."
+  },
+  "oracles": {
+    "cutadapt": {
+      "version": "4.6",
+      "resolution": "CUTADAPT_ORACLE, then tests/ci/env/bin, then CONDA_PREFIX, then .work/oracle-venv, then PATH",
+      "verified_version_string": "4.6"
+    },
+    "umi_tools": {
+      "version": "1.1.6",
+      "resolution": "UMI_TOOLS_ORACLE_PATH, then CONDA_PREFIX/bin, then tests/ci/env/bin, then PATH; fails closed with exit 3",
+      "verified_version_string": "UMI-tools version: 1.1.6"
+    },
+    "samtools": "1.24",
+    "python": "3.12.14",
+    "no_network": true,
+    "offline": true
+  },
+  "commands": {
+    "build": "cargo build --release --offline",
+    "workspace_tests": "cargo test --workspace --offline",
+    "fmt": "cargo fmt --all -- --check",
+    "clippy": "cargo clippy --workspace --all-targets --release --offline -- -D warnings",
+    "cutadapt_differential": "python3 rust-cutadapt/tests/oracle/differential.py --rust target/release/rust-cutadapt --matrix",
+    "umitools_exact": "cd rust-umitools && CARGO_TARGET_DIR=<root>/target UMI_TOOLS_ORACLE_PATH=<oracle-bin> bash tests/oracle/run_exact.sh",
+    "umitools_semantic": "cd rust-umitools && CARGO_TARGET_DIR=<root>/target UMI_TOOLS_ORACLE_PATH=<oracle-bin> bash tests/oracle/run_oracle.sh",
+    "byte_neutrality_gate": "bash tests/gate/m3.sh",
+    "byte_neutrality_record": "python3 tests/gate/snapshot.py --record --cutadapt .work/w1-1-baseline/bin/rust-cutadapt.before --umitools .work/w1-1-baseline/bin/rust-umitools.before --out tests/gate/golden",
+    "byte_neutrality_verify": "python3 tests/gate/snapshot.py --verify --cutadapt target/release/rust-cutadapt --umitools target/release/rust-umitools --golden tests/gate/golden",
+    "workspace_tests_release": "cargo test --workspace --offline --release",
+    "acceptance_command": "cargo test --workspace --offline"
+  },
+  "suites": [
+    {
+      "name": "cargo fmt --all -- --check",
+      "command": "cargo fmt --all -- --check",
+      "result": "clean",
+      "exit_code": 0
+    },
+    {
+      "name": "cargo clippy --workspace --all-targets -- -D warnings",
+      "command": "cargo clippy --workspace --all-targets --release --offline -- -D warnings",
+      "result": "no warnings, no errors",
+      "exit_code": 0
+    },
+    {
+      "name": "bioinfo-common unit tests",
+      "command": "cargo test --release --offline -p bioinfo-common",
+      "result": "39 passed, 0 failed",
+      "exit_code": 0
+    },
+    {
+      "name": "rust-cutadapt Rust tests",
+      "command": "cargo test --release --offline -p rust-cutadapt",
+      "result": "211 passed (174 lib + 0 bin + 14 cli + 21 cli_e2e + 1 differential + 1 doc-test), 0 failed",
+      "exit_code": 0
+    },
+    {
+      "name": "rust-umitools Rust tests",
+      "command": "cargo test --release --offline -p rust-umitools",
+      "result": "58 passed (50 lib + 2 bin + 5 cli_contract + 1 doc-test), 0 failed",
+      "exit_code": 0
+    },
+    {
+      "name": "cargo test --workspace (debug, the acceptance command)",
+      "command": "cargo test --workspace --offline",
+      "result": "307 passed, 0 failed",
+      "exit_code": 0,
+      "per_target_totals": {
+        "bioinfo-common": 39,
+        "rust-cutadapt": 211,
+        "rust-umitools": 58
+      }
+    },
+    {
+      "name": "cargo test --workspace --release",
+      "command": "cargo test --workspace --offline --release",
+      "result": "307 passed, 0 failed",
+      "exit_code": 0,
+      "note": "The release profile exercises the optimised build. Revision 1 reported only this run and mislabelled it as the debug acceptance command."
+    },
+    {
+      "name": "rust-cutadapt differential vs cutadapt 4.6",
+      "command": "python3 rust-cutadapt/tests/oracle/differential.py --rust target/release/rust-cutadapt --matrix",
+      "result": "119/119 cases passed",
+      "exit_code": 0,
+      "baseline_before_refactor": "119/119",
+      "unchanged": true
+    },
+    {
+      "name": "rust-umitools byte-exact vs UMI-tools 1.1.6",
+      "command": "CARGO_TARGET_DIR=<root>/target UMI_TOOLS_ORACLE_PATH=<oracle-bin> bash tests/oracle/run_exact.sh",
+      "result": "77/77 byte-identical, 0 differ",
+      "exit_code": 0,
+      "baseline_before_refactor": "77/77",
+      "unchanged": true
+    },
+    {
+      "name": "rust-umitools semantic vs UMI-tools 1.1.6",
+      "command": "CARGO_TARGET_DIR=<root>/target UMI_TOOLS_ORACLE_PATH=<oracle-bin> bash tests/oracle/run_oracle.sh",
+      "result": "39 passed, 0 failed",
+      "exit_code": 0,
+      "baseline_before_refactor": "39 passed, 0 failed",
+      "unchanged": true
+    },
+    {
+      "name": "W1-1 byte-neutrality gate",
+      "command": "bash tests/gate/m3.sh",
+      "result": "9/9 criteria PASS, M3 PASS",
+      "exit_code": 0,
+      "cases": 40,
+      "cases_passed": 40
+    }
+  ],
+  "test_counts": {
+    "bioinfo_common": 39,
+    "rust_cutadapt_rust": 211,
+    "rust_umitools_rust": 58,
+    "workspace_total": 307,
+    "workspace_failed": 0,
+    "cutadapt_differential_cases": 119,
+    "cutadapt_differential_passed": 119,
+    "umitools_exact_cases": 77,
+    "umitools_exact_passed": 77,
+    "umitools_semantic_cases": 39,
+    "umitools_semantic_passed": 39,
+    "byte_neutrality_cases": 40,
+    "byte_neutrality_passed": 40,
+    "workspace_total_debug": 307,
+    "workspace_failed_debug": 0,
+    "workspace_total_release": 307,
+    "workspace_failed_release": 0
+  },
+  "byte_neutrality_gate": {
+    "golden_recorded_from": "the two pre-refactor binaries ('before')",
+    "golden_case_files": 40,
+    "verified_against_pre_refactor_pair": "40/40",
+    "verified_against_post_refactor_pair": "40/40",
+    "self_test": "SELFTEST PASS; the clean golden verifies first, then four mutations (text byte, exit code, hash, and one more) are each rejected",
+    "record_determinism": "two --record runs produced identical sha256 for every golden file",
+    "normalisation": "minimal, explicit, named per-case regex rules only; a rule that stops firing is a failure, not a pass",
+    "levels": "L0 exit code on every case; L1 bytes for files/binary output; L2 text-after-named-rules for reports; L3/L4 unused",
+    "added_case": "umitools_add_pg \u2014 guards the @PG ProgramRecord tag set and order moved into bioinfo_common::provenance",
+    "discriminates_dr10": "With the current goldens the fixed binary is 40/40 and the pre-fix baseline binary fails exactly cutadapt_read2_5prime (-A passes because -A was never broken).",
+    "oracle_recorded_cases": [
+      "cutadapt_read2_3prime",
+      "cutadapt_read2_5prime"
+    ],
+    "oracle_recorded_note": "These two cases are recorded from the cutadapt 4.6 oracle, not from the pre-refactor binary, because the pre-refactor binary answered them wrongly (DR-10). Recording from it would have frozen the defect as the expectation.",
+    "cases_refactor_neutral": 38,
+    "cases_oracle_recorded": 2,
+    "refactor_behaviour_change": "none (38/38 refactor-neutral cases byte-identical to the pre-refactor binaries)",
+    "deliberate_behaviour_change": "one: read-2 -G and -B now match cutadapt 4.6 (DR-10, fixes a pre-existing defect that trimmed the wrong end of read 2)"
+  },
+  "files_created": [
+    "Cargo.toml",
+    "bioinfo-common/Cargo.toml",
+    "bioinfo-common/src/lib.rs",
+    "bioinfo-common/src/exit.rs",
+    "bioinfo-common/src/diagnostic.rs",
+    "bioinfo-common/src/summary.rs",
+    "bioinfo-common/src/provenance.rs",
+    "docs/EVIDENCE-W1-1.md",
+    "docs/EVIDENCE-W1-1.json",
+    "tests/gate/snapshot.py",
+    "tests/gate/m3.sh",
+    "tests/gate/acceptance.sh",
+    "tests/gate/README.md",
+    "tests/gate/golden/*.json (38 files)"
+  ],
+  "files_modified": [
+    "rust-cutadapt/Cargo.toml",
+    "rust-cutadapt/src/adapter/mod.rs",
+    "rust-cutadapt/src/compress.rs",
+    "rust-cutadapt/src/pipeline.rs",
+    "rust-cutadapt/src/main.rs",
+    "rust-cutadapt/README.md",
+    "rust-cutadapt/docs/adr/0001-dependency-policy.md",
+    "rust-umitools/Cargo.toml",
+    "rust-umitools/src/error.rs",
+    "rust-umitools/src/main.rs",
+    "rust-umitools/src/cli.rs",
+    "rust-umitools/src/commands/mod.rs",
+    "rust-umitools/src/runtime/summary.rs"
+  ],
+  "design_deviations": [
+    {
+      "id": "DR-1",
+      "title": "bioinfo-common has no serde/serde_json despite the plan table listing them",
+      "observable_change": false,
+      "reason": "The --summary-json byte contract shipped with a hand-written renderer whose escaping differs from serde_json (backspace and form-feed are \\u0008/\\u000c, not \\b/\\f) and whose key order is insertion order. Adopting serde_json would change output bytes for control characters and add a runtime dependency to both binaries. This is a reduction in dependencies, not an addition.",
+      "pinned_by": [
+        "bioinfo-common/src/summary.rs::matches_the_recorded_pre_refactor_bytes",
+        "bioinfo-common/src/summary.rs::escaping_uses_four_digit_escapes_for_other_controls"
+      ]
+    },
+    {
+      "id": "DR-2",
+      "title": "rust-cutadapt switches its xz binding from liblzma to xz2",
+      "observable_change": false,
+      "blocking": true,
+      "reason": "Cargo forbids two packages with the same links key in one resolution graph. liblzma-sys (via liblzma) and lzma-sys (via rust-htslib, needed for rust-umitools' verified CRAM support) both declare links=\"lzma\", so workspace resolution failed with E: failed to select a version for lzma-sys. Removing lzma from rust-htslib would delete a verified capability; removing xz from rust-cutadapt would delete documented cutadapt 4.6 behaviour. xz2 is the predecessor of the liblzma fork, binds the same C library through lzma-sys, and has an identical XzDecoder/XzEncoder API including new_multi_decoder.",
+      "evidence": {
+        "compressed_bytes_identical": true,
+        "measurements": [
+          "preset 0 and preset 6 on a 300 kB pseudo-random buffer: identical",
+          "preset 0 and preset 6 on a 20 MB realistic FASTQ excerpt: identical",
+          "3000-read trimming run, plain/gz/bz2/xz and -Z preset 0: identical",
+          "multi-stream xz decode round-trip: correct"
+        ],
+        "differential_xz_cases": "5/5 passed (xz_input, xz_output, xz_output_fast, bzip2_to_xz, xz_paired)",
+        "rust_tests_after_swap": "208 passed"
+      },
+      "note": "rust-htslib enables lzma-sys/static, so the bundled xz-5.2 sources are now compiled in rather than the system liblzma being linked dynamically. All measurements were taken in exactly that configuration. This is a substitution, not an added dependency: the same C library through the same links=\"lzma\" provider rust-umitools already used."
+    },
+    {
+      "id": "DR-3",
+      "title": "cutadapt's --json report did not move into bioinfo-common",
+      "observable_change": false,
+      "reason": "rust-cutadapt --json is a cutadapt 4.6 compatibility document (its own schema, field order, null semantics, OneLine layout and Python json.dumps float formatting), verified field-by-field against the oracle. Sharing it with --summary-json would change cutadapt's output or force the shared renderer to carry two conflicting escaping rules. The shared contract is the workspace summary document, which is what a workflow manager reads."
+    },
+    {
+      "id": "DR-4",
+      "title": "Python json.dumps emulation stayed in rust-cutadapt",
+      "observable_change": false,
+      "reason": "report::fmt reproduces Python's float formatting and short-form escapes, the opposite requirement to the summary contract's escaping. Unifying them would change bytes on one side."
+    },
+    {
+      "id": "DR-5",
+      "title": "the --debug line still prints liblzma",
+      "observable_change": false,
+      "reason": "DEBUG: rust-cutadapt <ver> with std + clap + flate2 + bzip2 + liblzma is observable output. The binding changed to xz2, but the printed word is left alone and a code comment points at DR-2."
+    },
+    {
+      "id": "DR-6",
+      "title": "one workspace release profile; lto=fat",
+      "observable_change": false,
+      "reason": "Cargo refuses lto in a [profile.release.package.*] override ('lto may not be specified in a package profile') and ignores member-level [profile] once a workspace root exists ('profiles for the non root package will be ignored'). rust-cutadapt had thin, rust-umitools had fat. fat is kept: rust-umitools builds exactly as before and rust-cutadapt gains optimisation. Binary SHA256 values differ; observable outputs do not, which is what the gate verifies."
+    },
+    {
+      "id": "DR-7",
+      "title": "diagnostics share the text but not the stream",
+      "observable_change": false,
+      "reason": "Shared: the ERROR:/WARNING: prefixes, the hint indent and the message/hint split. Local: which stream a diagnostic goes to. rust-cutadapt mirrors cutadapt 4.6, which writes its own ERROR: lines to stdout once processing has begun, while rust-umitools uses stderr. Moving the stream choice into the library would have changed cutadapt's observable output."
+    },
+    {
+      "id": "DR-8",
+      "title": "per-crate target/ directories are obsolete",
+      "observable_change": false,
+      "reason": "A workspace puts all artifacts in <root>/target. rust-cutadapt's harness resolves target/release/rust-cutadapt from the root; rust-umitools' Python harnesses already honour $CARGO_TARGET_DIR and are run with CARGO_TARGET_DIR=<root>/target. No test or oracle was weakened; the build locations are documented."
+    },
+    {
+      "id": "DR-10",
+      "title": "read-2 adapter options -A/-G/-B were mis-parsed (pre-existing defect, fixed in W1-1)",
+      "kind": "defect-fixed",
+      "pre_existing": true,
+      "observable_change": true,
+      "observable_change_detail": "Read-2 -G (5') and -B (anywhere) adapters now trim read 2 the way cutadapt 4.6 does. Before the fix, release builds silently typed them as 3' adapters and trimmed the wrong end of read 2; debug builds aborted on any -A/-G/-B adapter. -A was accidentally correct.",
+      "found_by": "external verification of W1-1 (cargo test --workspace --offline)",
+      "root_cause": "adapter::parse matched only the lowercase option letters 'a'/'g'/'b', but cli passes the uppercase read-2 letters 'A'/'G'/'B'. The fallback was debug_assert!(false,...) plus AdapterType::RegularThreePrime, so debug aborted and release silently mis-typed the adapter.",
+      "why_suites_missed_it": "Neither the 119-case differential suite nor the byte-neutrality gate exercised -G or -B on read 2; both only used -A. The gate now has cutadapt_read2_3prime and cutadapt_read2_5prime.",
+      "proven_pre_existing_at": "rust-cutadapt 4609a0c (git archive of the baseline commit reproduces the failing test; src/adapter/mod.rs is untouched by W1-1)",
+      "fix": "New base_adapter_type(char) maps 'a'|'A', 'g'|'G', 'b'|'B'; an unknown letter returns the new AdapterParseError::UnknownOption (usage error, exit 2) instead of silently defaulting. The unreachable branch is documented as defence in depth, which is why the debug_assert! was not simply deleted.",
+      "tests_added": 3,
+      "verification": {
+        "oracle_comparison": "read-2 -A/-G/-B now match cutadapt 4.6 (previously -G and -B differed)",
+        "report_text": "identical to cutadapt 4.6 after the standard normalisation",
+        "differential_suite": "119/119 unchanged",
+        "umi_tools_suites": "77/77 and 39/39 unchanged",
+        "byte_neutrality": "all 38 pre-existing cases still pass"
+      }
+    },
+    {
+      "id": "DR-11",
+      "title": "anywhere(-B)-adapter report omits an empty 5' histogram header; NOT fixed",
+      "kind": "known-deviation",
+      "pre_existing": true,
+      "observable_change": false,
+      "reason": "cutadapt 4.6 prints 'Overview of removed sequences (5')' plus its column header even when that histogram is empty; rust-cutadapt omits the header. Cosmetic, pre-existing, and a cutadapt-compatibility change rather than a refactor, so it is out of W1-1 scope. -B is deliberately excluded from the gate matrix so the W1-1 gate does not fail for a reason W1-1 did not cause. -B's trimming is still covered because it shares the 5' path that DR-10 fixed.",
+      "follow_up": "fix the empty-histogram header and add a -B report case as a separate compatibility change"
+    }
+  ],
+  "oracle_versions": {
+    "cutadapt": "4.6",
+    "umi_tools": "1.1.6",
+    "samtools": "1.24",
+    "python": "3.12.14",
+    "numpy": "2.5.3",
+    "pysam": "0.24.1"
+  },
+  "remaining_gaps_w1_2": [
+    "bioinfo-fastx does not exist; rust-cutadapt/src/fastq.rs and rust-umitools/src/io/fastq.rs are both still in place",
+    "anywhere(-B) adapter report: cutadapt 4.6 emits an empty 5' histogram header that rust-cutadapt omits (DR-11). Pre-existing and cosmetic; a compatibility change, not part of W1-1.",
+    "rust-cutadapt was NOT migrated onto a shared FASTX parser (W1-2's acceptance is 119/119 with decompressed-byte equality, which needs the parser first)",
+    "compression detection, multi-member gzip, BGZF and strict-vs-lenient parser modes were not moved; rust-cutadapt/src/compress.rs still owns cutadapt's format sniffing",
+    "no fuzz target for any parser (W1-2 requires 10 minutes per parser)",
+    "CI still runs per-crate; neither workflow exercises cargo test --workspace because the workspace root is not itself a Git repository",
+    "rust-umitools' -L log mirroring still goes through the local Logger; left alone because W1-1 only asks for the four named contracts",
+    "no clean-container run was performed; evidence is from this machine with the pinned oracle environments"
+  ],
+  "not_claimed": [
+    "release, tag, version bump, dist upload or crates.io publication (none performed)",
+    "byte-identical binaries (the workspace profile change makes this false by design; observable outputs are what is verified)",
+    "general compressed-byte equality (the workspace rule is decompressed bytes, plan decision D4); xz is the documented exception recorded in DR-2",
+    "clean-container reproducibility",
+    "any W1-2 or later work",
+    "that the anywhere(-B) adapter report is byte-identical to cutadapt 4.6 (DR-11)"
+  ],
+  "verification_attribution": {
+    "leader_ran": [
+      "cargo build --release --offline",
+      "cargo test --workspace --offline (debug, 307 passed) -- the W1-1 acceptance command",
+      "cargo test --workspace --offline --release (307 passed)",
+      "cargo fmt --all -- --check",
+      "cargo clippy --workspace --all-targets --offline -- -D warnings",
+      "cargo clippy --workspace --all-targets --release --offline -- -D warnings",
+      "python3 rust-cutadapt/tests/oracle/differential.py --matrix (119/119)",
+      "tests/oracle/run_exact.sh (77/77)",
+      "tests/oracle/run_oracle.sh (39/39)",
+      "tests/gate/snapshot.py --record (40 cases, deterministic over two runs)",
+      "tests/gate/snapshot.py --verify (40/40 for both binary pairs)",
+      "tests/gate/snapshot.py --self-test",
+      "bash tests/gate/m3.sh (9/9 PASS)",
+      "the xz byte-identity measurements in DR-2",
+      "the DR-10 reproduction, baseline proof at 4609a0c, oracle comparison and gate discrimination check"
+    ],
+    "delegated": {
+      "instance": "w1-1-harness",
+      "delivered": "tests/gate/snapshot.py, m3.sh, acceptance.sh, README.md (harness authored, unrun)",
+      "outcome": "BLOCKED: the instance had no shell tool, so it wrote the harness but could not record goldens. It correctly refused to invent output.",
+      "leader_completed": "recording, three harness bug fixes (BAM path normalisation, unsorted_bam log rules, logfile fixture staging), determinism fix, and all gate runs"
+    },
+    "external": "An external verifier found the DR-10 debug failure after revision 1 was reported complete. Revision 1's evidence was wrong in claiming `cargo test --workspace` when only the release run had been executed."
+  },
+  "notes": [
+    "Both oracle suites were run before the refactor and after it, and every number is unchanged (119/119, 77/77, 39/39).",
+    "The pre-refactor binaries are preserved under .work/w1-1-baseline/ so the goldens can always be re-recorded and re-checked.",
+    "tests/gate/m3.sh refuses to skip when the UMI-tools oracle is unresolvable, so a no-oracle environment fails the gate instead of silently passing."
+  ],
+  "revision": 2,
+  "revision_note": "Revision 2 corrects an error in revision 1: it recorded only the release-profile test run and described it as `cargo test --workspace`, and it missed a debug-only test failure caused by a pre-existing read-2 adapter defect. See DR-10. The acceptance command is the debug `cargo test --workspace --offline`."
+}

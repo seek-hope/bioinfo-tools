@@ -1,0 +1,502 @@
+{
+  "schema_version": 1,
+  "kind": "w1-2-completion-evidence",
+  "generated_at_utc": "2026-10-20T03:30:06Z",
+  "workspace": "bioinfo-tools",
+  "task": "W1-2",
+  "task_title": "Create bioinfo-fastx; migrate rust-cutadapt first, then rust-umitools FASTQ paths. Compression detection, multi-member gzip, BGZF, strict/lenient modes.",
+  "status": "complete",
+  "revision": 1,
+  "prerequisite_state": {
+    "w1_1_complete": true,
+    "w1_1_changes_committed": false,
+    "note": "W1-1 is complete but uncommitted. Its working-tree changes are preserved untouched; docs/EVIDENCE-W1-1.md remains the W1-1 record."
+  },
+  "achieved": [
+    "bioinfo-fastx created: 7 modules, 94 unit tests, std + compression backends only",
+    "rust-cutadapt migrated first (parser, chunker, writer, compression) with byte-identical output",
+    "rust-umitools FASTQ paths migrated second (extract, whitelist)",
+    "strict and lenient parser modes, strict by default",
+    "compression detection by magic bytes on read, by extension on write",
+    "multi-member gzip writer, byte-identical to flate2 GzEncoder for one member",
+    "BGZF block writer verified against gzip, bgzip and Python gzip",
+    "fuzz harness + 600 s corpus: 31,332,015 iterations, 0 failures",
+    "two genuine parser/writer defects found by fuzzing and fixed (DR-5)",
+    "no release, no tag, no version bump, no dist publication"
+  ],
+  "workspace_layout": {
+    "members": [
+      "bioinfo-common",
+      "bioinfo-fastx",
+      "rust-cutadapt",
+      "rust-umitools"
+    ],
+    "new_member": "bioinfo-fastx",
+    "release_profile_unchanged": "lto=fat, opt-level=3, codegen-units=1 (set by W1-1)"
+  },
+  "repositories": {
+    "rust-cutadapt": {
+      "head": "4609a0c6eb835c9117915c6da41267712ef38773",
+      "version": "0.1.0",
+      "version_changed": false,
+      "dirty": true,
+      "note": "W1-1 + W1-2 changes are uncommitted working-tree changes; no commit, tag or release created."
+    },
+    "rust-umitools": {
+      "head": "40b5b709247e84e00d81ca05c3b37c107a9f014d",
+      "version": "0.2.0",
+      "version_changed": false,
+      "dirty": true,
+      "note": "W1-1 + W1-2 changes are uncommitted working-tree changes; no commit, tag or release created."
+    }
+  },
+  "binaries": {
+    "pre_w12": {
+      "rust-cutadapt": {
+        "path": ".work/w1-2-baseline/bin/rust-cutadapt.pre-w12",
+        "sha256": "3975a4e10be2a16cb7de837ccf8dbf25adcd4383348be84c7690c8ff5bc5a14a"
+      },
+      "rust-umitools": {
+        "path": ".work/w1-2-baseline/bin/rust-umitools.pre-w12",
+        "sha256": "3889b9ba4bb27ed7c8f7e2d4d094d4da770aa6270c8c9485f0bddb8a25b9648b"
+      }
+    },
+    "post_w12": {
+      "rust-cutadapt": {
+        "path": "target/release/rust-cutadapt",
+        "sha256": "d26d2a66550bf8e322580c4db148737b34ea1e720fb79d54d6b3cd9ec50d9ae4"
+      },
+      "rust-umitools": {
+        "path": "target/release/rust-umitools",
+        "sha256": "eeb5e8681bbcc9035650eca0ab3d41e4ce7f33cd6227581ad96eaa385a9ee30e"
+      }
+    },
+    "binary_bytes_identical": false,
+    "binary_bytes_note": "Expected: the workspace uses one release profile (W1-1 DR-6), so code generation differs. Byte-neutrality is claimed and verified for observable outputs."
+  },
+  "new_crate": {
+    "name": "bioinfo-fastx",
+    "modules": {
+      "format": {
+        "responsibility": "magic-byte and extension detection, BGZF",
+        "tests": 9
+      },
+      "parser": {
+        "responsibility": "strict and lenient FASTQ/FASTA record parsing",
+        "tests": 24
+      },
+      "chunker": {
+        "responsibility": "record-aligned chunking for the parallel pipelines",
+        "tests": 12
+      },
+      "writer": {
+        "responsibility": "FASTQ/FASTA serialisation, header-sigil normalisation",
+        "tests": 10
+      },
+      "compress": {
+        "responsibility": "decompression, compression, multi-member gzip",
+        "tests": 18
+      },
+      "bgzf": {
+        "responsibility": "BGZF block writer, BC subfield, EOF marker",
+        "tests": 14
+      },
+      "reader": {
+        "responsibility": "Reader/Writer facades",
+        "tests": 11
+      }
+    },
+    "total_unit_tests": 94,
+    "dependencies": [
+      "bioinfo-common (path)",
+      "bzip2 0.6.1",
+      "crc32fast 1",
+      "flate2 1",
+      "lzma-sys 0.1.20 (static)",
+      "xz2 0.1.7",
+      "zstd 0.13.3"
+    ],
+    "dependency_note": "xz2+lzma-sys instead of liblzma for the links=\"lzma\" reason (DR-2). zstd is the addition the plan's crate table explicitly names."
+  },
+  "migration": {
+    "order": [
+      "rust-cutadapt",
+      "rust-umitools"
+    ],
+    "rust_cutadapt_seams": [
+      {
+        "file": "rust-cutadapt/src/fastq.rs",
+        "was": "parser implementation",
+        "now": "re-exports bioinfo_fastx::{Parser, ParseError, Record}"
+      },
+      {
+        "file": "rust-cutadapt/src/compress.rs",
+        "was": "format detection and compressors",
+        "now": "re-exports bioinfo_fastx::compress/format"
+      },
+      {
+        "file": "rust-cutadapt/src/pipeline.rs",
+        "was": "last_complete_record_end + for_each_chunk",
+        "now": "adapts bioinfo_fastx::chunker::for_each_chunk"
+      },
+      {
+        "file": "rust-cutadapt/src/pair.rs",
+        "was": "RecordRange + split_records",
+        "now": "re-exports bioinfo_fastx::chunker"
+      },
+      {
+        "file": "rust-cutadapt/src/auxout.rs",
+        "was": "inline write_record",
+        "now": "delegates to bioinfo_fastx::writer"
+      }
+    ],
+    "rust_umitools_seams": [
+      {
+        "file": "rust-umitools/src/io/fastq.rs",
+        "was": "local record model, reader and writer",
+        "now": "owned FastqRecord kept (extract edits in place); writer delegates to the shared writer; diagnostics and extension-based gzip kept (DR-1)"
+      }
+    ],
+    "preserved_exactly": [
+      "chunker split rule: cut after every fourth newline, so output is independent of chunk size and worker count",
+      "separator line echoed verbatim (+r1 stays +r1)",
+      "cutadapt strict diagnostics including 'malformed FASTQ at line N (byte offset M)'",
+      "umitools diagnostics in 'path:line: message' form",
+      "umitools gzip selected by extension, not content"
+    ]
+  },
+  "commands": {
+    "build": "cargo build --workspace --release --offline",
+    "workspace_tests_debug": "cargo test --workspace --offline",
+    "workspace_tests_release": "cargo test --workspace --offline --release",
+    "fmt": "cargo fmt --all -- --check",
+    "clippy": "cargo clippy --workspace --all-targets --offline -- -D warnings",
+    "cutadapt_differential": "python3 rust-cutadapt/tests/oracle/differential.py --rust target/release/rust-cutadapt --matrix",
+    "umitools_exact": "cd rust-umitools && CARGO_TARGET_DIR=<root>/target UMI_TOOLS_ORACLE_PATH=<oracle> bash tests/oracle/run_exact.sh",
+    "umitools_semantic": "cd rust-umitools && CARGO_TARGET_DIR=<root>/target UMI_TOOLS_ORACLE_PATH=<oracle> bash tests/oracle/run_oracle.sh",
+    "umitools_extract": "cd rust-umitools && CARGO_TARGET_DIR=<root>/target UMI_TOOLS_ORACLE_PATH=<oracle> bash tests/oracle/run_extract.sh",
+    "umitools_formats": "cd rust-umitools && CARGO_TARGET_DIR=<root>/target UMI_TOOLS_ORACLE_PATH=<oracle> bash tests/oracle/run_formats.sh",
+    "w11_gate": "bash tests/gate/m3.sh",
+    "w12_equivalence_cutadapt": "python3 tests/gate/w12_fastx_equivalence.py --reference .work/w1-2-baseline/bin/rust-cutadapt.pre-w12 --candidate target/release/rust-cutadapt",
+    "w12_equivalence_umitools": "python3 tests/gate/w12_fastx_equivalence.py --binary umitools --reference .work/w1-2-baseline/bin/rust-umitools.pre-w12 --candidate target/release/rust-umitools",
+    "fuzz_600s": "cargo run --release --offline -p bioinfo-fastx --bin fastx-fuzz -- --seconds 600 --seed 20261020"
+  },
+  "suites": [
+    {
+      "name": "cargo fmt --all -- --check",
+      "command": "cargo fmt --all -- --check",
+      "result": "clean",
+      "exit_code": 0
+    },
+    {
+      "name": "cargo clippy --workspace --all-targets -- -D warnings",
+      "command": "cargo clippy --workspace --all-targets --offline -- -D warnings",
+      "result": "0 errors, 0 warnings",
+      "exit_code": 0
+    },
+    {
+      "name": "cargo test --workspace (debug)",
+      "command": "cargo test --workspace --offline",
+      "result": "407 passed, 0 failed",
+      "exit_code": 0,
+      "per_crate_totals": {
+        "bioinfo-common": 39,
+        "bioinfo-fastx": 94,
+        "rust-cutadapt": 201,
+        "rust-umitools": 73
+      }
+    },
+    {
+      "name": "cargo test --workspace --release",
+      "command": "cargo test --workspace --offline --release",
+      "result": "407 passed, 0 failed",
+      "exit_code": 0
+    },
+    {
+      "name": "rust-cutadapt differential vs cutadapt 4.6",
+      "command": "python3 rust-cutadapt/tests/oracle/differential.py --rust target/release/rust-cutadapt --matrix",
+      "result": "119/119 cases passed",
+      "exit_code": 0,
+      "baseline_before_w12": "119/119",
+      "unchanged": true
+    },
+    {
+      "name": "rust-umitools byte-exact vs UMI-tools 1.1.6",
+      "command": "bash tests/oracle/run_exact.sh",
+      "result": "77/77 byte-identical, 0 differ",
+      "exit_code": 0,
+      "baseline_before_w12": "77/77",
+      "unchanged": true
+    },
+    {
+      "name": "rust-umitools semantic vs UMI-tools 1.1.6",
+      "command": "bash tests/oracle/run_oracle.sh",
+      "result": "39 passed, 0 failed",
+      "exit_code": 0,
+      "baseline_before_w12": "39 passed, 0 failed",
+      "unchanged": true
+    },
+    {
+      "name": "rust-umitools extract/whitelist suite",
+      "command": "bash tests/oracle/run_extract.sh",
+      "result": "9 passed, 0 failed",
+      "exit_code": 0,
+      "baseline_before_w12": "9 passed, 0 failed",
+      "unchanged": true
+    },
+    {
+      "name": "rust-umitools formats suite",
+      "command": "bash tests/oracle/run_formats.sh",
+      "result": "formats ok: 0 failures",
+      "exit_code": 0
+    },
+    {
+      "name": "W1-1 byte-neutrality gate",
+      "command": "bash tests/gate/m3.sh",
+      "result": "9/9 criteria PASS, M3 PASS",
+      "exit_code": 0,
+      "cases": 40,
+      "cases_passed": 40,
+      "note": "The 40 goldens were recorded from the PRE-W1-1 binaries, so this spans both refactors."
+    },
+    {
+      "name": "W1-2 FASTX equivalence (cutadapt)",
+      "command": "python3 tests/gate/w12_fastx_equivalence.py --reference .work/w1-2-baseline/bin/rust-cutadapt.pre-w12 --candidate target/release/rust-cutadapt",
+      "result": "35/35 cases identical",
+      "exit_code": 0,
+      "cases": 35,
+      "cases_identical": 35
+    },
+    {
+      "name": "W1-2 FASTX equivalence (umitools)",
+      "command": "python3 tests/gate/w12_fastx_equivalence.py --binary umitools --reference .work/w1-2-baseline/bin/rust-umitools.pre-w12 --candidate target/release/rust-umitools",
+      "result": "12/12 cases identical",
+      "exit_code": 0,
+      "cases": 12,
+      "cases_identical": 12
+    }
+  ],
+  "test_counts": {
+    "bioinfo_common": 39,
+    "bioinfo_fastx": 94,
+    "rust_cutadapt": 201,
+    "rust_umitools": 73,
+    "workspace_total_debug": 407,
+    "workspace_failed_debug": 0,
+    "workspace_total_release": 407,
+    "workspace_failed_release": 0,
+    "cutadapt_differential_cases": 119,
+    "cutadapt_differential_passed": 119,
+    "umitools_exact_cases": 77,
+    "umitools_exact_passed": 77,
+    "umitools_semantic_cases": 39,
+    "umitools_semantic_passed": 39,
+    "umitools_extract_cases": 9,
+    "umitools_extract_passed": 9,
+    "w11_gate_cases": 40,
+    "w11_gate_passed": 40,
+    "w12_equivalence_cutadapt_cases": 35,
+    "w12_equivalence_cutadapt_identical": 35,
+    "w12_equivalence_umitools_cases": 12,
+    "w12_equivalence_umitools_identical": 12
+  },
+  "byte_level_evidence": {
+    "principle": "Decompressed output bytes are the contract (plan decision D4).",
+    "instruments": [
+      {
+        "name": "tests/gate/m3.sh",
+        "what": "40 observables recorded from the pre-W1-1 binaries: stdout, stderr, exit codes, output files",
+        "result": "40/40"
+      },
+      {
+        "name": "tests/gate/w12_fastx_equivalence.py",
+        "what": "pre-migration vs post-migration binary on the same invocation: exit code, decompressed output bytes, normalised stdout/stderr",
+        "result": "35/35 cutadapt + 12/12 umitools"
+      },
+      {
+        "name": "cutadapt differential",
+        "what": "comparison against the real cutadapt 4.6 binary",
+        "result": "119/119"
+      },
+      {
+        "name": "umitools exact",
+        "what": "decompressed BAM/text bytes against the real UMI-tools 1.1.6",
+        "result": "77/77 byte-identical"
+      }
+    ],
+    "chunk_and_thread_invariance": {
+      "chunk_sizes_tested": ["4096", "8192", "65536", "262144", "1000003"],
+      "thread_counts_tested": ["1", "2", "4", "8"],
+      "result": "output identical to the pre-migration binary at every setting"
+    },
+    "bgzf": {
+      "readers_verified": ["gzip -t/gunzip", "bgzip -d (htslib reference)", "python gzip"],
+      "result": "all decode our blocks to the exact payload",
+      "structure_checks": [
+        "blocks tile the stream exactly",
+        "maximum uncompressed block 65,280 bytes (the legal limit)",
+        "28-byte EOF marker with ISIZE 0",
+        "CRC32 and ISIZE correct per block"
+      ],
+      "mtime": "written as 0 for reproducible output (DR-3)"
+    },
+    "multi_member_gzip": {
+      "single_member_byte_identical_to_flate2_gzencoder": true,
+      "concatenation_reads_back_as_one_stream": true,
+      "empty_members_are_valid": true
+    }
+  },
+  "fuzz": {
+    "tool": "bioinfo-fastx/src/bin/fastx-fuzz.rs (in-repo, no new dependency)",
+    "is_libfuzzer": false,
+    "why_not_cargo_fuzz": "cargo-fuzz is not installed and cannot be fetched (cargo --offline, no network); the crate is not in the local registry.",
+    "limitation": "Deterministic structured mutation, not coverage-guided. It finds panics, OOB and invariant violations reachable from its mutation set; it does not explore the path set libFuzzer's feedback loop would. Recorded as DR-4.",
+    "properties_asserted": [
+      "no panic on any input (catch_unwind around every entry point)",
+      "parse is deterministic",
+      "write ∘ parse = id in lenient mode",
+      "chunks tile the input exactly",
+      "every chunk but the last ends on a record boundary"
+    ],
+    "short_run": {
+      "command": "cargo run --release --offline -p bioinfo-fastx --bin fastx-fuzz -- --seconds 30 --seed 1",
+      "iterations": 1291534,
+      "failures": 0,
+      "result": "FUZZ PASS"
+    },
+    "corpus_600s": {
+      "command": "cargo run --release --offline -p bioinfo-fastx --bin fastx-fuzz -- --seconds 600 --seed 20261020",
+      "seconds": 600,
+      "iterations": 31332015,
+      "failures": 0,
+      "result": "FUZZ PASS",
+      "log": "fastx-fuzz: 31332015 iterations, 0 failures, 600.0s elapsed"
+    },
+    "defects_found": 2,
+    "defects_note": "Both were CRLF round-trip defects in the shared parser/writer; see DR-5. Neither input is accepted by cutadapt or UMI-tools, which is why no oracle suite could have found them."
+  },
+  "oracle_versions": {
+    "cutadapt": "4.6",
+    "umi_tools": "1.1.6",
+    "samtools": "1.24",
+    "python": "3.12.14"
+  },
+  "files_created": [
+    "bioinfo-fastx/Cargo.toml",
+    "bioinfo-fastx/src/lib.rs",
+    "bioinfo-fastx/src/format.rs",
+    "bioinfo-fastx/src/parser.rs",
+    "bioinfo-fastx/src/chunker.rs",
+    "bioinfo-fastx/src/writer.rs",
+    "bioinfo-fastx/src/compress.rs",
+    "bioinfo-fastx/src/bgzf.rs",
+    "bioinfo-fastx/src/reader.rs",
+    "bioinfo-fastx/src/bin/fastx-fuzz.rs",
+    "tests/gate/w12_fastx_equivalence.py",
+    "docs/EVIDENCE-W1-2.md",
+    "docs/EVIDENCE-W1-2.json"
+  ],
+  "files_modified": [
+    "Cargo.toml",
+    "rust-cutadapt/Cargo.toml",
+    "rust-cutadapt/src/fastq.rs",
+    "rust-cutadapt/src/compress.rs",
+    "rust-cutadapt/src/pipeline.rs",
+    "rust-cutadapt/src/pair.rs",
+    "rust-cutadapt/src/auxout.rs",
+    "rust-umitools/Cargo.toml",
+    "rust-umitools/src/io/fastq.rs"
+  ],
+  "design_deviations": [
+    {
+      "id": "DR-1",
+      "title": "rust-umitools keeps extension-based gzip detection",
+      "observable_change": false,
+      "reason": "The shared crate sniffs content; rust-umitools has always opened .gz inputs as gzip and plain inputs as plain. The two differ only when a file's name and content disagree. Changing it would be an observable change on input the oracle does not cover, so it was left alone and pinned by a test.",
+      "pinned_by": "rust-umitools/src/io/fastq.rs::gzip_detection_is_by_extension_here",
+      "reversible": "one-line change plus an oracle case; listed for W1-3"
+    },
+    {
+      "id": "DR-2",
+      "title": "bioinfo-fastx uses xz2 + lzma-sys, not liblzma",
+      "observable_change": false,
+      "reason": "Cargo permits one package per links value; rust-htslib already provides links=\"lzma\" through lzma-sys, so the liblzma form would make the workspace unresolvable. W1-1 measured byte-identical xz output (DR-2 there); this crate's round-trip tests re-assert it.",
+      "dependency_set": "the plan's crate table names flate2, bzip2, liblzma, zstd; liblzma is realised as xz2+lzma-sys for the links reason"
+    },
+    {
+      "id": "DR-3",
+      "title": "BGZF MTIME is zero",
+      "observable_change": false,
+      "reason": "Reference BGZF writers stamp the current time; this one writes zero so output is reproducible and a fixture can pin it. No reader depends on MTIME. Deliberate byte difference from htslib's output.",
+      "reversible": true
+    },
+    {
+      "id": "DR-4",
+      "title": "the fuzz corpus is an in-repo harness, not cargo-fuzz/libFuzzer",
+      "observable_change": false,
+      "reason": "cargo-fuzz is not installed and cannot be fetched offline; the crate is not in the local registry. Rather than claim a run that did not happen, an in-repo deterministic harness was written and run for the required 600 s.",
+      "limitation": "Not coverage-guided: it will not reach the path set libFuzzer's feedback loop would.",
+      "result": "31,332,015 iterations, 0 failures over 600 s",
+      "real_fix": "add cargo-fuzz with a persistent corpus in CI (needs nightly + network at build time); listed for W1-3/W1-6"
+    },
+    {
+      "id": "DR-5",
+      "title": "two genuine defects found by fuzzing and fixed",
+      "kind": "defect-fixed",
+      "pre_existing": false,
+      "introduced_by": "this step (the shared parser/writer did not exist before)",
+      "observable_change_for_existing_binaries": false,
+      "detail": "An embedded carriage return could not round-trip: the parser strips one trailing \\r per line, so a line ending in two carriage returns parsed successfully with a \\r left inside the field, and writing it back produced a line that re-parsed differently. Affected the separator and quality lines first, then the header. Fixed by rejecting an embedded \\r in the header, sequence, separator and quality lines, with a clear message; the writer also strips a trailing \\r defensively.",
+      "why_oracles_missed_it": "Neither input is valid FASTQ, so neither cutadapt 4.6 nor UMI-tools 1.1.6 accepts it; no oracle case covers it.",
+      "regression_tests_added": "parser-level tests plus the fuzz harness's write∘parse identity property"
+    },
+    {
+      "id": "DR-6",
+      "title": "a property the fuzz harness deliberately does not assert",
+      "observable_change": false,
+      "reason": "The harness first asserted that chunked parsing finds the same record count as a single pass. That is false for malformed input, and correctly so: a chunk boundary can fall where the whole-input parser would have kept reading. It was replaced with the two properties that are true and useful: chunks tile the input exactly, and every chunk but the last ends on a record boundary. Pipeline determinism holds for valid input, which is what the gate and the differential suites verify."
+    }
+  ],
+  "not_claimed": [
+    "no cargo fuzz run (DR-4)",
+    "no BGZF reader (BGZF is read as gzip, which is correct); no .gzi index",
+    "no multi-line FASTA support in the borrowed Record parser; such a record is reported, not truncated",
+    "no general compressed-byte equality (the rule is decompressed bytes, plan decision D4); BGZF block structure is the measured exception",
+    "rust-umitools gzip detection was not unified with the shared crate (DR-1)",
+    "no clean-container run; evidence is from this machine with the pinned oracle environments",
+    "no counting-allocator measurement of per-record allocation (G-M4 criterion not measured here)",
+    "no release, tag, version bump, dist upload or crates.io publication"
+  ],
+  "remaining_gaps_w1_3": [
+    "rust-fx not created (stats, seq, fq2fa, fx2tab, sample --seed, split, lint)",
+    "cargo fuzz not in CI; the in-repo harness is a substitute, not an equivalent (DR-4)",
+    "multi-line FASTA cannot be represented by the borrowed Record; fq2fa will need an owning reader or segment iterator",
+    "rust-umitools gzip detection could be unified with content sniffing if a case is added to the oracle (DR-1)",
+    ".gzi BGZF index for random access, wanted by the BAM work in W1-4",
+    "no counting allocator to satisfy G-M4's per-record allocation criterion",
+    "the W1-2 equivalence harness covers cutadapt and umitools FASTQ commands; it does not cover the umitools BAM paths, which the existing oracle suites cover instead"
+  ],
+  "verification_attribution": {
+    "leader_ran": [
+      "cargo build --workspace --release --offline",
+      "cargo test --workspace --offline (debug, 407) and --release (407)",
+      "cargo fmt --all -- --check",
+      "cargo clippy --workspace --all-targets --offline -- -D warnings",
+      "python3 rust-cutadapt/tests/oracle/differential.py --matrix (119/119)",
+      "tests/oracle/run_exact.sh (77/77)",
+      "tests/oracle/run_oracle.sh (39/39)",
+      "tests/oracle/run_extract.sh (9/9)",
+      "tests/oracle/run_formats.sh (0 failures)",
+      "bash tests/gate/m3.sh (9/9 PASS, 40/40 cases)",
+      "tests/gate/w12_fastx_equivalence.py (35/35 cutadapt, 12/12 umitools)",
+      "the BGZF cross-reader verification (gzip, bgzip, python gzip)",
+      "the 600 s fuzz corpus (31,332,015 iterations, 0 failures)",
+      "the DR-5 defect reproduction and fix"
+    ],
+    "delegated": {
+      "instance": "w1-2-fuzz",
+      "outcome": "BLOCKED: the instance had no shell tool and could confirm that before doing any work. It wrote nothing and fabricated no output. All W1-2 work was done by the leader."
+    },
+    "external": "W1-1's completion was challenged by external verification, which found a real read-2 adapter defect; that is recorded in docs/EVIDENCE-W1-1.md DR-10 and is not part of W1-2."
+  }
+}
