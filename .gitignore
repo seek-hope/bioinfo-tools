@@ -2,10 +2,12 @@
 /target/
 **/target/
 
-# Local oracle installs. The pins live in tests/ci/PINS.md; the binaries are
-# downloaded by a human or by CI provisioning and must never be committed.
-tests/ci/env/bin/
-tests/ci/env/**/bin/
+# Local oracle installs. The pins live in tests/ci/PINS.md and
+# tests/ci/PINS-QC.md; the payloads are downloaded by a human or by CI
+# provisioning and must never be committed. FastQC is ~15MB of class files plus
+# JARs and the MultiQC virtualenv is ~1.1GB, so ignoring the whole tree is the
+# only workable rule; the tracked pin notes live alongside it in tests/ci/.
+tests/ci/env/
 
 # Scratch space used during development.
 .work/

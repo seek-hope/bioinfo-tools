@@ -1033,6 +1033,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "rust-fastqc"
+version = "0.1.0"
+dependencies = [
+ "bioinfo-common",
+ "bioinfo-fastx",
+ "clap",
+]
+
+[[package]]
 name = "rust-fx"
 version = "0.1.0"
 dependencies = [

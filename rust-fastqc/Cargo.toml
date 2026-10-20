@@ -1,0 +1,25 @@
+[package]
+name = "rust-fastqc"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.91"
+description = "FastQC-compatible QC prototype emitting fastqc_data.txt"
+license = "MIT"
+
+[dependencies]
+# FastQC's numbers are only meaningful if the FASTQ parser agrees with the one the
+# other tools use, so this crate reads through the shared FASTX layer (W1-2)
+# instead of opening files itself.
+bioinfo-fastx = { path = "../bioinfo-fastx" }
+# Shared exit-code classes and diagnostics (W1-1).
+bioinfo-common = { path = "../bioinfo-common" }
+# Command-line parsing: already a workspace dependency.
+clap = { version = "4", features = ["derive"] }
+
+[lib]
+name = "rust_fastqc"
+path = "src/lib.rs"
+
+[[bin]]
+name = "rust-fastqc"
+path = "src/main.rs"

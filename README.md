@@ -22,6 +22,7 @@ those two repositories beside this root; the workspace paths are relative.
 - `bioinfo-fastx` — shared streaming FASTX/compression/BGZF layer
 - `rust-fx` — FASTX manipulation CLI
 - `rust-bam` — SAM/BAM inspection and manipulation on noodles
+- `rust-fastqc` — FastQC-compatible QC data report prototype
 - `rust-cutadapt` and `rust-umitools` — independent repositories described above
 
 ## Build and test

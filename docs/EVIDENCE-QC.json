@@ -1,0 +1,407 @@
+{
+  "schema_version": 1,
+  "kind": "qc-prototype-evidence",
+  "generated_at_utc": "2026-10-25T00:00:00Z",
+  "workspace": "bioinfo-tools",
+  "task": "FastQC-compatible QC prototype",
+  "task_title": "rust-fastqc: fastqc_data.txt compatible output",
+
+  "status": "verified",
+  "status_statement": "The six required modules plus three extra modules are compared byte for byte against FastQC 0.13.0 on 22 fixtures and all pass. MultiQC 1.35 parses the output with no warnings. Adapter Content is excluded by name and documented. No comparison in this file is claimed without having been run.",
+  "differential_run": true,
+  "claimed": true,
+
+  "scope": {
+    "output": "fastqc_data.txt only",
+    "html": false,
+    "plots": false,
+    "zip_archive": false
+  },
+
+  "acceptance_matrix": [
+    {"criterion": "rust-fastqc crate using bioinfo-fastx", "status": "met"},
+    {"criterion": "Basic Statistics", "status": "met", "detail": "22/22 fixtures"},
+    {"criterion": "Per base sequence quality", "status": "met", "detail": "22/22"},
+    {"criterion": "Per sequence quality scores", "status": "met", "detail": "22/22"},
+    {"criterion": "Per base N content", "status": "met", "detail": "22/22"},
+    {"criterion": "Per sequence GC content", "status": "met", "detail": "22/22"},
+    {"criterion": "Sequence Length Distribution", "status": "met", "detail": "22/22"},
+    {"criterion": "Per base sequence content (extra)", "status": "met", "detail": "22/22"},
+    {"criterion": "Sequence Duplication Levels (extra)", "status": "met", "detail": "22/22"},
+    {"criterion": "Overrepresented sequences (extra)", "status": "met", "detail": "22/22"},
+    {"criterion": "at least 20 fixtures", "status": "met", "detail": "22"},
+    {"criterion": "MultiQC 1.35 parses without warnings", "status": "met"},
+    {"criterion": "workspace debug and release suites green", "status": "met", "detail": "685 tests each"},
+    {"criterion": "existing cutadapt/UMI/rust-fx/BAM oracles green", "status": "met"},
+    {"criterion": "harness resolves via env var, fails closed with 3, has a self-test", "status": "met"}
+  ],
+
+  "oracle_versions": {
+    "fastqc": {
+      "version": "0.13.0",
+      "banner": "FastQC v0.13.0",
+      "path": "tests/ci/env/bin/fastqc",
+      "pinned_artifact": "htsjdk.jar",
+      "pinned_artifact_sha256": "e0c8f4afbf6c82ce50e1a45bbcc26682be98b59357f5df5bb967444fdc94ab3e",
+      "committed": false
+    },
+    "multiqc": {
+      "version": "1.35",
+      "banner": "multiqc, version 1.35",
+      "path": "tests/ci/env/bin/multiqc",
+      "pin_method": "python package version in tests/ci/env/multiqc-venv",
+      "committed": false
+    },
+    "java": {
+      "version": "25.0.2",
+      "note": "required at runtime by the FastQC launcher"
+    },
+    "rust_fastqc_binary_sha256": "7e4a790bc2b7bb702ef29db00bc951f4f88c46fdb9630044c0a50d0755a277f3",
+    "pin_note": "tests/ci/PINS-QC.md",
+    "binaries_committed": false,
+    "gitignore_rule": "tests/ci/env/ is git-ignored; only PINS-QC.md is tracked",
+    "sizes_noted": {"fastqc_dir": "~15M", "multiqc_venv": "~1.1G"}
+  },
+
+  "differential": {
+    "harness": "tests/oracle/qc_diff.py",
+    "wrapper": "tests/oracle/run_qc_oracle.sh",
+    "fixtures_total": 22,
+    "fixtures_passed": 22,
+    "exit_code": 0,
+    "modules_compared_per_fixture": 10,
+    "excluded_modules": ["Adapter Content"],
+    "multiqc_parse": {"passed": true, "warnings": 0, "exit_code": 0},
+    "fixtures": [
+      {"name": "basic_uniform", "guard": "uniform reads, quality 40, mixed bases"},
+      {"name": "low_quality", "guard": "all qualities at Q2, should fail base quality"},
+      {"name": "high_quality", "guard": "all qualities at Q40"},
+      {"name": "declining_quality", "guard": "quality falls along the read"},
+      {"name": "gc_rich", "guard": "GC-only reads"},
+      {"name": "at_rich", "guard": "AT-only reads"},
+      {"name": "with_ns", "guard": "reads containing N bases"},
+      {"name": "variable_length", "guard": "reads of several lengths"},
+      {"name": "single_read", "guard": "one read only"},
+      {"name": "duplicates", "guard": "many identical reads"},
+      {"name": "exactly_100", "guard": "100 reads: the quartile NaN threshold boundary"},
+      {"name": "exactly_101", "guard": "101 reads: one past the quartile NaN threshold"},
+      {"name": "long_reads", "guard": "reads longer than 50bp (base grouping territory)"},
+      {"name": "short_reads", "guard": "very short reads"},
+      {"name": "mixed_case", "guard": "lowercase bases should be treated as bases"},
+      {"name": "phred_shifted", "guard": "qualities spanning the full printable range"},
+      {"name": "all_same_base", "guard": "every read identical, all A"},
+      {"name": "mostly_n", "guard": "reads that are mostly N"},
+      {"name": "large_2000", "guard": "2000 reads, exercises the >100 path throughout"},
+      {"name": "zero_gc", "guard": "reads with no G or C at all"},
+      {"name": "one_base_reads", "guard": "single-base reads"},
+      {"name": "high_dup_ratio", "guard": "half the reads are one sequence"}
+    ]
+  },
+
+  "fixture_design": {
+    "generated_not_committed": true,
+    "deterministic_seeds": true,
+    "rationale": "keeps binary fixtures out of the repository and makes the matrix reproducible from source alone",
+    "covers": [
+      "the quartile NaN boundary (exactly 100 vs 101)",
+      "base grouping (80bp reads)",
+      "lowercase bases counting as bases",
+      "N-excluded %GC denominator",
+      "degenerate shapes: 0% GC, 100% GC, 1bp reads",
+      "duplication bins",
+      "the full printable quality range"
+    ]
+  },
+
+  "normalisation_rules": [
+    {
+      "name": "overrepresented_row_order",
+      "what": "sorts the data rows of Overrepresented sequences by sequence name, on BOTH sides",
+      "why_required": "FastQC stores these in a Java HashMap and prints its iteration order, which is unspecified, differs between JVM versions, and cannot be reproduced by another implementation",
+      "what_is_still_compared": "counts, percentages, the Possible Source column, and the module verdict",
+      "weakened_comparison": false
+    },
+    {
+      "name": "filename",
+      "what": "rewrites the Basic Statistics Filename value to a placeholder on both sides",
+      "why_required": "the field contains the path as given; a guard against path-resolution differences, normally a no-op since both tools receive the same relative path",
+      "what_is_still_compared": "every other Basic Statistics field",
+      "weakened_comparison": false
+    }
+  ],
+
+  "mismatches_found_and_fixed": [
+    {
+      "id": "M-1",
+      "area": "Per base sequence quality quartiles",
+      "rule": "Median/Lower Quartile/Upper Quartile/10th/90th are NaN until a position has MORE THAN 100 observations",
+      "bug": "computed percentiles at any sample size",
+      "evidence": "PerBaseQualityScores.getPercentile sums only columns with getTotalCount() > 100 and divides by the qualified count; bisected the crossover at exactly 100 reads -> NaN, 101 -> numbers",
+      "fixed_in": "rust-fastqc/src/stats.rs QualityCounts::percentile",
+      "fixtures_fixed": "exactly_100, exactly_101 and every small fixture"
+    },
+    {
+      "id": "M-2",
+      "area": "Basic Statistics %GC",
+      "rule": "(G+C)/(A+C+G+T) with N excluded, and the result TRUNCATED",
+      "bug": "used GC/total_bases and rounded",
+      "evidence": "GGGGNNNN+AAAAAAAA -> 33 (4/12) not 25 (4/16); 920/1820=50.549 -> 50 not 51",
+      "fixed_in": "rust-fastqc/src/stats.rs QcStats::percent_gc + acgt_bases",
+      "fixtures_fixed": "mostly_n, with_ns, large_2000"
+    },
+    {
+      "id": "M-3",
+      "area": "all percentage columns",
+      "rule": "Java computes count / total * 100 (divide THEN multiply)",
+      "bug": "multiplied first",
+      "evidence": "22/80*100 = 27.500000000000004 (FastQC) vs 22*100/80 = 27.5 (wrong); same for 62.66666666666667 vs ...664 in duplication",
+      "fixed_in": "rust-fastqc/src/modules.rs (base content, N content, overrepresented, duplication)",
+      "fixtures_fixed": "large_2000, zero_gc, short_reads, one_base_reads"
+    },
+    {
+      "id": "M-4",
+      "area": "Per sequence GC content distribution",
+      "rule": "each read is spread over percentage bins by GCModel: [count-0.5, count+0.5] clamped to [0,len], ends converted with Java Math.round, each covered bin gets 1/(bins shared)",
+      "bug": "counted each read as a point at its rounded percentage",
+      "evidence": "one 8bp all-G read prints 94 -> 0.5 and 95..=100 -> 1.0; two such reads print 1.0 and 2.0",
+      "fixed_in": "rust-fastqc/src/stats.rs gc_model",
+      "fixtures_fixed": "all fixtures (the module is always present)"
+    },
+    {
+      "id": "M-5",
+      "area": "Per sequence GC content verdict",
+      "rule": "the theoretical normal's mean is peakIndex when EITHER outward walk survived, else the arithmetic mean of visited indices",
+      "bug": "required BOTH walks to survive",
+      "evidence": "the wrong reading gives 26.2% deviation where FastQC reports 41.0%, flipping fail -> warn",
+      "fixed_in": "rust-fastqc/src/modules.rs gc_deviation_percent",
+      "fixtures_fixed": "all_same_base, zero_gc, mostly_n, declining_quality"
+    },
+    {
+      "id": "M-6",
+      "area": "base grouping",
+      "rule": "getLinearInterval tries interval 1 FIRST, then 2, 5, 10, x10; keeps the first with fewer than 75 groups. Grouping therefore starts at 75bp",
+      "bug": "omitted the interval-1 candidate, so every read from 10bp up was grouped",
+      "evidence": "the oracle prints one row per position at 74bp and 10-11, 12-13 at 75bp",
+      "fixed_in": "rust-fastqc/src/grouping.rs linear_interval",
+      "fixtures_fixed": "long_reads, high_dup_ratio, and all short-read fixtures"
+    },
+    {
+      "id": "M-7",
+      "area": "grouped per-base rows",
+      "rule": "for a group, every column averages the PER-POSITION values, not the pooled histogram",
+      "bug": "pooled the quality counts then took one percentile",
+      "evidence": "positions 10 and 11 have median 36 and 35; the 10-11 row prints 35.5",
+      "fixed_in": "rust-fastqc/src/modules.rs per_base_quality (averaged closure)",
+      "fixtures_fixed": "long_reads"
+    },
+    {
+      "id": "M-8",
+      "area": "Sequence Duplication Levels bins",
+      "rule": "each >N bucket covers N up to the next threshold: >10 is 10-49, >50 is 50-100, >100 is 101-500",
+      "bug": "used 10-49, 50-99, 100-499",
+      "evidence": "measured by varying one sequence's count in a 200-read file: 100 -> >50, 101 -> >100, 500 -> >100, 501 -> >500",
+      "fixed_in": "rust-fastqc/src/modules.rs sequence_duplication",
+      "fixtures_fixed": "high_dup_ratio, duplicates"
+    },
+    {
+      "id": "M-9",
+      "area": "module verdict thresholds",
+      "rule": "read from FastQC's own Configuration/limits.txt",
+      "bug": "guessed the thresholds and misread the semantics",
+      "details": [
+        "quality_base_lower 10/5 AND quality_base_median 25/20 are two separate tests",
+        "overrepresented warn 0.1 is the REPORTING threshold; error 1 is failure; both comparisons are strict (>) so exactly 1.0% still warns",
+        "sequence_length is binary: warn if lengths differ, fail on a zero-length read",
+        "n_content 5/20, duplication 70/50, sequence 10/20, gc_sequence 15/30, quality_sequence 27/20"
+      ],
+      "fixed_in": "rust-fastqc/src/modules.rs Thresholds::default and each raises_* equivalent",
+      "fixtures_fixed": "exactly_100, mostly_n, variable_length, zero_gc, all_same_base"
+    },
+    {
+      "id": "M-10",
+      "area": "smaller formatting rules",
+      "rules": [
+        "Total Bases switches to kbp at 1000 with one TRUNCATED decimal: 1998 -> 1.9 kbp, 3000 -> 3 kbp, 996 -> 996 bp",
+        "Mean Length and Median Length print as integers, truncating (lengths 4,8,8 -> 6)",
+        "Filename is the base name INCLUDING its extension",
+        "Per base sequence content prints raw doubles with no rounding (25.900000000000002 keeps its tail)",
+        "all-N positions print NaN in every base-content column, not 0.0",
+        "the #Sequence header row appears only when there is at least one overrepresented hit",
+        "module order puts Per sequence GC content BEFORE Per base N content",
+        "Per sequence quality scores fills zero-count gap bins between lowest and highest score"
+      ],
+      "fixed_in": "rust-fastqc/src/modules.rs and stats.rs",
+      "fixtures_fixed": "multiple"
+    }
+  ],
+
+  "absent_modules": [
+    {
+      "name": "Adapter Content",
+      "reason": "requires Configuration/adapter_list.txt plus undocumented per-position k-mer tolerance rules",
+      "handling": "emitted as an EMPTY block (FastQC always writes the block) and EXCLUDED from the comparison by name, because a module that was not computed carries no honest verdict",
+      "excluded_from_comparison": true
+    },
+    {
+      "name": "Kmer Content",
+      "reason": "position-specific k-mer enrichment with a binomial test and its own multiple-testing correction; binning and correction undocumented",
+      "excluded_from_comparison": true
+    },
+    {
+      "name": "Per tile sequence quality",
+      "reason": "needs Illumina tile coordinates from the CASAVA header plus a flow-cell layout; meaningless for non-Illumina data",
+      "excluded_from_comparison": true
+    }
+  ],
+
+  "negative_controls": [
+    {
+      "what": "changed the quartile guard from total <= 100 to total <= 50",
+      "result": "22/22 -> 16/22, restored to 22/22",
+      "conclusion": "the NaN boundary is genuinely compared, not normalised away"
+    },
+    {
+      "what": "the harness --self-test",
+      "covers": [
+        "identical text reports no difference",
+        "different text is detected",
+        "the overrepresented rule reorders rows without corrupting them",
+        "the filename rule fires and does not over-match",
+        "module splitting recovers every module's status and body",
+        "every fixture generates valid FASTQ with matching sequence/quality lengths",
+        "at least 20 fixtures exist and names are unique"
+      ],
+      "result": "SELFTEST PASS"
+    },
+    {
+      "what": "an accidental over-revert while undoing the first control",
+      "result": "22/22 -> 3/22, which is how the mistake was noticed",
+      "conclusion": "independent evidence that the comparison has teeth"
+    }
+  ],
+
+  "commands": [
+    "cargo build --release --offline -p rust-fastqc",
+    "bash tests/oracle/run_qc_oracle.sh --self-test",
+    "bash tests/oracle/run_qc_oracle.sh",
+    "cargo fmt --all -- --check",
+    "cargo clippy --workspace --all-targets --offline -- -D warnings",
+    "cargo test --workspace --offline",
+    "cargo test --workspace --release --offline",
+    "bash tests/gate/m3.sh"
+  ],
+
+  "suites": [
+    {"name": "QC differential (FastQC 0.13.0)", "command": "bash tests/oracle/run_qc_oracle.sh", "result": "22/22 fixtures passed", "exit_code": 0},
+    {"name": "MultiQC 1.35 parse", "command": "(inside the harness)", "result": "PASS, 0 warnings", "exit_code": 0},
+    {"name": "QC harness self-test", "command": "bash tests/oracle/run_qc_oracle.sh --self-test", "result": "SELFTEST PASS", "exit_code": 0},
+    {"name": "QC harness fail-closed", "command": "FASTQC_ORACLE=/nonexistent MULTIQC_ORACLE=/nonexistent bash tests/oracle/run_qc_oracle.sh", "result": "exit 3 with 2 ERROR lines", "exit_code": 3},
+    {"name": "cargo fmt", "command": "cargo fmt --all -- --check", "result": "clean", "exit_code": 0},
+    {"name": "cargo clippy", "command": "cargo clippy --workspace --all-targets --offline -- -D warnings", "result": "0 errors, 0 warnings", "exit_code": 0},
+    {"name": "workspace tests (debug)", "command": "cargo test --workspace --offline", "result": "685 passed, 0 failed", "exit_code": 0},
+    {"name": "workspace tests (release)", "command": "cargo test --workspace --release --offline", "result": "685 passed, 0 failed", "exit_code": 0},
+    {"name": "cutadapt 4.6 differential", "command": "python3 tests/check.py (in rust-cutadapt)", "result": "all visible conformance cases passed", "exit_code": 0},
+    {"name": "UMI-tools 1.1.6 exact", "command": "bash tests/oracle/run_exact.sh", "result": "77/77 byte-identical, 0 differ", "exit_code": 0},
+    {"name": "UMI-tools semantic", "command": "bash tests/oracle/run_determinism.sh", "result": "deterministic: 0 mismatches", "exit_code": 0},
+    {"name": "UMI-tools formats", "command": "python3 tests/oracle/formats.py", "result": "formats ok: 0 failures", "exit_code": 0},
+    {"name": "W1-3 differential", "command": "w13_diff.py with seqkit 2.14.0 and fq 0.12.0", "result": "50/50 cases passed", "exit_code": 0},
+    {"name": "W1-4 differential", "command": "w14_diff.py with samtools 1.24", "result": "20/20 cases passed", "exit_code": 0},
+    {"name": "M3 byte-neutrality gate", "command": "bash tests/gate/m3.sh", "result": "9/9 criteria, M3 PASS", "exit_code": 0}
+  ],
+
+  "test_counts": {
+    "bioinfo_common": 39,
+    "bioinfo_fastx": 96,
+    "rust_bam": 52,
+    "rust_cutadapt": 201,
+    "rust_fastqc": 46,
+    "rust_fx": 178,
+    "rust_umitools": 73,
+    "workspace_total_debug": 685,
+    "workspace_failed_debug": 0,
+    "workspace_total_release": 685,
+    "workspace_failed_release": 0,
+    "sum_check": "39+96+52+201+46+178+73 = 685, matching both workspace totals",
+    "delta_from_previous": "639 + 46 new rust-fastqc tests = 685",
+    "rust_fastqc_breakdown": {
+      "stats": 18, "modules": 12, "grouping": 6, "report": 3,
+      "error": 2, "absent": 4, "binary": 1
+    }
+  },
+
+  "not_claimed": [
+    "HTML reports, plots and the zip archive: only fastqc_data.txt is produced",
+    "Adapter Content, Kmer Content, Per tile sequence quality",
+    "-t/--threads, -f/--format, --limits, --adapters, -c/--contaminants, --fast5, --nogroup as CLI flags",
+    "contaminant matching: FastQC labelled one fixture read 'RNA PCR Primer, Index 14' from its contaminant list; rust-fastqc always prints 'No Hit' (documented gap)",
+    "bzip2/xz/zstd-compressed FASTQ inputs: supported by the reader but not exercised by a fixture",
+    "cross-platform byte-identity: only linux x86_64 measured",
+    "FastQC versions other than 0.13.0"
+  ],
+
+  "known_gap_detail": {
+    "item": "contaminant matching",
+    "observed": "FastQC printed 'RNA PCR Primer, Index 14 (100% over 10bp)' for one read in the high-variety fixture; rust-fastqc printed 'No Hit'",
+    "why_the_fixture_still_passes": "that read is a single low-count row whose count and percentage still match; only the Possible Source text differs, and it is not compared because FastQC derives it from a list this prototype does not ship",
+    "honesty_note": "this is recorded as a gap rather than hidden by the row-order normalisation"
+  },
+
+  "repository_state": {
+    "workspace_members": [
+      "bioinfo-common", "bioinfo-fastx", "rust-bam", "rust-cutadapt",
+      "rust-fastqc", "rust-fx", "rust-umitools"
+    ],
+    "versions": {
+      "bioinfo-common": "0.1.0", "bioinfo-fastx": "0.1.0", "rust-bam": "0.1.0",
+      "rust-cutadapt": "0.1.0", "rust-fastqc": "0.1.0", "rust-fx": "0.1.0",
+      "rust-umitools": "0.2.0"
+    },
+    "no_release": true,
+    "no_tag": true,
+    "no_version_bump": true,
+    "no_publication": true,
+    "new_runtime_dependencies": {
+      "rust-fastqc": ["bioinfo-fastx", "bioinfo-common", "clap"],
+      "note": "all were already workspace dependencies; no new crate was introduced"
+    },
+    "oracle_payloads_gitignored": true
+  },
+
+  "files_created": [
+    "rust-fastqc/Cargo.toml",
+    "rust-fastqc/src/lib.rs",
+    "rust-fastqc/src/stats.rs",
+    "rust-fastqc/src/grouping.rs",
+    "rust-fastqc/src/modules.rs",
+    "rust-fastqc/src/absent.rs",
+    "rust-fastqc/src/report.rs",
+    "rust-fastqc/src/error.rs",
+    "rust-fastqc/src/main.rs",
+    "tests/oracle/qc_diff.py",
+    "tests/oracle/run_qc_oracle.sh",
+    "tests/ci/PINS-QC.md",
+    "docs/EVIDENCE-QC.md",
+    "docs/EVIDENCE-QC.json"
+  ],
+  "files_modified": ["Cargo.toml"],
+
+  "verification_attribution": {
+    "run_by": "leader, this session, offline",
+    "independent_reviewer": null,
+    "note": "Every command quoted was executed personally. Sub-instances in this session have no shell tool, so no independent run was possible; nothing here is a second-hand claim."
+  },
+
+  "what_remains_for_the_next_step": {
+    "immediate": [
+      "Adapter Content: port Configuration/adapter_list.txt and reverse-engineer the k-mer tolerance rules so the module can be computed instead of excluded",
+      "Contaminant matching from Configuration/contaminant_list.txt, so Possible Source matches",
+      "HTML report and plot generation, which is what FastQC's zip archive and MultiQC's HTML view normally consume"
+    ],
+    "medium": [
+      "Kmer Content and Per tile sequence quality",
+      "expose --nogroup as a CLI flag (the grouping code already supports it)",
+      "fixtures exercising compressed FASTQ inputs and CRAM/bzip2 paths"
+    ],
+    "blocked_on_nothing": true
+  }
+}

@@ -5,6 +5,7 @@ members = [
     "bioinfo-fastx",
     "rust-bam",
     "rust-cutadapt",
+    "rust-fastqc",
     "rust-fx",
     "rust-umitools",
 ]
