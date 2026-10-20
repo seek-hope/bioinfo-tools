@@ -1,0 +1,95 @@
+{
+  "schema_version": 1,
+  "tool": "rust-cutadapt",
+  "mode": "default (4 workers)",
+  "source_commit": "c8b02495930a448e40241786dae98ff568324108",
+  "binary": "target/release/rust-cutadapt",
+  "binary_sha256": "c98c28990e9439f9d9cd1f75d4001dec0f8de7fa31baafe52f22db54ee4099de",
+  "input": "bench/workload.fastq.gz",
+  "input_bytes": 28281883,
+  "input_sha256": "b9e9ae7c967731fa728f589f9e45c97c059904ff8198656dc2fed1374408e5dc",
+  "command": "./target/release/rust-cutadapt --quiet -a AGATCGGAAGAGC -m 10 -o <out.fastq.gz> bench/workload.fastq.gz",
+  "method": "5 independent runs with /usr/bin/time -v; no warmup; hyperfine was not installed. Wall time includes process startup and teardown.",
+  "hyperfine_available": false,
+  "runs": [
+    {
+      "run": 1,
+      "wall_s": 0.72,
+      "max_rss_kb": 40768,
+      "output_bytes": 27026804,
+      "output_sha256": "bdf4e7d69859e1caede8cd80e738bfe8fc2823d4c449a489c1af45b272172b25"
+    },
+    {
+      "run": 2,
+      "wall_s": 0.62,
+      "max_rss_kb": 41416,
+      "output_bytes": 27026804,
+      "output_sha256": "bdf4e7d69859e1caede8cd80e738bfe8fc2823d4c449a489c1af45b272172b25"
+    },
+    {
+      "run": 3,
+      "wall_s": 0.67,
+      "max_rss_kb": 40300,
+      "output_bytes": 27026804,
+      "output_sha256": "bdf4e7d69859e1caede8cd80e738bfe8fc2823d4c449a489c1af45b272172b25"
+    },
+    {
+      "run": 4,
+      "wall_s": 0.7,
+      "max_rss_kb": 38376,
+      "output_bytes": 27026804,
+      "output_sha256": "bdf4e7d69859e1caede8cd80e738bfe8fc2823d4c449a489c1af45b272172b25"
+    },
+    {
+      "run": 5,
+      "wall_s": 0.65,
+      "max_rss_kb": 38456,
+      "output_bytes": 27026804,
+      "output_sha256": "bdf4e7d69859e1caede8cd80e738bfe8fc2823d4c449a489c1af45b272172b25"
+    }
+  ],
+  "summary": {
+    "wall_mean_s": 0.672,
+    "wall_min_s": 0.62,
+    "wall_max_s": 0.72,
+    "max_rss_kb": 41416,
+    "output_bytes": 27026804,
+    "output_sha256": "bdf4e7d69859e1caede8cd80e738bfe8fc2823d4c449a489c1af45b272172b25",
+    "outputs_identical_across_runs": true,
+    "records": 999988
+  },
+  "oracle_same_session": {
+    "version": "4.6",
+    "wall_s": 9.65,
+    "max_rss_kb": 23988,
+    "output_bytes": 26555609,
+    "output_sha256": "7f5c567767dd29e433a1e230b18ae48f28c93cd79efef8687b4bc0bb2c953f3d",
+    "decompressed_sha256": "39688ebc263e11d345474d3f20b88ecf002d79a7eb2eb6f44b76deb6d5ca4012",
+    "decompressed_outputs_identical": true
+  },
+  "reference_baseline": {
+    "source": "bench/reference.json",
+    "wall_mean_s": 4.4363,
+    "max_rss_kb": 24412
+  },
+  "speedup": {
+    "vs_reference_baseline_mean": 6.6,
+    "vs_same_session_oracle": 14.36
+  },
+  "five_x_target": {
+    "minimum_speedup": 5.0,
+    "met_vs_reference_baseline": true,
+    "met_vs_same_session_oracle": true
+  },
+  "single_thread_comparison": {
+    "source": "docs/bench/cutadapt-281a8dd.json",
+    "wall_mean_s": 2.352,
+    "speedup_vs_reference_baseline": 1.89,
+    "note": "the earlier evidence file was measured with the default one worker; -j 1 reproduces it"
+  },
+  "notes": [
+    "The default worker count changed from 1 to 4; cutadapt's default remains 1, so -j 1 is the exact single-thread parity mode.",
+    "Decompressed output is byte-identical to cutadapt 4.6 on the same command.",
+    "The 6.3x-6.9x headline in BENCHMARK.md belongs to the v0.1.0 subset, not this full-surface binary."
+  ]
+}

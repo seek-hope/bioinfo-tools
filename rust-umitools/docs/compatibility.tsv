@@ -1,0 +1,51 @@
+command	option	status	oracle	fixture	comparison	note
+all	--memory-limit	verified		spill and determinism suites	exit code + bytes	64 MiB minimum working set
+all	--quiet, --progress, --summary-json	verified		formats suite	stream contents
+all	--threads	verified		determinism suite	decompressed bytes	1/2/8/16
+all	-I - / -S - (stdin/stdout)	verified		formats suite	decompressed bytes	two-pass processing spools stdin
+all	CRAM input/output with --reference	verified		formats suite	core fields	derived MD/NM tags may be added when decoding
+count	--gene-transcript-map	verified	1.1.6	edge cases	tsv bytes	requires --per-contig
+count	--partition-genes	verified		spill suite	TSV bytes	automatic gene partition fallback
+count	--per-cell	verified	1.1.6	edge cases	tsv bytes	sparse triplet form
+count	--per-contig	experimental	1.1.6	unit tests	tsv bytes
+count	--per-gene --gene-tag	verified	1.1.6	tagged	tsv bytes
+count	--wide	verified	1.1.6	edge cases	tsv bytes	dense gene x cell matrix
+count_tab	--per-cell	verified	1.1.6	cell table	tsv bytes
+count_tab	default	verified	1.1.6	two column table	tsv bytes
+dedup	--add-pg	extension		n/a	not compared	changes output bytes
+dedup	--buffer-whole-contig	verified	1.1.6	edge cases	decompressed bytes	contig-wide bundle window
+dedup	--chrom NAME	verified	1.1.6	edge cases	decompressed bytes	whole-contig filter, unknown name refused
+dedup	--compresslevel 0-9	verified	1.1.6	edge cases	decompressed bytes	0 stores uncompressed blocks; default 1, 6 matches upstream size
+dedup	--edit-distance-threshold=0|1|2|at-length	verified	1.1.6	edge cases	decompressed bytes
+dedup	--extract-umi-method=read_id	verified	1.1.6	families	decompressed bytes
+dedup	--extract-umi-method=tag	verified	1.1.6	tagged	decompressed bytes
+dedup	--extract-umi-method=umis	experimental	1.1.6	unit tests	member sets
+dedup	--filter-umi [--umi-whitelist|--umi-whitelist-paired]	verified	1.1.6	edge cases	decompressed bytes	single and paired whitelists
+dedup	--gene-transcript-map	unsupported		n/a	rejected	count implements the map
+dedup	--ignore-tlen	verified	1.1.6	edge cases	decompressed bytes
+dedup	--mapping-quality	verified	1.1.6	edge cases	decompressed bytes
+dedup	--method=unique|percentile|cluster|adjacency|directional	verified	1.1.6	families, paired-repeat	decompressed bytes	five methods
+dedup	--multimapping-detection-method=NH|X0|XT	verified	1.1.6	edge cases	decompressed bytes	tie draw consumes the same RNG values as upstream
+dedup	--no-sort-output	verified	1.1.6	single-nosort, paired-nosort	decompressed bytes
+dedup	--output-stats	unsupported		n/a	rejected	null model not implemented
+dedup	--paired	verified	1.1.6	paired, paired-repeat	decompressed bytes	includes repeated pairs and mate recovery
+dedup	--per-cell --cell-tag	verified	1.1.6	edge cases	decompressed bytes
+dedup	--per-gene --gene-tag	verified	1.1.6	edge cases	decompressed bytes
+dedup	--random-seed	verified	1.1.6	all exact cases	decompressed bytes	CPython MT19937 reproduction
+dedup	--read-length	verified	1.1.6	edge cases	decompressed bytes
+dedup	--representative=stable	experimental		unit tests	molecule set	project RNG, not CPython
+dedup	--representative=upstream	verified	1.1.6	exact cases + oracle C3	decompressed bytes	representative tie handling
+dedup	--spliced-is-unique	verified	1.1.6	edge cases	decompressed bytes
+dedup	--subset P	verified	1.1.6	edge cases	decompressed bytes	shared RNG with the tie draw
+dedup	bounded paths: window, mate join, disk bundle	verified		spill suite	decompressed bytes	K9 forced paths
+dedup	default coordinate sort	verified	1.1.6	exact cases + oracle B04	decompressed bytes
+extract	--extract-method=regex	verified	1.1.6	extract cases	FASTQ bytes	named umi_* and discard_* groups
+extract	--extract-method=string with -p	verified	1.1.6	extract cases	FASTQ bytes	single/paired, 3prime, gzip, quality filter/mask
+extract	other methods, phred64	unsupported		n/a	rejected
+group	--group-out	verified	1.1.6	families x five methods	bam bytes + tsv bytes
+group	--output-bam	verified	1.1.6	families x five methods	bam bytes
+group	--per-gene [--per-cell]	verified	1.1.6	edge cases	bam bytes + tsv bytes
+group	UG and BX tags	verified	1.1.6	families x five methods	bam bytes	UG uses C/S/I
+whitelist	--ed-above-threshold=discard|correct	verified	1.1.6	whitelist cases	TSV bytes
+whitelist	--knee-method=distance|density, --set-cell-number	verified	1.1.6	whitelist cases	TSV bytes
+whitelist	--method=umis, --read2-in	unsupported		n/a	rejected

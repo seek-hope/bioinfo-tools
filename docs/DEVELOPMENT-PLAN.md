@@ -24,10 +24,9 @@ The plan answers four questions:
 
 ### 1. What this directory is
 
-`bioinfo-tools/` is a Cargo workspace and an **overlay Git repository**. The root tracks the
-shared crates, root build files, tests and evidence; `rust-cutadapt/` and `rust-umitools/` remain
-independent Git repositories with their own histories and remotes and are excluded by the root
-`.gitignore`:
+`bioinfo-tools/` is the canonical Cargo workspace and monorepo. The two original crate
+repositories were preserved as historical archives outside the tree; their source is now
+tracked directly by this repository:
 
 | Path | Kind | State |
 | --- | --- | --- |

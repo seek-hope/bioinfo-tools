@@ -1,0 +1,22 @@
+# Build stage: the MSRV toolchain keeps the verification honest.
+FROM rust:1.75-bookworm AS build
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends libhts-dev zlib1g-dev pkg-config \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /src
+COPY . .
+RUN cargo build --release
+
+# Runtime stage: only HTSlib is needed to run the binary.
+FROM debian:bookworm-slim
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends libhts3 ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY --from=build /src/target/release/rust-umitools /usr/local/bin/rust-umitools
+
+ENTRYPOINT ["rust-umitools"]
+CMD ["--help"]

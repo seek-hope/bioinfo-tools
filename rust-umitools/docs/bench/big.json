@@ -1,0 +1,179 @@
+{
+  "cases": [
+    {
+      "cpu_seconds": 0.13,
+      "input_reads": 200000,
+      "name": "dedup",
+      "output_bytes": 106155,
+      "peak_rss_kb": 42616,
+      "repetitions": 1,
+      "stages": {
+        "parse_cluster": 0.0,
+        "sort_commit": 0.0
+      },
+      "threads_peak": 35,
+      "tmp_bytes_peak": 0,
+      "wall_seconds_all": [
+        0.0647
+      ],
+      "wall_seconds_min": 0.0647
+    },
+    {
+      "cpu_seconds": 1.03,
+      "input_reads": 200000,
+      "name": "group",
+      "output_bytes": 12642704,
+      "peak_rss_kb": 146732,
+      "repetitions": 1,
+      "stages": {},
+      "threads_peak": 26,
+      "tmp_bytes_peak": 0,
+      "wall_seconds_all": [
+        0.9573
+      ],
+      "wall_seconds_min": 0.9573
+    },
+    {
+      "cpu_seconds": 0.02,
+      "input_reads": 200000,
+      "name": "count",
+      "output_bytes": 40,
+      "peak_rss_kb": 7344,
+      "repetitions": 1,
+      "stages": {},
+      "threads_peak": 17,
+      "tmp_bytes_peak": 0,
+      "wall_seconds_all": [
+        0.0323
+      ],
+      "wall_seconds_min": 0.0323
+    },
+    {
+      "cpu_seconds": 0.03,
+      "input_reads": 200000,
+      "name": "count_tab",
+      "output_bytes": 290011,
+      "peak_rss_kb": 6296,
+      "repetitions": 1,
+      "stages": {},
+      "threads_peak": 1,
+      "tmp_bytes_peak": 0,
+      "wall_seconds_all": [
+        0.0463
+      ],
+      "wall_seconds_min": 0.0463
+    },
+    {
+      "cpu_seconds": 283.95,
+      "input_reads": 200000,
+      "name": "dedup_big",
+      "output_bytes": 692843975,
+      "peak_rss_kb": 1806220,
+      "repetitions": 1,
+      "stages": {
+        "parse_cluster": 51.9,
+        "sort_commit": 6.9
+      },
+      "threads_peak": 35,
+      "tmp_bytes_peak": 784234693,
+      "wall_seconds_all": [
+        58.8197
+      ],
+      "wall_seconds_min": 58.8197
+    },
+    {
+      "cpu_seconds": 18.98,
+      "input_reads": 200000,
+      "name": "count_big",
+      "output_bytes": 8234,
+      "peak_rss_kb": 354520,
+      "repetitions": 1,
+      "stages": {},
+      "threads_peak": 17,
+      "tmp_bytes_peak": 0,
+      "wall_seconds_all": [
+        17.7545
+      ],
+      "wall_seconds_min": 17.7545
+    },
+    {
+      "cpu_seconds": 833.46,
+      "input_reads": 200000,
+      "name": "group_big",
+      "output_bytes": 7643164831,
+      "peak_rss_kb": 3120164,
+      "repetitions": 1,
+      "stages": {},
+      "threads_peak": 26,
+      "tmp_bytes_peak": 3851413687,
+      "wall_seconds_all": [
+        466.9073
+      ],
+      "wall_seconds_min": 466.9073
+    },
+    {
+      "cpu_seconds": 0.14,
+      "input_reads": 200000,
+      "name": "dedup_low-memory",
+      "output_bytes": 106155,
+      "peak_rss_kb": 42236,
+      "repetitions": 1,
+      "stages": {
+        "parse_cluster": 0.1,
+        "sort_commit": 0.0
+      },
+      "threads_peak": 35,
+      "tmp_bytes_peak": 0,
+      "wall_seconds_all": [
+        0.0659
+      ],
+      "wall_seconds_min": 0.0659
+    },
+    {
+      "cpu_seconds": 0.13,
+      "input_reads": 200000,
+      "name": "dedup_high-throughput",
+      "output_bytes": 106155,
+      "peak_rss_kb": 42556,
+      "repetitions": 1,
+      "stages": {
+        "parse_cluster": 0.0,
+        "sort_commit": 0.0
+      },
+      "threads_peak": 35,
+      "tmp_bytes_peak": 0,
+      "wall_seconds_all": [
+        0.0659
+      ],
+      "wall_seconds_min": 0.0659
+    },
+    {
+      "cpu_seconds": 4.25,
+      "input_reads": 5000000,
+      "name": "count_tab_big",
+      "output_bytes": 34450011,
+      "peak_rss_kb": 5984,
+      "repetitions": 1,
+      "stages": {},
+      "threads_peak": 1,
+      "tmp_bytes_peak": 0,
+      "wall_seconds_all": [
+        4.3
+      ],
+      "wall_seconds_min": 4.3
+    }
+  ],
+  "provenance": {
+    "binary": "/tmp/rust-umitools-build/target/release/rust-umitools",
+    "binary_sha256": "0b521bab1f860ae2f2f5148a3ae1e8d7100f871c000cd1e48bc438a493ea644e",
+    "commit": "a9dbd25bdc2c2ec56dd3500724611e906930fd1e",
+    "cpu_model": "13th Gen Intel(R) Core(TM) i7-13700H",
+    "logical_cpus": 20,
+    "platform": "Linux-7.2.9-2-cachyos-x86_64-with-glibc2.44",
+    "profile": "release",
+    "python": "3.12.14",
+    "rustc": "rustc 1.95.0 (59807616e 2026-04-14)",
+    "samtools": "samtools 1.24",
+    "umi_tools": "UMI-tools version: 1.1.6"
+  }
+}

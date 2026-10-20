@@ -1,0 +1,88 @@
+oracle: /home/rimuru/.conda/envs/ta-cutadapt/bin/cutadapt
+rust  : /home/rimuru/Projects/Code/for_fun/bioinfo-tools/.work/src/target/release/rust-cutadapt
+oracle version: 4.6
+rust version  : rust-cutadapt 0.1.0
+cases: 75
+
+PASS  default_minimum_length
+PASS  a3_regular
+PASS  a3_anchored
+PASS  g5_regular
+PASS  g5_anchored
+PASS  b_anywhere
+PASS  a3_no_indels
+PASS  a3_error_rate_0
+PASS  a3_error_rate_int
+PASS  a3_error_rate_02
+PASS  a3_overlap_1
+PASS  a3_overlap_10
+PASS  a3_times_2
+PASS  a3_times_3
+PASS  multiple_adapters
+PASS  anchored_and_regular
+PASS  linked_adapter
+PASS  wildcard_adapter
+PASS  no_match_wildcards
+PASS  match_read_wildcards
+PASS  revcomp
+PASS  action_trim
+PASS  action_retain
+PASS  action_mask
+PASS  action_lowercase
+PASS  action_none
+PASS  cut_5prime
+PASS  cut_3prime
+PASS  cut_both
+PASS  quality_3prime
+PASS  quality_both
+PASS  quality_base64
+PASS  nextseq_trim
+FAIL  poly_a
+        text report differs: line count 47 vs 40
+PASS  length_shorten
+PASS  length_negative
+PASS  trim_n
+PASS  zero_cap
+PASS  strip_suffix
+PASS  prefix
+PASS  suffix
+PASS  rename
+PASS  length_tag
+PASS  filter_min
+PASS  filter_max
+PASS  filter_max_n
+PASS  filter_max_ee
+FAIL  filter_max_aer
+        exit code 1 != 0
+PASS  discard_trimmed
+PASS  discard_untrimmed
+PASS  discard_casava
+PASS  out_fasta
+PASS  out_gzip
+PASS  out_stdout
+PASS  default_output
+PASS  info_file
+PASS  rest_file
+PASS  wildcard_file
+PASS  too_short_output
+PASS  too_long_output
+PASS  untrimmed_output
+PASS  report_minimal
+PASS  json_report
+PASS  json_report_full
+PASS  cores_2
+PASS  compression_z
+PASS  quiet
+PASS  paired_basic
+PASS  paired_interleaved
+PASS  paired_min
+PASS  err_missing_input
+PASS  err_unknown_option
+PASS  err_bad_adapter
+PASS  err_both_stdin
+PASS  err_no_adapter
+
+73/75 cases passed
+failures by category: single-end=2
+failing cases: poly_a, filter_max_aer
+wrote /tmp/final.json

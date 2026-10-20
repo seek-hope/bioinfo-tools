@@ -1,0 +1,89 @@
+Group reads by UMI and tag them with UG/BX
+
+Usage: rust-umitools group [OPTIONS] --stdin <FILE>
+
+Options:
+  -I, --stdin <FILE>
+          Input file: BAM, or SAM when the name ends in .sam (- for stdin) [alias: --input]
+  -S, --stdout <FILE>
+          Output file; the format depends on the command (- for stdout) [alias: --output]
+  -L, --log <FILE>
+          Log file (defaults to stderr)
+      --method <METHOD>
+          Merge method: unique, percentile, cluster, adjacency, directional [default: directional]
+      --edit-distance-threshold <THRESHOLD>
+          Maximum Hamming distance between UMIs in a cluster [default: 1]
+      --extract-umi-method <EXTRACT_UMI_METHOD>
+          Where the UMI comes from: read_id, tag, umis [default: read_id]
+      --umi-tag <UMI_TAG>
+          UMI tag when --extract-umi-method=tag [default: RX]
+      --verbose
+          Print detailed build information together with --version
+      --umi-separator <UMI_SEPARATOR>
+          Separator for the UMI in the read name [default: _]
+      --umi-tag-split <UMI_TAG_SPLIT>
+          Split the UMI tag on this string and keep the first part
+      --umi-tag-delim <UMI_TAG_DELIM>
+          Remove this string from the UMI tag
+      --cell-tag <CELL_TAG>
+          Cell barcode tag (used with --per-cell) [default: CB]
+      --per-cell
+          Group by cell barcode as well as UMI
+      --random-seed <RANDOM_SEED>
+          Seed for the representative read draw [default: 0]
+      --representative <REPRESENTATIVE>
+          Representative read strategy: upstream, stable [default: upstream]
+      --soft-clip-threshold <SOFT_CLIP_THRESHOLD>
+          Soft clip length above which a read counts as spliced [default: 4]
+      --spliced-is-unique
+          Treat spliced reads as unique
+      --ignore-tlen
+          Ignore the template length when grouping
+      --read-length
+          Include the read length in the bundle key
+      --mapping-quality <MAPPING_QUALITY>
+          Discard reads below this MAPQ
+      --multimapping-detection-method <DETECTION_METHOD>
+          Multimapping detection tag: NH, X0 or XT
+      --add-pg
+          Append a @PG provenance record (changes the output bytes)
+      --threads <THREADS>
+          Worker threads
+      --memory-limit <MEMORY_LIMIT>
+          Memory budget, e.g. 4GiB
+      --tmpdir <TMPDIR>
+          Directory for temporary files
+      --quiet
+          Suppress informational output; errors are still printed
+      --progress <MODE>
+          Progress reporting: auto (terminal only), on, off [default: auto]
+      --summary-json <FILE>
+          Write a machine readable run summary to this file
+      --sort-strategy <MODE>
+          Sort strategy: auto, low-memory, high-throughput [default: auto]
+      --reference <FASTA>
+          Reference FASTA for CRAM input or output
+      --compresslevel <COMPRESSLEVEL>
+          BAM compression level (0-9; 0 stores uncompressed blocks) [default: 1]
+      --group-out <GROUP_OUT>
+          Write the read groups table here
+      --per-gene
+          Group by gene (requires gene-tagged input)
+      --gene-tag <GENE_TAG>
+          Gene tag
+      --umi-group-tag <UMI_GROUP_TAG>
+          Tag holding the corrected UMI for the group [default: BX]
+      --output-bam
+          Accepted for UMI-tools compatibility (a BAM is written whenever -S is given)
+      --no-sort-output
+          Write the output in processing order
+  -h, --help
+          Print help
+
+EXAMPLES:
+  rust-umitools group -I in.bam --group-out groups.tsv
+  rust-umitools group -I in.bam -S grouped.bam --output-bam --group-out groups.tsv
+
+NOTES:
+  --output-bam is accepted for UMI-tools compatibility; a BAM is written when -S is given.
+  Reads are tagged with UG (group id) and the corrected UMI (BX by default).

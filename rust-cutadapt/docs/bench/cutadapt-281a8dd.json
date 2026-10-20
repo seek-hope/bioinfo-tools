@@ -1,0 +1,89 @@
+{
+  "schema_version": 1,
+  "tool": "rust-cutadapt",
+  "source_commit": "281a8dd89a9ba41bf1061578dc3218cebf699454",
+  "code_baseline_commit": "c337fc8",
+  "binary": "target/release/rust-cutadapt",
+  "binary_sha256": "4e69eabae9df531eb8750e0a357db6fac58f93aec1dba2ff515b9283295abfc5",
+  "input": "bench/workload.fastq.gz",
+  "input_bytes": 28281883,
+  "input_sha256": "b9e9ae7c967731fa728f589f9e45c97c059904ff8198656dc2fed1374408e5dc",
+  "command": "./target/release/rust-cutadapt --quiet -a AGATCGGAAGAGC -m 10 -o <out.fastq.gz> bench/workload.fastq.gz",
+  "method": "5 independent runs with /usr/bin/time -v; no warmup; hyperfine was not installed. Wall time includes process startup and teardown.",
+  "hyperfine_available": false,
+  "runs": [
+    {
+      "run": 1,
+      "wall_s": 2.38,
+      "max_rss_kb": 34272,
+      "output_bytes": 27026804,
+      "output_sha256": "bdf4e7d69859e1caede8cd80e738bfe8fc2823d4c449a489c1af45b272172b25"
+    },
+    {
+      "run": 2,
+      "wall_s": 2.38,
+      "max_rss_kb": 35116,
+      "output_bytes": 27026804,
+      "output_sha256": "bdf4e7d69859e1caede8cd80e738bfe8fc2823d4c449a489c1af45b272172b25"
+    },
+    {
+      "run": 3,
+      "wall_s": 2.35,
+      "max_rss_kb": 34888,
+      "output_bytes": 27026804,
+      "output_sha256": "bdf4e7d69859e1caede8cd80e738bfe8fc2823d4c449a489c1af45b272172b25"
+    },
+    {
+      "run": 4,
+      "wall_s": 2.35,
+      "max_rss_kb": 34124,
+      "output_bytes": 27026804,
+      "output_sha256": "bdf4e7d69859e1caede8cd80e738bfe8fc2823d4c449a489c1af45b272172b25"
+    },
+    {
+      "run": 5,
+      "wall_s": 2.3,
+      "max_rss_kb": 33620,
+      "output_bytes": 27026804,
+      "output_sha256": "bdf4e7d69859e1caede8cd80e738bfe8fc2823d4c449a489c1af45b272172b25"
+    }
+  ],
+  "summary": {
+    "wall_mean_s": 2.352,
+    "wall_min_s": 2.3,
+    "wall_max_s": 2.38,
+    "max_rss_kb": 35116,
+    "output_bytes": 27026804,
+    "output_sha256": "bdf4e7d69859e1caede8cd80e738bfe8fc2823d4c449a489c1af45b272172b25",
+    "outputs_identical_across_runs": true,
+    "records": 999988
+  },
+  "oracle_same_session": {
+    "version": "4.6",
+    "wall_s": 9.79,
+    "max_rss_kb": 23688,
+    "output_bytes": 26555609,
+    "output_sha256": "7f5c567767dd29e433a1e230b18ae48f28c93cd79efef8687b4bc0bb2c953f3d",
+    "decompressed_sha256": "39688ebc263e11d345474d3f20b88ecf002d79a7eb2eb6f44b76deb6d5ca4012",
+    "decompressed_outputs_identical": true
+  },
+  "reference_baseline": {
+    "source": "bench/reference.json",
+    "wall_mean_s": 4.4363,
+    "max_rss_kb": 24412
+  },
+  "speedup": {
+    "vs_reference_baseline_mean": 1.89,
+    "vs_same_session_oracle": 4.16
+  },
+  "five_x_target": {
+    "minimum_speedup": 5.0,
+    "met_vs_reference_baseline": false,
+    "met_vs_same_session_oracle": false
+  },
+  "notes": [
+    "Decompressed output is byte-identical to cutadapt 4.6 on the same command.",
+    "The 6.3x-6.9x headline in BENCHMARK.md belongs to the v0.1.0 subset, not this full-surface binary.",
+    "The same-session oracle run was slower than the recorded 4.4363 s baseline because the machine is shared; both speedup ratios are reported."
+  ]
+}

@@ -1,0 +1,35 @@
+[package]
+name = "rust-umitools"
+version = "0.2.0"
+edition = "2021"
+rust-version = "1.88"
+description = "Rust high-performance implementation of UMI-tools workflows"
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/seek-hope/rust-umitools"
+keywords = ["bioinformatics", "umi", "bam", "deduplication", "htslib"]
+categories = ["science::bioinformatics", "command-line-utilities"]
+
+[[bin]]
+name = "rust-umitools"
+path = "src/main.rs"
+
+[lib]
+name = "rust_umitools"
+path = "src/lib.rs"
+
+[dependencies]
+bioinfo-common = { path = "../bioinfo-common" }
+bioinfo-fastx = { path = "../bioinfo-fastx" }
+clap = { version = "4", features = ["derive"] }
+rust-htslib = { version = "0.49", default-features = false, features = ["bzip2", "lzma", "libdeflate"] }
+rayon = "1"
+rustc-hash = "2"
+regex = "1"
+libc = "0.2"
+flate2 = "1"
+mimalloc = "0.1.52"
+libmimalloc-sys = { version = "0.1.49", features = ["extended"] }
+
+# The release profile is defined once at the workspace root
+# (../Cargo.toml); Cargo ignores member-level profiles.

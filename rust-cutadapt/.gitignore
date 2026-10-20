@@ -1,0 +1,17 @@
+/target
+/dist
+__pycache__/
+*.pyc
+/.pe/
+r.json
+i.txt
+.scratch/
+r.txt
+# Probe/test outputs accidentally written to the repository root.
+/*.fastq
+/*.fastq.gz
+/*.fq
+/*.fq.gz
+
+# conda/pixi prefix created from tests/ci/env.yml
+/tests/ci/env/

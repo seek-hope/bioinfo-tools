@@ -1,20 +1,33 @@
-# bioinfo-tools workspace
+# bioinfo-tools monorepo
 
-This directory is a Cargo workspace and an **overlay Git repository**.
+This directory is a Cargo workspace and the canonical Git repository for all
+workspace members.
 
 ## Repository boundary
 
-The workspace contains three repositories:
+`rust-cutadapt/` and `rust-umitools/` were originally independent Git
+repositories. Their histories are preserved outside the monorepo at:
 
-| Path | Owner | Contents |
-| --- | --- | --- |
-| `bioinfo-tools/` (this root) | overlay repository | root `Cargo.toml`/`Cargo.lock`, shared crates, tests, evidence and workspace documentation |
-| `rust-cutadapt/` | independent repository | cutadapt-compatible crate and its own history/remote |
-| `rust-umitools/` | independent repository | UMI-tools-compatible crate and its own history/remote |
+```text
+../bioinfo-tools-historical/rust-cutadapt.git
+../bioinfo-tools-historical/rust-umitools.git
+```
 
-The root `.gitignore` excludes `rust-cutadapt/` and `rust-umitools/` so their
-commits stay in their own repositories. To build from a fresh checkout, clone
-those two repositories beside this root; the workspace paths are relative.
+They are **historical archives**, not the build source. The monorepo contains
+the current source for every crate:
+
+| Path | Contents |
+| --- | --- |
+| `bioinfo-common/` | shared exit codes, diagnostics, summary JSON and provenance |
+| `bioinfo-fastx/` | shared streaming FASTX/compression/BGZF layer |
+| `rust-cutadapt/` | cutadapt-compatible crate |
+| `rust-umitools/` | UMI-tools-compatible crate |
+| `rust-fx/` | FASTX manipulation CLI |
+| `rust-bam/` | SAM/BAM tooling on noodles |
+| `rust-fastqc/` | FastQC-compatible QC prototype |
+
+A fresh checkout of this repository is self-contained; no sibling crate
+repositories are required.
 
 ## Workspace members
 

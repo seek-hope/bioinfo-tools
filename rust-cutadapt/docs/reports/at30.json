@@ -1,0 +1,643 @@
+{
+  "oracle": "/home/rimuru/.conda/envs/ta-cutadapt/bin/cutadapt",
+  "rust": "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/.work/src/target/release/rust-cutadapt",
+  "results": [
+    {
+      "name": "default_minimum_length",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "a3_regular",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "a3_anchored",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "g5_regular",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "g5_anchored",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "b_anywhere",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "a3_no_indels",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "a3_error_rate_0",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "a3_error_rate_int",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "a3_error_rate_02",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "a3_overlap_1",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "a3_overlap_10",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "a3_times_2",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "a3_times_3",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "multiple_adapters",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "anchored_and_regular",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "linked_adapter",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "wildcard_adapter",
+      "category": "single-end",
+      "passed": false,
+      "problems": [
+        "exit code 0 != 2",
+        "text report differs: line count 39 vs 0",
+        "stderr presence differs",
+        "out: present in oracle=True, rust=False"
+      ]
+    },
+    {
+      "name": "no_match_wildcards",
+      "category": "single-end",
+      "passed": false,
+      "problems": [
+        "exit code 0 != 2",
+        "text report differs: line count 39 vs 0",
+        "stderr presence differs",
+        "out: present in oracle=True, rust=False"
+      ]
+    },
+    {
+      "name": "match_read_wildcards",
+      "category": "single-end",
+      "passed": false,
+      "problems": [
+        "exit code 0 != 1",
+        "text report differs: line count 39 vs 0",
+        "stderr presence differs",
+        "out: present in oracle=True, rust=False"
+      ]
+    },
+    {
+      "name": "revcomp",
+      "category": "single-end",
+      "passed": false,
+      "problems": [
+        "exit code 0 != 1",
+        "text report differs: line count 40 vs 0",
+        "stderr presence differs",
+        "out: present in oracle=True, rust=False"
+      ]
+    },
+    {
+      "name": "action_trim",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "action_retain",
+      "category": "single-end",
+      "passed": false,
+      "problems": [
+        "exit code 0 != 1",
+        "text report differs: line count 39 vs 0",
+        "stderr presence differs",
+        "out: present in oracle=True, rust=False"
+      ]
+    },
+    {
+      "name": "action_mask",
+      "category": "single-end",
+      "passed": false,
+      "problems": [
+        "exit code 0 != 1",
+        "text report differs: line count 39 vs 0",
+        "stderr presence differs",
+        "out: present in oracle=True, rust=False"
+      ]
+    },
+    {
+      "name": "action_lowercase",
+      "category": "single-end",
+      "passed": false,
+      "problems": [
+        "exit code 0 != 1",
+        "text report differs: line count 39 vs 0",
+        "stderr presence differs",
+        "out: present in oracle=True, rust=False"
+      ]
+    },
+    {
+      "name": "action_none",
+      "category": "single-end",
+      "passed": false,
+      "problems": [
+        "exit code 0 != 1",
+        "text report differs: line count 39 vs 0",
+        "stderr presence differs",
+        "out: present in oracle=True, rust=False"
+      ]
+    },
+    {
+      "name": "cut_5prime",
+      "category": "single-end",
+      "passed": false,
+      "problems": [
+        "text report differs: line 35: oracle='6\\t1\\t0.0\\t0\\t1' rust='11\\t1\\t0.0\\t1\\t1'"
+      ]
+    },
+    {
+      "name": "cut_3prime",
+      "category": "single-end",
+      "passed": false,
+      "problems": [
+        "text report differs: line 35: oracle='8\\t4\\t0.0\\t0\\t4' rust='13\\t4\\t0.0\\t1\\t4'"
+      ]
+    },
+    {
+      "name": "cut_both",
+      "category": "single-end",
+      "passed": false,
+      "problems": [
+        "text report differs: line 35: oracle='3\\t1\\t0.2\\t0\\t1' rust='9\\t1\\t0.0\\t0\\t1'"
+      ]
+    },
+    {
+      "name": "quality_3prime",
+      "category": "single-end",
+      "passed": false,
+      "problems": [
+        "text report differs: line 16: oracle='Quality-trimmed:                      10 bp (1.7%)' rust='Total written (filtered):            400 bp (68.8%)'"
+      ]
+    },
+    {
+      "name": "quality_both",
+      "category": "single-end",
+      "passed": false,
+      "problems": [
+        "text report differs: line 16: oracle='Quality-trimmed:                      20 bp (3.4%)' rust='Total written (filtered):            390 bp (67.1%)'"
+      ]
+    },
+    {
+      "name": "quality_base64",
+      "category": "single-end",
+      "passed": false,
+      "problems": [
+        "text report differs: line 16: oracle='Quality-trimmed:                     581 bp (100.0%)' rust='Total written (filtered):              0 bp (0.0%)'"
+      ]
+    },
+    {
+      "name": "nextseq_trim",
+      "category": "single-end",
+      "passed": false,
+      "problems": [
+        "text report differs: line 16: oracle='Quality-trimmed:                      12 bp (2.1%)' rust='Total written (filtered):            400 bp (68.8%)'"
+      ]
+    },
+    {
+      "name": "poly_a",
+      "category": "single-end",
+      "passed": false,
+      "problems": [
+        "text report differs: line 16: oracle='Poly-A-trimmed:                       12 bp (2.1%)' rust='Total written (filtered):            388 bp (66.8%)'"
+      ]
+    },
+    {
+      "name": "length_shorten",
+      "category": "single-end",
+      "passed": false,
+      "problems": [
+        "text report differs: line 27: oracle='  A: 55.6%' rust='  A: 11.1%'"
+      ]
+    },
+    {
+      "name": "length_negative",
+      "category": "single-end",
+      "passed": false,
+      "problems": [
+        "text report differs: line 35: oracle='6\\t1\\t0.0\\t0\\t1' rust='19\\t2\\t0.0\\t1\\t2'"
+      ]
+    },
+    {
+      "name": "trim_n",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "zero_cap",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "strip_suffix",
+      "category": "single-end",
+      "passed": false,
+      "problems": [
+        "exit code 0 != 1",
+        "text report differs: line count 39 vs 0",
+        "stderr presence differs",
+        "out: present in oracle=True, rust=False"
+      ]
+    },
+    {
+      "name": "prefix",
+      "category": "single-end",
+      "passed": false,
+      "problems": [
+        "exit code 0 != 1",
+        "text report differs: line count 39 vs 0",
+        "stderr presence differs",
+        "out: present in oracle=True, rust=False"
+      ]
+    },
+    {
+      "name": "suffix",
+      "category": "single-end",
+      "passed": false,
+      "problems": [
+        "exit code 0 != 1",
+        "text report differs: line count 39 vs 0",
+        "stderr presence differs",
+        "out: present in oracle=True, rust=False"
+      ]
+    },
+    {
+      "name": "rename",
+      "category": "single-end",
+      "passed": false,
+      "problems": [
+        "exit code 0 != 1",
+        "text report differs: line count 39 vs 0",
+        "stderr presence differs",
+        "out: present in oracle=True, rust=False"
+      ]
+    },
+    {
+      "name": "length_tag",
+      "category": "single-end",
+      "passed": false,
+      "problems": [
+        "exit code 0 != 1",
+        "text report differs: line count 39 vs 0",
+        "stderr presence differs",
+        "out: present in oracle=True, rust=False"
+      ]
+    },
+    {
+      "name": "filter_min",
+      "category": "single-end",
+      "passed": false,
+      "problems": [
+        "exit code 0 != 2",
+        "text report differs: line count 39 vs 0",
+        "stderr presence differs",
+        "out: present in oracle=True, rust=False"
+      ]
+    },
+    {
+      "name": "filter_max",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "filter_max_n",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "filter_max_ee",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "filter_max_aer",
+      "category": "single-end",
+      "passed": false,
+      "problems": [
+        "exit code 1 != 0"
+      ]
+    },
+    {
+      "name": "discard_trimmed",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "discard_untrimmed",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "discard_casava",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "out_fasta",
+      "category": "single-end",
+      "passed": false,
+      "problems": [
+        "exit code 0 != 1",
+        "text report differs: line count 39 vs 0",
+        "stderr presence differs",
+        "out: present in oracle=True, rust=False"
+      ]
+    },
+    {
+      "name": "out_gzip",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "out_stdout",
+      "category": "single-end",
+      "passed": false,
+      "problems": [
+        "stdout reads differ (996 vs 1979 bytes)",
+        "stderr presence differs"
+      ]
+    },
+    {
+      "name": "default_output",
+      "category": "single-end",
+      "passed": false,
+      "problems": [
+        "stdout reads differ (996 vs 1979 bytes)",
+        "stderr presence differs"
+      ]
+    },
+    {
+      "name": "info_file",
+      "category": "single-end",
+      "passed": false,
+      "problems": [
+        "exit code 0 != 1",
+        "text report differs: line count 39 vs 0",
+        "stderr presence differs",
+        "out: present in oracle=True, rust=False",
+        "info: present in oracle=True, rust=False"
+      ]
+    },
+    {
+      "name": "rest_file",
+      "category": "single-end",
+      "passed": false,
+      "problems": [
+        "exit code 0 != 1",
+        "text report differs: line count 39 vs 0",
+        "stderr presence differs",
+        "out: present in oracle=True, rust=False",
+        "rest: present in oracle=True, rust=False"
+      ]
+    },
+    {
+      "name": "wildcard_file",
+      "category": "single-end",
+      "passed": false,
+      "problems": [
+        "exit code 0 != 2",
+        "text report differs: line count 39 vs 0",
+        "stderr presence differs",
+        "out: present in oracle=True, rust=False",
+        "wildcards: present in oracle=True, rust=False"
+      ]
+    },
+    {
+      "name": "too_short_output",
+      "category": "single-end",
+      "passed": false,
+      "problems": [
+        "exit code 0 != 2",
+        "text report differs: line count 39 vs 0",
+        "stderr presence differs",
+        "out: present in oracle=True, rust=False",
+        "too_short: present in oracle=True, rust=False"
+      ]
+    },
+    {
+      "name": "too_long_output",
+      "category": "single-end",
+      "passed": false,
+      "problems": [
+        "exit code 0 != 1",
+        "text report differs: line count 40 vs 0",
+        "stderr presence differs",
+        "out: present in oracle=True, rust=False",
+        "too_long: present in oracle=True, rust=False"
+      ]
+    },
+    {
+      "name": "untrimmed_output",
+      "category": "single-end",
+      "passed": false,
+      "problems": [
+        "exit code 0 != 1",
+        "text report differs: line count 40 vs 0",
+        "stderr presence differs",
+        "out: present in oracle=True, rust=False",
+        "untrimmed: present in oracle=True, rust=False"
+      ]
+    },
+    {
+      "name": "report_minimal",
+      "category": "single-end",
+      "passed": false,
+      "problems": [
+        "text report differs: line 1: oracle='status\\tin_reads\\tin_bp\\ttoo_short\\ttoo_long\\ttoo_many_n\\tout_reads\\tw/adapters\\tqualtrim_bp\\tout_bp' rust='This is cutadapt <VERSION>'"
+      ]
+    },
+    {
+      "name": "json_report",
+      "category": "single-end",
+      "passed": false,
+      "problems": [
+        "exit code 0 != 1",
+        "text report differs: line count 39 vs 0",
+        "stderr presence differs",
+        "json: rust wrote no report",
+        "out: present in oracle=True, rust=False"
+      ]
+    },
+    {
+      "name": "json_report_full",
+      "category": "single-end",
+      "passed": false,
+      "problems": [
+        "exit code 0 != 2",
+        "text report differs: line count 41 vs 0",
+        "stderr presence differs",
+        "json: rust wrote no report",
+        "out: present in oracle=True, rust=False"
+      ]
+    },
+    {
+      "name": "cores_2",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "compression_z",
+      "category": "single-end",
+      "passed": false,
+      "problems": [
+        "exit code 0 != 1",
+        "text report differs: line count 36 vs 0",
+        "stderr presence differs",
+        "out_gz: present in oracle=True, rust=False"
+      ]
+    },
+    {
+      "name": "quiet",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "paired_basic",
+      "category": "paired-end",
+      "passed": false,
+      "problems": [
+        "exit code 0 != 1",
+        "text report differs: line count 63 vs 0",
+        "stderr presence differs",
+        "out: present in oracle=True, rust=False",
+        "out2: present in oracle=True, rust=False"
+      ]
+    },
+    {
+      "name": "paired_interleaved",
+      "category": "paired-end",
+      "passed": false,
+      "problems": [
+        "text report differs: line count 4 vs 0",
+        "stderr presence differs",
+        "out: present in oracle=True, rust=False"
+      ]
+    },
+    {
+      "name": "paired_min",
+      "category": "paired-end",
+      "passed": false,
+      "problems": [
+        "exit code 0 != 1",
+        "text report differs: line count 66 vs 0",
+        "stderr presence differs",
+        "out: present in oracle=True, rust=False",
+        "out2: present in oracle=True, rust=False"
+      ]
+    },
+    {
+      "name": "err_missing_input",
+      "category": "single-end",
+      "passed": false,
+      "problems": [
+        "stderr presence differs",
+        "out: present in oracle=True, rust=False"
+      ]
+    },
+    {
+      "name": "err_unknown_option",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "err_bad_adapter",
+      "category": "single-end",
+      "passed": false,
+      "problems": [
+        "exit code 0 != 2",
+        "stderr presence differs",
+        "out: present in oracle=True, rust=False"
+      ]
+    },
+    {
+      "name": "err_both_stdin",
+      "category": "single-end",
+      "passed": false,
+      "problems": [
+        "stderr presence differs"
+      ]
+    },
+    {
+      "name": "err_no_adapter",
+      "category": "single-end",
+      "passed": false,
+      "problems": [
+        "exit code 0 != 2",
+        "stderr presence differs",
+        "out: present in oracle=True, rust=False"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,160 @@
+{
+  "cases": [
+    {
+      "baseline": {
+        "binary": "/tmp/base-group-target/release/rust-umitools",
+        "command": "/tmp/base-group-target/release/rust-umitools group -I /tmp/umitools-before-after-oaqqdl_a/group_fixture.bam -S /tmp/umitools-before-after-oaqqdl_a/group_baseline.bam --output-bam --group-out /tmp/umitools-before-after-oaqqdl_a/group_baseline.tsv --quiet",
+        "completed": true,
+        "cpu_seconds": 1.62,
+        "cpu_seconds_all": [
+          1.82,
+          1.57,
+          1.62
+        ],
+        "output_bytes": 12027856,
+        "peak_rss_kb": 159336,
+        "peak_rss_kb_all": [
+          159848,
+          158892,
+          159336
+        ],
+        "rows": 200000,
+        "runs": 3,
+        "sha256": "42c64d2231381800548d512e45b8ad1893d0e62a13641e745e1b7de0ebdc3a03",
+        "wall_seconds": 0.79,
+        "wall_seconds_all": [
+          0.88,
+          0.78,
+          0.79
+        ]
+      },
+      "current": {
+        "binary": "/tmp/rust-umitools-build/target/release/rust-umitools",
+        "command": "/tmp/rust-umitools-build/target/release/rust-umitools group -I /tmp/umitools-before-after-oaqqdl_a/group_fixture.bam -S /tmp/umitools-before-after-oaqqdl_a/group_current.bam --output-bam --group-out /tmp/umitools-before-after-oaqqdl_a/group_current.tsv --quiet",
+        "completed": true,
+        "cpu_seconds": 0.81,
+        "cpu_seconds_all": [
+          0.84,
+          0.81,
+          0.8
+        ],
+        "output_bytes": 12027856,
+        "peak_rss_kb": 117416,
+        "peak_rss_kb_all": [
+          117404,
+          117832,
+          117416
+        ],
+        "rows": 200000,
+        "runs": 3,
+        "sha256": "0b521bab1f860ae2f2f5148a3ae1e8d7100f871c000cd1e48bc438a493ea644e",
+        "wall_seconds": 0.76,
+        "wall_seconds_all": [
+          0.79,
+          0.76,
+          0.74
+        ]
+      },
+      "name": "group_move_records"
+    },
+    {
+      "baseline": {
+        "binary": "/tmp/base-paired-target/release/rust-umitools",
+        "command": "/tmp/base-paired-target/release/rust-umitools dedup -I /tmp/umitools-before-after-oaqqdl_a/paired_20000_3.bam -S /tmp/umitools-before-after-oaqqdl_a/paired_baseline.bam --paired --random-seed 1",
+        "completed": true,
+        "cpu_seconds": 0.44,
+        "cpu_seconds_all": [
+          0.44,
+          0.43,
+          0.46
+        ],
+        "output_bytes": 449942,
+        "output_records": 80000,
+        "peak_rss_kb": 88504,
+        "peak_rss_kb_all": [
+          88984,
+          88504,
+          88268
+        ],
+        "runs": 3,
+        "sha256": "c797e80ccf5aaa11f16355e87c1cd133aa20c043915ec7a807e194ebc16a3479",
+        "wall_seconds": 0.12,
+        "wall_seconds_all": [
+          0.13,
+          0.12,
+          0.12
+        ]
+      },
+      "current": {
+        "binary": "/tmp/rust-umitools-build/target/release/rust-umitools",
+        "command": "/tmp/rust-umitools-build/target/release/rust-umitools dedup -I /tmp/umitools-before-after-oaqqdl_a/paired_20000_3.bam -S /tmp/umitools-before-after-oaqqdl_a/paired_current.bam --paired --random-seed 1 --quiet",
+        "completed": true,
+        "cpu_seconds": 0.39,
+        "cpu_seconds_all": [
+          0.39,
+          0.41,
+          0.39
+        ],
+        "output_bytes": 303005,
+        "output_records": 40000,
+        "peak_rss_kb": 77308,
+        "peak_rss_kb_all": [
+          76224,
+          77308,
+          77420
+        ],
+        "runs": 3,
+        "sha256": "0b521bab1f860ae2f2f5148a3ae1e8d7100f871c000cd1e48bc438a493ea644e",
+        "wall_seconds": 0.1,
+        "wall_seconds_all": [
+          0.1,
+          0.1,
+          0.1
+        ]
+      },
+      "name": "paired_mate_registration"
+    },
+    {
+      "baseline": {
+        "binary": "/tmp/base-paired-target/release/rust-umitools",
+        "command": "/tmp/base-paired-target/release/rust-umitools dedup -I /tmp/umitools-before-after-oaqqdl_a/paired_150000_1.bam -S /tmp/umitools-before-after-oaqqdl_a/paired_baseline_large.bam --paired --random-seed 1 --memory-limit 64MiB",
+        "completed": false,
+        "exit": 4,
+        "sha256": "c797e80ccf5aaa11f16355e87c1cd133aa20c043915ec7a807e194ebc16a3479"
+      },
+      "current": {
+        "binary": "/tmp/rust-umitools-build/target/release/rust-umitools",
+        "command": "/tmp/rust-umitools-build/target/release/rust-umitools dedup -I /tmp/umitools-before-after-oaqqdl_a/paired_150000_1.bam -S /tmp/umitools-before-after-oaqqdl_a/paired_current_large.bam --paired --random-seed 1 --memory-limit 64MiB --quiet",
+        "completed": true,
+        "cpu_seconds": 2.86,
+        "cpu_seconds_all": [
+          2.86
+        ],
+        "output_bytes": 2188590,
+        "output_records": 300000,
+        "peak_rss_kb": 212740,
+        "peak_rss_kb_all": [
+          212740
+        ],
+        "runs": 1,
+        "sha256": "0b521bab1f860ae2f2f5148a3ae1e8d7100f871c000cd1e48bc438a493ea644e",
+        "wall_seconds": 0.73,
+        "wall_seconds_all": [
+          0.73
+        ]
+      },
+      "name": "paired_large_mate_budget"
+    }
+  ],
+  "method": {
+    "current_commit": "ce18e4d848cf95406342c951431770d774087054",
+    "group_baseline_commit": "322dd1f (parent of 9a29b22, group cloned records)",
+    "group_fixture": "200 positions x 20 UMIs x 50 reads (depth 50 per UMI)",
+    "large_mate_fixture": "150,000 read pairs with --memory-limit 64MiB",
+    "machine": "same machine as docs/BENCHMARK.md",
+    "paired_baseline_commit": "558da69 (parent of 103e47e, mates registered before clustering)",
+    "paired_fixture": "20,000 positions x 3 identical read pairs (same UMI)",
+    "repetitions": 3,
+    "tool": "/usr/bin/time -v parsed for wall, user+system CPU and peak RSS"
+  }
+}

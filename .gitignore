@@ -13,10 +13,6 @@ tests/ci/env/
 .work/
 /gg.fa
 
-# The two existing crates keep their own Git histories and remotes. The root
-# overlay repository deliberately does not swallow them.
-/rust-cutadapt/
-/rust-umitools/
 
 # Trial harness/config directories, not project source.
 /AGENTS.md

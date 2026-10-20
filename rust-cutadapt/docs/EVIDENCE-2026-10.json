@@ -1,0 +1,106 @@
+{
+  "schema_version": 1,
+  "kind": "current-state-evidence",
+  "generated_at_utc": "2026-10-20T01:42:57Z",
+  "workspace": "bioinfo-tools",
+  "repositories": {
+    "rust-cutadapt": {
+      "path": "rust-cutadapt",
+      "head": "9d9abdf38fe0b46093df7166f38fa1bdc4279c65",
+      "branch": "main",
+      "binary": "target/release/rust-cutadapt",
+      "binary_sha256": "c98c28990e9439f9d9cd1f75d4001dec0f8de7fa31baafe52f22db54ee4099de",
+      "version": "0.1.0",
+      "benchmark_code_commit": "c8b0249"
+    },
+    "rust-umitools": {
+      "path": "rust-umitools",
+      "head": "40b5b709247e84e00d81ca05c3b37c107a9f014d",
+      "branch": "main",
+      "binary": "$CARGO_TARGET_DIR/release/rust-umitools",
+      "binary_sha256": "df563faa8d27abfa8055f972f2ed7a8a2765a2da59dbdc22ce435c9dc19f6f83",
+      "version": "0.2.0"
+    }
+  },
+  "ci": {
+    "rust-cutadapt": {
+      "run_id": 39354372681,
+      "head": "9d9abdf",
+      "conclusion": "success"
+    },
+    "rust-umitools": {
+      "run_id": 39354542940,
+      "head": "40b5b70",
+      "conclusion": "success"
+    }
+  },
+  "oracles": {
+    "cutadapt": {
+      "version": "4.6",
+      "resolution": "CUTADAPT_ORACLE, tests/ci/env.yml prefix, CONDA_PREFIX, .work/oracle-venv, PATH"
+    },
+    "umi_tools": {
+      "version": "1.1.6",
+      "resolution": "UMI_TOOLS_ORACLE_PATH, tests/ci/env.yml prefix, CONDA_PREFIX, PATH"
+    },
+    "samtools": "1.24",
+    "python": "3.12.14",
+    "numpy": "2.5.3",
+    "pysam": "0.24.1"
+  },
+  "suites": [
+    {
+      "name": "rust-cutadapt Rust tests",
+      "command": "cargo test --offline --release",
+      "result": "208 passed (171 lib + 14 cli + 21 cli_e2e + 1 differential + 1 doc-test)",
+      "exit_code": 0
+    },
+    {
+      "name": "rust-cutadapt differential",
+      "command": "python3 tests/oracle/differential.py --matrix",
+      "result": "119/119 cases passed",
+      "exit_code": 0
+    },
+    {
+      "name": "rust-umitools byte-exact",
+      "command": "UMI_TOOLS_ORACLE_PATH=<pinned-oracle-bin> bash tests/oracle/run_exact.sh",
+      "result": "77/77 byte-identical, 0 differ",
+      "exit_code": 0
+    },
+    {
+      "name": "rust-umitools semantic",
+      "command": "UMI_TOOLS_ORACLE_PATH=<pinned-oracle-bin> bash tests/oracle/run_oracle.sh",
+      "result": "39 passed, 0 failed",
+      "exit_code": 0
+    }
+  ],
+  "benchmark": {
+    "evidence": "docs/bench/cutadapt-c8b0249.json",
+    "code_commit": "c8b0249",
+    "default_workers": 4,
+    "input": "bench/workload.fastq.gz",
+    "input_sha256": "b9e9ae7c967731fa728f589f9e45c97c059904ff8198656dc2fed1374408e5dc",
+    "binary_sha256": "c98c28990e9439f9d9cd1f75d4001dec0f8de7fa31baafe52f22db54ee4099de",
+    "wall_mean_s": 0.672,
+    "wall_min_s": 0.62,
+    "wall_max_s": 0.72,
+    "max_rss_kb": 41416,
+    "speedup_vs_reference_baseline": 6.6,
+    "speedup_vs_same_session_oracle": 14.36,
+    "five_x_target_met": true,
+    "single_thread_wall_mean_s": 2.352,
+    "decompressed_output_matches_oracle": true
+  },
+  "portability_checks": {
+    "hardcoded_home_paths_in_tests": [],
+    "missing_oracle_exit_code": 3,
+    "cutadapt_oracle_discovery": "pass",
+    "umitools_oracle_discovery": "pass"
+  },
+  "notes": [
+    "hyperfine was not installed; benchmark evidence uses five /usr/bin/time -v runs instead of hyperfine JSON.",
+    "The default four-worker mode meets the 5x target; -j 1 reproduces the 2.352 s single-thread measurement.",
+    "The default worker count is a documented deviation from cutadapt's default of one; see docs/adr/0002-default-worker-count.md.",
+    "No source tag or release was created."
+  ]
+}

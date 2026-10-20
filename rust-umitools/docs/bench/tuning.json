@@ -1,0 +1,97 @@
+{
+  "schema": 1,
+  "provenance": {
+    "code_commit": "818b3af",
+    "binary_sha256": "d6033a1929cc527db2154bb9603c187a366faa06c0d373829b07c12c049eecd8",
+    "oracle": "UMI-tools 1.1.6",
+    "timer": "/usr/bin/time -f '%e %U %S %M'",
+    "machine": "i7-13700H, 31 GiB, Linux 7.2.9"
+  },
+  "method": {
+    "repetitions": "3-5 interleaved repetitions, median reported",
+    "count_baseline": "git worktree add --detach /tmp/base-count 4e00a52; CARGO_TARGET_DIR=/tmp/base-count-target cargo build --release",
+    "fixtures": {
+      "high_bundle": "500000 positions x 4 reads (2M reads), random 8nt UMI, 60bp A sequence, GX:Z:G{pos%1000}",
+      "random": "100000 positions x 5 reads (500k reads), random 8nt UMI, random 60bp ACGT"
+    }
+  },
+  "count_compact": {
+    "command": "count -I high.bam -S out.tsv --per-gene --gene-tag GX --threads 16 --quiet",
+    "baseline_commit": "4e00a52",
+    "baseline": {
+      "wall_seconds": 0.99,
+      "cpu_seconds": 2.5,
+      "peak_rss_mib": 444
+    },
+    "current": {
+      "wall_seconds": 0.93,
+      "cpu_seconds": 3.0,
+      "peak_rss_mib": 203
+    },
+    "output_identical": true,
+    "change": "peak RSS -54%, wall -6%, CPU +20% (sorting 2M UMIs at flush)"
+  },
+  "compression_default": {
+    "dedup_command": "dedup -I random.bam -S out.bam --random-seed 1 --threads 16 --compresslevel N --quiet",
+    "group_command": "group -I random.bam -S out.bam --output-bam --group-out out.tsv --threads 16 --compresslevel N --quiet",
+    "dedup_random": {
+      "1": {
+        "wall_seconds": 0.3,
+        "cpu_seconds": 0.7,
+        "output_mib": 14.1
+      },
+      "4": {
+        "wall_seconds": 0.32,
+        "cpu_seconds": 0.8,
+        "output_mib": 13.6
+      },
+      "6": {
+        "wall_seconds": 0.33,
+        "cpu_seconds": 1.0,
+        "output_mib": 13.5
+      }
+    },
+    "group_random": {
+      "1": {
+        "wall_seconds": 0.61,
+        "cpu_seconds": 1.2,
+        "output_mib": 17.2
+      },
+      "6": {
+        "wall_seconds": 0.68,
+        "cpu_seconds": 1.7,
+        "output_mib": 17.1
+      }
+    },
+    "dedup_high_all_a": {
+      "1": {
+        "wall_seconds": 1.42,
+        "cpu_seconds": 3.5,
+        "output_mib": 18.1
+      },
+      "6": {
+        "wall_seconds": 1.58,
+        "cpu_seconds": 4.0,
+        "output_mib": 18.1
+      }
+    },
+    "decision": "default 1 (wall -9/-10%, CPU -30/-29%, output +4.4%/+0.6%); --compresslevel 6 restores near-upstream size",
+    "decompressed_identical": true
+  },
+  "count_order": {
+    "baseline": "97bfef5 (sorted CountBundle)",
+    "command": "count -I high.bam -S out.tsv --per-gene --gene-tag GX --threads 16 --quiet",
+    "sorted_countbundle": {
+      "wall_seconds": 1.68,
+      "cpu_seconds": 3.8,
+      "peak_rss_mib": 202
+    },
+    "insertion_order": {
+      "wall_seconds": 1.53,
+      "cpu_seconds": 3.2,
+      "peak_rss_mib": 255
+    },
+    "output_identical": true,
+    "change": "wall -9%, CPU -16%, RSS +26% (still below the 314 MiB glibc baseline)"
+  }
+}

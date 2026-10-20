@@ -1,0 +1,15 @@
+{
+  "tool": "cutadapt",
+  "version": "4.6",
+  "command": "cutadapt --quiet -a AGATCGGAAGAGC -m 10 -o <out> bench/workload.fastq.gz",
+  "reads": 1000000,
+  "input": "bench/workload.fastq.gz",
+  "input_bytes": 28281883,
+  "wall_mean_s": 4.4363,
+  "wall_min_s": 4.4258,
+  "wall_max_s": 4.453,
+  "max_rss_kb": 24412,
+  "output_bytes": 26555609,
+  "output_sha256": "7f5c567767dd29e433a1e230b18ae48f28c93cd79efef8687b4bc0bb2c953f3d",
+  "method": "hyperfine 1 warmup + 3 runs, same machine; RSS from /usr/bin/time -v on one run"
+}

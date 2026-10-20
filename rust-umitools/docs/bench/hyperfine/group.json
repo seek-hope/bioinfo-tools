@@ -1,0 +1,29 @@
+{
+  "results": [
+    {
+      "command": "/tmp/rust-umitools-build/target/release/rust-umitools group -I /tmp/umitools-bench-my3nrxyd/plain.bam -S /tmp/umitools-bench-my3nrxyd/group.bam --output-bam --group-out /tmp/umitools-bench-my3nrxyd/group.tsv --tmpdir /tmp/umitools-bench-my3nrxyd/tmp",
+      "mean": 0.8008546641866667,
+      "stddev": 0.000620056100640372,
+      "median": 0.8006137935200001,
+      "user": 0.3755617466666667,
+      "system": 0.5121093266666666,
+      "min": 0.80039118552,
+      "max": 0.80155901352,
+      "times": [
+        0.80039118552,
+        0.8006137935200001,
+        0.80155901352
+      ],
+      "memory_usage_byte": [
+        133062656,
+        133062656,
+        133062656
+      ],
+      "exit_codes": [
+        0,
+        0,
+        0
+      ]
+    }
+  ]
+}

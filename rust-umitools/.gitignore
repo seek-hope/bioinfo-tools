@@ -1,0 +1,4 @@
+/target
+
+# conda/pixi prefix created from tests/ci/env.yml
+/tests/ci/env/

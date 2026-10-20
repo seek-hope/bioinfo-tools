@@ -1,0 +1,366 @@
+oracle: /home/rimuru/Projects/Code/for_fun/bioinfo-tools/.work/oracle-venv/bin/cutadapt
+rust  : /home/rimuru/Projects/Code/for_fun/bioinfo-tools/.work/src/target/release/rust-cutadapt
+oracle version: 4.6
+rust version  : rust-cutadapt 0.1.0
+cases: 75
+
+FAIL  default_minimum_length
+        exit code 0 != 2
+        stderr presence differs
+        out: present in oracle=True, rust=False
+FAIL  a3_regular
+        text report differs: line 1: oracle='This is cutadapt <VERSION>' rust="Adapter 'AGATCGGAAGAGC' trimmed"
+FAIL  a3_anchored
+        exit code 0 != 2
+        text report differs: line count 33 vs 0
+        stderr presence differs
+        out: present in oracle=True, rust=False
+FAIL  g5_regular
+        exit code 0 != 2
+        text report differs: line count 30 vs 0
+        stderr presence differs
+        out: present in oracle=True, rust=False
+FAIL  g5_anchored
+        exit code 0 != 2
+        text report differs: line count 26 vs 0
+        stderr presence differs
+        out: present in oracle=True, rust=False
+FAIL  b_anywhere
+        exit code 0 != 2
+        text report differs: line count 39 vs 0
+        stderr presence differs
+        out: present in oracle=True, rust=False
+FAIL  a3_no_indels
+        exit code 0 != 2
+        text report differs: line count 39 vs 0
+        stderr presence differs
+        out: present in oracle=True, rust=False
+FAIL  a3_error_rate_0
+        exit code 0 != 2
+        text report differs: line count 39 vs 0
+        stderr presence differs
+        out: present in oracle=True, rust=False
+FAIL  a3_error_rate_int
+        exit code 0 != 2
+        text report differs: line count 39 vs 0
+        stderr presence differs
+        out: present in oracle=True, rust=False
+FAIL  a3_error_rate_02
+        exit code 0 != 2
+        text report differs: line count 39 vs 0
+        stderr presence differs
+        out: present in oracle=True, rust=False
+FAIL  a3_overlap_1
+        exit code 0 != 2
+        text report differs: line count 40 vs 0
+        stderr presence differs
+        out: present in oracle=True, rust=False
+FAIL  a3_overlap_10
+        exit code 0 != 2
+        text report differs: line count 38 vs 0
+        stderr presence differs
+        out: present in oracle=True, rust=False
+FAIL  a3_times_2
+        exit code 0 != 2
+        text report differs: line count 39 vs 0
+        stderr presence differs
+        out: present in oracle=True, rust=False
+FAIL  a3_times_3
+        exit code 0 != 2
+        text report differs: line count 39 vs 0
+        stderr presence differs
+        out: present in oracle=True, rust=False
+FAIL  multiple_adapters
+        exit code 0 != 2
+        text report differs: line count 60 vs 0
+        stderr presence differs
+        out: present in oracle=True, rust=False
+FAIL  anchored_and_regular
+        exit code 0 != 2
+        text report differs: line count 48 vs 0
+        stderr presence differs
+        out: present in oracle=True, rust=False
+FAIL  linked_adapter
+        exit code 0 != 2
+        text report differs: line count 35 vs 0
+        stderr presence differs
+        out: present in oracle=True, rust=False
+FAIL  wildcard_adapter
+        exit code 0 != 2
+        text report differs: line count 39 vs 0
+        stderr presence differs
+        out: present in oracle=True, rust=False
+FAIL  no_match_wildcards
+        exit code 0 != 2
+        text report differs: line count 39 vs 0
+        stderr presence differs
+        out: present in oracle=True, rust=False
+FAIL  match_read_wildcards
+        exit code 0 != 2
+        text report differs: line count 39 vs 0
+        stderr presence differs
+        out: present in oracle=True, rust=False
+FAIL  revcomp
+        exit code 0 != 2
+        text report differs: line count 40 vs 0
+        stderr presence differs
+        out: present in oracle=True, rust=False
+FAIL  action_trim
+        exit code 0 != 2
+        text report differs: line count 39 vs 0
+        stderr presence differs
+        out: present in oracle=True, rust=False
+FAIL  action_retain
+        exit code 0 != 2
+        text report differs: line count 39 vs 0
+        stderr presence differs
+        out: present in oracle=True, rust=False
+FAIL  action_mask
+        exit code 0 != 2
+        text report differs: line count 39 vs 0
+        stderr presence differs
+        out: present in oracle=True, rust=False
+FAIL  action_lowercase
+        exit code 0 != 2
+        text report differs: line count 39 vs 0
+        stderr presence differs
+        out: present in oracle=True, rust=False
+FAIL  action_none
+        exit code 0 != 2
+        text report differs: line count 39 vs 0
+        stderr presence differs
+        out: present in oracle=True, rust=False
+FAIL  cut_5prime
+        exit code 0 != 2
+        text report differs: line count 38 vs 0
+        stderr presence differs
+        out: present in oracle=True, rust=False
+FAIL  cut_3prime
+        exit code 0 != 2
+        text report differs: line count 38 vs 0
+        stderr presence differs
+        out: present in oracle=True, rust=False
+FAIL  cut_both
+        exit code 0 != 2
+        text report differs: line count 38 vs 0
+        stderr presence differs
+        out: present in oracle=True, rust=False
+FAIL  quality_3prime
+        exit code 0 != 2
+        text report differs: line count 41 vs 0
+        stderr presence differs
+        out: present in oracle=True, rust=False
+FAIL  quality_both
+        exit code 0 != 2
+        text report differs: line count 41 vs 0
+        stderr presence differs
+        out: present in oracle=True, rust=False
+FAIL  quality_base64
+        exit code 0 != 2
+        text report differs: line count 21 vs 0
+        stderr presence differs
+        out: present in oracle=True, rust=False
+FAIL  nextseq_trim
+        exit code 0 != 2
+        text report differs: line count 41 vs 0
+        stderr presence differs
+        out: present in oracle=True, rust=False
+FAIL  poly_a
+        exit code 0 != 2
+        text report differs: line count 47 vs 0
+        stderr presence differs
+        out: present in oracle=True, rust=False
+FAIL  length_shorten
+        exit code 0 != 2
+        text report differs: line count 39 vs 0
+        stderr presence differs
+        out: present in oracle=True, rust=False
+FAIL  length_negative
+        exit code 0 != 2
+        text report differs: line count 39 vs 0
+        stderr presence differs
+        out: present in oracle=True, rust=False
+FAIL  trim_n
+        exit code 0 != 2
+        text report differs: line count 39 vs 0
+        stderr presence differs
+        out: present in oracle=True, rust=False
+FAIL  zero_cap
+        exit code 0 != 2
+        text report differs: line count 39 vs 0
+        stderr presence differs
+        out: present in oracle=True, rust=False
+FAIL  strip_suffix
+        exit code 0 != 2
+        text report differs: line count 39 vs 0
+        stderr presence differs
+        out: present in oracle=True, rust=False
+FAIL  prefix
+        exit code 0 != 2
+        text report differs: line count 39 vs 0
+        stderr presence differs
+        out: present in oracle=True, rust=False
+FAIL  suffix
+        exit code 0 != 2
+        text report differs: line count 39 vs 0
+        stderr presence differs
+        out: present in oracle=True, rust=False
+FAIL  rename
+        exit code 0 != 2
+        text report differs: line count 39 vs 0
+        stderr presence differs
+        out: present in oracle=True, rust=False
+FAIL  length_tag
+        exit code 0 != 2
+        text report differs: line count 39 vs 0
+        stderr presence differs
+        out: present in oracle=True, rust=False
+FAIL  filter_min
+        exit code 0 != 2
+        text report differs: line count 39 vs 0
+        stderr presence differs
+        out: present in oracle=True, rust=False
+FAIL  filter_max
+        exit code 0 != 2
+        text report differs: line count 40 vs 0
+        stderr presence differs
+        out: present in oracle=True, rust=False
+FAIL  filter_max_n
+        exit code 0 != 2
+        text report differs: line count 40 vs 0
+        stderr presence differs
+        out: present in oracle=True, rust=False
+FAIL  filter_max_ee
+        exit code 0 != 2
+        text report differs: line count 40 vs 0
+        stderr presence differs
+        out: present in oracle=True, rust=False
+FAIL  filter_max_aer
+        exit code 1 != 2
+FAIL  discard_trimmed
+        exit code 0 != 2
+        text report differs: line count 40 vs 0
+        stderr presence differs
+        out: present in oracle=True, rust=False
+FAIL  discard_untrimmed
+        exit code 0 != 2
+        text report differs: line count 40 vs 0
+        stderr presence differs
+        out: present in oracle=True, rust=False
+FAIL  discard_casava
+        exit code 0 != 2
+        text report differs: line count 40 vs 0
+        stderr presence differs
+        out: present in oracle=True, rust=False
+FAIL  out_fasta
+        exit code 0 != 2
+        text report differs: line count 39 vs 0
+        stderr presence differs
+        out: present in oracle=True, rust=False
+FAIL  out_gzip
+        exit code 0 != 2
+        text report differs: line count 36 vs 0
+        stderr presence differs
+        out_gz: present in oracle=True, rust=False
+FAIL  out_stdout
+        exit code 0 != 2
+        stdout reads differ (996 vs 0 bytes)
+FAIL  default_output
+        exit code 0 != 2
+        stdout reads differ (996 vs 0 bytes)
+FAIL  info_file
+        exit code 0 != 2
+        text report differs: line count 39 vs 0
+        stderr presence differs
+        out: present in oracle=True, rust=False
+        info: present in oracle=True, rust=False
+FAIL  rest_file
+        exit code 0 != 2
+        text report differs: line count 39 vs 0
+        stderr presence differs
+        out: present in oracle=True, rust=False
+        rest: present in oracle=True, rust=False
+FAIL  wildcard_file
+        exit code 0 != 2
+        text report differs: line count 39 vs 0
+        stderr presence differs
+        out: present in oracle=True, rust=False
+        wildcards: present in oracle=True, rust=False
+FAIL  too_short_output
+        exit code 0 != 2
+        text report differs: line count 39 vs 0
+        stderr presence differs
+        out: present in oracle=True, rust=False
+        too_short: present in oracle=True, rust=False
+FAIL  too_long_output
+        exit code 0 != 2
+        text report differs: line count 40 vs 0
+        stderr presence differs
+        out: present in oracle=True, rust=False
+        too_long: present in oracle=True, rust=False
+FAIL  untrimmed_output
+        exit code 0 != 2
+        text report differs: line count 40 vs 0
+        stderr presence differs
+        out: present in oracle=True, rust=False
+        untrimmed: present in oracle=True, rust=False
+FAIL  report_minimal
+        exit code 0 != 2
+        text report differs: line count 2 vs 0
+        stderr presence differs
+        out: present in oracle=True, rust=False
+FAIL  json_report
+        exit code 0 != 2
+        text report differs: line count 39 vs 0
+        stderr presence differs
+        json: rust wrote no report
+        out: present in oracle=True, rust=False
+FAIL  json_report_full
+        exit code 0 != 2
+        text report differs: line count 41 vs 0
+        stderr presence differs
+        json: rust wrote no report
+        out: present in oracle=True, rust=False
+FAIL  cores_2
+        exit code 0 != 2
+        text report differs: line count 39 vs 0
+        stderr presence differs
+        out: present in oracle=True, rust=False
+FAIL  compression_z
+        exit code 0 != 2
+        text report differs: line count 36 vs 0
+        stderr presence differs
+        out_gz: present in oracle=True, rust=False
+PASS  quiet
+FAIL  paired_basic
+        exit code 0 != 2
+        text report differs: line count 63 vs 0
+        stderr presence differs
+        out: present in oracle=True, rust=False
+        out2: present in oracle=True, rust=False
+FAIL  paired_interleaved
+        exit code 1 != 2
+FAIL  paired_min
+        exit code 0 != 2
+        text report differs: line count 66 vs 0
+        stderr presence differs
+        out: present in oracle=True, rust=False
+        out2: present in oracle=True, rust=False
+FAIL  err_missing_input
+        exit code 1 != 2
+PASS  err_unknown_option
+FAIL  err_bad_adapter
+        exit code 0 != 2
+        stderr presence differs
+        out: present in oracle=True, rust=False
+FAIL  err_both_stdin
+        exit code 0 != 2
+FAIL  err_no_adapter
+        exit code 0 != 2
+        stderr presence differs
+        out: present in oracle=True, rust=False
+
+2/75 cases passed
+failures by category: paired-end=3, single-end=70
+failing cases: default_minimum_length, a3_regular, a3_anchored, g5_regular, g5_anchored, b_anywhere, a3_no_indels, a3_error_rate_0, a3_error_rate_int, a3_error_rate_02, a3_overlap_1, a3_overlap_10, a3_times_2, a3_times_3, multiple_adapters, anchored_and_regular, linked_adapter, wildcard_adapter, no_match_wildcards, match_read_wildcards, revcomp, action_trim, action_retain, action_mask, action_lowercase, action_none, cut_5prime, cut_3prime, cut_both, quality_3prime, quality_both, quality_base64, nextseq_trim, poly_a, length_shorten, length_negative, trim_n, zero_cap, strip_suffix, prefix, suffix, rename, length_tag, filter_min, filter_max, filter_max_n, filter_max_ee, filter_max_aer, discard_trimmed, discard_untrimmed, discard_casava, out_fasta, out_gzip, out_stdout, default_output, info_file, rest_file, wildcard_file, too_short_output, too_long_output, untrimmed_output, report_minimal, json_report, json_report_full, cores_2, compression_z, paired_basic, paired_interleaved, paired_min, err_missing_input, err_bad_adapter, err_both_stdin, err_no_adapter
+wrote docs/reports/baseline-v0.1.0.json

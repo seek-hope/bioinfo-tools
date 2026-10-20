@@ -1,0 +1,128 @@
+{
+  "cases": [
+    {
+      "cpu_seconds": 0.0433,
+      "input_reads": 200000,
+      "name": "dedup",
+      "output_bytes": 117453,
+      "peak_rss_kb": 41860,
+      "repetitions": 3,
+      "stages": {
+        "parse_cluster": 0.0,
+        "sort_commit": 0.0
+      },
+      "threads_peak": 26,
+      "tmp_bytes_peak": 0,
+      "wall_seconds_all": [
+        0.0559,
+        0.0551,
+        0.0555
+      ],
+      "wall_seconds_min": 0.0551
+    },
+    {
+      "cpu_seconds": 0.21,
+      "input_reads": 200000,
+      "name": "group",
+      "output_bytes": 12887389,
+      "peak_rss_kb": 128580,
+      "repetitions": 3,
+      "stages": {},
+      "threads_peak": 35,
+      "tmp_bytes_peak": 0,
+      "wall_seconds_all": [
+        0.1761,
+        0.1799,
+        0.1679
+      ],
+      "wall_seconds_min": 0.1679
+    },
+    {
+      "cpu_seconds": 0.0133,
+      "input_reads": 200000,
+      "name": "count",
+      "output_bytes": 40,
+      "peak_rss_kb": 17556,
+      "repetitions": 3,
+      "stages": {},
+      "threads_peak": 26,
+      "tmp_bytes_peak": 0,
+      "wall_seconds_all": [
+        0.0341,
+        0.0332,
+        0.0342
+      ],
+      "wall_seconds_min": 0.0332
+    },
+    {
+      "cpu_seconds": 0.0,
+      "input_reads": 200000,
+      "name": "count_tab",
+      "output_bytes": 290011,
+      "peak_rss_kb": 1372,
+      "repetitions": 3,
+      "stages": {},
+      "threads_peak": 1,
+      "tmp_bytes_peak": 0,
+      "wall_seconds_all": [
+        0.0077,
+        0.0072,
+        0.0073
+      ],
+      "wall_seconds_min": 0.0072
+    },
+    {
+      "cpu_seconds": 0.05,
+      "input_reads": 200000,
+      "name": "dedup_low-memory",
+      "output_bytes": 117453,
+      "peak_rss_kb": 42860,
+      "repetitions": 3,
+      "stages": {
+        "parse_cluster": 0.0,
+        "sort_commit": 0.0
+      },
+      "threads_peak": 26,
+      "tmp_bytes_peak": 0,
+      "wall_seconds_all": [
+        0.0563,
+        0.0547,
+        0.0558
+      ],
+      "wall_seconds_min": 0.0547
+    },
+    {
+      "cpu_seconds": 0.0433,
+      "input_reads": 200000,
+      "name": "dedup_high-throughput",
+      "output_bytes": 117453,
+      "peak_rss_kb": 42100,
+      "repetitions": 3,
+      "stages": {
+        "parse_cluster": 0.0,
+        "sort_commit": 0.0
+      },
+      "threads_peak": 26,
+      "tmp_bytes_peak": 0,
+      "wall_seconds_all": [
+        0.056,
+        0.0557,
+        0.056
+      ],
+      "wall_seconds_min": 0.0557
+    }
+  ],
+  "provenance": {
+    "binary": "/tmp/rust-umitools-build/target/release/rust-umitools",
+    "binary_sha256": "53c4ec040fd3e2c91a26978747288461c0af870cd01269d2463a39f9330fdd95",
+    "commit": "a87dce4d4fcb3e5c3614b1c1d84b95ebb31c3135",
+    "cpu_model": "13th Gen Intel(R) Core(TM) i7-13700H",
+    "logical_cpus": 20,
+    "platform": "Linux-7.2.9-2-cachyos-x86_64-with-glibc2.44",
+    "profile": "release",
+    "python": "3.12.14",
+    "rustc": "rustc 1.95.0 (59807616e 2026-04-14)",
+    "samtools": "samtools 1.24",
+    "umi_tools": "UMI-tools version: 1.1.6"
+  }
+}
