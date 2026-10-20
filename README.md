@@ -49,7 +49,8 @@ cargo clippy --workspace --all-targets --offline -- -D warnings
 The oracle binaries for the FASTX comparisons are pinned in
 [tests/ci/PINS.md](tests/ci/PINS.md). They are downloaded locally, not committed.
 
-The workspace requires Rust 1.91 because `rust-bam` uses noodles 0.118.0.
+The workspace MSRV is Rust 1.91 (set by `rust-bam`/noodles); the primary
+`rust-toolchain.toml` pins the latest stable, currently 1.99.1.
 
 ## Evidence
 

@@ -10,18 +10,12 @@ members = [
     "rust-umitools",
 ]
 
-# Workspace-wide MSRV: 1.91.
+# Workspace MSRV: 1.91; primary toolchain: 1.99.1.
 #
-# This floor is set by `noodles` 0.118.0, which declares `rust-version = "1.91.0"`
-# on itself and on every sub-crate (`noodles-bam`, `-sam`, `-bgzf`, `-csi`,
-# `-core`). Cargo refuses to build a workspace member on a toolchain below a
-# dependency's declared minimum, so keeping the previous 1.88 value while
-# `rust-bam` depends on noodles would be a claim that cannot be honoured.
-#
-# The other five members are buildable on 1.88 today; a shared workspace can only
-# declare one floor, so their effective minimum rises to 1.91 as a consequence.
-# Verified: the whole suite (587 tests before rust-bam landed) passes under the
-# 1.91.0 toolchain. Recorded as DR-W1-4-2 in docs/EVIDENCE-W1-4.md.
+# The MSRV floor is set by `noodles` 0.118.0, which declares
+# `rust-version = "1.91.0"` on itself and every sub-crate. The workspace's
+# `rust-toolchain.toml` pins the latest stable (1.99.1) for development,
+# packaging and CI; older compiler users keep the 1.91 floor.
 [workspace.package]
 rust-version = "1.91"
 

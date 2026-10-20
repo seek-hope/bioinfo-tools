@@ -115,7 +115,7 @@ impl Md5 {
     fn compress(&mut self, block: &[u8]) {
         debug_assert_eq!(block.len(), 64);
         let mut m = [0u32; 16];
-        for (i, chunk) in block.chunks_exact(4).enumerate() {
+        for (i, chunk) in block.as_chunks::<4>().0.iter().enumerate() {
             m[i] = u32::from_le_bytes([chunk[0], chunk[1], chunk[2], chunk[3]]);
         }
         let [mut a, mut b, mut c, mut d] = self.state;

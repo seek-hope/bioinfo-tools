@@ -44,7 +44,7 @@
 # the layer split is kept simple and honest rather than faking a dependency cache.
 
 # ---------- builder ----------
-FROM rust:1.91.0-bookworm AS builder
+FROM rust:1.99.1-bookworm AS builder
 
 # Build-time native dependencies for the compression codecs:
 #   zstd-sys and lzma-sys compile C sources, so `cc` and `make` are required.

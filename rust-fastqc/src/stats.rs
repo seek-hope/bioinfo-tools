@@ -249,7 +249,7 @@ pub struct QcStats {
 }
 
 /// The order `Per base sequence content` prints its columns in.
-pub const BASE_ORDER: [u8; 4] = [b'G', b'A', b'T', b'C'];
+pub const BASE_ORDER: [u8; 4] = *b"GATC";
 
 impl QcStats {
     /// Create empty statistics for a file.

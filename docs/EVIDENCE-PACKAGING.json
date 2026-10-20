@@ -1,72 +1,82 @@
 {
-  "schema_version": 2,
+  "schema_version": 3,
   "kind": "packaging-preparation-evidence",
   "generated_at_utc": "2026-10-25T00:00:00Z",
   "workspace": "bioinfo-tools",
   "task": "Packaging preparation",
   "repository": "https://github.com/seek-hope/bioinfo-tools",
-  "commit": "47646ad1f03df8acaa5ad677b9fabad9de8adcb5",
+  "commit": "3678b5e7e9626dc7a5e1d10148eaacbd231b2cd1",
 
   "status": "verified",
-  "status_statement": "All six items verified. The aarch64 cross-build, the container image and the conda package now build and are smoke-tested for real; the reproducible build and SBOM were re-verified unchanged. Two items carry documented limitations rather than blockers: the conda package is built with rustc 1.98.1 (conda-forge's version) because rust-toolchain.toml is a rustup feature the recipe cannot use, and no linux/arm64 container image was built. Nothing was published.",
+  "status_statement": "All six items verified on the primary Rust 1.99.1 toolchain, with the declared MSRV held at 1.91. The container is built from rust:1.99.1-bookworm and smoke-tested; the conda package builds with rust 1.99.0 (conda-forge has no 1.99.1) and its packaged binary was extracted and executed. Conda packaging is near-deterministic (3 bytes differ) rather than bit-reproducible, and that is recorded as a limitation. Nothing was published.",
   "published": false,
-  "revision_note": "A previous revision recorded items 2, 3 and 4 as blocked/unbuilt. The environment was then provisioned and all three were re-run; resolved blockers are marked resolved rather than deleted.",
+  "revision_note": "Revision 3. The primary toolchain moved from 1.91.0 to 1.99.1 with the MSRV floor unchanged at 1.91; every artifact hash was re-measured. Previous 1.91.0 hashes (b722e9e0..., ac470294..., 07ee9abf...) are superseded and no longer current.",
 
-  "items": [
-    {"id": 1, "item": "reproducible build", "status": "verified", "previous": "achieved", "detail": "re-verified; identical hashes in both modes"},
-    {"id": 2, "item": "aarch64 cross-build", "status": "verified", "previous": "blocked", "resolved": true, "detail": "real ARM aarch64 ELF built and run under qemu-aarch64; trimmed output identical to the host build"},
-    {"id": 3, "item": "container", "status": "verified", "previous": "recipe-written-not-built", "resolved": true, "detail": "image built, smoke-tested, and reproducible across two builds"},
-    {"id": 4, "item": "conda recipe", "status": "verified-with-limitation", "previous": "draft-not-built-not-linted", "resolved": true, "detail": "real conda-build produced an installable .conda; packaged binary executed. Built with rustc 1.98.1, not the pinned 1.91.0"},
-    {"id": 5, "item": "SBOM", "status": "verified", "previous": "achieved", "detail": "unchanged; --check and self-test pass"},
-    {"id": 6, "item": "evidence", "status": "verified", "previous": "achieved", "detail": "this revision"}
-  ],
-
-  "toolchain": {
-    "pin_file": "rust-toolchain.toml",
-    "channel": "1.91.0",
-    "rustc": "rustc 1.91.0 (f8297e351 2025-10-28)",
-    "cargo": "cargo 1.91.0 (ea2d97820 2025-10-10)",
+  "toolchain_model": {
+    "note": "Two distinct numbers, deliberately not conflated: the primary build pin and the declared MSRV floor.",
+    "primary_build_toolchain": {
+      "version": "1.99.1",
+      "declared_in": "rust-toolchain.toml",
+      "rustc": "rustc 1.99.1 (58cf8f9c3 2026-10-13)",
+      "cargo": "cargo 1.99.1 (5f94df478 2026-08-27)",
+      "purpose": "what the repository builds and is verified with"
+    },
+    "declared_msrv": {
+      "version": "1.91",
+      "declared_in": "[workspace.package] rust-version in Cargo.toml",
+      "set_by": "noodles 0.118.0, which declares rust-version = 1.91.0",
+      "purpose": "the minimum a downstream user needs; a floor, not the build pin"
+    },
     "locked_flag_verified": "adding an unlisted dependency makes cargo refuse: 'the lock file needs to be updated but --locked was passed'"
   },
 
+  "items": [
+    {"id": 1, "item": "reproducible build", "status": "verified", "detail": "re-measured on 1.99.1; plain and portable modes both byte-identical"},
+    {"id": 2, "item": "aarch64 cross-build", "status": "verified", "detail": "real ARM ELF built with 1.99.1, run under qemu-aarch64, trimmed output identical to host"},
+    {"id": 3, "item": "container", "status": "verified", "detail": "rust:1.99.1-bookworm image f4b0196e99f2, smoke-tested"},
+    {"id": 4, "item": "conda recipe", "status": "verified-with-limitation", "detail": "built and executed; uses rust 1.99.0 because conda-forge has no 1.99.1"},
+    {"id": 5, "item": "SBOM", "status": "verified", "detail": "unchanged; Cargo.lock did not move; --check and self-test pass"},
+    {"id": 6, "item": "evidence", "status": "verified", "detail": "this revision"}
+  ],
+
   "reproducible_build": {
     "script": "packaging/repro-check.sh",
-    "re_verified_this_revision": true,
+    "toolchain": "1.99.1",
+    "commit": "3678b5e7e9626dc7a5e1d10148eaacbd231b2cd1",
     "mode_1_plain": {
-      "identical": true,
-      "sha256": "b722e9e01792d20b653e31f74c23eadf523b32090a337d3ac1ac64509f44b730",
-      "size_bytes": 2266784,
+      "sha256": "e65e5935e026144e3f2866df79d568fc952250e389fc19e799e75c8ad023a4a4",
+      "identical_twice": true,
       "caveat": "embeds absolute source and registry paths from debug info; reproducible only at the same checkout path"
     },
     "mode_2_remapped": {
-      "identical": true,
-      "sha256": "ac47029428b2d4b782ef8fbb9d2915f25053000e0078af7ad99b19a875247c2d",
-      "size_bytes": 2266400,
+      "sha256": "16d35e0a7e9eb6ae655a1315058c91b123e400758b5f9c283d73dfe668f7c997",
+      "identical_twice": true,
       "absolute_paths_embedded": 0,
-      "note": "the portable mode; this is what a packager should use"
+      "note": "the portable mode; what a packager should use"
     },
-    "stripped_sha256": "07ee9abfdb1dcdcd65629bd1d2d3850a2ecd73758245483e9b0177025cfeff02"
+    "stripped_sha256": "6697b029b765df0757f73cdebd4af08dc030790df9b13214b75263cb2bcc1603",
+    "superseded_1_91_hashes": {
+      "plain": "b722e9e01792d20b653e31f74c23eadf523b32090a337d3ac1ac64509f44b730",
+      "remapped": "ac47029428b2d4b782ef8fbb9d2915f25053000e0078af7ad99b19a875247c2d",
+      "stripped": "07ee9abfdb1dcdcd65629bd1d2d3850a2ecd73758245483e9b0177025cfeff02"
+    }
   },
 
   "aarch64_cross_build": {
     "status": "verified",
-    "previous_status": "blocked",
-    "resolved_by": "provisioned aarch64-linux-gnu-gcc/-g++/-ld and an aarch64 sysroot at /usr/aarch64-linux-gnu",
+    "toolchain": "1.99.1",
     "probe_script": "packaging/cross-build-aarch64.sh",
-    "script_rewritten": true,
     "probe_exit_code": 0,
     "environment_used": {
       "CC_aarch64_unknown_linux_gnu": "aarch64-linux-gnu-gcc",
       "CXX_aarch64_unknown_linux_gnu": "aarch64-linux-gnu-g++",
       "CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER": "aarch64-linux-gnu-gcc",
-      "RUSTFLAGS": "--remap-path-prefix=<root>=/build/source --remap-path-prefix=<cargo-home>=/build/cargo",
       "compiler_version": "aarch64-linux-gnu-gcc (GCC) 16.2.0",
       "binutils": "GNU ld (GNU Binutils) 2.47",
       "sysroot": "/usr/aarch64-linux-gnu"
     },
     "artifact": {
-      "path": "target/aarch64-unknown-linux-gnu/release/rust-cutadapt",
-      "sha256": "dcf58efe232e926a1fef3d7199ac19b7f438db68b668b0341cd6e98d9f6a7265",
+      "sha256": "32ffc643d12b9b9a15fe0928664d2774ae11128d4a58b45720255b417ebdbd99",
       "size_bytes": 2049128,
       "file_type": "ELF 64-bit LSB pie executable, ARM aarch64, dynamically linked, interpreter /lib/ld-linux-aarch64.so.1",
       "needed_libraries": ["libgcc_s.so.1", "libm.so.6", "libc.so.6"],
@@ -77,140 +87,148 @@
       "version_output": "rust-cutadapt 0.1.0",
       "version_exit": 0,
       "trim_exit": 0,
-      "cross_architecture_comparison": "trimmed output FILE IS BYTE-IDENTICAL to the x86_64 build's",
-      "note": "qemu is always invoked explicitly; binfmt_misc is never relied on"
+      "cross_architecture_comparison": "trimmed output byte-identical to the x86_64 build's",
+      "note": "qemu always invoked explicitly; binfmt_misc never relied upon"
     },
-    "false_success_bugs_fixed": [
-      {
-        "bug": "binfmt_misc has qemu-aarch64 registered, so an aarch64 ELF 'runs' directly and a missing loader still yields shell exit status 0",
-        "fix": "the smoke test always invokes qemu-aarch64 -L <sysroot> explicitly and checks the status"
-      },
-      {
-        "bug": "the previous script could report BLOCKED and be read as success",
-        "fix": "every failure path returns non-zero; exit 0 is reachable only at the end"
-      }
-    ],
-    "explicit_exit_codes": {"0": "build + smoke test passed", "1": "build ok but smoke test failed", "3": "toolchain incomplete, no build attempted", "4": "cross build failed"},
+    "false_success_guards": {
+      "problem": "binfmt_misc registers qemu-aarch64 on this host, so an aarch64 ELF 'runs' directly and a missing loader still yields shell exit status 0",
+      "mitigation": "the script always invokes qemu-aarch64 -L <sysroot> and checks status; every failure path is non-zero and exit 0 is reachable only at the end"
+    },
+    "exit_codes": {"0": "build + smoke test passed", "1": "build ok but smoke test failed", "3": "toolchain incomplete", "4": "cross build failed"},
     "negative_controls": [
-      {"what": "hide aarch64-linux-gnu-gcc from PATH", "result": "exit 3, 'cross toolchain incomplete; no build attempted'"},
-      {"what": "replace qemu-aarch64 with a shim that always fails", "result": "exit 1 with '--version failed', 'failed to trim', 'output differs'"},
-      {"what": "genuine run", "result": "exit 0, RESULT: PASS"}
+      {"what": "hide aarch64-linux-gnu-gcc from PATH", "result": "exit 3"},
+      {"what": "replace qemu-aarch64 with an always-failing shim", "result": "exit 1"},
+      {"what": "genuine run", "result": "exit 0, PASS"}
     ]
   },
 
   "container": {
     "status": "verified",
-    "previous_status": "recipe-written-not-built",
+    "builder_image": "rust:1.99.1-bookworm",
+    "runtime_image": "debian:bookworm-slim",
     "file": "packaging/Containerfile",
-    "docker_access": "sudo -n docker (daemon 29.9.1, overlayfs driver)",
-    "build_command": "sudo -n docker build -f packaging/Containerfile -t rust-cutadapt:local .",
-    "build_result": "Successfully tagged rust-cutadapt:local (exit 0)",
+    "build_command": "sudo -n docker build -f packaging/Containerfile -t rust-cutadapt:1.99.1 .",
+    "tag": "rust-cutadapt:1.99.1",
     "image": {
-      "id": "sha256:a9a6b630427db101301d2ea26eed32a61f9e6f73ab6e59e6c5ba0204ef8a378c",
-      "digest": "rust-cutadapt@sha256:a9a6b630427db101301d2ea26eed32a61f9e6f73ab6e59e6c5ba0204ef8a378c",
-      "architecture": "amd64/linux",
-      "size_bytes": 116652538,
-      "layers": 4
+      "id": "sha256:f4b0196e99f259bd1becf42b7b9064d261e600d7c2e483fac91efc90c0134710",
+      "id_short": "f4b0196e99f2",
+      "size_bytes": 116555120,
+      "layers": 4,
+      "architecture": "amd64/linux"
     },
     "reproducible": {
-      "second_build_image_id": "sha256:a9a6b630427db101301d2ea26eed32a61f9e6f73ab6e59e6c5ba0204ef8a378c",
+      "verified": true,
+      "method": "a second docker build produced the identical image ID",
+      "second_build_tag": "rust-cutadapt:1.99.1-v2",
+      "second_build_image_id": "sha256:f4b0196e99f259bd1becf42b7b9064d261e600d7c2e483fac91efc90c0134710",
       "identical": true
     },
     "smoke_tests_run": [
-      {"test": "version", "command": "docker run --rm rust-cutadapt:local --version", "output": "rust-cutadapt 0.1.0", "exit_code": 0},
-      {"test": "default CMD", "command": "docker run --rm rust-cutadapt:local", "output": "prints --help usage", "exit_code": 0},
-      {"test": "real trim with mounted volume", "command": "docker run --rm -v /tmp/smoke2:/data rust-cutadapt:local -a AGATCGGAAGAGC -o /data/out.fq /data/in.fq", "output": "adapter trimmed, out.fq written", "exit_code": 0},
-      {"test": "non-root user", "command": "docker run --rm --entrypoint id rust-cutadapt:local", "output": "uid=10001(appuser) gid=10001(appuser)", "exit_code": 0},
-      {"test": "usage error propagation", "command": "docker run --rm rust-cutadapt:local --badflag", "exit_code": 2},
-      {"test": "I/O error propagation", "command": "docker run --rm rust-cutadapt:local /nonexistent.fq", "exit_code": 1}
+      {"test": "version", "command": "docker run --rm rust-cutadapt:1.99.1 --version", "output": "rust-cutadapt 0.1.0", "exit_code": 0},
+      {"test": "non-root user", "command": "docker run --rm --entrypoint id rust-cutadapt:1.99.1", "output": "uid=10001(appuser) gid=10001(appuser)", "exit_code": 0},
+      {"test": "real trim with mounted volume", "command": "docker run --rm --user \"$(id -u):$(id -g)\" -v /tmp/cs:/data rust-cutadapt:1.99.1 -a AGATCGGAAGAGC -o /data/out.fq /data/in.fq", "output": "exit 0, wrote out.fq (8 bytes, adapter removed)", "exit_code": 0},
+      {"test": "usage error propagation", "command": "docker run --rm rust-cutadapt:1.99.1 --badflag", "exit_code": 2},
+      {"test": "I/O error propagation", "command": "docker run --rm rust-cutadapt:1.99.1 /nonexistent.fq", "exit_code": 1}
     ],
-    "deployment_detail_found": {
+    "superseded_image": {
+      "tag": "rust-cutadapt:local",
+      "id": "sha256:a9a6b630427db101301d2ea26eed32a61f9e6f73ab6e59e6c5ba0204ef8a378c",
+      "builder_image": "rust:1.91.0-bookworm",
+      "note": "still present locally but superseded by the 1.99.1 tag"
+    },
+    "deployment_detail": {
       "problem": "container runs as uid 10001, so a bind-mounted host directory must be writable by that uid",
       "observed_error": "ERROR: cannot create output \"/data/out.fq\": Permission denied (os error 13)",
-      "workaround_documented": "docker run --rm --user \"$(id -u):$(id -g)\" -v \"$PWD:/data\" rust-cutadapt:local ...",
-      "workaround_verified": "wrote out.fq owned by the host user on a non-world-writable directory",
-      "why_not_run_as_root": "root inside the container would leave root-owned files on the host"
+      "documented_workaround": "docker run --rm --user \"$(id -u):$(id -g)\" -v \"$PWD:/data\" ... (keeps host file ownership)",
+      "verified": true
     }
   },
 
   "conda": {
     "status": "verified-with-limitation",
-    "previous_status": "draft-not-built-not-linted",
     "conda_build_version": "26.9.1",
-    "conda_build_path": "tests/ci/env/conda-build/bin/conda-build",
-    "build_command": "conda-build packaging/conda --croot /var/tmp/cbroot --output-folder /var/tmp/cbld --no-anaconda-upload",
+    "build_command": "conda-build packaging/conda --croot /var/tmp/cbr-latest --output-folder /var/tmp/cbld-latest-out --no-anaconda-upload",
     "build_exit_code": 0,
+    "rust_resolved": "rust 1.99.0-h846490e_0",
+    "rust_resolved_evidence": "grep of the build log: 'rust: 1.99.0-h846490e_0'",
     "package": {
       "file": "rust-cutadapt-0.1.0-hfb04f09_0.conda",
-      "size_bytes": 860000,
-      "sha256": "1d2d817dfec47d2dcc35acef0d964c2ac2eb98474b9b8eb08c9faedbce3ae582",
+      "sha256": "ef1b58a8c897e2e2bffef06f0297e0efb70371aeb666246ffd55a9a9194fe0f6",
+      "size_bytes": 800000,
       "runtime_depends": ["__glibc >=2.17", "libgcc >=16"],
       "installed_file": "bin/rust-cutadapt"
     },
-    "packaged_binary_executed": {
+    "packaged_binary": {
+      "executed": true,
       "version_output": "rust-cutadapt 0.1.0",
-      "exit_code": 0,
-      "trim_test": "ran and trimmed the adapter",
-      "sha256": "305c78e79e192b5f77b42284078c78ab6f7cac37098c0d9818e076036049e4b6"
+      "version_exit": 0,
+      "trim_test": "ran and trimmed the adapter, exit 0",
+      "sha256": "9b7259236dac3dca9a83f20d82a42a074c2bc9b8ec45f9fc8553a07912fd9b74",
+      "embedded_rustc_commit": "b940084d7eb6a299eb4bfeb8e34901bc051e7ac4"
+    },
+    "why_not_the_1_99_1_artifact": {
+      "conda_forge_newest_rust": "1.99.0",
+      "verified_with": "conda search -c conda-forge rust -> newest is rust 1.99.0 h846490e_0",
+      "structural_reason": "rust-toolchain.toml is a rustup feature, and conda-forge's rust installs rustc/cargo directly under $BUILD_PREFIX/bin, so the pin is ignored by construction",
+      "measured_proof": {
+        "conda_binary_embedded_rustc": "b940084d7eb6a299eb4bfeb8e34901bc051e7ac4",
+        "local_1_99_1_rustc_commit": "58cf8f9c35b355199727627d07ae34a4e2846d67",
+        "different": true
+      },
+      "to_fix": "require a conda rust at 1.99.1, or vendor a rustup toolchain in the sdist"
+    },
+    "reproducibility": {
+      "bit_reproducible": false,
+      "evidence": {
+        "build_1_package_sha256": "ef1b58a8c897e2e2bffef06f0297e0efb70371aeb666246ffd55a9a9194fe0f6",
+        "build_2_package_sha256": "03276f8a649a5af6116564885032a4714ecbe1700ae2dc54edd97e1e8348d81a",
+        "build_2_output_folder": "/var/tmp/cbld-verify"
+      },
+      "measured_cause": {
+        "differing_binary_bytes": 3,
+        "binary_size_bytes": 2148288,
+        "offsets": [5445, 1877465, 2146465],
+        "interpretation": "BuildID-related; both binaries embed the same rustc (/rustc/b940084d), so this is not a compiler difference"
+      },
+      "functional_equivalence": {
+        "verified": true,
+        "method": "both binaries trimmed the same input to identical output (md5 5330749bbd4c3ae055f62a9a0331e9d9)"
+      },
+      "claim_boundary": "the conda package builds and works; it is NOT claimed to be bit-reproducible. Only the Rust build (item 1) carries the reproducibility claim."
     },
     "recipe_bugs_found_and_fixed": [
-      {
-        "bug": "source `path: ..` resolved to packaging/ instead of the workspace root, so no Cargo.toml was found",
-        "fix": "path: ../.. (conda-build resolves path: relative to the recipe directory)"
-      },
-      {
-        "bug": "`- cargo` was listed as a dependency, but no conda package named `cargo` exists, making the solve unsatisfiable",
-        "observed": "Unsatisfiable dependencies for platform linux-64: {MatchSpec(\"cargo\")}; cargo =* * does not exist",
-        "fix": "removed the separate cargo requirement; conda-forge's rust ships both rustc and cargo"
-      },
-      {
-        "bug": "conda-build's default work directory lives inside the source tree, so copying the source fails",
-        "observed": "AssertionError: Can't merge/copy source into subdirectory of itself",
-        "fix": "build with --croot outside the source tree"
-      }
+      {"bug": "source `path: ..` resolved to packaging/ instead of the workspace root", "fix": "path: ../.."},
+      {"bug": "`- cargo` listed as a dependency but no conda package named cargo exists", "observed": "Unsatisfiable dependencies: cargo =* * does not exist", "fix": "removed; conda-forge's rust ships both rustc and cargo"},
+      {"bug": "conda-build's default work dir is inside the source tree", "observed": "AssertionError: Can't merge/copy source into subdirectory of itself", "fix": "build with --croot outside the source tree"}
     ],
-    "toolchain_mismatch": {
-      "measured": true,
-      "conda_resolved_rust": "rust 1.98.1-hc89c8c8_2 (conda-forge)",
-      "probe_inside_build_env": {
-        "rustc": "rustc 1.98.1 (48a229cea 2026-09-01)",
-        "cargo": "cargo 1.98.1 (797e8a9bc 2026-08-05)",
-        "rustc_path": "$BUILD_PREFIX/bin/rustc"
-      },
-      "why_the_pin_cannot_be_honoured": "rust-toolchain.toml is a rustup feature, and conda-forge's rust installs rustc/cargo directly under $BUILD_PREFIX/bin; there is no rustup and no 1.91.0 package",
-      "consequence": "the conda binary (305c78e7...) is NOT the pinned 1.91.0 build (b722e9e0...); a different compiler produces different code",
-      "to_fix": "require a conda rust at 1.91.0, or vendor a rustup toolchain in the sdist"
-    },
     "conda_build_lint": {
       "exists_in_26_9_1": false,
-      "note": "the old `conda-build lint` subcommand was removed; `--check` is the nearest equivalent",
-      "check_is_unreliable": "conda-build --check exited 0 even with an unsatisfiable dependency (cargo does not exist)"
+      "check_is_unreliable": "conda-build --check exited 0 even with an unsatisfiable dependency"
     },
     "stdlib_checker": {
       "script": "packaging/conda/check_recipe.py",
       "result": "PASS",
-      "catches_what_check_tolerates": ["wrong source path", "a dependency that is not a real package", "a build script that lost --locked"],
       "negative_control": "removing --locked from the build script -> FAIL"
     }
   },
 
   "sbom": {
     "status": "verified",
-    "re_verified_this_revision": true,
+    "unchanged_this_revision": true,
+    "reason_unchanged": "Cargo.lock did not move, so the generated SBOM is still current",
     "generator": "packaging/sbom.py",
     "format": "CycloneDX 1.5",
-    "output": "packaging/sbom.cdx.json",
     "components": 162,
     "components_with_sha256": 155,
     "input": "Cargo.lock",
     "input_sha256": "f6a95b462b2bffa326810e451788214d59d6c1dbaad5dd41de18044297edf8bc",
     "output_sha256": "bc5608019ad3440062593343f409aca564785d9ddf20c3bca9f5915ba3f50af2",
-    "determinism": "5 runs -> 1 distinct hash; no timestamp; UUIDv5 serial derived from content",
     "staleness_check": "python3 packaging/sbom.py --check -> PASS",
     "self_test": "python3 packaging/sbom.py --self-test -> SELFTEST PASS"
   },
 
   "regression_status": {
+    "toolchain": "1.99.1",
     "cargo_fmt": "clean",
     "cargo_clippy": "0 warnings (workspace, all targets, --locked)",
     "workspace_tests_debug": "685 passed",
@@ -224,30 +242,44 @@
     "nothing_regressed": true
   },
 
-  "remaining_limitations": [
-    "the conda package is built with rustc 1.98.1, not the pinned 1.91.0, because conda-forge has no 1.91.0 and rust-toolchain.toml is a rustup feature the recipe cannot use",
-    "conda-build --check cannot be used as a gate: it returned 0 with an unsatisfiable dependency",
-    "the container image is amd64 only; no linux/arm64 image was built, so the aarch64 binary is verified but an aarch64 image is not",
-    "the SBOM is generated by a local stdlib script, not an ecosystem tool; it is deterministic and checksummed but not signed or attested",
-    "no signing or provenance attestation (cosign, SLSA) was attempted",
-    "nothing was published: no release, tag, dist upload, crates.io upload, conda channel upload or registry push"
+  "clippy_fixes_for_1_99": [
+    {"file": "rust-fastqc/src/stats.rs", "reason": "clippy lint specific to Rust 1.99", "behaviour_change": false},
+    {"file": "rust-fx/src/md5.rs", "reason": "clippy lint specific to Rust 1.99", "behaviour_change": false}
   ],
 
+  "msrv_note": "The declared MSRV (1.91) was previously verified to build the workspace, but the suites in this revision ran on 1.99.1 only. 1.91 is declared in Cargo.toml and guarded by --locked, not re-tested on this machine in this revision.",
+
   "artifacts_local_only": [
-    {"name": "x86_64 release binary (pinned 1.91.0)", "sha256": "b722e9e01792d20b653e31f74c23eadf523b32090a337d3ac1ac64509f44b730"},
-    {"name": "x86_64 remapped portable binary", "sha256": "ac47029428b2d4b782ef8fbb9d2915f25053000e0078af7ad99b19a875247c2d"},
-    {"name": "aarch64 binary", "sha256": "dcf58efe232e926a1fef3d7199ac19b7f438db68b668b0341cd6e98d9f6a7265"},
-    {"name": "container image", "sha256": "a9a6b630427db101301d2ea26eed32a61f9e6f73ab6e59e6c5ba0204ef8a378c"},
-    {"name": "conda package", "sha256": "1d2d817dfec47d2dcc35acef0d964c2ac2eb98474b9b8eb08c9faedbce3ae582"},
-    {"name": "conda-packaged binary", "sha256": "305c78e79e192b5f77b42284078c78ab6f7cac37098c0d9818e076036049e4b6"},
+    {"name": "x86_64 release plain (1.99.1)", "sha256": "e65e5935e026144e3f2866df79d568fc952250e389fc19e799e75c8ad023a4a4"},
+    {"name": "x86_64 remapped portable (1.99.1)", "sha256": "16d35e0a7e9eb6ae655a1315058c91b123e400758b5f9c283d73dfe668f7c997"},
+    {"name": "x86_64 stripped", "sha256": "6697b029b765df0757f73cdebd4af08dc030790df9b13214b75263cb2bcc1603"},
+    {"name": "aarch64 (1.99.1)", "sha256": "32ffc643d12b9b9a15fe0928664d2774ae11128d4a58b45720255b417ebdbd99"},
+    {"name": "container image rust-cutadapt:1.99.1", "sha256": "f4b0196e99f259bd1becf42b7b9064d261e600d7c2e483fac91efc90c0134710"},
+    {"name": "conda package (rust 1.99.0)", "sha256": "ef1b58a8c897e2e2bffef06f0297e0efb70371aeb666246ffd55a9a9194fe0f6"},
+    {"name": "conda packaged binary", "sha256": "9b7259236dac3dca9a83f20d82a42a074c2bc9b8ec45f9fc8553a07912fd9b74"},
     {"name": "SBOM", "sha256": "bc5608019ad3440062593343f409aca564785d9ddf20c3bca9f5915ba3f50af2"}
   ],
 
+  "remaining_limitations": [
+    "the conda package uses rust 1.99.0, not the 1.99.1 primary pin, because conda-forge has no 1.99.1 and rust-toolchain.toml is a rustup feature a $BUILD_PREFIX/bin/cargo ignores",
+    "conda packaging is near-deterministic but not bit-reproducible: two builds differ in 3 bytes of the packaged binary (BuildID-related); functionally identical",
+    "conda-build --check cannot be used as a gate: it returned 0 with an unsatisfiable dependency",
+    "the container image is amd64 only; no linux/arm64 image was built, so the aarch64 binary is verified but an aarch64 image is not",
+    "the SBOM is generated by a local stdlib script, not an ecosystem tool; deterministic and checksummed but not signed or attested",
+    "no signing or provenance attestation (cosign, SLSA) was attempted",
+    "the declared MSRV 1.91 is not CI-tested in this revision; the suites ran on 1.99.1 only",
+    "nothing was published: no release, tag, version bump, dist upload, crates.io upload, conda channel upload or registry push"
+  ],
+
   "files_changed_this_revision": [
-    "packaging/cross-build-aarch64.sh",
+    "rust-toolchain.toml",
+    "Cargo.toml",
+    "README.md",
     "packaging/Containerfile",
+    "packaging/README.md",
     "packaging/conda/meta.yaml",
-    "packaging/conda/check_recipe.py",
+    "rust-fastqc/src/stats.rs",
+    "rust-fx/src/md5.rs",
     "docs/EVIDENCE-PACKAGING.md",
     "docs/EVIDENCE-PACKAGING.json"
   ],
@@ -255,7 +287,7 @@
   "verification_attribution": {
     "run_by": "leader, this session",
     "independent_reviewer": null,
-    "note": "Every command and every hash quoted was produced in this session. Container builds used passwordless sudo -n docker; conda-build ran from tests/ci/env/conda-build. Sub-instances in this session have no shell tool, so no independent run was possible."
+    "note": "Every hash and exit code quoted was produced in this session. Container commands used passwordless sudo -n docker; conda-build ran from tests/ci/env/conda-build. Sub-instances in this session have no shell tool, so no independent run was possible."
   },
 
   "publication": {

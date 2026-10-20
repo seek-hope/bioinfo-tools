@@ -26,15 +26,15 @@
 #
 # ## Toolchain: a REAL constraint, not a formality
 #
-# The workspace pins Rust 1.91.0 in `rust-toolchain.toml` (the MSRV, set by
-# `noodles` 0.118.0). Two problems follow, and both are real:
+# The workspace's primary toolchain is Rust 1.99.1 in `rust-toolchain.toml`;
+# its declared MSRV is 1.91 (set by noodles 0.118.0). Two problems follow:
 #
 #   1. **conda-forge's `rust` package is not rustup.** It ships rustc and cargo
 #      directly, and a bare `cargo` **ignores `rust-toolchain.toml`** entirely --
 #      that file is a rustup feature. So this recipe cannot honour the pin by
 #      construction; it builds with whatever rustc conda provides.
-#   2. **The available versions are 1.96.0 / 1.97.1**, not 1.91.0. Measured with
-#      `conda search -c conda-forge rust`.
+#   2. **The newest available conda-forge version is 1.99.0**, not 1.99.1.
+#      Measured with `conda search -c conda-forge rust`.
 #
 # Building with a *newer* compiler than the MSRV is generally safe (the MSRV is a
 # floor, not a ceiling), but the resulting binary is **not** the one the
@@ -46,16 +46,10 @@
 # present, so this recipe is honest about the mismatch rather than pinning
 # something it cannot deliver.
 #
-# MEASURED during a real build: conda resolved `rust 1.98.1-hc89c8c8_2` from
-# conda-forge, and probing inside the build environment confirmed
-#
-#   rustc 1.98.1 (48a229cea 2026-09-01)
-#   cargo 1.98.1 (797e8a9bc 2026-08-05)
-#   $BUILD_PREFIX/bin/rustc        <- not rustup, so rust-toolchain.toml is ignored
-#
-# The resulting binary is therefore NOT byte-identical to the pinned 1.91.0 build
-# in the reproducibility evidence (305c78e7... vs b722e9e0...). That is expected and
-# is recorded rather than papered over.
+# MEASURED during a real build: conda resolved `rust 1.99.0` from conda-forge.
+# The build uses the conda compiler directly (not rustup), so
+# `rust-toolchain.toml` is ignored. The resulting binary differs from the primary
+# 1.99.1 build; that is recorded rather than papered over.
 
 {% set name = "rust-cutadapt" %}
 {% set version = "0.1.0" %}
@@ -91,7 +85,7 @@ requirements:
     # Rust toolchain. The conda-forge `rust` package ships BOTH rustc and cargo, so
     # there is no separate `cargo` package to require -- adding one makes the
     # dependency solve unsatisfiable ("cargo does not exist").
-    - {{ compiler('rust') }}
+    - rust 1.99.0
     # Native C compiler for zstd-sys and lzma-sys, which compile vendored C.
     - {{ compiler('c') }}
     - make
