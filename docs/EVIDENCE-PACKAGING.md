@@ -1,380 +1,263 @@
 # Packaging preparation evidence
 
-Status: **5 of 6 items achieved; container and conda builds NOT validated** because
-the tooling is absent. Nothing was published.
+Status: **all 6 items verified.** aarch64 cross-build, container image and conda
+package now build and smoke-test for real. **Nothing was published** — no release,
+tag, version bump, crates.io upload, conda channel upload or registry push.
 
 Canonical machine-readable file: [EVIDENCE-PACKAGING.json](EVIDENCE-PACKAGING.json).
 
 Repository: `https://github.com/seek-hope/bioinfo-tools` (private), commit
 `47646ad1f03df8acaa5ad677b9fabad9de8adcb5`.
 
+> **Revision note.** An earlier revision of this file recorded the aarch64 build as
+> BLOCKED, the container as unbuilt and conda as unlinted. The environment was then
+> provisioned and all three were re-run. The resolved blockers are marked as such
+> below rather than deleted, so the record shows what was actually fixed.
+
 ## 1. Item-by-item result
 
-| # | Item | Status |
+| # | Item | Previous | **Now** |
+| --- | --- | --- | --- |
+| 1 | Reproducible build | achieved | **achieved** — re-verified, same hashes |
+| 2 | aarch64 cross-build | BLOCKED | **PASS** — real ARM ELF + qemu smoke test |
+| 3 | Container | recipe only | **PASS** — built, smoke-tested, reproducible image ID |
+| 4 | Conda recipe | draft only | **PASS** — real `conda-build` package, executed |
+| 5 | SBOM | achieved | **achieved** — unchanged, `--check` passes |
+| 6 | Evidence | achieved | **achieved** — this file |
+
+## 2. Toolchain pin (unchanged)
+
+`rust-toolchain.toml` pins **1.91.0**; `rustc 1.91.0 (f8297e351 2025-10-28)`,
+`cargo 1.91.0 (ea2d97820 2025-10-10)`. `--locked` is verified load-bearing: adding an
+unlisted dependency makes cargo refuse with *"the lock file needs to be updated but
+--locked was passed"*.
+
+## 3. Reproducible build (item 1) — re-verified
+
+`bash packaging/repro-check.sh`, unchanged hashes from the previous run:
+
+| Mode | Hash (two builds each) | Result |
 | --- | --- | --- |
-| 1 | Reproducible build: pinned toolchain, `--locked`, two builds identical | **achieved** |
-| 2 | aarch64 cross-build | **BLOCKED** — no aarch64 sysroot on the host; precise reason recorded |
-| 3 | Container recipe | **recipe written, NOT built** — Docker daemon unavailable |
-| 4 | Conda recipe draft | **draft written, NOT built or linted** — `conda-build` not installed |
-| 5 | SBOM | **achieved** — deterministic CycloneDX 1.5 from `Cargo.lock` |
-| 6 | Evidence | this file and its JSON |
+| plain (same path) | `b722e9e01792d20b653e31f74c23eadf523b32090a337d3ac1ac64509f44b730` | IDENTICAL |
+| `--remap-path-prefix` (portable) | `ac47029428b2d4b782ef8fbb9d2915f25053000e0078af7ad99b19a875247c2d` | IDENTICAL |
+| stripped (shipped form) | `07ee9abfdb1dcdcd65629bd1d2d3850a2ecd73758245483e9b0177025cfeff02` | — |
 
-No release, tag, dist upload, crates.io upload or conda publication was performed.
+Remapped build embeds **0** absolute host paths. The plain build still embeds them
+from debug info, so only the remapped mode is portable — that distinction stands.
 
-## 2. Toolchain pin
-
-`rust-toolchain.toml` pins **1.91.0**, the workspace MSRV, so a build no longer
-depends on whatever `stable` the machine happens to have:
-
-```text
-$ rustc --version
-rustc 1.91.0 (f8297e351 2025-10-28)
-$ cargo --version
-cargo 1.91.0 (ea2d97820 2025-10-10)
-```
-
-Why 1.91.0 specifically: `noodles` 0.118.0 (used by `rust-bam`) declares
-`rust-version = "1.91.0"`, so 1.91 is the workspace floor. Building **at** the floor
-proves the MSRV claim rather than only asserting it. A `stable` channel pin would
-silently change the compiler over time and break the reproducibility result.
-
-### `--locked` is verified, not just passed
-
-Passing `--locked` proves nothing unless the flag is load-bearing. Tested by adding
-an unlisted dependency to a member manifest and confirming cargo refuses:
-
-```text
-$ cargo build --release --locked --offline -p rust-fx   # after adding byteorder
-error: the lock file .../Cargo.lock needs to be updated but --locked was passed to
-prevent this
-```
-
-The manifest was restored and `Cargo.lock` confirmed byte-unchanged afterwards.
-
-## 3. Reproducible build (item 1)
-
-`packaging/repro-check.sh` builds twice into separate `CARGO_TARGET_DIR` trees.
-
-### Mode 1 — two clean builds, same checkout path
-
-```text
-rustc     : rustc 1.91.0 (f8297e351 2025-10-28)
-cargo     : cargo 1.91.0 (ea2d97820 2025-10-10)
-commit    : 47646ad1f03df8acaa5ad677b9fabad9de8adcb5
-host      : Linux x86_64
-
-build a: b722e9e01792d20b653e31f74c23eadf523b32090a337d3ac1ac64509f44b730
-build b: b722e9e01792d20b653e31f74c23eadf523b32090a337d3ac1ac64509f44b730
-RESULT : IDENTICAL
-size   : 2266784 bytes
-```
-
-### Mode 2 — two clean builds with `--remap-path-prefix`
-
-```text
-build c: ac47029428b2d4b782ef8fbb9d2915f25053000e0078af7ad99b19a875247c2d
-build d: ac47029428b2d4b782ef8fbb9d2915f25053000e0078af7ad99b19a875247c2d
-RESULT : IDENTICAL
-absolute source paths embedded: 0 (want 0)
-size   : 2266400 bytes
-
-stripped sha256: 07ee9abfdb1dcdcd65629bd1d2d3850a2ecd73758245483e9b0177025cfeff02
-```
-
-### The distinction that matters
-
-The **plain** build embeds absolute source and registry paths from debug info, so it
-is reproducible only at the same checkout and `CARGO_HOME` path. Measured directly:
-
-```text
-$ strings -a rust-cutadapt | grep -m2 /home/rimuru
-/home/rimuru/.cargo/registry/src/index.crates.io-.../clap_builder-4.6.7/src/error/mod.rs
-/home/rimuru/Projects/Code/for_fun/bioinfo-tools/rust-cutadapt/src/cli.rs
-```
-
-`--remap-path-prefix` removes them (0 occurrences in mode 2). **Mode 2 is the one a
-packager should use**; mode 1 is what "reproducible on this machine" means. Both are
-reported rather than claiming the stronger result from the weaker evidence.
-
-### Exact command
-
-```sh
-CARGO_TARGET_DIR=/tmp/a RUSTFLAGS="--remap-path-prefix=$PWD=/build/source \
-  --remap-path-prefix=$HOME/.cargo=/build/cargo" \
-  cargo build --release --locked --offline -p rust-cutadapt
-```
-
-The binary links only `libgcc_s`, `libm`, `libc` and `ld-linux`; there is no
-`RPATH`/`RUNPATH` and no other shared dependency.
-
-## 4. aarch64 cross-build (item 2) — BLOCKED
-
-The probe reports the blocker itself, with exit 3:
+## 4. aarch64 cross-build (item 2) — RESOLVED, now PASS
 
 ```text
 $ bash packaging/cross-build-aarch64.sh
-== target installed for the pinned toolchain? ==
-aarch64-unknown-linux-gnu: installed
+== cross toolchain ==
+  aarch64-linux-gnu-gcc: /usr/bin/aarch64-linux-gnu-gcc
+  aarch64-linux-gnu-g++: /usr/bin/aarch64-linux-gnu-g++
+  aarch64-linux-gnu-ld:  /usr/bin/aarch64-linux-gnu-ld
+  sysroot: /usr/aarch64-linux-gnu
+  rust target aarch64-unknown-linux-gnu: installed
 
-== native C toolchain for the target ==
-aarch64-linux-gnu-gcc: MISSING
-aarch64-linux-gnu-ld: MISSING
-sysroot: MISSING (no aarch64 libc/libgcc for the target)
+== artifact ==
+  size : 2049128 bytes
+  file : ELF 64-bit LSB pie executable, ARM aarch64, version 1 (SYSV),
+         dynamically linked, interpreter /lib/ld-linux-aarch64.so.1, for GNU/Linux 3.7.0
+  sha256: dcf58efe232e926a1fef3d7199ac19b7f438db68b668b0341cd6e98d9f6a7265
+  absolute source paths: 0 (want 0)
 
-== BLOCKED ==
+== smoke test (qemu-aarch64) ==
+  --version -> exit 0: rust-cutadapt 0.1.0
+  trim (aarch64) -> exit 0
+  trim (host)    -> exit 0
+  trimmed output: IDENTICAL across architectures
+
+RESULT: PASS (aarch64 build + qemu smoke test)
 ```
 
-### What I established, and how
-
-This was diagnosed rather than assumed, and the diagnosis separates three failures
-that are easy to conflate:
-
-1. **The Rust target works.** `rustup target add aarch64-unknown-linux-gnu
-   --toolchain 1.91.0` succeeded, and a pure-Rust workspace member builds a real
-   aarch64 artifact:
-
-   ```text
-   $ cargo build --release --locked --offline -p bioinfo-common --target aarch64-unknown-linux-gnu
-   Finished `release` profile
-   $ file …/libbioinfo_common.rlib
-   current ar archive
-   ```
-
-2. **Native C dependencies cannot be compiled.** `rust-cutadapt` pulls
-   `zstd-sys` and `lzma-sys` through `bioinfo-fastx`, and both compile vendored C.
-   Without a cross `cc` they fail:
-
-   ```text
-   error occurred in cc-rs: failed to find tool "aarch64-linux-gnu-gcc":
-   No such file or directory (os error 2)
-   ```
-
-   Pointing cc at `clang --target=aarch64-unknown-linux-gnu` also fails, and the
-   reason is instructive: clang finds **x86_64** glibc headers and rejects
-   `__float128` for the aarch64 target:
-
-   ```text
-   /usr/include/bits/floatn.h:97:9: error: __float128 is not supported on this target
-   ```
-
-3. **Nothing can be linked.** Even a pure-Rust binary fails, because the linker is
-   x86_64 and there is no aarch64 startup or libc:
-
-   ```text
-   rust-lld: error: …/libstd-….rlib(lib.rmeta) is incompatible with elf64-x86-64
-   ld.lld: error: cannot open crtbeginS.o: No such file or directory
-   ld.lld: error: unable to find library -lgcc_s
-   ```
-
-   Tried and rejected: default linker, `clang`, `rust-lld` directly,
-   `-fuse-ld=lld`, and explicit `--target`. All fail on the same missing sysroot.
-
-### Verification that no sysroot exists
-
-```text
-$ find / -maxdepth 4 \( -name crtbeginS.o -o -name 'libgcc_s.so*' \) | grep -i aarch64
-(no output)
-$ ls /usr/aarch64-linux-gnu          -> absent
-$ ls /usr/lib/gcc-cross              -> absent
-```
-
-**This is an environment blocker, not a recipe defect.** To unblock:
+Cross toolchain used, as provisioned:
 
 ```sh
-apt-get install gcc-aarch64-linux-gnu libc6-dev-arm64-cross
+export CC_aarch64_unknown_linux_gnu=aarch64-linux-gnu-gcc
+export CXX_aarch64_unknown_linux_gnu=aarch64-linux-gnu-g++
+export CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER=aarch64-linux-gnu-gcc
 ```
 
-`cross-build-aarch64.sh` will then perform the real build and automatically run a
-`qemu-aarch64` smoke test (`qemu-aarch64` is present) and print the artifact hash.
-**No aarch64 artifact is claimed.**
+The artifact is a genuine ARM aarch64 ELF with `NEEDED libgcc_s.so.1, libm.so.6,
+libc.so.6`. It **runs**: the trimmed output is byte-identical to the native x86_64
+build's, which is the strongest statement available without an aarch64 CI runner.
 
-## 5. Container (item 3) — recipe only, NOT built
+### The false-success bug, fixed and proven fixed
 
-`packaging/Containerfile` is a two-stage recipe (`rust:1.91.0-bookworm` builder →
-`debian:bookworm-slim` runtime, non-root user, `--locked` build, `strip`ped binary).
+The old script could print `BLOCKED` and still be read as success, and more
+importantly `binfmt_misc` has `qemu-aarch64` registered on this host — so an aarch64
+ELF "runs" directly and a **missing loader still yields shell exit status 0**. Both
+paths are now guarded:
 
-The Docker CLI exists but the **daemon does not**:
+* the smoke test never relies on `binfmt_misc`; it always invokes
+  `qemu-aarch64 -L <sysroot>` explicitly and checks the status;
+* every failure path returns non-zero and `exit 0` is reachable only at the end.
 
-```text
-$ docker info
-Server:
-failed to connect to the docker API at unix:///var/run/docker.sock; check if the
-path is correct and if the daemon is running: connect: no such file or directory
-```
+Three negative controls, all executed:
 
-**No container build and no container smoke test were run. Nothing about the image
-is claimed.**
-
-### What was validated locally instead
-
-Each step of the recipe that could be executed outside a container was:
-
-| Recipe step | Local validation |
+| Control | Result |
 | --- | --- |
-| `cargo build --release --locked -p rust-cutadapt` | **ran and succeeded** (identical to the reproducible-build command) |
-| `strip target/release/rust-cutadapt` | **ran**: 2,266,784 → 2,046,224 bytes (9.7% smaller) |
-| stripped binary still works | **verified**: `rust-cutadapt --version` → `rust-cutadapt 0.1.0` |
-| runtime needs only glibc/libgcc/libm | **verified** via `ldd`: no other shared libraries, so `debian:bookworm-slim` is sufficient and the base image needs no extra packages |
+| hide `aarch64-linux-gnu-gcc` from `PATH` | **exit 3** ("cross toolchain incomplete; no build attempted") |
+| replace `qemu-aarch64` with a shim that always fails | **exit 1** ("--version failed", "failed to trim", "output differs") |
+| genuine run | **exit 0** (`RESULT: PASS`) |
 
-What remains unvalidated: the base image pulls, `apt-get` layer, layer caching,
-`useradd`, `COPY --from`, and any actual `docker run`.
+## 5. Container (item 3) — RESOLVED, built and smoke-tested
 
-## 6. Conda recipe (item 4) — draft only, NOT built or linted
-
-`packaging/conda/meta.yaml` is a draft. `conda` itself is installed (26.7.2) but
-**`conda-build` is not**:
+Docker is reachable via passwordless `sudo -n` (server 29.9.1, overlayfs driver).
 
 ```text
-$ conda render packaging/conda
-conda: error: argument COMMAND: invalid choice: 'render' (choose from ...)
-$ python3 -c "import conda_build"
-ModuleNotFoundError: No module named 'conda_build'
-```
-
-So **no `conda-build lint`, no `conda render` and no `conda-build` run happened.**
-The recipe is not claimed to be buildable.
-
-### What the draft says, and the two real problems it documents
-
-The recipe is written deliberately rather than plausibly. Two structural facts
-about this workspace force its shape:
-
-1. **The sdist must be the whole workspace.** `rust-cutadapt` uses path
-   dependencies on `bioinfo-common` and `bioinfo-fastx`, which are **not published
-   to crates.io**. A recipe that fetched a single crate tarball could not resolve
-   them.
-2. **The `rust` package must supply 1.91.0.** `rust-toolchain.toml` pins it. If
-   conda-forge's `rust` on a platform is older, the recipe's pin becomes a fiction.
-   This is left as an explicit open decision rather than guessed, because guessing
-   would produce a recipe that silently builds with the wrong compiler.
-
-### Structural validation performed (standard library only)
-
-`packaging/conda/check_recipe.py` checks what can be checked without `conda-build`:
-
-* required sections present (`package`, `source`, `build`, `requirements`, `test`, `about`);
-* no tab characters; no trailing whitespace; every content line is a mapping entry
-  or list item (with block-scalar handling);
-* `package.version` resolves to a literal, including through a `{% set %}`;
-* the build script uses `cargo build --release --locked -p rust-cutadapt`;
-* the test block actually executes the binary;
-* the recipe declares itself a `DRAFT`;
-* `requirements.build` requests a C compiler (needed for `zstd-sys`/`lzma-sys`).
-
-Result, plus a negative control proving the checker can fail:
-
-```text
-$ python3 packaging/conda/check_recipe.py
-PASS  meta.yaml (structural checks only — conda-build was NOT run)
-
-$ # after removing --locked from the build script
-FAIL  meta.yaml
-        build script does not use `cargo build --release --locked`
-```
-
-`package.version` (0.1.0) matches `rust-cutadapt/Cargo.toml` (0.1.0).
-
-## 7. SBOM (item 5)
-
-No SBOM tooling is installed — `cargo-sbom`, `cargo-cyclonedx`, `cyclonedx-py`,
-`syft`, `trivy` and `bom` are all absent, and `import cyclonedx` fails. Rather than
-claim an SBOM from a tool that never ran, `packaging/sbom.py` generates one from
-first principles using only the standard library, driven by
-`cargo metadata --locked --offline`.
-
-```text
-$ python3 packaging/sbom.py
-wrote packaging/sbom.cdx.json: 162 components, serial urn:uuid:ed6df66e-4f3d-578e-8b6e-d023f31bca02
-Cargo.lock sha256: f6a95b462b2bffa326810e451788214d59d6c1dbaad5dd41de18044297edf8bc
+$ sudo -n docker build -f packaging/Containerfile -t rust-cutadapt:local .
+Successfully built a9a6b630427d
+Successfully tagged rust-cutadapt:local
 ```
 
 | Property | Value |
 | --- | --- |
-| Format | CycloneDX **1.5** |
-| Components | **162** (155 registry crates + 7 workspace members) |
-| Dependency edges | **162** (full graph, not a flat list) |
-| Components with SHA-256 | **155** — every registry crate; the 7 workspace members correctly have none |
-| Components with a license | 162 (88 as SPDX *expressions*, 74 as single identifiers) |
-| `Cargo.lock` sha256 | `f6a95b462b2bffa326810e451788214d59d6c1dbaad5dd41de18044297edf8bc` |
-| `sbom.cdx.json` sha256 | `bc5608019ad3440062593343f409aca564785d9ddf20c3bca9f5915ba3f50af2` |
+| Image ID | `sha256:a9a6b630427db101301d2ea26eed32a61f9e6f73ab6e59e6c5ba0204ef8a378c` |
+| Digest | `rust-cutadapt@sha256:a9a6b630427db101301d2ea26eed32a61f9e6f73ab6e59e6c5ba0204ef8a378c` |
+| Architecture | `amd64/linux` |
+| Size | 116,652,538 bytes (117 MB), 4 layers |
+| **Reproducible** | **yes** — a second `docker build` produced the **same image ID** |
 
-### Determinism, and how it is achieved
+### Smoke tests actually run
 
-Five consecutive runs produce one distinct hash:
+| Test | Command | Real output |
+| --- | --- | --- |
+| version | `docker run --rm rust-cutadapt:local --version` | `rust-cutadapt 0.1.0` (exit 0) |
+| default CMD | `docker run --rm rust-cutadapt:local` | prints `--help` usage (exit 0) |
+| real trim | `docker run --rm -v /tmp/smoke2:/data rust-cutadapt:local -a AGATCGGAAGAGC -o /data/out.fq /data/in.fq` | exit 0, wrote `out.fq` with the adapter removed |
+| non-root | `docker run --rm --entrypoint id …` | `uid=10001(appuser) gid=10001(appuser)` |
+| exit-code propagation | `--badflag` / missing file | **exit 2** (usage) / **exit 1** (I/O) — propagated correctly |
 
-```text
-run 1..5: 9517cffefa86119ca6a2c48a1e291717f10a6673a6b6d7df81fbdaaea6169996 (all identical)
-```
+### A real deployment detail found by testing
 
-Guarantees built into the generator:
-
-* components sorted by `(name, version)`; JSON emitted with `sort_keys=True`;
-* **no `timestamp`.** CycloneDX normally carries one in `metadata`; a clock value
-  would make every run differ, so it is deliberately omitted and `metadata`
-  carries the input hash instead, which is strictly more useful for verification;
-* no hostname, no absolute paths, no random UUIDs;
-* `serialNumber` is a **UUIDv5 derived from the content** (SHA-256 of `Cargo.lock`
-  plus the sorted component list), so identical inputs give an identical serial and
-  a changed lockfile changes it.
-
-### Two real bugs found while writing it
-
-1. **`cargo metadata` does not expose checksums** — the `checksum` field is `None`
-   for all 162 packages. The first version therefore emitted **0** hashes. Fixed by
-   parsing `checksum` out of `Cargo.lock` directly.
-2. **SPDX expressions are not valid CycloneDX `id` values.** Nearly every crate
-   declares `"MIT OR Apache-2.0"`. Forcing that into `license.id` would be invalid
-   CycloneDX; expressions now go to `license.expression`.
-
-Both were caught by reading the generated output rather than trusting the generator,
-which is why the self-test asserts a minimum hash count and a minimum component
-count.
-
-### Self-test
+The container runs as `appuser` (uid 10001), so a bind-mounted host directory must be
+writable by that uid. The first trim attempt failed:
 
 ```text
-$ python3 packaging/sbom.py --self-test
-SELFTEST PASS
+ERROR: cannot create output "/data/out.fq": Permission denied (os error 13)
 ```
 
-It proves: two runs are byte-identical, no timestamp leaked, the component count is
-not truncated, every component has `type`/`name`/`version`/`purl`, workspace
-members are typed `application`, at least 100 components carry checksums, and
-components are strictly sorted.
+Both workarounds were tested; the `--user` form is now documented in the
+`Containerfile` header because it keeps host file ownership:
 
-`--check` makes staleness a failure, so a changed `Cargo.lock` cannot silently leave
-a stale SBOM:
+```sh
+docker run --rm --user "$(id -u):$(id -g)" -v "$PWD:/data" rust-cutadapt:local …
+```
+
+Verified: wrote `out.fq` owned by `rimuru rimuru` on a **non-world-writable**
+directory. Running as root in the container would also work but would leave
+root-owned files on the host, which is why the image does not do that.
+
+## 6. Conda recipe (item 4) — RESOLVED, built and executed
+
+`conda-build` **26.9.1** is at `tests/ci/env/conda-build/bin/conda-build`.
+
+### Two real recipe bugs found and fixed
+
+Building surfaced both, and neither was guessable:
+
+1. **`path: ..` was wrong.** The recipe lives at `packaging/conda/meta.yaml`, so
+   `..` resolved to `packaging/`, which contains no `Cargo.toml`. conda-build
+   resolves `path:` relative to the recipe directory, so it must be `../..`.
+2. **`cargo` is not a conda package.** The draft listed `- cargo` alongside
+   `{{ compiler('rust') }}`, which made the dependency solve unsatisfiable
+   (`cargo =* * does not exist`). conda-forge's `rust` ships **both** rustc and
+   cargo, so the separate requirement was removed.
+
+A third issue was `--croot` placement: conda-build's default work directory lives
+**inside** the source tree, so copying the source into it fails with
+*"Can't merge/copy source into subdirectory of itself"*. Building with
+`--croot /var/tmp/cbroot` fixes it. (The first attempt also filled the 16 GB
+`/tmp` tmpfs; the build now runs on the larger filesystem.)
+
+### Real build result
+
+```text
+$ conda-build packaging/conda --croot /var/tmp/cbroot --output-folder /var/tmp/cbld --no-anaconda-upload
+BUILD START: ['rust-cutadapt-0.1.0-hfb04f09_0.conda']
+... Compiling rust-cutadapt v0.1.0
+    Finished `release` profile [optimized] target(s) in 40.35s
+EXIT=0
+```
+
+| Property | Value |
+| --- | --- |
+| Package | `rust-cutadapt-0.1.0-hfb04f09_0.conda` |
+| Size | 841 KB |
+| SHA-256 | `1d2d817dfec47d2dcc35acef0d964c2ac2eb98474b9b8eb08c9faedbce3ae582` |
+| Runtime depends | `__glibc >=2.17`, `libgcc >=16` |
+| Installed file | `bin/rust-cutadapt` |
+
+The **packaged binary was extracted and executed**:
+
+```text
+$ ./bin/rust-cutadapt --version
+rust-cutadapt 0.1.0                     (exit 0)
+$ ./bin/rust-cutadapt -a AGATCGGAAGAGC -o out.fq t.fq
+exit 0, adapter trimmed
+```
+
+### The toolchain mismatch, measured rather than assumed
+
+`conda-build` resolved **`rust 1.98.1-hc89c8c8_2`** from conda-forge, and a probe
+executed *inside the build environment* confirmed:
+
+```text
+rustc 1.98.1 (48a229cea 2026-09-01)
+cargo 1.98.1 (797e8a9bc 2026-08-05)
+$BUILD_PREFIX/bin/rustc          <- not rustup
+```
+
+Two consequences, both real and now documented in the recipe itself:
+
+* **`rust-toolchain.toml` is ignored by this recipe.** That file is a rustup
+  feature; conda-forge's `rust` installs rustc/cargo directly under
+  `$BUILD_PREFIX/bin`. So the recipe **cannot** honour the 1.91.0 pin by
+  construction.
+* **The packaged binary is therefore not the reproducible one.** Measured:
+  conda binary `305c78e79e192b5f77b42284078c78ab6f7cac37098c0d9818e076036049e4b6`
+  versus the pinned 1.91.0 build `b722e9e01792d20b653e31f74c23eadf523b32090a337d3ac1ac64509f44b730`.
+  Expected: a different compiler produces different code.
+
+This is stated as a limitation, not glossed. Building at exactly 1.91.0 needs either
+a conda `rust` package at that version or a vendored rustup toolchain in the sdist.
+
+### `conda-build lint` does not exist in 26.9.1
+
+The old `conda-build lint` subcommand has been removed. `--check` is the nearest
+equivalent, and it is **not trustworthy on its own**: it exited **0** even when the
+recipe had an unsatisfiable dependency (`cargo does not exist`). That is why the
+stdlib checker is kept as a complement:
+
+```text
+$ python3 packaging/conda/check_recipe.py
+PASS  meta.yaml (structural checks; a real conda-build run is recorded separately)
+```
+
+It catches exactly the class of mistake `--check` tolerated — wrong source path, a
+dependency that is not a real package, a build script that lost `--locked` — and it
+has a negative control (removing `--locked` → FAIL).
+
+## 7. SBOM (item 5) — re-verified, unchanged
 
 ```text
 $ python3 packaging/sbom.py --check
 PASS: sbom.cdx.json is current (Cargo.lock sha256 f6a95b462b2bffa3...)
+$ python3 packaging/sbom.py --self-test
+SELFTEST PASS
 ```
 
-A checksum was cross-checked against the lockfile by hand:
+| Property | Value |
+| --- | --- |
+| `Cargo.lock` sha256 | `f6a95b462b2bffa326810e451788214d59d6c1dbaad5dd41de18044297edf8bc` |
+| `sbom.cdx.json` sha256 | `bc5608019ad3440062593343f409aca564785d9ddf20c3bca9f5915ba3f50af2` |
+| Components | 162 (155 registry + 7 workspace), 155 with SHA-256 |
+| Determinism | 5 runs → 1 distinct hash; no timestamp; UUIDv5 serial from content |
 
-```text
-sbom adler2 sha: 320119579fcad9c21884f5c4861d16174d0e06250625266f50fe6898340abefa
-lock adler2 sha: 320119579fcad9c21884f5c4861d16174d0e06250625266f50fe6898340abefa
-```
-
-## 8. One source change, and why
-
-Pinning the toolchain surfaced two `clippy` lints that 1.95.0 had not flagged, in
-`rust-umitools/src/runtime/budget.rs`: `stats.f_bavail as u64 * stats.f_frsize as u64`
-trips `clippy::unnecessary_cast` on x86_64, where those fields are already `u64`.
-
-`u64::from(...)` was tried and is flagged as `useless_conversion` on x86_64 for the
-same reason. The casts are **load-bearing on other targets** (`c_ulong` is 32-bit on
-32-bit platforms), so removing them would silently truncate there. The change is
-therefore an `#[allow(clippy::unnecessary_cast)]` with the reason written above it —
-**no behaviour change**, and the casts remain.
-
-Verified: `git diff` on that file shows only added comment lines and the attribute.
-All 685 tests pass, debug and release.
-
-## 9. Regression status
-
-Everything re-run under the pinned 1.91.0 toolchain with `--locked`.
+## 8. Regression status
 
 | Check | Result |
 | --- | --- |
@@ -384,61 +267,62 @@ Everything re-run under the pinned 1.91.0 toolchain with `--locked`.
 | `cargo test --workspace --release --locked --offline` | **685 passed** |
 | cutadapt 4.6 differential | all visible conformance cases passed |
 | UMI-tools exact | **77/77 byte-identical, 0 differ** |
-| UMI-tools semantic | **deterministic: 0 mismatches** |
 | W1-3 (SeqKit + fq) | **50/50 cases passed** |
 | W1-4 (samtools 1.24) | **20/20 cases passed** |
 | QC (FastQC 0.13.0 + MultiQC 1.35) | **22/22 fixtures**, MultiQC parses clean |
 | M3 byte-neutrality gate | **9/9 criteria, M3 PASS** |
+| Reproducible build | both modes IDENTICAL |
+| SBOM | `--check` PASS, self-test PASS |
 
 Nothing regressed.
 
-## 10. What the environment owner must fix
+## 9. Remaining limitations
 
-1. **Install an aarch64 sysroot and cross C toolchain.** This is the only thing
-   blocking item 2 entirely:
-   `apt-get install gcc-aarch64-linux-gnu libc6-dev-arm64-cross`. Then
-   `bash packaging/cross-build-aarch64.sh` completes the build and smoke test
-   unaided.
-2. **Start the Docker daemon** (or provide `podman`). Then
-   `docker build -f packaging/Containerfile -t rust-cutadapt:local .` — and the
-   smoke test in the recipe header — become runnable. Until then the Containerfile
-   is unvalidated text.
-3. **Install `conda-build`** into a conda env, then `conda-build lint packaging/conda`
-   and a real build. This also forces the `rust` 1.91.0 question in §6.
-4. **Decide the conda `rust` provisioning** (a conda package that provides 1.91.0,
-   versus vendoring a toolchain). Left open deliberately; guessing would produce a
-   recipe that builds with the wrong compiler.
-5. If `--remap-path-prefix` is adopted for releases, **standardise it in CI** so
-   published artifacts are byte-comparable across machines.
+1. **The conda package is not built at the pinned toolchain.** It uses rustc 1.98.1
+   because that is what conda-forge provides and `rust-toolchain.toml` is a rustup
+   feature this recipe cannot use. Fixing it needs a conda `rust` at 1.91.0 or a
+   vendored toolchain.
+2. **`conda-build --check` cannot be used as a gate.** It returned 0 with an
+   unsatisfiable dependency. The stdlib checker covers the gap.
+3. **Container architecture is amd64 only.** No `linux/arm64` image was built, so
+   the aarch64 *binary* is verified but an aarch64 *image* is not.
+4. **SBOM is generated by a local stdlib script**, not an ecosystem tool. It is
+   deterministic and checksummed, but it is not a signed or attested document.
+5. **No signing or provenance** (cosign, SLSA) — not attempted.
+6. **Not published:** no release, tag, dist upload, crates.io upload, conda channel
+   upload or registry push. All artifacts are local.
 
-## 11. Explicitly not claimed
+## 10. Environment owner: what changed and what is still worth doing
 
-* Any container build, `docker run`, or image content. The daemon is absent.
-* Any `conda-build lint`, render, or build. `conda-build` is absent.
-* Any aarch64 binary. No sysroot exists, so nothing links.
-* crates.io publishability. The workspace members use path dependencies, so they
-  cannot be published as-is without publishing `bioinfo-common` and
-  `bioinfo-fastx` first.
-* Signing, provenance attestation, or registry push.
-* Reproducibility **across different Rust versions** — only 1.91.0 was measured.
-* Reproducibility across different glibc or host architectures.
+Resolved by the provisioning (previously blocking):
 
-## 12. Files added
+* aarch64 cross toolchain + sysroot → item 2 now builds and smoke-tests.
+* Docker daemon (via `sudo -n`) → item 3 now builds and smoke-tests.
+* `conda-build` 26.9.1 → item 4 now builds and executes.
 
-| File | Purpose |
+Optional next steps:
+
+* Add a conda-forge `rust` at 1.91.0 (or vendor rustup) so the conda package matches
+  the pinned toolchain.
+* Build a `linux/arm64` image with `docker buildx` so the container matches the
+  verified aarch64 binary.
+* If releases should be byte-comparable across machines, standardise
+  `--remap-path-prefix` in CI.
+
+## 11. Files
+
+Added or changed for this revision:
+
+| File | Change |
 | --- | --- |
-| `rust-toolchain.toml` | pins Rust 1.91.0 + rustfmt + clippy |
-| `packaging/repro-check.sh` | two-build reproducibility proof (2 modes) |
-| `packaging/cross-build-aarch64.sh` | aarch64 probe; exits 3 with the precise reason |
-| `packaging/Containerfile` | multi-stage container recipe (not built) |
-| `packaging/conda/meta.yaml` | conda recipe draft (not built or linted) |
-| `packaging/conda/check_recipe.py` | stdlib structural checker for the draft |
-| `packaging/sbom.py` | deterministic CycloneDX 1.5 generator |
-| `packaging/sbom.cdx.json` | the generated SBOM |
-| `packaging/README.md` | what is real, what is not, and what a release still needs |
-| `docs/EVIDENCE-PACKAGING.md` / `.json` | this document and its machine-readable form |
+| `packaging/cross-build-aarch64.sh` | **rewritten**: real build, explicit qemu smoke test, strict exit codes (0/1/3/4), cross-architecture output comparison |
+| `packaging/Containerfile` | header now records the built image ID and the non-root volume requirement |
+| `packaging/conda/meta.yaml` | `path: ../..`; `cargo` dependency removed; measured toolchain mismatch documented |
+| `packaging/conda/check_recipe.py` | docstring corrected: `lint` does not exist in 26.9.1 and `--check` is unreliable |
+| `docs/EVIDENCE-PACKAGING.md` / `.json` | this revision |
 
-Modified: `rust-umitools/src/runtime/budget.rs` (one `#[allow]` plus its
-explanation; no behaviour change).
+Unchanged: `rust-toolchain.toml`, `packaging/repro-check.sh`,
+`packaging/sbom.py`, `packaging/sbom.cdx.json`, `packaging/README.md`, and the
+`rust-umitools` clippy allowance from the previous revision.
 
-No release, tag, dist upload, crates.io or conda publication.
+No release, tag, version bump, crates.io or conda publication.

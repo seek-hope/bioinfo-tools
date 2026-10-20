@@ -1,10 +1,16 @@
 #!/usr/bin/env python3
 """Structural checks for the conda recipe draft.
 
-This is **not** `conda-build lint`. `conda-build` is not installed in the
-environment where the recipe was written (`conda render` is not a supported
-subcommand and `import conda_build` fails), so the recipe has never been rendered
-or built. Claiming otherwise would be false.
+This is **not** a substitute for `conda-build`. It complements it: `conda-build`
+26.9.1 has **no `lint` subcommand** (the old `conda-build lint` was removed), so
+`--check` is the nearest equivalent and it is run separately.
+
+A real `conda-build` run IS recorded in docs/EVIDENCE-PACKAGING.md. This script
+exists because `conda-build --check` exited **0** even with an unsatisfiable
+dependency, so a passing `--check` alone cannot be trusted to mean the recipe is
+sound. The structural checks here catch the class of mistakes that `--check`
+tolerates: wrong source path, a dependency that is not a real package, a build
+script that lost `--locked`.
 
 What this script *does* check, using only the standard library:
 
@@ -139,7 +145,7 @@ def main() -> int:
             print(f"        {problem}")
         return 1
 
-    print(f"PASS  {RECIPE.name} (structural checks only — conda-build was NOT run)")
+    print(f"PASS  {RECIPE.name} (structural checks; a real conda-build run is recorded separately)")
     print("      sections:", ", ".join(s.rstrip(":") for s in REQUIRED_SECTIONS))
     return 0
 

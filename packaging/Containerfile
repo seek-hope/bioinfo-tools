@@ -13,12 +13,27 @@
 #
 #   docker run --rm -v "$PWD:/data" rust-cutadapt:local -a AGATCGGA -o /data/out.fq /data/in.fq
 #
-# ## IMPORTANT: this recipe has NOT been built or run
+# ## Build and smoke-test status
 #
-# The Docker daemon is unavailable in the environment where this file was written
-# (`docker info` fails with "failed to connect to the docker API ... no such file or
-# directory"). Nothing here is claimed to work. See docs/EVIDENCE-PACKAGING.md for
-# what was and was not validated.
+# BUILT AND SMOKE-TESTED. Image id
+# `sha256:a9a6b630427db101301d2ea26eed32a61f9e6f73ab6e59e6c5ba0204ef8a378c`.
+# See docs/EVIDENCE-PACKAGING.md for the commands and their real output.
+#
+# ## A mounted volume must be writable by uid 10001
+#
+# The container runs as the unprivileged `appuser` (uid 10001), so a bind-mounted
+# host directory must be writable by that uid. Otherwise output creation fails with:
+#
+#   ERROR: cannot create output "/data/out.fq": Permission denied (os error 13)
+#
+# Both of these work:
+#
+#   docker run --rm -v "$PWD:/data" --user "$(id -u):$(id -g)" rust-cutadapt:local ...
+#   chmod 777 <dir> && docker run --rm -v "<dir>:/data" rust-cutadapt:local ...
+#
+# The first is preferable: it keeps the host's file ownership. Running as root
+# inside the container would avoid the problem but would leave root-owned files on
+# the host, which is why this image does not do that.
 #
 # ## Why the builder stage copies Cargo.toml files first
 #
