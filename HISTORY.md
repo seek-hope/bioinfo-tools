@@ -4,8 +4,13 @@ The workspace originally contained two independent Git repositories:
 
 | Archived history | Original remote |
 | --- | --- |
-| `../bioinfo-tools-historical/rust-cutadapt.git` | `https://github.com/seek-hope/rust-cutadapt.git` |
-| `../bioinfo-tools-historical/rust-umitools.git` | `https://github.com/seek-hope/rust-umitools.git` |
+| `rust-cutadapt.bundle` | `https://github.com/seek-hope/rust-cutadapt.git` |
+| `rust-umitools.bundle` | `https://github.com/seek-hope/rust-umitools.git` |
+
+Both bundles are release assets of this repository under tag
+[`archive-pre-monorepo-2026-10-21`](https://github.com/seek-hope/bioinfo-tools/releases/tag/archive-pre-monorepo-2026-10-21).
+The former local `../bioinfo-tools-historical/` directory was removed after the
+upload; the release is now the canonical archive.
 
 They were archived when the workspace became a monorepo. The archives are
 **mirror clones**, so they contain every branch and tag, not just the imported
@@ -36,9 +41,8 @@ Five repositories were consolidated into two:
 
 `bioinfo-tools` stays private and holds the source. `bioinfo-tools-dist` is
 public and holds only prebuilt binaries, `install.sh`, checksums and a README.
-The deleted distribution releases are archived under
-`../bioinfo-tools-historical/dist-assets/` (`rust-cutadapt-v0.1.0/` and
-`rust-umitools-v0.2.0/`).
+The deleted distribution releases are archived in the same release as
+`dist-assets.tar.gz` (`rust-cutadapt-v0.1.0/` and `rust-umitools-v0.2.0/`).
 
 Each release now contains **both** tools; the release tag applies to the
 distribution set, while `rust-cutadapt --version` and `rust-umitools --version`

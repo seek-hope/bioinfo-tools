@@ -6,12 +6,10 @@ workspace members.
 ## Repository boundary
 
 `rust-cutadapt/` and `rust-umitools/` were originally independent Git
-repositories. Their histories are preserved outside the monorepo at:
-
-```text
-../bioinfo-tools-historical/rust-cutadapt.git
-../bioinfo-tools-historical/rust-umitools.git
-```
+repositories. Their full histories are archived as release assets in this
+repository under tag
+[`archive-pre-monorepo-2026-10-21`](https://github.com/seek-hope/bioinfo-tools/releases/tag/archive-pre-monorepo-2026-10-21):
+`rust-cutadapt.bundle`, `rust-umitools.bundle` and `dist-assets.tar.gz`.
 
 They are **historical archives**, not the build source. On GitHub the separate
 `rust-cutadapt`, `rust-umitools`, `rust-cutadapt-dist` and `rust-umitools-dist`

@@ -767,7 +767,7 @@ the evidence log instead of a URL.
 | S46 | Riker, <https://docs.rs/crate/riker-ngs/latest> and <https://docs.seqera.io/multiqc/modules/riker> | Rust Picard-metrics port; speed claims (**vendor claim**) |
 | S47 | rust-bio, <https://github.com/rust-bio/rust-bio> | Algorithms/data structures library; MSRV 1.87 |
 | S48 | bioinfo-tools distribution releases, <https://github.com/seek-hope/bioinfo-tools-dist/releases> | Consolidated repository; one release carries both binaries |
-| S49 | ~~rust-cutadapt-dist~~ / ~~rust-umitools-dist~~ | Deleted on 2026-10-21; histories archived in `../bioinfo-tools-historical/` |
+| S49 | ~~rust-cutadapt-dist~~ / ~~rust-umitools-dist~~ | Deleted on 2026-10-21; histories archived in the `archive-pre-monorepo-2026-10-21` release of `bioinfo-tools` |
 | S50 | needletail, <https://github.com/onecodex/needletail> and crates.io API | 0.7.3; minimal-copy FASTX parsing; k-mer API |
 | S51 | Trimmomatic releases, <https://github.com/usadellab/Trimmomatic/releases> | v0.41; Java 25; `ILLUMINACLIP`, `SLIDINGWINDOW`, `MINLEN` |
 | S52 | fq (St. Jude), <https://github.com/stjude-rust-labs/fq> | 0.12.0; `filter`, `lint`, `subsample`; Bioconda |
