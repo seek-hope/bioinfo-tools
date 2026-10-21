@@ -62,7 +62,7 @@ Everything release-related in this plan is preparation and a gated checklist, no
 | Implemented surface | Full documented cutadapt 4.6 option set: adapter types `-a/-g/-b` incl. anchored/linked, `file:` lists, indels, `--times`, read modifications, filters, `--action`, `--revcomp`, renaming, auxiliary outputs, FASTA, paired-end/interleaved, text + JSON report, demultiplexing, gzip/bzip2/xz | `docs/FULL-COMPATIBILITY.md`, probes |
 | Known deviations | compressed bytes differ (level 3 default vs cutadapt 6); extra "output file is incomplete" note; report "expect" column compared with tolerance; `-j` output deterministic | `docs/FULL-COMPATIBILITY.md` |
 | Recorded performance | cutadapt 4.6 baseline 4.4363 s / 24,412 kB on 1,000,000 reads; this crate 0.64–0.70 s, 11.6–13.4 MB peak RSS; 6.3x–6.9x across six hyperfine sessions | `bench/reference.json`, `BENCHMARK.md` |
-| Release artifact | Dist repo `seek-hope/rust-cutadapt-dist` has **v0.1.0 only**, built from commit `d9c4c52` | Dist releases page; local Git |
+| Release artifact | Dist repo `seek-hope/bioinfo-tools-dist` is the consolidated public repository; each release contains both `rust-cutadapt` and `rust-umitools` | Dist releases page; local Git |
 | Artifact staleness | `d9c4c52..HEAD` = **47 commits**, including the entire full-compatibility effort | `git rev-list --count d9c4c52..HEAD` |
 | Platform | Linux x86_64 glibc only; no aarch64/macOS artifact | Dist README / release notes |
 
@@ -766,8 +766,8 @@ the evidence log instead of a URL.
 | S45 | WDL specification, <https://github.com/openwdl/wdl> | Spec 1.3 current, 2.0 next; multiple engines |
 | S46 | Riker, <https://docs.rs/crate/riker-ngs/latest> and <https://docs.seqera.io/multiqc/modules/riker> | Rust Picard-metrics port; speed claims (**vendor claim**) |
 | S47 | rust-bio, <https://github.com/rust-bio/rust-bio> | Algorithms/data structures library; MSRV 1.87 |
-| S48 | rust-cutadapt dist releases, <https://github.com/seek-hope/rust-cutadapt-dist/releases> | Only v0.1.0 published; built from `d9c4c52` |
-| S49 | rust-umitools dist releases, <https://github.com/seek-hope/rust-umitools-dist/releases> | v0.2.0 published |
+| S48 | bioinfo-tools distribution releases, <https://github.com/seek-hope/bioinfo-tools-dist/releases> | Consolidated repository; one release carries both binaries |
+| S49 | ~~rust-cutadapt-dist~~ / ~~rust-umitools-dist~~ | Deleted on 2026-10-21; histories archived in `../bioinfo-tools-historical/` |
 | S50 | needletail, <https://github.com/onecodex/needletail> and crates.io API | 0.7.3; minimal-copy FASTX parsing; k-mer API |
 | S51 | Trimmomatic releases, <https://github.com/usadellab/Trimmomatic/releases> | v0.41; Java 25; `ILLUMINACLIP`, `SLIDINGWINDOW`, `MINLEN` |
 | S52 | fq (St. Jude), <https://github.com/stjude-rust-labs/fq> | 0.12.0; `filter`, `lint`, `subsample`; Bioconda |

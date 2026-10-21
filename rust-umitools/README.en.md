@@ -15,23 +15,24 @@
 
 ### Prebuilt binary (Linux x86_64, public download)
 
-Public distribution repository: [seek-hope/rust-umitools-dist](https://github.com/seek-hope/rust-umitools-dist). It contains the installer, binaries and checksums:
+Public distribution repository: [seek-hope/bioinfo-tools-dist](https://github.com/seek-hope/bioinfo-tools-dist). Each release contains both `rust-umitools` and `rust-cutadapt`:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/seek-hope/rust-umitools-dist/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/seek-hope/bioinfo-tools-dist/main/install.sh | bash -s rust-umitools
 ```
 
 The installer downloads the latest release, verifies its SHA256 checksum and installs to `~/.local/bin`. You can also choose a version or directory:
 
 ```bash
-INSTALL_DIR=/opt/bin RUST_UMITOOLS_VERSION=v0.2.0 bash install.sh
+INSTALL_DIR=/opt/bin BIOINFO_VERSION=v0.2.0 bash install.sh rust-umitools
 ```
 
 Manual download:
 
 ```bash
-curl -fLO https://github.com/seek-hope/rust-umitools-dist/releases/latest/download/rust-umitools-x86_64-unknown-linux-gnu.tar.gz
-curl -fLO https://github.com/seek-hope/rust-umitools-dist/releases/latest/download/rust-umitools-x86_64-unknown-linux-gnu.tar.gz.sha256
+base=https://github.com/seek-hope/bioinfo-tools-dist/releases/latest/download
+curl -fLO "$base/rust-umitools-x86_64-unknown-linux-gnu.tar.gz"
+curl -fLO "$base/rust-umitools-x86_64-unknown-linux-gnu.tar.gz.sha256"
 sha256sum -c rust-umitools-x86_64-unknown-linux-gnu.tar.gz.sha256
 tar -xzf rust-umitools-x86_64-unknown-linux-gnu.tar.gz
 install -m 755 rust-umitools-x86_64-unknown-linux-gnu/rust-umitools ~/.local/bin/
@@ -41,13 +42,13 @@ The prebuilt package targets Linux x86_64 (glibc). An aarch64 prebuilt package i
 
 ### Build from source
 
-Repository access is required:
+The source repository is private:
 
 ```bash
-cargo install --git https://github.com/seek-hope/rust-umitools --locked
+cargo install --git https://github.com/seek-hope/bioinfo-tools --package rust-umitools --locked
 ```
 
-Rust 1.88+ is required. For local development:
+Rust 1.88+ is required. For local development from a checkout:
 
 ```bash
 cargo build --release      # target/release/rust-umitools

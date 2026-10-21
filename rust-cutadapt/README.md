@@ -152,12 +152,15 @@ joined the `bioinfo-tools` workspace (`liblzma-sys` and the `lzma-sys` that
 
 ## Installation
 
-The public distribution repository
-[seek-hope/rust-cutadapt-dist](https://github.com/seek-hope/rust-cutadapt-dist)
-currently contains only **v0.1.0**, built from commit `d9c4c52`. That artifact
-predates the full-surface work and does not represent this tree.
+Prebuilt Linux x86_64 binaries are published from the public distribution
+repository [seek-hope/bioinfo-tools-dist](https://github.com/seek-hope/bioinfo-tools-dist).
+Each release contains both `rust-cutadapt` and `rust-umitools`:
 
-For the current tree, build from source:
+```bash
+curl -fsSL https://raw.githubusercontent.com/seek-hope/bioinfo-tools-dist/main/install.sh | bash -s rust-cutadapt
+```
+
+To build this tree from source instead:
 
 ```bash
 cargo install --path . --locked
@@ -166,18 +169,15 @@ cargo build --release --offline
 ./target/release/rust-cutadapt --version
 ```
 
-The distribution install script is still available for the historical
-v0.1.0 artifact, but reproducing the current surface requires a source build
-until a new artifact is approved and published.
-
 ## Release status
 
-No tag or release is created by this tree. There is no source tag; the v0.1.0
-distribution artifact was built from commit `d9c4c52` and is historical. See
-[docs/RELEASE-FREEZE.md](docs/RELEASE-FREEZE.md) for the active freeze and its
-exit criteria. `.github/workflows/` contains the existing release automation,
-but it is not part of the compatibility claim and must not be triggered
-without an explicit release decision.
+Releases are published from the `bioinfo-tools` monorepo by the root
+`.github/workflows/release.yml` workflow: a `v*` tag builds both tools and
+creates one release in `bioinfo-tools-dist` containing both binaries.
+`rust-cutadapt --version` and `rust-umitools --version` report the component
+versions inside that release set. See
+[docs/RELEASE-FREEZE.md](docs/RELEASE-FREEZE.md) for the historical freeze and
+its exit criteria.
 
 ## Repository layout
 

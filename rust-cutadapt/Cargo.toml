@@ -6,7 +6,7 @@ rust-version = "1.88"
 description = "Adapter trimming for FASTQ/FASTA reads with the documented cutadapt 4.6 command-line surface"
 license = "MIT"
 readme = "README.md"
-repository = "https://github.com/seek-hope/rust-cutadapt"
+repository = "https://github.com/seek-hope/bioinfo-tools"
 keywords = ["bioinformatics", "fastq", "adapter", "trimming", "cutadapt"]
 categories = ["science::bioinformatics", "command-line-utilities"]
 

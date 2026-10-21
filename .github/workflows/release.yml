@@ -1,0 +1,109 @@
+name: release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+# The source repository only needs read access. Publishing happens in the
+# public distribution repository through the DIST_GITHUB_TOKEN secret.
+permissions:
+  contents: read
+
+jobs:
+  linux-x86_64:
+    name: build and publish Linux x86_64 binaries
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential pkg-config \
+            libbz2-dev liblzma-dev zlib1g-dev libdeflate-dev libclang-dev
+
+      - name: Build both binaries
+        run: cargo build --release --locked -p rust-cutadapt -p rust-umitools
+
+      - name: Smoke test
+        run: |
+          target/release/rust-cutadapt --version
+          target/release/rust-umitools --version
+
+      - name: Package
+        run: |
+          set -euo pipefail
+          target="x86_64-unknown-linux-gnu"
+          rm -rf dist-pkg
+          mkdir -p dist-pkg
+          for tool in rust-cutadapt rust-umitools; do
+            name="${tool}-${target}"
+            mkdir -p "dist-pkg/${name}"
+            cp "target/release/${tool}" "dist-pkg/${name}/"
+            cp "${tool}/README.md" "dist-pkg/${name}/README.md"
+            cp "${tool}/LICENSE" "dist-pkg/${name}/LICENSE"
+            tar -C dist-pkg -czf "dist-pkg/${name}.tar.gz" "${name}"
+            ( cd dist-pkg && sha256sum "${name}.tar.gz" > "${name}.tar.gz.sha256" )
+          done
+          cp dist/install.sh dist-pkg/install.sh
+          cp dist/README.md dist-pkg/README.md
+          cp dist/LICENSE dist-pkg/LICENSE
+          ( cd dist-pkg && sha256sum ./*.tar.gz > SHA256SUMS )
+
+      - name: Upload workflow artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: bioinfo-tools-${{ github.ref_name }}
+          path: |
+            dist-pkg/*.tar.gz
+            dist-pkg/*.sha256
+            dist-pkg/SHA256SUMS
+            dist-pkg/install.sh
+
+      - name: Publish to bioinfo-tools-dist
+        env:
+          GH_TOKEN: ${{ secrets.DIST_GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [ -z "${GH_TOKEN:-}" ]; then
+            echo "error: DIST_GITHUB_TOKEN is not configured; refusing to skip publication" >&2
+            exit 1
+          fi
+
+          dist_repo="seek-hope/bioinfo-tools-dist"
+          tag="${GITHUB_REF_NAME}"
+          cutadapt_version="$(target/release/rust-cutadapt --version)"
+          umitools_version="$(target/release/rust-umitools --version)"
+
+          notes="$(mktemp)"
+          {
+            echo "Prebuilt Linux x86_64 binaries for bioinfo-tools ${tag#v}."
+            echo
+            echo "- ${cutadapt_version}"
+            echo "- ${umitools_version}"
+            echo
+            echo "Every release contains both tools. Install one or both with \`install.sh\`;"
+            echo "asset checksums are listed in \`SHA256SUMS\` and per-asset \`.sha256\` files."
+          } > "$notes"
+
+          assets=(
+            dist-pkg/rust-cutadapt-x86_64-unknown-linux-gnu.tar.gz
+            dist-pkg/rust-cutadapt-x86_64-unknown-linux-gnu.tar.gz.sha256
+            dist-pkg/rust-umitools-x86_64-unknown-linux-gnu.tar.gz
+            dist-pkg/rust-umitools-x86_64-unknown-linux-gnu.tar.gz.sha256
+            dist-pkg/SHA256SUMS
+            dist-pkg/install.sh
+          )
+
+          if gh release view "$tag" --repo "$dist_repo" >/dev/null 2>&1; then
+            gh release upload "$tag" --repo "$dist_repo" --clobber "${assets[@]}"
+          else
+            gh release create "$tag" --repo "$dist_repo" \
+              --title "bioinfo-tools ${tag#v}" \
+              --notes-file "$notes" \
+              "${assets[@]}"
+          fi

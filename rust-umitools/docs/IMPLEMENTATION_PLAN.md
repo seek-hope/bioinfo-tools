@@ -428,7 +428,7 @@ BAM 比较忽略已明确允许不同的程序版本/timestamp header，但不�
 
 ### 本地来源与验证范围
 
-- 当前原型：[固定提交源码](https://github.com/seek-hope/rust-umitools/blob/a35fd81/src/main.rs)（私有仓库，需权限）；[本地源码](../src/main.rs)。该提交早于更名，仍使用旧包名。
+- 当前原型：历史提交 `a35fd81`（原 `seek-hope/rust-umitools` 仓库，已于 2026-10-21 合并并删除，历史档案见 `../../../bioinfo-tools-historical/rust-umitools.git`）；[本地源码](../src/main.rs)。该提交早于更名，仍使用旧包名。
 - [L1] 原始作业记录位于迁移前父目录 `AI4Biomedicine/dedup/REPORT.md` 的基准表与备注，以及 `runs/COMPARISON.md`。本方案核对了这些记录，但没有迁移或重新公开原始数据，也没有把历史作者结论等同于新的验证结果。
 - 本次实际运行了 B01–B04 最小样例；其他代码问题来自静态核对，尚需按计划加入上游运行对照。未声称已完成完整 oracle 测试或测得未来性能目标。
 - 架构图使用 Mermaid CLI 12.0.0 与本机 Chrome 完成明暗主题渲染检查；保留内嵌 Mermaid 源码，GitHub 的实际渲染版本可能不同。

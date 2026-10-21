@@ -1,3 +1,10 @@
+> **Consolidation note (2026-10-21).** This is a historical record. The
+> separate `rust-cutadapt` and `rust-cutadapt-dist` GitHub repositories were
+> consolidated into `seek-hope/bioinfo-tools` (source) and
+> `seek-hope/bioinfo-tools-dist` (binaries). Old repository URLs below are dead;
+> the distribution commands in the preserved text are superseded by
+> `bioinfo-tools-dist/install.sh`.
+
 # History: the v0.1.0 README
 
 This is the README as it stood for the original v0.1.0 subset. It is kept for

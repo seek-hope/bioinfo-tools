@@ -1,8 +1,13 @@
 # Release freeze
 
-- Status: **active**
+> **Consolidation note (2026-10-21).** This freeze covered the pre-monorepo
+> repositories and is kept as a historical record. Source now lives in
+> `seek-hope/bioinfo-tools`; distribution now lives in
+> `seek-hope/bioinfo-tools-dist`. See [../../HISTORY.md](../../HISTORY.md).
+
+- Status: **superseded** (was active)
 - Since: 2026-10-20
-- Applies to: `rust-cutadapt` source repository and the
+- Applies to: the former `rust-cutadapt` source repository and
   `seek-hope/rust-cutadapt-dist` distribution repository
 
 ## What is frozen

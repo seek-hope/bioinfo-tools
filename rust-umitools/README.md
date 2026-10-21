@@ -15,23 +15,24 @@
 
 ### 预编译二进制（Linux x86_64，公开下载）
 
-公开分发仓库：[seek-hope/rust-umitools-dist](https://github.com/seek-hope/rust-umitools-dist)。dist 仓库只放安装脚本、二进制和校验和：
+公开分发仓库：[seek-hope/bioinfo-tools-dist](https://github.com/seek-hope/bioinfo-tools-dist)。每个 release 同时包含 `rust-umitools` 与 `rust-cutadapt`：
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/seek-hope/rust-umitools-dist/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/seek-hope/bioinfo-tools-dist/main/install.sh | bash -s rust-umitools
 ```
 
 脚本下载最新 release、校验 SHA256，并安装到 `~/.local/bin`。也可以指定版本/目录：
 
 ```bash
-INSTALL_DIR=/opt/bin RUST_UMITOOLS_VERSION=v0.2.0 bash install.sh
+INSTALL_DIR=/opt/bin BIOINFO_VERSION=v0.2.0 bash install.sh rust-umitools
 ```
 
 手动下载：
 
 ```bash
-curl -fLO https://github.com/seek-hope/rust-umitools-dist/releases/latest/download/rust-umitools-x86_64-unknown-linux-gnu.tar.gz
-curl -fLO https://github.com/seek-hope/rust-umitools-dist/releases/latest/download/rust-umitools-x86_64-unknown-linux-gnu.tar.gz.sha256
+base=https://github.com/seek-hope/bioinfo-tools-dist/releases/latest/download
+curl -fLO "$base/rust-umitools-x86_64-unknown-linux-gnu.tar.gz"
+curl -fLO "$base/rust-umitools-x86_64-unknown-linux-gnu.tar.gz.sha256"
 sha256sum -c rust-umitools-x86_64-unknown-linux-gnu.tar.gz.sha256
 tar -xzf rust-umitools-x86_64-unknown-linux-gnu.tar.gz
 install -m 755 rust-umitools-x86_64-unknown-linux-gnu/rust-umitools ~/.local/bin/
@@ -41,13 +42,13 @@ install -m 755 rust-umitools-x86_64-unknown-linux-gnu/rust-umitools ~/.local/bin
 
 ### 从源码安装
 
-需要拥有仓库访问权限：
+源码仓库是私有的：
 
 ```bash
-cargo install --git https://github.com/seek-hope/rust-umitools --locked
+cargo install --git https://github.com/seek-hope/bioinfo-tools --package rust-umitools --locked
 ```
 
-需要 Rust 1.88+；本地开发仍推荐：
+需要 Rust 1.88+；本地 checkout 开发仍推荐：
 
 ```bash
 cargo build --release      # 产物 target/release/rust-umitools

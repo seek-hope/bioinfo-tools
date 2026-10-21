@@ -6,7 +6,7 @@ rust-version = "1.88"
 description = "Rust high-performance implementation of UMI-tools workflows"
 license = "MIT"
 readme = "README.md"
-repository = "https://github.com/seek-hope/rust-umitools"
+repository = "https://github.com/seek-hope/bioinfo-tools"
 keywords = ["bioinformatics", "umi", "bam", "deduplication", "htslib"]
 categories = ["science::bioinformatics", "command-line-utilities"]
 

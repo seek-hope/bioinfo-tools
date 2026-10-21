@@ -13,15 +13,24 @@ repositories. Their histories are preserved outside the monorepo at:
 ../bioinfo-tools-historical/rust-umitools.git
 ```
 
-They are **historical archives**, not the build source. The monorepo contains
-the current source for every crate:
+They are **historical archives**, not the build source. On GitHub the separate
+`rust-cutadapt`, `rust-umitools`, `rust-cutadapt-dist` and `rust-umitools-dist`
+repositories were consolidated on 2026-10-21; only two repositories remain:
+
+| Repository | Visibility | Contents |
+| --- | --- | --- |
+| `seek-hope/bioinfo-tools` | private | this monorepo (source of truth) |
+| `seek-hope/bioinfo-tools-dist` | public | prebuilt binaries, `install.sh`, checksums |
+
+The monorepo contains the current source for every crate:
 
 | Path | Contents |
 | --- | --- |
 | `bioinfo-common/` | shared exit codes, diagnostics, summary JSON and provenance |
 | `bioinfo-fastx/` | shared streaming FASTX/compression/BGZF layer |
-| `rust-cutadapt/` | cutadapt-compatible crate |
-| `rust-umitools/` | UMI-tools-compatible crate |
+| `rust-cutadapt/` | cutadapt-compatible crate (workspace member) |
+| `rust-umitools/` | UMI-tools-compatible crate (workspace member) |
+| `dist/` | public distribution payload: unified `install.sh`, README, LICENSE |
 | `rust-fx/` | FASTX manipulation CLI |
 | `rust-bam/` | SAM/BAM tooling on noodles |
 | `rust-fastqc/` | FastQC-compatible QC prototype |
@@ -36,7 +45,8 @@ repositories are required.
 - `rust-fx` — FASTX manipulation CLI
 - `rust-bam` — SAM/BAM inspection and manipulation on noodles
 - `rust-fastqc` — FastQC-compatible QC data report prototype
-- `rust-cutadapt` and `rust-umitools` — independent repositories described above
+- `rust-cutadapt` — cutadapt-compatible adapter trimmer
+- `rust-umitools` — UMI-tools-compatible UMI workflows
 
 ## Build and test
 
@@ -51,6 +61,20 @@ The oracle binaries for the FASTX comparisons are pinned in
 
 The workspace MSRV is Rust 1.91 (set by `rust-bam`/noodles); the primary
 `rust-toolchain.toml` pins the latest stable, currently 1.99.1.
+
+## Distribution
+
+`seek-hope/bioinfo-tools-dist` is the only public repository. It contains no
+source. Each release contains both binaries:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/seek-hope/bioinfo-tools-dist/main/install.sh | bash
+```
+
+The release workflow is [.github/workflows/release.yml](.github/workflows/release.yml):
+pushing a `v*` tag builds `rust-cutadapt` and `rust-umitools` and publishes one
+release with both tarballs, checksums and `install.sh`. See
+[dist/README.md](dist/README.md).
 
 ## Evidence
 

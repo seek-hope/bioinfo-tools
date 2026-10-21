@@ -13,6 +13,9 @@ tests/ci/env/
 .work/
 /gg.fa
 
+# CodeGraph index (local machine state; has its own internal .gitignore).
+.codegraph/
+
 
 # Trial harness/config directories, not project source.
 /AGENTS.md
