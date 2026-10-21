@@ -36,6 +36,10 @@ Five repositories were consolidated into two:
 
 `bioinfo-tools` stays private and holds the source. `bioinfo-tools-dist` is
 public and holds only prebuilt binaries, `install.sh`, checksums and a README.
+The deleted distribution releases are archived under
+`../bioinfo-tools-historical/dist-assets/` (`rust-cutadapt-v0.1.0/` and
+`rust-umitools-v0.2.0/`).
+
 Each release now contains **both** tools; the release tag applies to the
 distribution set, while `rust-cutadapt --version` and `rust-umitools --version`
 report the component versions.
