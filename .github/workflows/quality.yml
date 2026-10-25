@@ -27,7 +27,7 @@ jobs:
       MULTIQC_NO_VERSION_CHECK: "true"
       WITH_FASTX_QC_ORACLES: ${{ inputs.fastx_qc_oracles || false }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           persist-credentials: false
 
@@ -67,7 +67,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           persist-credentials: false
 
