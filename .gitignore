@@ -17,9 +17,7 @@ tests/ci/env/
 .codegraph/
 
 
-# Trial harness/config directories, not project source.
-/AGENTS.md
-/TASK.md
+# Local agent/harness state, not project source.
 /.pi/
 /.leader-verify/
 

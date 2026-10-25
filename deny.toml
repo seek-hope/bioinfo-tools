@@ -2,7 +2,7 @@
 # maintainer via the current session; decision record: tests/security/README.md.
 # License allow-list is a policy choice; no advisory suppression.
 # Licenses: cargo deny --offline --locked check licenses
-# Advisories are intentionally allowed to fail until the custom_derive dependency is replaced.
+# Advisories: cargo deny --offline --locked check advisories (blocking; no ignores)
 
 [advisories]
 ignore = []

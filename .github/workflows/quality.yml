@@ -82,5 +82,5 @@ jobs:
       - name: License and source policy
         run: bash tests/security/check.sh --licenses
 
-      - name: Advisory policy (known failure until custom_derive is migrated)
+      - name: Advisory policy
         run: bash tests/security/check.sh --advisories

@@ -6,7 +6,9 @@ ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)
 cd "$ROOT"
 
 # Reuse the project build environment so offline cargo-deny sees the same
-# CARGO_HOME/registry cache as the other gates.
+# CARGO_HOME/registry cache as the other gates. env.sh defaults to offline for
+# the sandboxed UMI-tools build; dependency policy follows the workspace
+# default (network allowed) and only forces offline when requested.
 # shellcheck source=../rust-umitools/tests/ci/env.sh
 . "$ROOT/rust-umitools/tests/ci/env.sh"
 PATH="$ROOT/tests/ci/env/bin:$PATH"
@@ -15,7 +17,10 @@ export PATH
 mode=${1:---licenses}
 args=(--locked)
 if [ "${CARGO_DENY_OFFLINE:-0}" = "1" ]; then
+    export CARGO_NET_OFFLINE=true
     args+=(--offline)
+else
+    unset CARGO_NET_OFFLINE
 fi
 
 case "$mode" in
