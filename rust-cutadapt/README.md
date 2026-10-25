@@ -10,7 +10,7 @@ live in [docs/FULL-COMPATIBILITY.md](docs/FULL-COMPATIBILITY.md).
 
 ## Status
 
-At the current tree (code commit `c8b0249`; this README is a later documentation-only change):
+The compatibility and benchmark snapshot below was recorded at code commit `c8b0249`; later workspace changes do not automatically invalidate that record, but re-run the commands at the current commit before making a new claim.
 
 | Check | Result |
 | --- | --- |
@@ -119,11 +119,12 @@ baseline. Do not quote the old headline as a property of the current binary.
 
 ## Build and test
 
-Requirements: Rust 1.88 or newer. The crate is tested offline.
+Requirements: Rust 1.91 or newer (the workspace MSRV). Network access is allowed;
+use `--offline` only for an isolated/cached run.
 
 ```bash
-cargo build --release --offline
-cargo test --release --offline
+cargo build --release --locked
+cargo test --release --locked
 cargo fmt --all -- --check
 cargo clippy --all-targets --locked -- -D warnings
 ```
@@ -165,7 +166,7 @@ To build this tree from source instead:
 ```bash
 cargo install --path . --locked
 # or
-cargo build --release --offline
+cargo build --release --locked
 ./target/release/rust-cutadapt --version
 ```
 

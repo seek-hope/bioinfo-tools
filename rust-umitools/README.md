@@ -146,7 +146,7 @@ cat in.bam | rust-umitools dedup -I - -S - | samtools view -c -
 - `--memory-limit` 先预留 8–32 MiB 给 HTSlib、分配器与线程栈，剩余部分才是 bundle/排序预算；实测 64/128/256 MiB 预算对应峰值 RSS 57/103/187 MiB，仍不是硬性进程上限。
 - dedup 默认使用可用内存的一半；高重复 2M-read 输入实测 auto 约 2.47 GiB。需要更低 RSS 时用 `--memory-limit 1GiB`（实测约 1.30 GiB，wall 约 +17%）；`--sort-strategy low-memory` 不改变该峰值。
 - 单个超大 position 或 gene 若超过扣除预留后的预算，会在写输出前 exit 4，并提示提高 `--memory-limit` 或拆分输入。
-- CRAM 解码可能按 htslib 设置补出派生 `MD/NM` 标签，故 BAM↔CRAM 按核心字段比较。
+- CRAM 解码可能由 noodles/htslib 设置补出派生 `MD/NM` 标签，故 BAM↔CRAM 按核心字段比较。
 - 压缩后的 BAM 字节可能与上游不同（压缩级别/BGZF 布局）；解压后的内容逐字节一致。
 - 上游未固定 `--random-seed` 时使用 `os.urandom`，不可复现；本实现默认 seed=0。
 

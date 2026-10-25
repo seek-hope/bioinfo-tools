@@ -19,18 +19,7 @@ pub struct AbsentModule {
 }
 
 /// Every FastQC 0.13.0 module this prototype omits.
-pub const ABSENT_MODULES: [AbsentModule; 4] = [
-    AbsentModule {
-        name: "Adapter Content",
-        reason: "FastQC measures adapter content by k-mer matching against its own \
-                 adapter list with position-dependent tolerances; the list ships in \
-                 Configuration/adapter_list.txt and the matching rules are not \
-                 documented. Reproducing the numbers without the oracle's own list \
-                 would produce plausible-looking values that disagree with FastQC, \
-                 which is worse than omitting the module.",
-        requirement: "Port adapter_list.txt into the crate and reverse-engineer the \
-                      k-mer tolerance rules against the oracle.",
-    },
+pub const ABSENT_MODULES: [AbsentModule; 3] = [
     AbsentModule {
         name: "Kmer Content",
         reason: "FastQC reports position-specific k-mer enrichment using a binomial \
@@ -122,9 +111,8 @@ mod tests {
     }
 
     #[test]
-    fn adapter_content_is_documented_as_absent() {
-        // The report emits an empty Adapter Content block, so the reason for that
-        // emptiness must be recorded here.
-        assert!(absent_module_names().contains(&"Adapter Content"));
+    fn adapter_content_is_no_longer_absent() {
+        // It is now computed as an experimental exact-match subset.
+        assert!(!absent_module_names().contains(&"Adapter Content"));
     }
 }

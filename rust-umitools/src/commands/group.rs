@@ -7,11 +7,11 @@ use crate::core::bundle::{Bundle, Bundler, GeneBundler, Storage};
 use crate::core::cluster::cluster_with_scratch;
 use crate::error::{Error, Result};
 use crate::io::alignment::{aux_str, read_position};
+use crate::io::bam::Aux;
+use crate::io::bam::{self, Format, Record};
 use crate::io::sort::coordinate_sort;
 use crate::io::spill::{ensure_distinct_outputs, TempOutput};
 use crate::runtime::pipeline::map_ordered;
-use rust_htslib::bam::record::Aux;
-use rust_htslib::bam::{self, Format, Read, Record};
 use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::time::Instant;
@@ -159,7 +159,7 @@ pub fn run(args: &GroupArgs) -> Result<()> {
             // This staged BAM is reread and recompressed by coordinate_sort;
             // spending level-6 CPU on it would be pure duplication.
             writer
-                .set_compression_level(rust_htslib::bam::CompressionLevel::Fastest)
+                .set_compression_level(crate::io::bam::CompressionLevel::Fastest)
                 .map_err(|e| Error::Format(format!("cannot set compression level: {e}")))?;
             Some(writer)
         }
@@ -295,7 +295,11 @@ pub fn run(args: &GroupArgs) -> Result<()> {
         &contig_names,
         &budget.tmpdir,
     )?;
-    drop(writer);
+    if let Some(writer) = writer.take() {
+        writer
+            .finish()
+            .map_err(|e| Error::Format(format!("cannot finish output: {e}")))?;
+    }
     if progress {
         eprint!("\r");
     }
@@ -392,7 +396,7 @@ fn flush(
                         let _ = read.remove_aux(b"UG");
                         let _ = read.remove_aux(&group_tag);
                         crate::commands::push_aux_uint(&mut read, b"UG", id)?;
-                        read.push_aux(&group_tag, Aux::String(&top))
+                        read.push_aux(&group_tag, Aux::String(top.clone()))
                             .map_err(|e| Error::Format(format!("cannot set group tag: {e}")))?;
                         writer
                             .write(&read)

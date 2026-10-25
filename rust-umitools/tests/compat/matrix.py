@@ -114,7 +114,9 @@ def render() -> str:
     writer.writerow(COLUMNS)
     for row in sorted(ROWS, key=lambda value: (value[0], value[1])):
         writer.writerow(row)
-    return buffer.getvalue()
+    # csv.writer emits the trailing delimiter even when the final field is empty.
+    # Strip line-end whitespace so the generated TSV is git-clean.
+    return "\n".join(line.rstrip() for line in buffer.getvalue().splitlines()) + "\n"
 
 
 def main() -> int:

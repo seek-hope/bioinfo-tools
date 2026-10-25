@@ -24,32 +24,35 @@
 # and it is deliberately explicit about `--locked` so the dependency set matches the
 # committed `Cargo.lock`.
 #
-# ## Toolchain: a REAL constraint, not a formality
+# ## Toolchain policy: MSRV lower bound, not the primary pin
 #
-# The workspace's primary toolchain is Rust 1.99.1 in `rust-toolchain.toml`;
-# its declared MSRV is 1.91 (set by noodles 0.118.0). Two problems follow:
+# The repository has two distinct Rust numbers:
 #
-#   1. **conda-forge's `rust` package is not rustup.** It ships rustc and cargo
-#      directly, and a bare `cargo` **ignores `rust-toolchain.toml`** entirely --
-#      that file is a rustup feature. So this recipe cannot honour the pin by
-#      construction; it builds with whatever rustc conda provides.
-#   2. **The newest available conda-forge version is 1.99.0**, not 1.99.1.
-#      Measured with `conda search -c conda-forge rust`.
+#   * a **primary development pin** of 1.99.1 in `rust-toolchain.toml`, which is
+#     what the workspace is built and verified with; and
+#   * a **declared MSRV of 1.91** in `[workspace.package] rust-version`.
 #
-# Building with a *newer* compiler than the MSRV is generally safe (the MSRV is a
-# floor, not a ceiling), but the resulting binary is **not** the one the
-# reproducible-build evidence covers, and its hash will differ. That is why the
-# build below records the rustc version it actually used.
+# Conda packaging is intentionally decoupled from the first. It only needs a
+# compiler that satisfies the MSRV, so this recipe requires `rust >=1.91` and lets
+# the solver choose. That is the right shape: a conda package should not be forced
+# to rebuild merely because the primary development pin moves, and a user
+# installing from conda is entitled to any compiler that honours the declared floor.
 #
-# To build at exactly 1.91.0 a recipe would need either a conda `rust` package at
-# that version or a vendored rustup toolchain in the source tarball. Neither is
-# present, so this recipe is honest about the mismatch rather than pinning
-# something it cannot deliver.
+# Two consequences that are stated rather than hidden:
 #
-# MEASURED during a real build: conda resolved `rust 1.99.0` from conda-forge.
-# The build uses the conda compiler directly (not rustup), so
-# `rust-toolchain.toml` is ignored. The resulting binary differs from the primary
-# 1.99.1 build; that is recorded rather than papered over.
+#   1. **`rust-toolchain.toml` is ignored by conda builds.** That file is a rustup
+#      feature; conda-forge's `rust` installs rustc and cargo directly under
+#      `$BUILD_PREFIX/bin`, so there is no rustup to read it. This is not a defect
+#      to fix here -- the pin is a *development* concern, and the MSRV is what
+#      governs a conda build.
+#   2. **The conda binary is not byte-identical to the primary 1.99.1 build.** It
+#      is compiled by whatever rustc the solver picks, so its bytes differ. That is
+#      expected and acceptable: the conda package is required to *build and run
+#      correctly*, not to reproduce the primary artifact. The reproducibility claim
+#      in docs/EVIDENCE-PACKAGING.md covers the Rust build only, never conda.
+#
+# The version actually resolved by the solver, and the resulting package hash, are
+# recorded in docs/EVIDENCE-PACKAGING.md for each build that was performed.
 
 {% set name = "rust-cutadapt" %}
 {% set version = "0.1.0" %}
@@ -82,10 +85,26 @@ build:
 
 requirements:
   build:
-    # Rust toolchain. The conda-forge `rust` package ships BOTH rustc and cargo, so
-    # there is no separate `cargo` package to require -- adding one makes the
-    # dependency solve unsatisfiable ("cargo does not exist").
-    - rust 1.99.0
+    # Rust toolchain: a LOWER BOUND, not an exact pin.
+    #
+    # Conda packaging is independent of the repository's primary development
+    # toolchain. It only needs a compiler that satisfies the *declared MSRV*
+    # (`[workspace.package] rust-version = "1.91"` in Cargo.toml), so the
+    # requirement is `>=1.91` and the solver picks.
+    #
+    # Deliberately NOT `rust 1.99.1` (the primary pin) and NOT `rust 1.99.0` (the
+    # previous exact pin): either would tie the conda artifact to a specific
+    # toolchain for no reason, and both would force a rebuild every time the
+    # primary pin moves even though the MSRV did not.
+    #
+    # The conda-forge `rust` package ships BOTH rustc and cargo, so there is no
+    # separate `cargo` package to require -- adding one makes the dependency solve
+    # unsatisfiable ("cargo does not exist").
+    #
+    # `>=1.91` is satisfiable at the floor: conda-forge publishes rust 1.91.0 and
+    # 1.91.1. What the solver actually chooses is recorded in
+    # docs/EVIDENCE-PACKAGING.md rather than assumed here.
+    - rust >=1.91
     # Native C compiler for zstd-sys and lzma-sys, which compile vendored C.
     - {{ compiler('c') }}
     - make

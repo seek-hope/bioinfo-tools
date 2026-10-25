@@ -1,5 +1,7 @@
 # W1-1 evidence: the workspace and `bioinfo-common`
 
+> Historical record: commands, versions and offline flags describe the session at the recorded commit. They are not current project requirements; see [DOC-AUDIT.md](DOC-AUDIT.md).
+
 Status: **complete** — see "Verification results" for the commands and their
 output. This file records W1-1 only; it does not start W1-2.
 

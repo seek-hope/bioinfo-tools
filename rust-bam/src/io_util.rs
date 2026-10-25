@@ -8,9 +8,9 @@
 //!
 //! Nothing here collects the whole file. `AlignmentReader::records` yields one
 //! record at a time, and `view` writes each one back out immediately. `sort`
-//! needs random access by definition, so it buffers — but only record *keys* and
-//! the raw record bytes it must re-emit, and it spills nothing, which is
-//! documented as a limitation rather than hidden.
+//! needs random access; it buffers one bounded chunk, spills sorted BAM runs plus
+//! an input-index sidecar to a temporary directory, and merges them with a
+//! bounded number of open files.
 
 use std::fs::File;
 use std::io::{self, BufReader, Read};
@@ -193,6 +193,17 @@ impl<W: io::Write> SamWriter<W> {
             .map_err(|error| Error::io(format!("cannot write record: {error}")))
     }
 
+    /// Write one raw alignment record (for an indexed query iterator).
+    pub fn write_alignment_record(
+        &mut self,
+        header: &sam::Header,
+        record: &dyn sam::alignment::Record,
+    ) -> Result<()> {
+        self.inner
+            .write_alignment_record(header, record)
+            .map_err(|error| Error::io(format!("cannot write record: {error}")))
+    }
+
     /// Flush the underlying writer.
     pub fn finish(&mut self) -> Result<()> {
         self.inner
@@ -208,10 +219,23 @@ pub struct BamWriter<W: io::Write> {
 }
 
 impl<W: io::Write> BamWriter<W> {
-    /// Wrap `writer`.
+    /// Wrap `writer` with the default BGZF compression level (6).
     pub fn new(writer: W) -> BamWriter<W> {
         BamWriter {
             inner: bam::io::Writer::new(writer),
+        }
+    }
+
+    /// Wrap a temporary sort run with fast BGZF compression (level 1).
+    ///
+    /// Only temporary runs use this; the final output keeps the default level, so
+    /// the compressed final bytes and all observable output stay unchanged.
+    pub fn new_fast(writer: W) -> BamWriter<W> {
+        let bgzf_writer = bgzf::io::writer::Builder::default()
+            .set_compression_level(bgzf::io::writer::CompressionLevel::FAST)
+            .build_from_writer(writer);
+        BamWriter {
+            inner: bam::io::Writer::from(bgzf_writer),
         }
     }
 
@@ -224,6 +248,17 @@ impl<W: io::Write> BamWriter<W> {
 
     /// Write one record.
     pub fn write_record(&mut self, header: &sam::Header, record: &Record) -> Result<()> {
+        self.inner
+            .write_alignment_record(header, record)
+            .map_err(|error| Error::io(format!("cannot write BAM record: {error}")))
+    }
+
+    /// Write one raw alignment record (for an indexed query iterator).
+    pub fn write_alignment_record(
+        &mut self,
+        header: &sam::Header,
+        record: &dyn sam::alignment::Record,
+    ) -> Result<()> {
         self.inner
             .write_alignment_record(header, record)
             .map_err(|error| Error::io(format!("cannot write BAM record: {error}")))

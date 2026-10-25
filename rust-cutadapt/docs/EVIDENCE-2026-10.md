@@ -1,5 +1,7 @@
 # Current-state evidence: October 2026
 
+> Historical record: commands, versions and offline flags describe the session at the recorded commit. They are not current project requirements; see [DOC-AUDIT.md](../../docs/DOC-AUDIT.md).
+
 Status: **recorded and reproducible on this machine**.
 Scope: W0-3 of the workspace development plan. This file records commands,
 versions, commits and results; it does not introduce a new compatibility claim.

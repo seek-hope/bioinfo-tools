@@ -9,6 +9,7 @@
 #
 # Source this file; it only exports variables.
 
+# shellcheck disable=SC2034  # consumed by scripts that source this file
 umitools_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 umitools_account_home="$(getent passwd "$(id -u)" 2>/dev/null | cut -d: -f6 || true)"
 [ -n "${umitools_account_home:-}" ] || umitools_account_home="${HOME:-/tmp}"

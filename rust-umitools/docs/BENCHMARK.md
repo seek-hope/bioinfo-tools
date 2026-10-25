@@ -1,5 +1,7 @@
 # 性能基准
 
+> Historical benchmark. The rust-htslib comparison notes below are historical; the 2026-10-23 noodles migration and its 200k-read comparison are in [EVIDENCE-NOODLES](../../docs/EVIDENCE-NOODLES.md).
+
 本文件只记录**同机、同输入、同参数**的测量。历史作业中 27~81 小时的 UMI-tools 数值来自其他硬件（Xeon E5-2690 v4）且包含统计与最终排序，**不可**与本文件直接比较，也不作为加速倍数来源。
 
 ## 方法

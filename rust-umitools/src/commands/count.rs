@@ -15,10 +15,10 @@ use crate::core::cluster::cluster_count_with_scratch;
 use crate::core::cluster::Method;
 use crate::error::{Error, Result};
 use crate::io::alignment::aux_str;
+use crate::io::bam::{self, Format};
 use crate::io::spill::{ensure_distinct_outputs, TempOutput};
 use crate::runtime::budget::Budget;
 use crate::runtime::pipeline::map_ordered;
-use rust_htslib::bam::{self, Format, Read};
 use std::collections::BTreeMap;
 use std::io::Write;
 use std::path::{Path, PathBuf};
@@ -242,7 +242,11 @@ fn partitioned(
             .write(&record)
             .map_err(|e| Error::Format(format!("cannot write partition: {e}")))?;
     }
-    drop(writers);
+    for writer in writers.drain(..) {
+        writer
+            .finish()
+            .map_err(|e| Error::Format(format!("cannot finish partition: {e}")))?;
+    }
 
     for temp in &temps {
         let mut reader = bam::Reader::from_path(temp.path())

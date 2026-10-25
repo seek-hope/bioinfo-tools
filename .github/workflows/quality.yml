@@ -1,0 +1,86 @@
+name: quality
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      fastx_qc_oracles:
+        description: Run pre-provisioned FASTX/QC oracles
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+concurrency:
+  group: quality-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  native:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      MULTIQC_NO_VERSION_CHECK: "true"
+      WITH_FASTX_QC_ORACLES: ${{ inputs.fastx_qc_oracles || false }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Install pinned Rust toolchain
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: "1.99.1"
+          components: rustfmt, clippy
+
+      - name: Install native build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential pkg-config python3 \
+            libbz2-dev liblzma-dev zlib1g-dev libdeflate-dev libclang-dev
+
+      - name: Validate gate failure handling
+        run: python3 tests/ci/test_check.py -v
+
+      - name: Run quality gate
+        shell: bash
+        run: bash tests/ci/check.sh
+
+      - name: Run pre-provisioned FASTX/QC oracles
+        if: ${{ inputs.fastx_qc_oracles == true }}
+        shell: bash
+        run: |
+          if [ ! -x tests/ci/env/bin/seqkit ] || [ ! -x tests/ci/env/bin/fq ] \
+             || [ ! -x tests/ci/env/bin/fastqc ] || [ ! -x tests/ci/env/bin/multiqc ]; then
+            echo "ERROR: FASTX/QC oracles are not provisioned on this runner." >&2
+            echo "Install the pinned versions from tests/ci/PINS.md and PINS-QC.md." >&2
+            exit 3
+          fi
+          bash tests/ci/check.sh --with-fastx-qc-oracles
+
+  dependency-policy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Install pinned Rust toolchain
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: "1.99.1"
+
+      - name: Install cargo-deny
+        run: cargo install cargo-deny --version 0.20.2 --locked
+
+      - name: License and source policy
+        run: bash tests/security/check.sh --licenses
+
+      - name: Advisory policy (known failure until custom_derive is migrated)
+        run: bash tests/security/check.sh --advisories

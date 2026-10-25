@@ -18,12 +18,17 @@
 #   BASELINE_CUTADAPT   reference binary    (default .work/w1-1-baseline/bin/rust-cutadapt.before)
 #   BASELINE_UMITOOLS   reference binary    (default .work/w1-1-baseline/bin/rust-umitools.before)
 #   GOLDEN_DIR          golden directory    (default tests/gate/golden)
+#   GOLDEN_MANIFEST     golden SHA-256 list  (default tests/gate/golden.sha256)
 #
 # Exit status: 0 when every criterion passes, 1 otherwise.
 
 set -u
 
-ROOT=$(cd "$(dirname "$0")/../.." && pwd)
+SOURCE=${BASH_SOURCE[0]}
+if command -v readlink >/dev/null 2>&1; then
+    SOURCE=$(readlink -f "$SOURCE" 2>/dev/null || printf '%s' "$SOURCE")
+fi
+ROOT=$(cd "$(dirname "$SOURCE")/../.." && pwd)
 cd "$ROOT" || exit 1
 
 CUTADAPT_BIN=${CUTADAPT_BIN:-target/release/rust-cutadapt}
@@ -31,8 +36,26 @@ UMITOOLS_BIN=${UMITOOLS_BIN:-target/release/rust-umitools}
 BASELINE_CUTADAPT=${BASELINE_CUTADAPT:-.work/w1-1-baseline/bin/rust-cutadapt.before}
 BASELINE_UMITOOLS=${BASELINE_UMITOOLS:-.work/w1-1-baseline/bin/rust-umitools.before}
 GOLDEN_DIR=${GOLDEN_DIR:-tests/gate/golden}
+GOLDEN_MANIFEST=${GOLDEN_MANIFEST:-tests/gate/golden.sha256}
 
 SNAPSHOT=tests/gate/snapshot.py
+
+if [ -d "$ROOT/tests/ci/env/bin" ]; then
+    PATH="$ROOT/tests/ci/env/bin:$PATH"
+    export PATH
+fi
+
+# Resolve the canonical oracle directory when PATH exposes samtools and
+# umi_tools through the same test-environment directory. This keeps the
+# recorded @PG CL paths stable without hard-coding a personal path.
+if [ -z "${UMI_TOOLS_ORACLE_PATH:-}" ] && command -v samtools >/dev/null 2>&1 && command -v umi_tools >/dev/null 2>&1; then
+    samtools_real=$(readlink -f "$(command -v samtools)" 2>/dev/null || true)
+    umitools_real=$(readlink -f "$(command -v umi_tools)" 2>/dev/null || true)
+    if [ -n "$samtools_real" ] && [ -n "$umitools_real" ] && [ "$(dirname "$samtools_real")" = "$(dirname "$umitools_real")" ]; then
+        UMI_TOOLS_ORACLE_PATH=$(dirname "$samtools_real")
+        export UMI_TOOLS_ORACLE_PATH
+    fi
+fi
 
 pass=0
 fail=0
@@ -111,6 +134,20 @@ if [ "$golden_count" -gt 0 ]; then
     pass_criterion "goldens present ($golden_count case files)"
 else
     fail_criterion "goldens present (0 case files in $GOLDEN_DIR)"
+fi
+
+# The count alone accepts a rewritten corpus. Bind the committed files to a
+# reviewed digest list before comparing behavior against them.
+if [ ! -f "$GOLDEN_MANIFEST" ]; then
+    fail_criterion "goldens match integrity manifest (missing $GOLDEN_MANIFEST)"
+elif ! command -v sha256sum >/dev/null 2>&1; then
+    fail_criterion "goldens match integrity manifest (sha256sum missing)"
+elif [ "$(wc -l < "$GOLDEN_MANIFEST" | tr -d ' ')" -ne "$golden_count" ]; then
+    fail_criterion "goldens match integrity manifest (manifest/count mismatch)"
+elif sha256sum -c "$GOLDEN_MANIFEST" >/dev/null 2>&1; then
+    pass_criterion "goldens match integrity manifest ($golden_count files)"
+else
+    fail_criterion "goldens match integrity manifest (digest mismatch or missing file)"
 fi
 
 # --------------------------------------------------------------------------- #

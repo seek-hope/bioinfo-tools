@@ -128,6 +128,48 @@ def check_content(text: str) -> list[str]:
     if "compiler('c')" not in text:
         problems.append("requirements.build does not request a C compiler")
 
+    # The Rust requirement must be an MSRV lower bound, not an exact primary pin.
+    #
+    # Conda packaging is deliberately decoupled from `rust-toolchain.toml`. A
+    # regression to `rust 1.99.0` / `rust 1.99.1` (or any `rust X.Y.Z` exact pin)
+    # would re-couple it and force a rebuild whenever the primary pin moves even
+    # though the MSRV did not, so that is treated as a failure here.
+    rust_requirement = re.search(
+        r"^\s*-\s*rust\s+(\S+)\s*$", text, re.M
+    )
+    if not rust_requirement:
+        problems.append("requirements.build has no `rust` requirement")
+    else:
+        spec = rust_requirement.group(1)
+        if not spec.startswith(">="):
+            problems.append(
+                f"rust requirement {spec!r} is not a lower bound; conda must track "
+                "the MSRV (>=1.91), not the exact primary toolchain pin"
+            )
+        else:
+            try:
+                major, minor = (int(part) for part in spec[2:].split(".")[:2])
+            except ValueError:
+                problems.append(f"rust requirement {spec!r} is not a version")
+            else:
+                # The declared MSRV lives in the workspace manifest; read it so the
+                # two cannot drift silently.
+                manifest = RECIPE.parent.parent.parent / "Cargo.toml"
+                msrv = None
+                if manifest.is_file():
+                    found = re.search(
+                        r"^rust-version\s*=\s*\"([0-9.]+)\"",
+                        manifest.read_text(),
+                        re.M,
+                    )
+                    if found:
+                        msrv = tuple(int(p) for p in found.group(1).split(".")[:2])
+                if msrv and (major, minor) != msrv:
+                    problems.append(
+                        f"rust lower bound {spec} does not match the declared MSRV "
+                        f"{msrv[0]}.{msrv[1]} in Cargo.toml"
+                    )
+
     return problems
 
 

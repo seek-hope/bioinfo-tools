@@ -1,5 +1,7 @@
 # W1-4 evidence: `rust-bam`
 
+> Historical record: commands, versions and offline flags describe the session at the recorded commit. They are not current project requirements; see [DOC-AUDIT.md](DOC-AUDIT.md).
+
 Status: **VERIFIED** — the crate is implemented and the samtools 1.24 differential
 was run: **20/20 cases pass**.
 

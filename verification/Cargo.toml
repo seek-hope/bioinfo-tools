@@ -1,0 +1,20 @@
+[package]
+name = "bioinfo-verification"
+version = "0.0.0"
+edition = "2021"
+publish = false
+
+# This is deliberately its own workspace: verification harnesses are not part of
+# the shipped workspace or its dependency graph.
+[workspace]
+
+[dependencies]
+bioinfo-fastx = { path = "../bioinfo-fastx" }
+rust-fx = { path = "../rust-fx" }
+rust-bam = { path = "../rust-bam" }
+rust-fastqc = { path = "../rust-fastqc" }
+rust-cutadapt = { path = "../rust-cutadapt" }
+noodles = { version = "0.118.0", default-features = false, features = ["sam"] }
+
+[dev-dependencies]
+proptest = "1"

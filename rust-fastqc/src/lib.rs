@@ -28,7 +28,7 @@
 //! Present: Basic Statistics, Per base sequence quality, Per sequence quality
 //! scores, Per base sequence content, Per base N content, Per sequence GC content,
 //! Sequence Length Distribution, Sequence Duplication Levels, Overrepresented
-//! sequences, Adapter Content (empty).
+//! sequences, Adapter Content (experimental exact-match subset).
 //!
 //! See [`modules`] for exactly which are computed and which are emitted as empty
 //! placeholders, and [`absent`] for what the prototype omits.
@@ -39,6 +39,7 @@
 pub mod absent;
 pub mod error;
 pub mod grouping;
+pub mod limits;
 pub mod modules;
 pub mod report;
 pub mod stats;
@@ -54,7 +55,7 @@ pub const FASTQC_VERSION: &str = "0.13.0";
 pub const HEADER: &str = "##FastQC\t0.13.0";
 
 /// The QC modules this prototype computes.
-pub const COMPUTED_MODULES: [&str; 9] = [
+pub const COMPUTED_MODULES: [&str; 10] = [
     "Basic Statistics",
     "Per base sequence quality",
     "Per sequence quality scores",
@@ -64,4 +65,5 @@ pub const COMPUTED_MODULES: [&str; 9] = [
     "Sequence Length Distribution",
     "Sequence Duplication Levels",
     "Overrepresented sequences",
+    "Adapter Content",
 ];

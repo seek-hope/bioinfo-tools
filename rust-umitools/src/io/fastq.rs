@@ -168,6 +168,7 @@ impl FastqReader {
     }
 }
 
+#[allow(clippy::large_enum_variant)] // boxing the encoder would obscure the small writer API
 pub enum FastqWriter {
     Plain(BufWriter<Box<dyn Write>>),
     Gzip(GzEncoder<BufWriter<Box<dyn Write>>>),

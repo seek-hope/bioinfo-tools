@@ -5,17 +5,21 @@
 //! The counting and ordering logic lives in `crate::stats` and
 //! `crate::sort_order` so it can be unit-tested without touching the filesystem.
 
+use std::collections::BinaryHeap;
 use std::fs::File;
-use std::io::{BufWriter, Write};
+use std::io::{BufReader, BufWriter, Read, Write};
+use std::num::NonZero;
 use std::path::{Path, PathBuf};
+use std::sync::atomic::{AtomicU64, Ordering as AtomicOrdering};
 
 use noodles::sam;
+use noodles::sam::alignment::io::Write as _;
 
 use crate::error::{Error, Result};
 use crate::format::{detect_path, Format};
 use crate::index_util;
 use crate::io_util::{AlignmentReader, BamWriter, Record, SamWriter};
-use crate::sort_order::{self, SortKey};
+use crate::sort_order::SortKey;
 use crate::stats::{FlagStat, IdxStats};
 
 // --------------------------------------------------------------------------- //
@@ -62,10 +66,161 @@ pub struct ViewOptions {
     pub header_only: bool,
     /// `-c`: print only the count of matching records.
     pub count_only: bool,
+    /// `-f`: require all of these flag bits.
+    pub require_flags: u16,
+    /// `-F`: exclude records with any of these flag bits.
+    pub exclude_flags: u16,
+    /// `-q`: minimum mapping quality (0 keeps all).
+    pub min_mapq: u8,
+    /// `--region`: query an indexed BAM (`chr1`, `chr1:10-20`).
+    pub region: Option<String>,
+    /// `-@`: worker threads for BAM output compression; 1 keeps single-threaded.
+    pub threads: usize,
+}
+
+fn passes_filters(record: &Record, options: &ViewOptions) -> bool {
+    let flags = record.flags().bits();
+    if flags & options.require_flags != options.require_flags {
+        return false;
+    }
+    if flags & options.exclude_flags != 0 {
+        return false;
+    }
+    record
+        .mapping_quality()
+        .map(|quality| quality.get())
+        .unwrap_or(0)
+        >= options.min_mapq
+}
+
+fn open_writer_send(path: Option<&Path>) -> Result<Box<dyn Write + Send>> {
+    match path {
+        Some(path) => {
+            let file = File::create(path)
+                .map_err(|error| Error::io(format!("{}: {error}", path.display())))?;
+            Ok(Box::new(file))
+        }
+        None => Ok(Box::new(std::io::stdout())),
+    }
+}
+
+fn passes_raw_filters(record: &noodles::bam::Record, options: &ViewOptions) -> bool {
+    let flags = record.flags().bits();
+    if flags & options.require_flags != options.require_flags {
+        return false;
+    }
+    if flags & options.exclude_flags != 0 {
+        return false;
+    }
+    record
+        .mapping_quality()
+        .map(|quality| quality.get())
+        .unwrap_or(0)
+        >= options.min_mapq
+}
+
+fn view_region(options: &ViewOptions, region_text: &str) -> Result<()> {
+    let region: noodles::core::Region = region_text
+        .parse()
+        .map_err(|error| Error::usage(format!("invalid --region: {error}")))?;
+    let mut reader = noodles::bam::io::indexed_reader::Builder::default()
+        .build_from_path(&options.input)
+        .map_err(|error| {
+            Error::input(format!(
+                "{}: --region needs an indexed BAM (.bai or .csi): {error}",
+                options.input.display()
+            ))
+        })?;
+    let header = reader
+        .read_header()
+        .map_err(|error| Error::io(format!("cannot read BAM header: {error}")))?;
+
+    if options.header_only {
+        let mut out = open_writer(options.output.as_deref())?;
+        let mut writer = SamWriter::new(&mut out);
+        writer.write_header(&header)?;
+        writer.finish()?;
+        out.flush()
+            .map_err(|error| Error::io(format!("cannot flush output: {error}")))?;
+        return Ok(());
+    }
+
+    let mut query = reader
+        .query(&header, &region)
+        .map_err(|error| Error::io(format!("cannot query region: {error}")))?;
+    let mut raw = noodles::bam::Record::default();
+
+    if options.count_only {
+        let mut count: u64 = 0;
+        loop {
+            match query.read_record(&mut raw) {
+                Ok(0) => break,
+                Ok(_) => {
+                    if passes_raw_filters(&raw, options) {
+                        count += 1;
+                    }
+                }
+                Err(error) => return Err(Error::io(format!("cannot read query record: {error}"))),
+            }
+        }
+        let mut out = open_writer(options.output.as_deref())?;
+        writeln!(out, "{count}")
+            .map_err(|error| Error::io(format!("cannot write output: {error}")))?;
+        out.flush()
+            .map_err(|error| Error::io(format!("cannot flush output: {error}")))?;
+        return Ok(());
+    }
+
+    if options.bam_output {
+        let out = open_writer(options.output.as_deref())?;
+        let mut writer = BamWriter::new(out);
+        writer.write_header(&header)?;
+        loop {
+            match query.read_record(&mut raw) {
+                Ok(0) => break,
+                Ok(_) => {
+                    if passes_raw_filters(&raw, options) {
+                        writer.write_alignment_record(&header, &raw)?;
+                    }
+                }
+                Err(error) => return Err(Error::io(format!("cannot read query record: {error}"))),
+            }
+        }
+        let mut out = writer.finish()?;
+        out.flush()
+            .map_err(|error| Error::io(format!("cannot flush output: {error}")))?;
+        return Ok(());
+    }
+
+    let mut out = open_writer(options.output.as_deref())?;
+    {
+        let mut writer = SamWriter::new(&mut out);
+        if options.with_header {
+            writer.write_header(&header)?;
+        }
+        loop {
+            match query.read_record(&mut raw) {
+                Ok(0) => break,
+                Ok(_) => {
+                    if passes_raw_filters(&raw, options) {
+                        writer.write_alignment_record(&header, &raw)?;
+                    }
+                }
+                Err(error) => return Err(Error::io(format!("cannot read query record: {error}"))),
+            }
+        }
+        writer.finish()?;
+    }
+    out.flush()
+        .map_err(|error| Error::io(format!("cannot flush output: {error}")))?;
+    Ok(())
 }
 
 /// `view`: emit SAM text (default), BAM (`-b`), a header (`-H`) or a count (`-c`).
 pub fn view(options: ViewOptions) -> Result<()> {
+    if let Some(region) = options.region.as_deref() {
+        return view_region(&options, region);
+    }
     let mut reader = AlignmentReader::open(&options.input)?;
     let header = reader.read_header()?;
 
@@ -89,7 +244,9 @@ pub fn view(options: ViewOptions) -> Result<()> {
             if bytes == 0 {
                 break;
             }
-            count += 1;
+            if passes_filters(&record, &options) {
+                count += 1;
+            }
         }
         let mut out = open_writer(options.output.as_deref())?;
         writeln!(out, "{count}")
@@ -100,19 +257,48 @@ pub fn view(options: ViewOptions) -> Result<()> {
     }
 
     if options.bam_output {
+        let mut record = Record::default();
+        if options.threads > 1 {
+            let out = open_writer_send(options.output.as_deref())?;
+            let workers = NonZero::new(options.threads).expect("threads > 1");
+            let mt = noodles::bgzf::io::multithreaded_writer::Builder::default()
+                .set_worker_count(workers)
+                .build_from_writer(out);
+            let mut writer = noodles::bam::io::Writer::from(mt);
+            writer
+                .write_header(&header)
+                .map_err(|error| Error::io(format!("cannot write BAM header: {error}")))?;
+            loop {
+                let bytes = reader.read_record(&header, &mut record)?;
+                if bytes == 0 {
+                    break;
+                }
+                if passes_filters(&record, &options) {
+                    writer
+                        .write_alignment_record(&header, &record)
+                        .map_err(|error| Error::io(format!("cannot write BAM record: {error}")))?;
+                }
+            }
+            let mut mt = writer.into_inner();
+            let mut out = mt
+                .finish()
+                .map_err(|error| Error::io(format!("cannot finish BGZF stream: {error}")))?;
+            out.flush()
+                .map_err(|error| Error::io(format!("cannot flush output: {error}")))?;
+            return Ok(());
+        }
         let out = open_writer(options.output.as_deref())?;
         let mut writer = BamWriter::new(out);
         writer.write_header(&header)?;
-        let mut record = Record::default();
         loop {
             let bytes = reader.read_record(&header, &mut record)?;
             if bytes == 0 {
                 break;
             }
-            writer.write_record(&header, &record)?;
+            if passes_filters(&record, &options) {
+                writer.write_record(&header, &record)?;
+            }
         }
-        // `finish` writes the BGZF EOF marker; without it `samtools quickcheck`
-        // fails with "missing EOF block".
         let mut out = writer.finish()?;
         out.flush()
             .map_err(|error| Error::io(format!("cannot flush output: {error}")))?;
@@ -132,7 +318,9 @@ pub fn view(options: ViewOptions) -> Result<()> {
             if bytes == 0 {
                 break;
             }
-            writer.write_record(&header, &record)?;
+            if passes_filters(&record, &options) {
+                writer.write_record(&header, &record)?;
+            }
         }
         writer.finish()?;
     }
@@ -427,7 +615,7 @@ fn check_bgzf_eof(path: &Path) -> std::result::Result<(), String> {
 /// `index`: write a BAI next to the BAM.
 ///
 /// Returns the path written and the number of records indexed.
-pub fn index(input: &Path, output: Option<PathBuf>) -> Result<(PathBuf, u64)> {
+pub fn index(input: &Path, output: Option<PathBuf>, csi: bool) -> Result<(PathBuf, u64)> {
     let format = detect_path(input)?;
     if format != Format::Bam {
         return Err(Error::usage(format!(
@@ -436,14 +624,29 @@ pub fn index(input: &Path, output: Option<PathBuf>) -> Result<(PathBuf, u64)> {
             format.as_str()
         )));
     }
-    let output = output.unwrap_or_else(|| index_util::bai_path(input));
-    let count = index_util::build_bai(input, &output)?;
+    let output = output.unwrap_or_else(|| {
+        if csi {
+            index_util::csi_path(input)
+        } else {
+            index_util::bai_path(input)
+        }
+    });
+    let count = if csi {
+        index_util::build_csi(input, &output)?
+    } else {
+        index_util::build_bai(input, &output)?
+    };
     Ok((output, count))
 }
 
 // --------------------------------------------------------------------------- //
 // sort
 // --------------------------------------------------------------------------- //
+
+/// Default memory budget for one in-memory sort chunk.
+pub const DEFAULT_SORT_MEMORY: u64 = 256 * 1024 * 1024;
+/// Default maximum number of sorted runs opened at once.
+pub const DEFAULT_MAX_OPEN_FILES: usize = 64;
 
 /// Options for `sort`.
 pub struct SortOptions {
@@ -453,49 +656,284 @@ pub struct SortOptions {
     pub output: Option<PathBuf>,
     /// Write SAM text instead of BAM.
     pub sam_output: bool,
+    /// Approximate bytes of records held in one sort chunk. `None` uses
+    /// [`DEFAULT_SORT_MEMORY`].
+    pub max_memory: Option<u64>,
+    /// Maximum number of run files opened during one merge pass.
+    pub max_open_files: usize,
+    /// `-@`: only 1 is currently supported by sort.
+    pub threads: usize,
 }
 
-/// `sort`: coordinate-sort records into the documented order.
-///
-/// Fully described in `crate::sort_order`. Records are buffered because sorting
-/// needs random access; memory is proportional to the file, which is recorded as
-/// a limitation rather than hidden.
-pub fn sort(options: SortOptions) -> Result<u64> {
-    let mut reader = AlignmentReader::open(&options.input)?;
-    let header = reader.read_header()?;
+/// A temporary directory that removes its runs even when a later step fails.
+struct TempDir {
+    path: PathBuf,
+    next_run: u64,
+}
 
-    let mut keyed: Vec<(SortKey, Record)> = Vec::new();
-    let mut record = Record::default();
-    let mut index: usize = 0;
-    loop {
-        let bytes = reader.read_record(&header, &mut record)?;
-        if bytes == 0 {
-            break;
-        }
-        let key = SortKey::new(
-            record.flags(),
-            tolerant_reference_id(&record),
-            record.alignment_start().map(usize::from),
-            record.name().map(|n| n.as_ref()).unwrap_or(&[]),
-            index,
-        );
-        keyed.push((key, record.clone()));
-        index += 1;
+impl TempDir {
+    fn new() -> Result<TempDir> {
+        let nanos = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .map(|duration| duration.as_nanos())
+            .unwrap_or(0);
+        let path = std::env::temp_dir().join(format!(
+            "rust-bam-sort-{}-{}-{}",
+            std::process::id(),
+            nanos,
+            TEMP_COUNTER.fetch_add(1, AtomicOrdering::Relaxed)
+        ));
+        std::fs::create_dir_all(&path).map_err(|error| {
+            Error::io(format!(
+                "cannot create sort workspace {}: {error}",
+                path.display()
+            ))
+        })?;
+        Ok(TempDir { path, next_run: 0 })
     }
-    let total = keyed.len() as u64;
-    let sorted = sort_order::sort_by_key(keyed);
 
-    // The header's sort-order field must say what we did. `samtools sort` sets
-    // `@HD SO:coordinate`; leaving a stale `SO:unsorted` would be a lie.
-    let header = header_with_coordinate_sort(header);
+    fn run_path(&mut self) -> PathBuf {
+        let part = self.next_run;
+        self.next_run += 1;
+        self.path.join(format!("run-{part}.bam"))
+    }
+}
 
+impl Drop for TempDir {
+    fn drop(&mut self) {
+        let _ = std::fs::remove_dir_all(&self.path);
+    }
+}
+
+static TEMP_COUNTER: AtomicU64 = AtomicU64::new(0);
+
+fn key_for(record: &Record, index: usize) -> SortKey {
+    SortKey::new(
+        record.flags(),
+        tolerant_reference_id(record),
+        record.alignment_start().map(usize::from),
+        record.name().map(|name| name.as_ref()).unwrap_or(&[]),
+        index,
+    )
+}
+
+fn record_memory(record: &Record) -> u64 {
+    let name = record
+        .name()
+        .map(|name| {
+            let bytes: &[u8] = name.as_ref();
+            bytes.len()
+        })
+        .unwrap_or(0);
+    let sequence = record.sequence().len();
+    let qualities = record.quality_scores().len();
+    (std::mem::size_of::<Record>() + name + sequence + qualities + 256) as u64
+}
+
+fn write_index(file: &mut File, index: usize) -> Result<()> {
+    let index = u64::try_from(index)
+        .map_err(|_| Error::runtime("record index does not fit in u64".to_string()))?;
+    file.write_all(&index.to_le_bytes())
+        .map_err(|error| Error::io(format!("cannot write sort index: {error}")))
+}
+
+fn spill_run(
+    temp: &mut TempDir,
+    header: &sam::Header,
+    chunk: &mut Vec<(SortKey, Record)>,
+) -> Result<PathBuf> {
+    let path = temp.run_path();
+    let index_path = path.with_extension("idx");
+    let mut sorted = std::mem::take(chunk);
+    sorted.sort_by(|a, b| a.0.cmp(&b.0));
+
+    let file = File::create(&path)
+        .map_err(|error| Error::io(format!("cannot create {}: {error}", path.display())))?;
+    let mut index_file = File::create(&index_path)
+        .map_err(|error| Error::io(format!("cannot create {}: {error}", index_path.display())))?;
+    let mut writer = BamWriter::new_fast(file);
+    writer.write_header(header)?;
+    for (key, record) in &sorted {
+        writer.write_record(header, record)?;
+        write_index(&mut index_file, key.input_index)?;
+    }
+    let file = writer.finish()?;
+    file.sync_all()
+        .map_err(|error| Error::io(format!("cannot sync {}: {error}", path.display())))?;
+    index_file
+        .flush()
+        .map_err(|error| Error::io(format!("cannot flush {}: {error}", index_path.display())))?;
+    Ok(path)
+}
+
+struct RunReader {
+    label: PathBuf,
+    reader: AlignmentReader,
+    header: sam::Header,
+    indices: BufReader<File>,
+}
+
+fn open_run(path: &Path) -> Result<RunReader> {
+    let mut reader = AlignmentReader::open(path)?;
+    let header = reader.read_header()?;
+    let index_path = path.with_extension("idx");
+    let file = File::open(&index_path)
+        .map_err(|error| Error::io(format!("cannot open {}: {error}", index_path.display())))?;
+    Ok(RunReader {
+        label: path.to_path_buf(),
+        reader,
+        header,
+        indices: BufReader::new(file),
+    })
+}
+
+fn next_from_run(run: &mut RunReader) -> Result<Option<(SortKey, Record)>> {
+    let mut bytes = [0u8; 8];
+    let mut filled = 0;
+    while filled < bytes.len() {
+        match run.indices.read(&mut bytes[filled..]) {
+            Ok(0) => break,
+            Ok(n) => filled += n,
+            Err(error) if error.kind() == std::io::ErrorKind::Interrupted => {}
+            Err(error) => {
+                return Err(Error::io(format!(
+                    "cannot read sort index {}: {error}",
+                    run.label.display()
+                )))
+            }
+        }
+    }
+    if filled == 0 {
+        return Ok(None);
+    }
+    if filled != bytes.len() {
+        return Err(Error::runtime(format!(
+            "truncated sort index {}",
+            run.label.display()
+        )));
+    }
+    let index = usize::try_from(u64::from_le_bytes(bytes))
+        .map_err(|_| Error::runtime("sort index does not fit in usize".to_string()))?;
+    let mut record = Record::default();
+    if run.reader.read_record(&run.header, &mut record)? == 0 {
+        return Err(Error::runtime(format!(
+            "sort run {} ended before its index",
+            run.label.display()
+        )));
+    }
+    let key = key_for(&record, index);
+    Ok(Some((key, record)))
+}
+
+struct MergeItem {
+    key: SortKey,
+    record: Record,
+    run: usize,
+}
+
+impl PartialEq for MergeItem {
+    fn eq(&self, other: &Self) -> bool {
+        self.key == other.key
+    }
+}
+
+impl Eq for MergeItem {}
+
+impl PartialOrd for MergeItem {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl Ord for MergeItem {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        // Reverse the key comparison: BinaryHeap is a max-heap, we need a min-heap.
+        other
+            .key
+            .cmp(&self.key)
+            .then_with(|| other.run.cmp(&self.run))
+    }
+}
+
+fn open_runs(paths: &[PathBuf]) -> Result<(Vec<RunReader>, BinaryHeap<MergeItem>)> {
+    let mut readers = Vec::with_capacity(paths.len());
+    let mut heap = BinaryHeap::new();
+    for (run, path) in paths.iter().enumerate() {
+        let mut reader = open_run(path)?;
+        if let Some((key, record)) = next_from_run(&mut reader)? {
+            heap.push(MergeItem { key, record, run });
+        }
+        readers.push(reader);
+    }
+    Ok((readers, heap))
+}
+
+fn merge_to_run(temp: &mut TempDir, paths: &[PathBuf], header: &sam::Header) -> Result<PathBuf> {
+    let (mut readers, mut heap) = open_runs(paths)?;
+    let path = temp.run_path();
+    let index_path = path.with_extension("idx");
+    let file = File::create(&path)
+        .map_err(|error| Error::io(format!("cannot create {}: {error}", path.display())))?;
+    let mut index_file = File::create(&index_path)
+        .map_err(|error| Error::io(format!("cannot create {}: {error}", index_path.display())))?;
+    let mut writer = BamWriter::new_fast(file);
+    writer.write_header(header)?;
+    while let Some(item) = heap.pop() {
+        writer.write_record(header, &item.record)?;
+        write_index(&mut index_file, item.key.input_index)?;
+        if let Some((key, record)) = next_from_run(&mut readers[item.run])? {
+            heap.push(MergeItem {
+                key,
+                record,
+                run: item.run,
+            });
+        }
+    }
+    let file = writer.finish()?;
+    file.sync_all()
+        .map_err(|error| Error::io(format!("cannot sync {}: {error}", path.display())))?;
+    index_file
+        .flush()
+        .map_err(|error| Error::io(format!("cannot flush {}: {error}", index_path.display())))?;
+    Ok(path)
+}
+
+fn reduce_runs(
+    temp: &mut TempDir,
+    mut runs: Vec<PathBuf>,
+    max_open: usize,
+    header: &sam::Header,
+) -> Result<Vec<PathBuf>> {
+    while runs.len() > max_open {
+        let mut next = Vec::new();
+        for group in runs.chunks(max_open) {
+            if group.len() == 1 {
+                next.push(group[0].clone());
+                continue;
+            }
+            let merged = merge_to_run(temp, group, header)?;
+            for old in group {
+                let _ = std::fs::remove_file(old);
+                let _ = std::fs::remove_file(old.with_extension("idx"));
+            }
+            next.push(merged);
+        }
+        runs = next;
+    }
+    Ok(runs)
+}
+
+fn write_records<F>(options: &SortOptions, header: &sam::Header, mut next: F) -> Result<()>
+where
+    F: FnMut() -> Result<Option<Record>>,
+{
     if options.sam_output {
         let mut out = open_writer(options.output.as_deref())?;
         {
             let mut writer = SamWriter::new(&mut out);
-            writer.write_header(&header)?;
-            for record in &sorted {
-                writer.write_record(&header, record)?;
+            writer.write_header(header)?;
+            while let Some(record) = next()? {
+                writer.write_record(header, &record)?;
             }
             writer.finish()?;
         }
@@ -504,15 +942,97 @@ pub fn sort(options: SortOptions) -> Result<u64> {
     } else {
         let out = open_writer(options.output.as_deref())?;
         let mut writer = BamWriter::new(out);
-        writer.write_header(&header)?;
-        for record in &sorted {
-            writer.write_record(&header, record)?;
+        writer.write_header(header)?;
+        while let Some(record) = next()? {
+            writer.write_record(header, &record)?;
         }
         let mut out = writer.finish()?;
         out.flush()
             .map_err(|error| Error::io(format!("cannot flush output: {error}")))?;
     }
+    Ok(())
+}
+
+/// `sort`: coordinate-sort records into the documented order.
+///
+/// Fully described in `crate::sort_order`. The first chunk is sorted in memory;
+/// when the configured budget is exceeded, sorted BAM runs plus a parallel
+/// `u64` input-index sidecar are spilled to a temporary directory. Runs are
+/// merged with a bounded number of open files. The sidecar preserves the
+/// documented final input-index tie-break exactly.
+pub fn sort(options: SortOptions) -> Result<u64> {
+    if options.threads > 1 {
+        return Err(Error::usage(
+            "sort currently supports -@ 1 only; BAM sort itself is single-threaded",
+        ));
+    }
+    let mut reader = AlignmentReader::open(&options.input)?;
+    let header = reader.read_header()?;
+    let final_header = header_with_coordinate_sort(header.clone());
+    let budget = options.max_memory.unwrap_or(DEFAULT_SORT_MEMORY).max(1);
+    let max_open = options.max_open_files.max(2);
+
+    let mut chunk: Vec<(SortKey, Record)> = Vec::new();
+    let mut chunk_bytes = 0u64;
+    let mut runs: Vec<PathBuf> = Vec::new();
+    let mut temp: Option<TempDir> = None;
+    let mut index = 0usize;
+    let mut record = Record::default();
+
+    loop {
+        let bytes = reader.read_record(&header, &mut record)?;
+        if bytes == 0 {
+            break;
+        }
+        let key = key_for(&record, index);
+        chunk_bytes = chunk_bytes.saturating_add(record_memory(&record));
+        chunk.push((key, record.clone()));
+        index += 1;
+        if chunk_bytes >= budget {
+            if temp.is_none() {
+                temp = Some(TempDir::new()?);
+            }
+            let workspace = temp.as_mut().expect("sort workspace was just created");
+            runs.push(spill_run(workspace, &header, &mut chunk)?);
+            chunk_bytes = 0;
+        }
+    }
+
+    let total = index as u64;
+    if runs.is_empty() {
+        chunk.sort_by(|a, b| a.0.cmp(&b.0));
+        let mut sorted = chunk.into_iter().map(|(_, record)| record);
+        write_records(&options, &final_header, || Ok(sorted.next()))?;
+        return Ok(total);
+    }
+
+    if !chunk.is_empty() {
+        let workspace = temp.as_mut().expect("runs exist, so the workspace exists");
+        runs.push(spill_run(workspace, &header, &mut chunk)?);
+    }
+    let mut workspace = temp.expect("runs exist, so the workspace exists");
+    let runs = reduce_runs(&mut workspace, runs, max_open, &header)?;
+    merge_to_output(&options, &runs, &final_header)?;
     Ok(total)
+}
+
+fn merge_to_output(options: &SortOptions, paths: &[PathBuf], header: &sam::Header) -> Result<()> {
+    let (mut readers, mut heap) = open_runs(paths)?;
+    write_records(options, header, || {
+        if let Some(item) = heap.pop() {
+            let record = item.record;
+            if let Some((key, next)) = next_from_run(&mut readers[item.run])? {
+                heap.push(MergeItem {
+                    key,
+                    record: next,
+                    run: item.run,
+                });
+            }
+            Ok(Some(record))
+        } else {
+            Ok(None)
+        }
+    })
 }
 
 /// Set `@HD SO:coordinate` on a header.

@@ -1,5 +1,7 @@
 # Current-state evidence: October 2026
 
+> Historical record: commands, versions and offline flags describe the session at the recorded commit. They are not current project requirements; see [DOC-AUDIT.md](DOC-AUDIT.md).
+
 Status: **recorded and reproducible on this machine**.
 Scope: W0-3 of the workspace development plan. This file records commands,
 versions, commits and results; it does not introduce a new compatibility claim.
@@ -106,7 +108,7 @@ The cutadapt harness also exits 3 when the oracle is missing.
 ## Benchmark
 
 The full-surface measurement is recorded in
-[bench/cutadapt-c8b0249.json](bench/cutadapt-c8b0249.json). Summary:
+[bench/cutadapt-c8b0249.json](../rust-cutadapt/docs/bench/cutadapt-c8b0249.json). Summary:
 
 | Item | Value |
 | --- | --- |
@@ -136,7 +138,7 @@ Caveats:
 - The machine is shared; the same-session cutadapt run took 9.65 s while the
   recorded baseline is 4.4363 s. Both ratios are reported in the JSON.
 - Four workers is a deliberate deviation from cutadapt's default of one; see
-  [adr/0002-default-worker-count.md](adr/0002-default-worker-count.md).
+  [adr/0002-default-worker-count.md](../rust-cutadapt/docs/adr/0002-default-worker-count.md).
   `-j 1` reproduces the 2.352 s single-thread result.
 
 ## What is explicitly not claimed

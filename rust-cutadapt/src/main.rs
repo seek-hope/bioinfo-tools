@@ -96,7 +96,8 @@ fn run(cli: &Cli, raw_args: &[String]) -> Result<(), String> {
         cli.input.clone(),
         cli.output.clone().unwrap_or_else(|| "-".into()),
         Vec::new(),
-    );
+    )
+    .map_err(|error| format!("error: {error}"))?;
     config.adapters = cli.adapters.clone();
     config.match_config = cli.match_config;
     config.match_config.match_read_wildcards = cli.match_read_wildcards;

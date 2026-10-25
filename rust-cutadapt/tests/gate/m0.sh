@@ -10,7 +10,7 @@
 set -u
 
 ROOT=$(cd "$(dirname "$0")/../.." && pwd)
-cd "$ROOT"
+cd "$ROOT" || exit 1
 
 fail=0
 pass() { printf 'PASS  %s\n' "$*"; }

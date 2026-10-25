@@ -313,11 +313,19 @@ impl RecordReader {
         let Some(raw_header) = self.next_line()? else {
             return Ok(None);
         };
-        // A trailing blank line at end of file is not a record.
+        let at = self.lines.line_number();
+        // Preserve tolerated trailing padding, but only after proving it is
+        // actually EOF. Treating any blank as EOF silently drops later records.
         if raw_header.is_empty() {
+            while let Some(line) = self.next_line()? {
+                if !line.is_empty() {
+                    return Err(CommandError::input(format!(
+                        "malformed FASTQ at line {at}: unexpected blank line before more input"
+                    )));
+                }
+            }
             return Ok(None);
         }
-        let at = self.lines.line_number();
         if !raw_header.starts_with(b"@") {
             return Err(CommandError::input(format!(
                 "malformed FASTQ at line {at}: expected a header line starting with '@', found {:?}",

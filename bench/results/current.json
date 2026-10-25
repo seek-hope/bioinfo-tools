@@ -1,0 +1,1425 @@
+{
+  "schema_version": 1,
+  "generated_at_utc": "2026-10-23T07:07:54.218800+00:00",
+  "git": {
+    "commit": "49953ec50ae04b343123a214b77030ff31f39a4b",
+    "dirty": true,
+    "dirty_paths": [
+      " M README.md",
+      " M docs/DEVELOPMENT-PLAN.md",
+      " M docs/EVIDENCE-2026-10.md",
+      " M docs/EVIDENCE-PACKAGING.md",
+      " M docs/EVIDENCE-QC.md",
+      " M docs/EVIDENCE-W1-1.md",
+      " M docs/EVIDENCE-W1-2.md",
+      " M docs/EVIDENCE-W1-3.md",
+      " M docs/EVIDENCE-W1-4.md",
+      " M packaging/conda/check_recipe.py",
+      " M packaging/conda/meta.yaml",
+      " M rust-bam/src/commands.rs",
+      " M rust-bam/src/io_util.rs",
+      " M rust-bam/src/main.rs",
+      " M rust-cutadapt/README.md",
+      " M rust-cutadapt/docs/EVIDENCE-2026-10.md",
+      " M rust-cutadapt/docs/adr/0001-dependency-policy.md",
+      " M rust-fastqc/src/main.rs",
+      " M rust-fx/src/commands.rs",
+      " M rust-fx/src/io.rs",
+      " M rust-fx/src/table.rs",
+      " M tests/ci/PINS-QC.md",
+      " M tests/ci/PINS.md",
+      "?? .github/workflows/quality.yml",
+      "?? bench/",
+      "?? docs/DEVELOPMENT-PLAN-LEGACY.md",
+      "?? docs/DOC-AUDIT.md",
+      "?? docs/EVIDENCE-P0-CI.json",
+      "?? docs/EVIDENCE-P0-CI.md",
+      "?? docs/EVIDENCE-P0-DOCS-CI.json",
+      "?? docs/EVIDENCE-P0-DOCS-CI.md",
+      "?? docs/EVIDENCE-P0-START.json",
+      "?? docs/EVIDENCE-P0-START.md",
+      "?? rust-bam/tests/",
+      "?? rust-fastqc/tests/",
+      "?? rust-fx/tests/",
+      "?? tests/ci/README.md",
+      "?? tests/ci/check.sh",
+      "?? tests/ci/check_docs.py",
+      "?? tests/ci/test_check.py"
+    ]
+  },
+  "hardware": {
+    "platform": "Linux-7.3.0-3-cachyos-x86_64-with-glibc2.44",
+    "machine": "x86_64",
+    "processor": "",
+    "cpu_model": "13th Gen Intel(R) Core(TM) i7-13700H",
+    "logical_cpus": 20,
+    "memory_kb": 32571304
+  },
+  "toolchain": {
+    "rustc": "rustc 1.99.1 (58cf8f9c3 2026-10-13)",
+    "cargo": "cargo 1.99.1 (5f94df478 2026-08-27)"
+  },
+  "binaries": {
+    "cutadapt": {
+      "path": "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/release/rust-cutadapt",
+      "sha256": "1954a8d5d1b29480757821920242c0bd46e0cc48577225d5f25aaa12160278ee",
+      "version": "rust-cutadapt 0.1.0"
+    },
+    "fastqc": {
+      "path": "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/release/rust-fastqc",
+      "sha256": "6661804da2996dc6a48c6e9265854b40f14191eb14f89ae03653a9f758259912",
+      "version": "rust-fastqc 0.1.0"
+    },
+    "fx": {
+      "path": "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/release/rust-fx",
+      "sha256": "85fd0794693ca493cf9dd1a2911760b7bc0a8e9a3c6abc1cbe701d8f79b9d7a5",
+      "version": "rust-fx 0.1.0"
+    },
+    "bam": {
+      "path": "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/release/rust-bam",
+      "sha256": "4f5de2cb9023874c49f309dfb69297fd075c343642f1bac36fe173ba13a794ec",
+      "version": "rust-bam 0.1.0"
+    },
+    "umi": {
+      "path": "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/release/rust-umitools",
+      "sha256": "2a5caa61cebefcb6ab26904f3c530e63aa03788a4f3df2068471fccae6f0d5ef",
+      "version": "rust-umitools 0.2.0"
+    }
+  },
+  "parameters": {
+    "sizes": [
+      1,
+      10,
+      100
+    ],
+    "repeats": 2,
+    "record_base": 1000
+  },
+  "results": [
+    {
+      "case": "cutadapt",
+      "size_multiplier": 1,
+      "records": 1000,
+      "command": [
+        "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/release/rust-cutadapt",
+        "--quiet",
+        "-a",
+        "AGATCGGAAGAGC",
+        "-m",
+        "30",
+        "-j",
+        "4",
+        "-o",
+        "/tmp/bioinfo-bench-jkf017ya/size-1/cutadapt/out.fastq.gz",
+        "/tmp/bioinfo-bench-jkf017ya/size-1/reads.fastq"
+      ],
+      "cwd": "/tmp/bioinfo-bench-jkf017ya/size-1/cutadapt",
+      "threads": 4,
+      "compression": "gzip",
+      "repeats": 2,
+      "samples": [
+        {
+          "wall_s": 0.0,
+          "user_s": 0.0,
+          "sys_s": 0.0,
+          "max_rss_kb": 4696,
+          "exit_code": 0,
+          "runner_wall_s": 0.005434806997072883,
+          "temp_peak_bytes": 0,
+          "stdout_bytes": 0,
+          "stderr_bytes": 0
+        },
+        {
+          "wall_s": 0.0,
+          "user_s": 0.0,
+          "sys_s": 0.0,
+          "max_rss_kb": 4652,
+          "exit_code": 0,
+          "runner_wall_s": 0.005715936000342481,
+          "temp_peak_bytes": 0,
+          "stdout_bytes": 0,
+          "stderr_bytes": 0
+        }
+      ],
+      "summary": {
+        "wall_mean_s": 0.0,
+        "wall_median_s": 0.0,
+        "wall_min_s": 0.0,
+        "wall_max_s": 0.0,
+        "cpu_mean_s": 0.0,
+        "max_rss_kb": 4696,
+        "temp_peak_bytes": 0,
+        "output_bytes": 0
+      },
+      "correctness": {
+        "passed": true,
+        "note": "records=1000 <= 1000"
+      },
+      "input_sha256": {
+        "fastq": "a31f00e59064e765b9866ab5f44c0624fc10d9fe9bd1b3cd7e667b71b9495b49",
+        "sam": "c73b23e765729565da541c59cf8e8b2378dd338568d1400e143862f9c54dbd3d",
+        "unsorted": "6442d35fff3f1ff128ede085993824f919001de12b1e846e4ac493e4d9a91feb",
+        "sorted": "1cafae6de7d52350d8a0c85996f6b1572e694b933babe485c1db8c5835307337"
+      }
+    },
+    {
+      "case": "cutadapt_j1",
+      "size_multiplier": 1,
+      "records": 1000,
+      "command": [
+        "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/release/rust-cutadapt",
+        "--quiet",
+        "-a",
+        "AGATCGGAAGAGC",
+        "-m",
+        "30",
+        "-j",
+        "1",
+        "-o",
+        "/tmp/bioinfo-bench-jkf017ya/size-1/cutadapt_j1/out.fastq.gz",
+        "/tmp/bioinfo-bench-jkf017ya/size-1/reads.fastq"
+      ],
+      "cwd": "/tmp/bioinfo-bench-jkf017ya/size-1/cutadapt_j1",
+      "threads": 1,
+      "compression": "gzip",
+      "repeats": 2,
+      "samples": [
+        {
+          "wall_s": 0.0,
+          "user_s": 0.0,
+          "sys_s": 0.0,
+          "max_rss_kb": 4568,
+          "exit_code": 0,
+          "runner_wall_s": 0.0075896529997407924,
+          "temp_peak_bytes": 0,
+          "stdout_bytes": 0,
+          "stderr_bytes": 0
+        },
+        {
+          "wall_s": 0.0,
+          "user_s": 0.0,
+          "sys_s": 0.0,
+          "max_rss_kb": 4572,
+          "exit_code": 0,
+          "runner_wall_s": 0.006647139998676721,
+          "temp_peak_bytes": 0,
+          "stdout_bytes": 0,
+          "stderr_bytes": 0
+        }
+      ],
+      "summary": {
+        "wall_mean_s": 0.0,
+        "wall_median_s": 0.0,
+        "wall_min_s": 0.0,
+        "wall_max_s": 0.0,
+        "cpu_mean_s": 0.0,
+        "max_rss_kb": 4572,
+        "temp_peak_bytes": 0,
+        "output_bytes": 0
+      },
+      "correctness": {
+        "passed": true,
+        "note": "records=1000 <= 1000"
+      },
+      "input_sha256": {
+        "fastq": "a31f00e59064e765b9866ab5f44c0624fc10d9fe9bd1b3cd7e667b71b9495b49",
+        "sam": "c73b23e765729565da541c59cf8e8b2378dd338568d1400e143862f9c54dbd3d",
+        "unsorted": "6442d35fff3f1ff128ede085993824f919001de12b1e846e4ac493e4d9a91feb",
+        "sorted": "1cafae6de7d52350d8a0c85996f6b1572e694b933babe485c1db8c5835307337"
+      }
+    },
+    {
+      "case": "fastqc",
+      "size_multiplier": 1,
+      "records": 1000,
+      "command": [
+        "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/release/rust-fastqc",
+        "-o",
+        "/tmp/bioinfo-bench-jkf017ya/size-1/fastqc/out",
+        "/tmp/bioinfo-bench-jkf017ya/size-1/reads.fastq"
+      ],
+      "cwd": "/tmp/bioinfo-bench-jkf017ya/size-1/fastqc",
+      "threads": null,
+      "compression": "none",
+      "repeats": 2,
+      "samples": [
+        {
+          "wall_s": 0.0,
+          "user_s": 0.0,
+          "sys_s": 0.0,
+          "max_rss_kb": 3820,
+          "exit_code": 0,
+          "runner_wall_s": 0.006466357001045253,
+          "temp_peak_bytes": 0,
+          "stdout_bytes": 0,
+          "stderr_bytes": 81
+        },
+        {
+          "wall_s": 0.0,
+          "user_s": 0.0,
+          "sys_s": 0.0,
+          "max_rss_kb": 3860,
+          "exit_code": 0,
+          "runner_wall_s": 0.005063977998361224,
+          "temp_peak_bytes": 0,
+          "stdout_bytes": 0,
+          "stderr_bytes": 81
+        }
+      ],
+      "summary": {
+        "wall_mean_s": 0.0,
+        "wall_median_s": 0.0,
+        "wall_min_s": 0.0,
+        "wall_max_s": 0.0,
+        "cpu_mean_s": 0.0,
+        "max_rss_kb": 3860,
+        "temp_peak_bytes": 0,
+        "output_bytes": 0
+      },
+      "correctness": {
+        "passed": true,
+        "note": "Total Sequences matches"
+      },
+      "input_sha256": {
+        "fastq": "a31f00e59064e765b9866ab5f44c0624fc10d9fe9bd1b3cd7e667b71b9495b49",
+        "sam": "c73b23e765729565da541c59cf8e8b2378dd338568d1400e143862f9c54dbd3d",
+        "unsorted": "6442d35fff3f1ff128ede085993824f919001de12b1e846e4ac493e4d9a91feb",
+        "sorted": "1cafae6de7d52350d8a0c85996f6b1572e694b933babe485c1db8c5835307337"
+      }
+    },
+    {
+      "case": "fx_stats",
+      "size_multiplier": 1,
+      "records": 1000,
+      "command": [
+        "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/release/rust-fx",
+        "stats",
+        "-a",
+        "-T",
+        "-o",
+        "/tmp/bioinfo-bench-jkf017ya/size-1/fx_stats/stats.tsv",
+        "/tmp/bioinfo-bench-jkf017ya/size-1/reads.fastq"
+      ],
+      "cwd": "/tmp/bioinfo-bench-jkf017ya/size-1/fx_stats",
+      "threads": null,
+      "compression": "none",
+      "repeats": 2,
+      "samples": [
+        {
+          "wall_s": 0.0,
+          "user_s": 0.0,
+          "sys_s": 0.0,
+          "max_rss_kb": 4128,
+          "exit_code": 0,
+          "runner_wall_s": 0.002489081001840532,
+          "temp_peak_bytes": 0,
+          "stdout_bytes": 0,
+          "stderr_bytes": 0
+        },
+        {
+          "wall_s": 0.0,
+          "user_s": 0.0,
+          "sys_s": 0.0,
+          "max_rss_kb": 4144,
+          "exit_code": 0,
+          "runner_wall_s": 0.002696424999157898,
+          "temp_peak_bytes": 0,
+          "stdout_bytes": 0,
+          "stderr_bytes": 0
+        }
+      ],
+      "summary": {
+        "wall_mean_s": 0.0,
+        "wall_median_s": 0.0,
+        "wall_min_s": 0.0,
+        "wall_max_s": 0.0,
+        "cpu_mean_s": 0.0,
+        "max_rss_kb": 4144,
+        "temp_peak_bytes": 0,
+        "output_bytes": 0
+      },
+      "correctness": {
+        "passed": true,
+        "note": "num_seqs=1000"
+      },
+      "input_sha256": {
+        "fastq": "a31f00e59064e765b9866ab5f44c0624fc10d9fe9bd1b3cd7e667b71b9495b49",
+        "sam": "c73b23e765729565da541c59cf8e8b2378dd338568d1400e143862f9c54dbd3d",
+        "unsorted": "6442d35fff3f1ff128ede085993824f919001de12b1e846e4ac493e4d9a91feb",
+        "sorted": "1cafae6de7d52350d8a0c85996f6b1572e694b933babe485c1db8c5835307337"
+      }
+    },
+    {
+      "case": "bam_sort",
+      "size_multiplier": 1,
+      "records": 1000,
+      "command": [
+        "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/release/rust-bam",
+        "sort",
+        "-o",
+        "/tmp/bioinfo-bench-jkf017ya/size-1/bam_sort/out.bam",
+        "/tmp/bioinfo-bench-jkf017ya/size-1/unsorted.bam"
+      ],
+      "cwd": "/tmp/bioinfo-bench-jkf017ya/size-1/bam_sort",
+      "threads": null,
+      "compression": "bgzf",
+      "repeats": 2,
+      "samples": [
+        {
+          "wall_s": 0.0,
+          "user_s": 0.0,
+          "sys_s": 0.0,
+          "max_rss_kb": 4584,
+          "exit_code": 0,
+          "runner_wall_s": 0.004519811998761725,
+          "temp_peak_bytes": 0,
+          "stdout_bytes": 0,
+          "stderr_bytes": 20
+        },
+        {
+          "wall_s": 0.0,
+          "user_s": 0.0,
+          "sys_s": 0.0,
+          "max_rss_kb": 4704,
+          "exit_code": 0,
+          "runner_wall_s": 0.0032755299980635755,
+          "temp_peak_bytes": 0,
+          "stdout_bytes": 0,
+          "stderr_bytes": 20
+        }
+      ],
+      "summary": {
+        "wall_mean_s": 0.0,
+        "wall_median_s": 0.0,
+        "wall_min_s": 0.0,
+        "wall_max_s": 0.0,
+        "cpu_mean_s": 0.0,
+        "max_rss_kb": 4704,
+        "temp_peak_bytes": 0,
+        "output_bytes": 0
+      },
+      "correctness": {
+        "passed": true,
+        "note": "records=1000 <= 1000"
+      },
+      "input_sha256": {
+        "fastq": "a31f00e59064e765b9866ab5f44c0624fc10d9fe9bd1b3cd7e667b71b9495b49",
+        "sam": "c73b23e765729565da541c59cf8e8b2378dd338568d1400e143862f9c54dbd3d",
+        "unsorted": "6442d35fff3f1ff128ede085993824f919001de12b1e846e4ac493e4d9a91feb",
+        "sorted": "1cafae6de7d52350d8a0c85996f6b1572e694b933babe485c1db8c5835307337"
+      }
+    },
+    {
+      "case": "bam_sort_lowmem",
+      "size_multiplier": 1,
+      "records": 1000,
+      "command": [
+        "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/release/rust-bam",
+        "sort",
+        "--max-memory",
+        "1MiB",
+        "--max-open-files",
+        "8",
+        "-o",
+        "/tmp/bioinfo-bench-jkf017ya/size-1/bam_sort_lowmem/out.bam",
+        "/tmp/bioinfo-bench-jkf017ya/size-1/unsorted.bam"
+      ],
+      "cwd": "/tmp/bioinfo-bench-jkf017ya/size-1/bam_sort_lowmem",
+      "threads": null,
+      "compression": "bgzf",
+      "repeats": 2,
+      "samples": [
+        {
+          "wall_s": 0.0,
+          "user_s": 0.0,
+          "sys_s": 0.0,
+          "max_rss_kb": 4596,
+          "exit_code": 0,
+          "runner_wall_s": 0.0029008679994149134,
+          "temp_peak_bytes": 0,
+          "stdout_bytes": 0,
+          "stderr_bytes": 20
+        },
+        {
+          "wall_s": 0.0,
+          "user_s": 0.0,
+          "sys_s": 0.0,
+          "max_rss_kb": 4600,
+          "exit_code": 0,
+          "runner_wall_s": 0.002733068999077659,
+          "temp_peak_bytes": 0,
+          "stdout_bytes": 0,
+          "stderr_bytes": 20
+        }
+      ],
+      "summary": {
+        "wall_mean_s": 0.0,
+        "wall_median_s": 0.0,
+        "wall_min_s": 0.0,
+        "wall_max_s": 0.0,
+        "cpu_mean_s": 0.0,
+        "max_rss_kb": 4600,
+        "temp_peak_bytes": 0,
+        "output_bytes": 0
+      },
+      "correctness": {
+        "passed": true,
+        "note": "records=1000 <= 1000"
+      },
+      "input_sha256": {
+        "fastq": "a31f00e59064e765b9866ab5f44c0624fc10d9fe9bd1b3cd7e667b71b9495b49",
+        "sam": "c73b23e765729565da541c59cf8e8b2378dd338568d1400e143862f9c54dbd3d",
+        "unsorted": "6442d35fff3f1ff128ede085993824f919001de12b1e846e4ac493e4d9a91feb",
+        "sorted": "1cafae6de7d52350d8a0c85996f6b1572e694b933babe485c1db8c5835307337"
+      }
+    },
+    {
+      "case": "umi_dedup",
+      "size_multiplier": 1,
+      "records": 1000,
+      "command": [
+        "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/release/rust-umitools",
+        "dedup",
+        "-I",
+        "/tmp/bioinfo-bench-jkf017ya/size-1/sorted.bam",
+        "-S",
+        "/tmp/bioinfo-bench-jkf017ya/size-1/umi_dedup/out.bam",
+        "--extract-umi-method=tag",
+        "--umi-tag=UB"
+      ],
+      "cwd": "/tmp/bioinfo-bench-jkf017ya/size-1/umi_dedup",
+      "threads": null,
+      "compression": "bgzf",
+      "repeats": 2,
+      "samples": [
+        {
+          "wall_s": 0.01,
+          "user_s": 0.0,
+          "sys_s": 0.01,
+          "max_rss_kb": 19940,
+          "exit_code": 0,
+          "runner_wall_s": 0.01725114699729602,
+          "temp_peak_bytes": 0,
+          "stdout_bytes": 0,
+          "stderr_bytes": 691
+        },
+        {
+          "wall_s": 0.01,
+          "user_s": 0.0,
+          "sys_s": 0.01,
+          "max_rss_kb": 19868,
+          "exit_code": 0,
+          "runner_wall_s": 0.01653650899970671,
+          "temp_peak_bytes": 0,
+          "stdout_bytes": 0,
+          "stderr_bytes": 691
+        }
+      ],
+      "summary": {
+        "wall_mean_s": 0.01,
+        "wall_median_s": 0.01,
+        "wall_min_s": 0.01,
+        "wall_max_s": 0.01,
+        "cpu_mean_s": 0.01,
+        "max_rss_kb": 19940,
+        "temp_peak_bytes": 0,
+        "output_bytes": 0
+      },
+      "correctness": {
+        "passed": true,
+        "note": "records=1000 <= 1000"
+      },
+      "input_sha256": {
+        "fastq": "a31f00e59064e765b9866ab5f44c0624fc10d9fe9bd1b3cd7e667b71b9495b49",
+        "sam": "c73b23e765729565da541c59cf8e8b2378dd338568d1400e143862f9c54dbd3d",
+        "unsorted": "6442d35fff3f1ff128ede085993824f919001de12b1e846e4ac493e4d9a91feb",
+        "sorted": "1cafae6de7d52350d8a0c85996f6b1572e694b933babe485c1db8c5835307337"
+      }
+    },
+    {
+      "case": "cutadapt",
+      "size_multiplier": 10,
+      "records": 10000,
+      "command": [
+        "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/release/rust-cutadapt",
+        "--quiet",
+        "-a",
+        "AGATCGGAAGAGC",
+        "-m",
+        "30",
+        "-j",
+        "4",
+        "-o",
+        "/tmp/bioinfo-bench-jkf017ya/size-10/cutadapt/out.fastq.gz",
+        "/tmp/bioinfo-bench-jkf017ya/size-10/reads.fastq"
+      ],
+      "cwd": "/tmp/bioinfo-bench-jkf017ya/size-10/cutadapt",
+      "threads": 4,
+      "compression": "gzip",
+      "repeats": 2,
+      "samples": [
+        {
+          "wall_s": 0.01,
+          "user_s": 0.03,
+          "sys_s": 0.0,
+          "max_rss_kb": 8516,
+          "exit_code": 0,
+          "runner_wall_s": 0.011716441997123184,
+          "temp_peak_bytes": 0,
+          "stdout_bytes": 0,
+          "stderr_bytes": 0
+        },
+        {
+          "wall_s": 0.01,
+          "user_s": 0.04,
+          "sys_s": 0.0,
+          "max_rss_kb": 8408,
+          "exit_code": 0,
+          "runner_wall_s": 0.011404348999349168,
+          "temp_peak_bytes": 0,
+          "stdout_bytes": 0,
+          "stderr_bytes": 0
+        }
+      ],
+      "summary": {
+        "wall_mean_s": 0.01,
+        "wall_median_s": 0.01,
+        "wall_min_s": 0.01,
+        "wall_max_s": 0.01,
+        "cpu_mean_s": 0.035,
+        "max_rss_kb": 8516,
+        "temp_peak_bytes": 0,
+        "output_bytes": 0
+      },
+      "correctness": {
+        "passed": true,
+        "note": "records=10000 <= 10000"
+      },
+      "input_sha256": {
+        "fastq": "846e1a003ec2b014ed97d0714366ece18bc43dbe13cacf2908c26cced7b13f80",
+        "sam": "0412803a5eb5d895555b1ba7919d9ddcb163fe6ec9916e03c7cc3ddeddc55188",
+        "unsorted": "e8c86937440f1c7213628254812534066e1dfd7794fc107cc8742eb71d64c7f0",
+        "sorted": "876f0520f2022a473c5a676d28d94226b61d8b4884114488d84dfa73fc727e51"
+      }
+    },
+    {
+      "case": "cutadapt_j1",
+      "size_multiplier": 10,
+      "records": 10000,
+      "command": [
+        "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/release/rust-cutadapt",
+        "--quiet",
+        "-a",
+        "AGATCGGAAGAGC",
+        "-m",
+        "30",
+        "-j",
+        "1",
+        "-o",
+        "/tmp/bioinfo-bench-jkf017ya/size-10/cutadapt_j1/out.fastq.gz",
+        "/tmp/bioinfo-bench-jkf017ya/size-10/reads.fastq"
+      ],
+      "cwd": "/tmp/bioinfo-bench-jkf017ya/size-10/cutadapt_j1",
+      "threads": 1,
+      "compression": "gzip",
+      "repeats": 2,
+      "samples": [
+        {
+          "wall_s": 0.02,
+          "user_s": 0.03,
+          "sys_s": 0.0,
+          "max_rss_kb": 6564,
+          "exit_code": 0,
+          "runner_wall_s": 0.024983104998682393,
+          "temp_peak_bytes": 0,
+          "stdout_bytes": 0,
+          "stderr_bytes": 0
+        },
+        {
+          "wall_s": 0.02,
+          "user_s": 0.04,
+          "sys_s": 0.0,
+          "max_rss_kb": 6736,
+          "exit_code": 0,
+          "runner_wall_s": 0.02621649900174816,
+          "temp_peak_bytes": 0,
+          "stdout_bytes": 0,
+          "stderr_bytes": 0
+        }
+      ],
+      "summary": {
+        "wall_mean_s": 0.02,
+        "wall_median_s": 0.02,
+        "wall_min_s": 0.02,
+        "wall_max_s": 0.02,
+        "cpu_mean_s": 0.035,
+        "max_rss_kb": 6736,
+        "temp_peak_bytes": 0,
+        "output_bytes": 0
+      },
+      "correctness": {
+        "passed": true,
+        "note": "records=10000 <= 10000"
+      },
+      "input_sha256": {
+        "fastq": "846e1a003ec2b014ed97d0714366ece18bc43dbe13cacf2908c26cced7b13f80",
+        "sam": "0412803a5eb5d895555b1ba7919d9ddcb163fe6ec9916e03c7cc3ddeddc55188",
+        "unsorted": "e8c86937440f1c7213628254812534066e1dfd7794fc107cc8742eb71d64c7f0",
+        "sorted": "876f0520f2022a473c5a676d28d94226b61d8b4884114488d84dfa73fc727e51"
+      }
+    },
+    {
+      "case": "fastqc",
+      "size_multiplier": 10,
+      "records": 10000,
+      "command": [
+        "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/release/rust-fastqc",
+        "-o",
+        "/tmp/bioinfo-bench-jkf017ya/size-10/fastqc/out",
+        "/tmp/bioinfo-bench-jkf017ya/size-10/reads.fastq"
+      ],
+      "cwd": "/tmp/bioinfo-bench-jkf017ya/size-10/fastqc",
+      "threads": null,
+      "compression": "none",
+      "repeats": 2,
+      "samples": [
+        {
+          "wall_s": 0.03,
+          "user_s": 0.03,
+          "sys_s": 0.0,
+          "max_rss_kb": 5312,
+          "exit_code": 0,
+          "runner_wall_s": 0.03559091400165926,
+          "temp_peak_bytes": 0,
+          "stdout_bytes": 0,
+          "stderr_bytes": 82
+        },
+        {
+          "wall_s": 0.03,
+          "user_s": 0.03,
+          "sys_s": 0.0,
+          "max_rss_kb": 5120,
+          "exit_code": 0,
+          "runner_wall_s": 0.03808822000064538,
+          "temp_peak_bytes": 0,
+          "stdout_bytes": 0,
+          "stderr_bytes": 82
+        }
+      ],
+      "summary": {
+        "wall_mean_s": 0.03,
+        "wall_median_s": 0.03,
+        "wall_min_s": 0.03,
+        "wall_max_s": 0.03,
+        "cpu_mean_s": 0.03,
+        "max_rss_kb": 5312,
+        "temp_peak_bytes": 0,
+        "output_bytes": 0
+      },
+      "correctness": {
+        "passed": true,
+        "note": "Total Sequences matches"
+      },
+      "input_sha256": {
+        "fastq": "846e1a003ec2b014ed97d0714366ece18bc43dbe13cacf2908c26cced7b13f80",
+        "sam": "0412803a5eb5d895555b1ba7919d9ddcb163fe6ec9916e03c7cc3ddeddc55188",
+        "unsorted": "e8c86937440f1c7213628254812534066e1dfd7794fc107cc8742eb71d64c7f0",
+        "sorted": "876f0520f2022a473c5a676d28d94226b61d8b4884114488d84dfa73fc727e51"
+      }
+    },
+    {
+      "case": "fx_stats",
+      "size_multiplier": 10,
+      "records": 10000,
+      "command": [
+        "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/release/rust-fx",
+        "stats",
+        "-a",
+        "-T",
+        "-o",
+        "/tmp/bioinfo-bench-jkf017ya/size-10/fx_stats/stats.tsv",
+        "/tmp/bioinfo-bench-jkf017ya/size-10/reads.fastq"
+      ],
+      "cwd": "/tmp/bioinfo-bench-jkf017ya/size-10/fx_stats",
+      "threads": null,
+      "compression": "none",
+      "repeats": 2,
+      "samples": [
+        {
+          "wall_s": 0.01,
+          "user_s": 0.01,
+          "sys_s": 0.0,
+          "max_rss_kb": 4360,
+          "exit_code": 0,
+          "runner_wall_s": 0.015942559999530204,
+          "temp_peak_bytes": 0,
+          "stdout_bytes": 0,
+          "stderr_bytes": 0
+        },
+        {
+          "wall_s": 0.01,
+          "user_s": 0.01,
+          "sys_s": 0.0,
+          "max_rss_kb": 4360,
+          "exit_code": 0,
+          "runner_wall_s": 0.01861077599824057,
+          "temp_peak_bytes": 0,
+          "stdout_bytes": 0,
+          "stderr_bytes": 0
+        }
+      ],
+      "summary": {
+        "wall_mean_s": 0.01,
+        "wall_median_s": 0.01,
+        "wall_min_s": 0.01,
+        "wall_max_s": 0.01,
+        "cpu_mean_s": 0.01,
+        "max_rss_kb": 4360,
+        "temp_peak_bytes": 0,
+        "output_bytes": 0
+      },
+      "correctness": {
+        "passed": true,
+        "note": "num_seqs=10000"
+      },
+      "input_sha256": {
+        "fastq": "846e1a003ec2b014ed97d0714366ece18bc43dbe13cacf2908c26cced7b13f80",
+        "sam": "0412803a5eb5d895555b1ba7919d9ddcb163fe6ec9916e03c7cc3ddeddc55188",
+        "unsorted": "e8c86937440f1c7213628254812534066e1dfd7794fc107cc8742eb71d64c7f0",
+        "sorted": "876f0520f2022a473c5a676d28d94226b61d8b4884114488d84dfa73fc727e51"
+      }
+    },
+    {
+      "case": "bam_sort",
+      "size_multiplier": 10,
+      "records": 10000,
+      "command": [
+        "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/release/rust-bam",
+        "sort",
+        "-o",
+        "/tmp/bioinfo-bench-jkf017ya/size-10/bam_sort/out.bam",
+        "/tmp/bioinfo-bench-jkf017ya/size-10/unsorted.bam"
+      ],
+      "cwd": "/tmp/bioinfo-bench-jkf017ya/size-10/bam_sort",
+      "threads": null,
+      "compression": "bgzf",
+      "repeats": 2,
+      "samples": [
+        {
+          "wall_s": 0.01,
+          "user_s": 0.01,
+          "sys_s": 0.0,
+          "max_rss_kb": 11008,
+          "exit_code": 0,
+          "runner_wall_s": 0.01757363000069745,
+          "temp_peak_bytes": 0,
+          "stdout_bytes": 0,
+          "stderr_bytes": 21
+        },
+        {
+          "wall_s": 0.01,
+          "user_s": 0.01,
+          "sys_s": 0.0,
+          "max_rss_kb": 10984,
+          "exit_code": 0,
+          "runner_wall_s": 0.01832301399917924,
+          "temp_peak_bytes": 0,
+          "stdout_bytes": 0,
+          "stderr_bytes": 21
+        }
+      ],
+      "summary": {
+        "wall_mean_s": 0.01,
+        "wall_median_s": 0.01,
+        "wall_min_s": 0.01,
+        "wall_max_s": 0.01,
+        "cpu_mean_s": 0.01,
+        "max_rss_kb": 11008,
+        "temp_peak_bytes": 0,
+        "output_bytes": 0
+      },
+      "correctness": {
+        "passed": true,
+        "note": "records=10000 <= 10000"
+      },
+      "input_sha256": {
+        "fastq": "846e1a003ec2b014ed97d0714366ece18bc43dbe13cacf2908c26cced7b13f80",
+        "sam": "0412803a5eb5d895555b1ba7919d9ddcb163fe6ec9916e03c7cc3ddeddc55188",
+        "unsorted": "e8c86937440f1c7213628254812534066e1dfd7794fc107cc8742eb71d64c7f0",
+        "sorted": "876f0520f2022a473c5a676d28d94226b61d8b4884114488d84dfa73fc727e51"
+      }
+    },
+    {
+      "case": "bam_sort_lowmem",
+      "size_multiplier": 10,
+      "records": 10000,
+      "command": [
+        "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/release/rust-bam",
+        "sort",
+        "--max-memory",
+        "1MiB",
+        "--max-open-files",
+        "8",
+        "-o",
+        "/tmp/bioinfo-bench-jkf017ya/size-10/bam_sort_lowmem/out.bam",
+        "/tmp/bioinfo-bench-jkf017ya/size-10/unsorted.bam"
+      ],
+      "cwd": "/tmp/bioinfo-bench-jkf017ya/size-10/bam_sort_lowmem",
+      "threads": null,
+      "compression": "bgzf",
+      "repeats": 2,
+      "samples": [
+        {
+          "wall_s": 0.03,
+          "user_s": 0.02,
+          "sys_s": 0.0,
+          "max_rss_kb": 5296,
+          "exit_code": 0,
+          "runner_wall_s": 0.031420634000824066,
+          "temp_peak_bytes": 320257,
+          "stdout_bytes": 0,
+          "stderr_bytes": 21
+        },
+        {
+          "wall_s": 0.03,
+          "user_s": 0.02,
+          "sys_s": 0.0,
+          "max_rss_kb": 5288,
+          "exit_code": 0,
+          "runner_wall_s": 0.03434364499844378,
+          "temp_peak_bytes": 320257,
+          "stdout_bytes": 0,
+          "stderr_bytes": 21
+        }
+      ],
+      "summary": {
+        "wall_mean_s": 0.03,
+        "wall_median_s": 0.03,
+        "wall_min_s": 0.03,
+        "wall_max_s": 0.03,
+        "cpu_mean_s": 0.02,
+        "max_rss_kb": 5296,
+        "temp_peak_bytes": 320257,
+        "output_bytes": 0
+      },
+      "correctness": {
+        "passed": true,
+        "note": "records=10000 <= 10000"
+      },
+      "input_sha256": {
+        "fastq": "846e1a003ec2b014ed97d0714366ece18bc43dbe13cacf2908c26cced7b13f80",
+        "sam": "0412803a5eb5d895555b1ba7919d9ddcb163fe6ec9916e03c7cc3ddeddc55188",
+        "unsorted": "e8c86937440f1c7213628254812534066e1dfd7794fc107cc8742eb71d64c7f0",
+        "sorted": "876f0520f2022a473c5a676d28d94226b61d8b4884114488d84dfa73fc727e51"
+      }
+    },
+    {
+      "case": "umi_dedup",
+      "size_multiplier": 10,
+      "records": 10000,
+      "command": [
+        "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/release/rust-umitools",
+        "dedup",
+        "-I",
+        "/tmp/bioinfo-bench-jkf017ya/size-10/sorted.bam",
+        "-S",
+        "/tmp/bioinfo-bench-jkf017ya/size-10/umi_dedup/out.bam",
+        "--extract-umi-method=tag",
+        "--umi-tag=UB"
+      ],
+      "cwd": "/tmp/bioinfo-bench-jkf017ya/size-10/umi_dedup",
+      "threads": null,
+      "compression": "bgzf",
+      "repeats": 2,
+      "samples": [
+        {
+          "wall_s": 0.02,
+          "user_s": 0.02,
+          "sys_s": 0.01,
+          "max_rss_kb": 33008,
+          "exit_code": 0,
+          "runner_wall_s": 0.027459111999633024,
+          "temp_peak_bytes": 0,
+          "stdout_bytes": 0,
+          "stderr_bytes": 695
+        },
+        {
+          "wall_s": 0.02,
+          "user_s": 0.02,
+          "sys_s": 0.0,
+          "max_rss_kb": 32968,
+          "exit_code": 0,
+          "runner_wall_s": 0.027885175000847084,
+          "temp_peak_bytes": 0,
+          "stdout_bytes": 0,
+          "stderr_bytes": 695
+        }
+      ],
+      "summary": {
+        "wall_mean_s": 0.02,
+        "wall_median_s": 0.02,
+        "wall_min_s": 0.02,
+        "wall_max_s": 0.02,
+        "cpu_mean_s": 0.025,
+        "max_rss_kb": 33008,
+        "temp_peak_bytes": 0,
+        "output_bytes": 0
+      },
+      "correctness": {
+        "passed": true,
+        "note": "records=10000 <= 10000"
+      },
+      "input_sha256": {
+        "fastq": "846e1a003ec2b014ed97d0714366ece18bc43dbe13cacf2908c26cced7b13f80",
+        "sam": "0412803a5eb5d895555b1ba7919d9ddcb163fe6ec9916e03c7cc3ddeddc55188",
+        "unsorted": "e8c86937440f1c7213628254812534066e1dfd7794fc107cc8742eb71d64c7f0",
+        "sorted": "876f0520f2022a473c5a676d28d94226b61d8b4884114488d84dfa73fc727e51"
+      }
+    },
+    {
+      "case": "cutadapt",
+      "size_multiplier": 100,
+      "records": 100000,
+      "command": [
+        "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/release/rust-cutadapt",
+        "--quiet",
+        "-a",
+        "AGATCGGAAGAGC",
+        "-m",
+        "30",
+        "-j",
+        "4",
+        "-o",
+        "/tmp/bioinfo-bench-jkf017ya/size-100/cutadapt/out.fastq.gz",
+        "/tmp/bioinfo-bench-jkf017ya/size-100/reads.fastq"
+      ],
+      "cwd": "/tmp/bioinfo-bench-jkf017ya/size-100/cutadapt",
+      "threads": 4,
+      "compression": "gzip",
+      "repeats": 2,
+      "samples": [
+        {
+          "wall_s": 0.06,
+          "user_s": 0.42,
+          "sys_s": 0.01,
+          "max_rss_kb": 14644,
+          "exit_code": 0,
+          "runner_wall_s": 0.06272711199926562,
+          "temp_peak_bytes": 0,
+          "stdout_bytes": 0,
+          "stderr_bytes": 0
+        },
+        {
+          "wall_s": 0.05,
+          "user_s": 0.42,
+          "sys_s": 0.01,
+          "max_rss_kb": 14400,
+          "exit_code": 0,
+          "runner_wall_s": 0.060598482999921544,
+          "temp_peak_bytes": 0,
+          "stdout_bytes": 0,
+          "stderr_bytes": 0
+        }
+      ],
+      "summary": {
+        "wall_mean_s": 0.055,
+        "wall_median_s": 0.055,
+        "wall_min_s": 0.05,
+        "wall_max_s": 0.06,
+        "cpu_mean_s": 0.43,
+        "max_rss_kb": 14644,
+        "temp_peak_bytes": 0,
+        "output_bytes": 0
+      },
+      "correctness": {
+        "passed": true,
+        "note": "records=99997 <= 100000"
+      },
+      "input_sha256": {
+        "fastq": "170a2034962e11d9c87217b3031b69a4f3a6a49372102981329380c68739c034",
+        "sam": "101cefff8d537c22a69ae23de2666f1e050056b5ccd11db3f49539328fe2cbcf",
+        "unsorted": "ca1f7b963d6b503aea20c8533f634f4d0e29cee3d426642bf38bd20968593097",
+        "sorted": "3555bca14564d3e9c32f0c2a5188ff56f62f53e533d740189a0a2748e91b6268"
+      }
+    },
+    {
+      "case": "cutadapt_j1",
+      "size_multiplier": 100,
+      "records": 100000,
+      "command": [
+        "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/release/rust-cutadapt",
+        "--quiet",
+        "-a",
+        "AGATCGGAAGAGC",
+        "-m",
+        "30",
+        "-j",
+        "1",
+        "-o",
+        "/tmp/bioinfo-bench-jkf017ya/size-100/cutadapt_j1/out.fastq.gz",
+        "/tmp/bioinfo-bench-jkf017ya/size-100/reads.fastq"
+      ],
+      "cwd": "/tmp/bioinfo-bench-jkf017ya/size-100/cutadapt_j1",
+      "threads": 1,
+      "compression": "gzip",
+      "repeats": 2,
+      "samples": [
+        {
+          "wall_s": 0.17,
+          "user_s": 0.34,
+          "sys_s": 0.01,
+          "max_rss_kb": 8812,
+          "exit_code": 0,
+          "runner_wall_s": 0.1768721420012298,
+          "temp_peak_bytes": 0,
+          "stdout_bytes": 0,
+          "stderr_bytes": 0
+        },
+        {
+          "wall_s": 0.2,
+          "user_s": 0.41,
+          "sys_s": 0.01,
+          "max_rss_kb": 8684,
+          "exit_code": 0,
+          "runner_wall_s": 0.20635290800055373,
+          "temp_peak_bytes": 0,
+          "stdout_bytes": 0,
+          "stderr_bytes": 0
+        }
+      ],
+      "summary": {
+        "wall_mean_s": 0.185,
+        "wall_median_s": 0.185,
+        "wall_min_s": 0.17,
+        "wall_max_s": 0.2,
+        "cpu_mean_s": 0.385,
+        "max_rss_kb": 8812,
+        "temp_peak_bytes": 0,
+        "output_bytes": 0
+      },
+      "correctness": {
+        "passed": true,
+        "note": "records=99997 <= 100000"
+      },
+      "input_sha256": {
+        "fastq": "170a2034962e11d9c87217b3031b69a4f3a6a49372102981329380c68739c034",
+        "sam": "101cefff8d537c22a69ae23de2666f1e050056b5ccd11db3f49539328fe2cbcf",
+        "unsorted": "ca1f7b963d6b503aea20c8533f634f4d0e29cee3d426642bf38bd20968593097",
+        "sorted": "3555bca14564d3e9c32f0c2a5188ff56f62f53e533d740189a0a2748e91b6268"
+      }
+    },
+    {
+      "case": "fastqc",
+      "size_multiplier": 100,
+      "records": 100000,
+      "command": [
+        "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/release/rust-fastqc",
+        "-o",
+        "/tmp/bioinfo-bench-jkf017ya/size-100/fastqc/out",
+        "/tmp/bioinfo-bench-jkf017ya/size-100/reads.fastq"
+      ],
+      "cwd": "/tmp/bioinfo-bench-jkf017ya/size-100/fastqc",
+      "threads": null,
+      "compression": "none",
+      "repeats": 2,
+      "samples": [
+        {
+          "wall_s": 0.39,
+          "user_s": 0.38,
+          "sys_s": 0.0,
+          "max_rss_kb": 15296,
+          "exit_code": 0,
+          "runner_wall_s": 0.3958976409994648,
+          "temp_peak_bytes": 0,
+          "stdout_bytes": 0,
+          "stderr_bytes": 83
+        },
+        {
+          "wall_s": 0.37,
+          "user_s": 0.36,
+          "sys_s": 0.0,
+          "max_rss_kb": 15364,
+          "exit_code": 0,
+          "runner_wall_s": 0.37821615299981204,
+          "temp_peak_bytes": 0,
+          "stdout_bytes": 0,
+          "stderr_bytes": 83
+        }
+      ],
+      "summary": {
+        "wall_mean_s": 0.38,
+        "wall_median_s": 0.38,
+        "wall_min_s": 0.37,
+        "wall_max_s": 0.39,
+        "cpu_mean_s": 0.37,
+        "max_rss_kb": 15364,
+        "temp_peak_bytes": 0,
+        "output_bytes": 0
+      },
+      "correctness": {
+        "passed": true,
+        "note": "Total Sequences matches"
+      },
+      "input_sha256": {
+        "fastq": "170a2034962e11d9c87217b3031b69a4f3a6a49372102981329380c68739c034",
+        "sam": "101cefff8d537c22a69ae23de2666f1e050056b5ccd11db3f49539328fe2cbcf",
+        "unsorted": "ca1f7b963d6b503aea20c8533f634f4d0e29cee3d426642bf38bd20968593097",
+        "sorted": "3555bca14564d3e9c32f0c2a5188ff56f62f53e533d740189a0a2748e91b6268"
+      }
+    },
+    {
+      "case": "fx_stats",
+      "size_multiplier": 100,
+      "records": 100000,
+      "command": [
+        "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/release/rust-fx",
+        "stats",
+        "-a",
+        "-T",
+        "-o",
+        "/tmp/bioinfo-bench-jkf017ya/size-100/fx_stats/stats.tsv",
+        "/tmp/bioinfo-bench-jkf017ya/size-100/reads.fastq"
+      ],
+      "cwd": "/tmp/bioinfo-bench-jkf017ya/size-100/fx_stats",
+      "threads": null,
+      "compression": "none",
+      "repeats": 2,
+      "samples": [
+        {
+          "wall_s": 0.14,
+          "user_s": 0.14,
+          "sys_s": 0.0,
+          "max_rss_kb": 4432,
+          "exit_code": 0,
+          "runner_wall_s": 0.14741705599954003,
+          "temp_peak_bytes": 0,
+          "stdout_bytes": 0,
+          "stderr_bytes": 0
+        },
+        {
+          "wall_s": 0.14,
+          "user_s": 0.14,
+          "sys_s": 0.0,
+          "max_rss_kb": 4192,
+          "exit_code": 0,
+          "runner_wall_s": 0.1478050779987825,
+          "temp_peak_bytes": 0,
+          "stdout_bytes": 0,
+          "stderr_bytes": 0
+        }
+      ],
+      "summary": {
+        "wall_mean_s": 0.14,
+        "wall_median_s": 0.14,
+        "wall_min_s": 0.14,
+        "wall_max_s": 0.14,
+        "cpu_mean_s": 0.14,
+        "max_rss_kb": 4432,
+        "temp_peak_bytes": 0,
+        "output_bytes": 0
+      },
+      "correctness": {
+        "passed": true,
+        "note": "num_seqs=100000"
+      },
+      "input_sha256": {
+        "fastq": "170a2034962e11d9c87217b3031b69a4f3a6a49372102981329380c68739c034",
+        "sam": "101cefff8d537c22a69ae23de2666f1e050056b5ccd11db3f49539328fe2cbcf",
+        "unsorted": "ca1f7b963d6b503aea20c8533f634f4d0e29cee3d426642bf38bd20968593097",
+        "sorted": "3555bca14564d3e9c32f0c2a5188ff56f62f53e533d740189a0a2748e91b6268"
+      }
+    },
+    {
+      "case": "bam_sort",
+      "size_multiplier": 100,
+      "records": 100000,
+      "command": [
+        "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/release/rust-bam",
+        "sort",
+        "-o",
+        "/tmp/bioinfo-bench-jkf017ya/size-100/bam_sort/out.bam",
+        "/tmp/bioinfo-bench-jkf017ya/size-100/unsorted.bam"
+      ],
+      "cwd": "/tmp/bioinfo-bench-jkf017ya/size-100/bam_sort",
+      "threads": null,
+      "compression": "bgzf",
+      "repeats": 2,
+      "samples": [
+        {
+          "wall_s": 0.17,
+          "user_s": 0.15,
+          "sys_s": 0.01,
+          "max_rss_kb": 67472,
+          "exit_code": 0,
+          "runner_wall_s": 0.17194311800267315,
+          "temp_peak_bytes": 0,
+          "stdout_bytes": 0,
+          "stderr_bytes": 22
+        },
+        {
+          "wall_s": 0.16,
+          "user_s": 0.15,
+          "sys_s": 0.01,
+          "max_rss_kb": 68788,
+          "exit_code": 0,
+          "runner_wall_s": 0.16948655799933476,
+          "temp_peak_bytes": 0,
+          "stdout_bytes": 0,
+          "stderr_bytes": 22
+        }
+      ],
+      "summary": {
+        "wall_mean_s": 0.165,
+        "wall_median_s": 0.165,
+        "wall_min_s": 0.16,
+        "wall_max_s": 0.17,
+        "cpu_mean_s": 0.16,
+        "max_rss_kb": 68788,
+        "temp_peak_bytes": 0,
+        "output_bytes": 0
+      },
+      "correctness": {
+        "passed": true,
+        "note": "records=100000 <= 100000"
+      },
+      "input_sha256": {
+        "fastq": "170a2034962e11d9c87217b3031b69a4f3a6a49372102981329380c68739c034",
+        "sam": "101cefff8d537c22a69ae23de2666f1e050056b5ccd11db3f49539328fe2cbcf",
+        "unsorted": "ca1f7b963d6b503aea20c8533f634f4d0e29cee3d426642bf38bd20968593097",
+        "sorted": "3555bca14564d3e9c32f0c2a5188ff56f62f53e533d740189a0a2748e91b6268"
+      }
+    },
+    {
+      "case": "bam_sort_lowmem",
+      "size_multiplier": 100,
+      "records": 100000,
+      "command": [
+        "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/release/rust-bam",
+        "sort",
+        "--max-memory",
+        "1MiB",
+        "--max-open-files",
+        "8",
+        "-o",
+        "/tmp/bioinfo-bench-jkf017ya/size-100/bam_sort_lowmem/out.bam",
+        "/tmp/bioinfo-bench-jkf017ya/size-100/unsorted.bam"
+      ],
+      "cwd": "/tmp/bioinfo-bench-jkf017ya/size-100/bam_sort_lowmem",
+      "threads": null,
+      "compression": "bgzf",
+      "repeats": 2,
+      "samples": [
+        {
+          "wall_s": 0.46,
+          "user_s": 0.41,
+          "sys_s": 0.04,
+          "max_rss_kb": 5156,
+          "exit_code": 0,
+          "runner_wall_s": 0.4627550790028181,
+          "temp_peak_bytes": 3613943,
+          "stdout_bytes": 0,
+          "stderr_bytes": 22
+        },
+        {
+          "wall_s": 0.47,
+          "user_s": 0.42,
+          "sys_s": 0.04,
+          "max_rss_kb": 5204,
+          "exit_code": 0,
+          "runner_wall_s": 0.480075282001053,
+          "temp_peak_bytes": 3647764,
+          "stdout_bytes": 0,
+          "stderr_bytes": 22
+        }
+      ],
+      "summary": {
+        "wall_mean_s": 0.46499999999999997,
+        "wall_median_s": 0.46499999999999997,
+        "wall_min_s": 0.46,
+        "wall_max_s": 0.47,
+        "cpu_mean_s": 0.45499999999999996,
+        "max_rss_kb": 5204,
+        "temp_peak_bytes": 3647764,
+        "output_bytes": 0
+      },
+      "correctness": {
+        "passed": true,
+        "note": "records=100000 <= 100000"
+      },
+      "input_sha256": {
+        "fastq": "170a2034962e11d9c87217b3031b69a4f3a6a49372102981329380c68739c034",
+        "sam": "101cefff8d537c22a69ae23de2666f1e050056b5ccd11db3f49539328fe2cbcf",
+        "unsorted": "ca1f7b963d6b503aea20c8533f634f4d0e29cee3d426642bf38bd20968593097",
+        "sorted": "3555bca14564d3e9c32f0c2a5188ff56f62f53e533d740189a0a2748e91b6268"
+      }
+    },
+    {
+      "case": "umi_dedup",
+      "size_multiplier": 100,
+      "records": 100000,
+      "command": [
+        "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/release/rust-umitools",
+        "dedup",
+        "-I",
+        "/tmp/bioinfo-bench-jkf017ya/size-100/sorted.bam",
+        "-S",
+        "/tmp/bioinfo-bench-jkf017ya/size-100/umi_dedup/out.bam",
+        "--extract-umi-method=tag",
+        "--umi-tag=UB"
+      ],
+      "cwd": "/tmp/bioinfo-bench-jkf017ya/size-100/umi_dedup",
+      "threads": null,
+      "compression": "bgzf",
+      "repeats": 2,
+      "samples": [
+        {
+          "wall_s": 0.11,
+          "user_s": 0.17,
+          "sys_s": 0.04,
+          "max_rss_kb": 186524,
+          "exit_code": 0,
+          "runner_wall_s": 0.11329808000300545,
+          "temp_peak_bytes": 0,
+          "stdout_bytes": 0,
+          "stderr_bytes": 699
+        },
+        {
+          "wall_s": 0.11,
+          "user_s": 0.17,
+          "sys_s": 0.05,
+          "max_rss_kb": 186944,
+          "exit_code": 0,
+          "runner_wall_s": 0.11811622800087207,
+          "temp_peak_bytes": 0,
+          "stdout_bytes": 0,
+          "stderr_bytes": 699
+        }
+      ],
+      "summary": {
+        "wall_mean_s": 0.11,
+        "wall_median_s": 0.11,
+        "wall_min_s": 0.11,
+        "wall_max_s": 0.11,
+        "cpu_mean_s": 0.21500000000000002,
+        "max_rss_kb": 186944,
+        "temp_peak_bytes": 0,
+        "output_bytes": 0
+      },
+      "correctness": {
+        "passed": true,
+        "note": "records=100000 <= 100000"
+      },
+      "input_sha256": {
+        "fastq": "170a2034962e11d9c87217b3031b69a4f3a6a49372102981329380c68739c034",
+        "sam": "101cefff8d537c22a69ae23de2666f1e050056b5ccd11db3f49539328fe2cbcf",
+        "unsorted": "ca1f7b963d6b503aea20c8533f634f4d0e29cee3d426642bf38bd20968593097",
+        "sorted": "3555bca14564d3e9c32f0c2a5188ff56f62f53e533d740189a0a2748e91b6268"
+      }
+    }
+  ],
+  "limitations": [
+    "No oracle comparison is performed for every case; correctness checks are structural/record-count based.",
+    "BAM sort temp-disk peak is sampled, not a hard process filesystem limit.",
+    "hosted runner/CI performance is not measured here."
+  ]
+}

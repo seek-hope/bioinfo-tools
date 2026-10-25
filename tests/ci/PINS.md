@@ -49,10 +49,11 @@ Checksums are per-platform: the upstream release archives for macOS/arm64 differ
 If the platform is not linux x86_64, pin the checksum of the binary actually
 installed and note the platform here rather than forcing this one to match.
 
-## How to install (needs network, once, outside the agent sandbox)
+## How to install (network access allowed)
 
-Shell network access is forbidden inside this workspace's agent sessions, so the
-binaries must be placed by a human or by CI provisioning:
+The gate never provides or silently downloads an oracle. Provision the pinned
+versions manually, in CI, or with a maintainer script. The gate then verifies the
+version banners, resolved paths and, where recorded, checksums:
 
 ```sh
 mkdir -p tests/ci/env/bin

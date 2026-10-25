@@ -1,13 +1,14 @@
 //! Alignment, table and temporary-file I/O.
 
 pub mod alignment;
+pub mod bam;
 pub mod fastq;
 pub mod paired;
 pub mod sort;
 pub mod spill;
 
 use crate::error::{Error, Result};
-use rust_htslib::bam::{self, Record};
+use crate::io::bam::Record;
 use std::path::Path;
 
 /// Output format implied by the destination extension.

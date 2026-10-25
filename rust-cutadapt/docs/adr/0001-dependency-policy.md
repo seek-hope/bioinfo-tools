@@ -36,8 +36,9 @@ The dependency policy is:
    `xz2` and `lzma-sys`; adding another direct dependency requires an ADR or an
    explicit update to this one.
 3. Keep test and build-only dependencies out of the runtime surface.
-4. Continue to build and test offline with the pinned toolchain; the
-   `Cargo.lock` file is authoritative for reproducible builds.
+4. Build with the pinned toolchain and `--locked`; `Cargo.lock` is authoritative
+   for reproducible builds. Network access is allowed; offline builds are
+   supported when the lockfile is vendored or cached.
 5. Do not use a dependency to hide an unsupported format or an unimplemented
    option. Unsupported input must fail closed with the documented exit code.
 
@@ -76,9 +77,9 @@ observable output (`docs/EVIDENCE-W1-1.md` DR-5).
 ## Consequences
 
 - bzip2 and xz are first-class documented formats, not silent extensions.
-- The MSRV check must cover the new dependencies (currently Rust 1.88).
+- The MSRV check must cover the new dependencies (currently Rust 1.91).
 - Offline builds need these crates vendored or present in the local registry,
-  exactly as they already need `clap` and `flate2`.
+  exactly as they already need `clap` and `flate2`; online builds can fetch them.
 - The dependency review in `Cargo.toml` and the CI lockfile check remain the
   enforcement points. A future format or reporting feature that needs another
   crate must update this ADR rather than silently expanding the manifest.

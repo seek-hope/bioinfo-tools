@@ -22,6 +22,8 @@
 //! binary is **not available here**, so these are documentation-derived and are
 //! recorded as `experimental` in `docs/EVIDENCE-W1-3.md` (DR-1, DR-3).
 
+use std::collections::BTreeMap;
+
 /// One row of the stats table.
 #[derive(Clone, Debug, PartialEq)]
 pub struct StatsRow {
@@ -360,6 +362,95 @@ pub fn n50(lengths: &mut [u64]) -> (u64, u64) {
     (0, 0)
 }
 
+/// N50/L50 from an exact length histogram.
+///
+/// Memory is proportional to the number of distinct lengths, not the number of
+/// reads. The arithmetic is the same as [`n50`]: lengths descending, half the
+/// bases covered, L50 is the number of reads consumed including the crossing
+/// read. A zero-length-only input keeps the old `(0, 1)` result.
+pub fn n50_from_histogram(lengths: &BTreeMap<u64, u64>) -> (u64, u64) {
+    if lengths.is_empty() {
+        return (0, 0);
+    }
+    let total: u64 = lengths
+        .iter()
+        .map(|(&len, &count)| len.saturating_mul(count))
+        .fold(0u64, u64::saturating_add);
+    let mut running = 0u64;
+    let mut consumed = 0u64;
+    for (&len, &count) in lengths.iter().rev() {
+        if count == 0 {
+            continue;
+        }
+        if total == 0 {
+            // The old implementation returns the first (only) length and L50 1.
+            return (len, consumed + 1);
+        }
+        let after = running.saturating_add(len.saturating_mul(count));
+        if after.saturating_mul(2) >= total {
+            let need = total.saturating_sub(running.saturating_mul(2));
+            let k = if len == 0 {
+                1
+            } else {
+                need.div_ceil(len.saturating_mul(2)).max(1)
+            };
+            return (len, consumed + k.min(count));
+        }
+        running = after;
+        consumed += count;
+    }
+    (0, 0)
+}
+
+/// Quartiles from an exact length histogram.
+///
+/// Uses the same Tukey hinges and half-to-even rounding as [`quartiles`], but
+/// reads order statistics from the histogram instead of materialising every
+/// read length.
+pub fn quartiles_from_histogram(lengths: &BTreeMap<u64, u64>) -> (u64, u64, u64) {
+    if lengths.is_empty() {
+        return (0, 0, 0);
+    }
+    let n: u64 = lengths.values().copied().sum();
+    if n == 0 {
+        return (0, 0, 0);
+    }
+    if n == 1 {
+        let value = value_at(lengths, 0);
+        return (value, value, value);
+    }
+
+    let median = |start: u64, len: u64| -> f64 {
+        let mid = start + len / 2;
+        if len % 2 == 1 {
+            value_at(lengths, mid) as f64
+        } else {
+            (value_at(lengths, mid - 1) as f64 + value_at(lengths, mid) as f64) / 2.0
+        }
+    };
+    let (low_len, high_start, high_len) = if n % 2 == 1 {
+        (n / 2 + 1, n / 2, n - n / 2)
+    } else {
+        (n / 2, n / 2, n / 2)
+    };
+    (
+        round_half_even(median(0, low_len)),
+        round_half_even(median(0, n)),
+        round_half_even(median(high_start, high_len)),
+    )
+}
+
+/// The value at a 0-based rank in an ascending histogram.
+fn value_at(lengths: &BTreeMap<u64, u64>, mut rank: u64) -> u64 {
+    for (&length, &count) in lengths {
+        if rank < count {
+            return length;
+        }
+        rank -= count;
+    }
+    0
+}
+
 /// Quartiles of a length list.
 ///
 /// The interpolation method is **not documented** by SeqKit, so it was
@@ -590,6 +681,42 @@ mod tests {
         );
         let human = render(&[], false, Layout::Human);
         assert_eq!(human.lines().count(), 1, "header only: no rule line");
+    }
+
+    #[test]
+    fn histogram_statistics_match_the_sorted_path() {
+        let cases: Vec<Vec<u64>> = vec![
+            Vec::new(),
+            vec![0],
+            vec![0, 0],
+            vec![5],
+            vec![4, 7, 20],
+            vec![1, 2, 3, 4],
+            (1..=20).collect(),
+            vec![150, 150, 150],
+            vec![1, 1, 1, 2, 2, 3, 100],
+            vec![100, 1, 1, 1],
+        ];
+        for lengths in cases {
+            let mut expected_n50 = lengths.clone();
+            let expected_n50 = n50(&mut expected_n50);
+            let mut expected_quartiles = lengths.clone();
+            let expected_quartiles = quartiles(&mut expected_quartiles);
+            let mut histogram = BTreeMap::new();
+            for length in lengths {
+                *histogram.entry(length).or_insert(0) += 1;
+            }
+            assert_eq!(
+                n50_from_histogram(&histogram),
+                expected_n50,
+                "N50 for {histogram:?}"
+            );
+            assert_eq!(
+                quartiles_from_histogram(&histogram),
+                expected_quartiles,
+                "quartiles for {histogram:?}"
+            );
+        }
     }
 
     #[test]

@@ -77,10 +77,11 @@ if the version changed:
 * **Adapter Content** is computed from `Configuration/adapter_list.txt`, which this
   prototype does not implement; see `docs/EVIDENCE-QC.md`.
 
-## How to install (needs network, once, outside the agent sandbox)
+## How to install (network access allowed)
 
-Shell network access is forbidden inside this workspace's agent sessions, so the
-oracles must be placed by a human or by CI provisioning:
+The gate never provides or silently downloads an oracle. Provision the pinned
+versions manually, in CI, or with a maintainer script. The gate then verifies the
+version banners, resolved paths and, where recorded, checksums:
 
 ```sh
 mkdir -p tests/ci/env

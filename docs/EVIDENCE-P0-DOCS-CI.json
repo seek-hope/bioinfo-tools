@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "kind": "p0-doc-audit-and-quality-gate",
+  "base_commit": "49953ec50ae04b343123a214b77030ff31f39a4b",
+  "working_tree_dirty": true,
+  "scope_completed": ["T1", "T2", "T3", "T4", "C1", "C3"],
+  "toolchain": {
+    "rustc": "1.99.1 (58cf8f9c3 2026-10-13)",
+    "cargo": "1.99.1 (5f94df478 2026-08-27)"
+  },
+  "permissions": {
+    "network": "allowed",
+    "install": "allowed",
+    "offline": "optional --offline",
+    "oracle_isolation": "optional --isolate-network"
+  },
+  "checks": [
+    {"command": "python3 tests/ci/check_docs.py", "exit_code": 0, "result": "PASS documentation constraints (10 current files, 8 historical files); PASS rust-umitools documented as protected/not modified"},
+    {"command": "python3 tests/ci/test_check.py -v", "exit_code": 0, "result": "Ran 12 tests; OK"},
+    {
+      "command": "bash tests/ci/check.sh --with-fastx-qc-oracles",
+      "exit_code": 0,
+      "workspace_release_tests_passed": 699,
+      "fastx_differential": "50/50 cases passed",
+      "qc_differential": "22/22 fixtures passed",
+      "multiqc": "PASS",
+      "qc_selftest": "SELFTEST PASS",
+      "result": "QUALITY PASS (base + FASTX/QC oracles)"
+    },
+    {"command": "git diff --check", "exit_code": 0, "result": "no output"},
+    {"command": "git status --porcelain -- rust-umitools rust-cutadapt/tests/fixtures", "exit_code": 0, "result": "no output"}
+  ],
+  "sha256": {
+    "AGENTS.md": "319731188ee86b153a1693ea121a786687e5f6134baf94f60a8bf780d7fd3015",
+    "TASK.md": "d6fba4cfeefbd1ec25d9666920667f5d584da98fe38fee7a7f19ad9a5081b4c3",
+    "README.md": "3ab7e057e646c6c354f03081874fbe67dbede91f280c011068d900d97f782206",
+    "docs/DEVELOPMENT-PLAN.md": "76e42ae8e400ca8d5c327c7a2264b053f58b969b6cafb17aa84cca53dc24ed3c",
+    "docs/DOC-AUDIT.md": "5a65586d2e88732667be522d4112938d8c26c99e198c5a9122f193ca40c3bae8",
+    "tests/ci/check.sh": "6ec4c850a1178f44e2e23c14afe0d3424bcb890b29881bc74eef9ef8b4d5f2be",
+    "tests/ci/test_check.py": "942b2ddc8037b8156234e560b9ebf4b3bff151e1f8976f8177fe3bf9adb3e0e7",
+    "tests/ci/check_docs.py": "ef44ae1a2f6c1c65d2619b6b3a7441cbd987c14946ffdfd133e0a4d81f866b89",
+    "tests/ci/README.md": "5b500ab7cff712143de784a640002dacd7e7135b4b22e84723addc34762ccc33",
+    ".github/workflows/quality.yml": "ec774ea40b7375c7ae6f0be56a57f6e4fb38a7024c1aaafc14cc21a284cb213d",
+    "rust-cutadapt/README.md": "3ec2c4a1ea10e60cc15a27491212e6235505c95596cd4e91b0892e7086b9a857",
+    "rust-cutadapt/docs/adr/0001-dependency-policy.md": "9d6bec6a8d3e6900f2c059fb9c1ccd93a531afb46585bdf19d72532f5beb3087"
+  },
+  "protected_status": {
+    "rust-umitools": "unchanged in this batch; stale MSRV/offline statements recorded in docs/DOC-AUDIT.md",
+    "oracle_fixtures": "unchanged",
+    "preexisting_packaging_changes": "preserved"
+  },
+  "not_run": [
+    "GitHub Actions workflow execution",
+    "required-check registration or release gate",
+    "full cutadapt 119-case differential",
+    "UMI exact/semantic/spill/determinism suites",
+    "BAM differential",
+    "coverage-guided fuzz",
+    "large-data performance matrix"
+  ],
+  "release_created": false,
+  "commit_created": false
+}

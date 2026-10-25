@@ -12,9 +12,9 @@
 //! which is what makes the output byte-identical to UMI-tools.
 
 use crate::error::{Error, Result};
+use crate::io::bam::{self, CompressionLevel, Format, Record};
 use crate::io::spill::TempOutput;
 use rayon::slice::ParallelSliceMut;
-use rust_htslib::bam::{self, CompressionLevel, Format, Read, Record};
 use std::cmp::Reverse;
 use std::collections::BinaryHeap;
 use std::path::{Path, PathBuf};
@@ -151,6 +151,9 @@ impl SortingWriter {
                 None,
             )?;
             write_sorted(&self.buffer, &mut writer)?;
+            writer
+                .finish()
+                .map_err(|e| Error::Format(format!("cannot finish sort run: {e}")))?;
         }
         self.run_paths.push(temp.path().to_path_buf());
         self.runs.push(temp);
@@ -179,6 +182,9 @@ impl SortingWriter {
                 self.reference.as_deref(),
             )?;
             write_sorted(&self.buffer, &mut writer)?;
+            writer
+                .finish()
+                .map_err(|e| Error::Format(format!("cannot finish output: {e}")))?;
             if timing_enabled() {
                 eprintln!(
                     "[timing] single_pass records={records} elapsed={:.3}s",
@@ -307,6 +313,9 @@ fn merge_runs(
             heap.push(Reverse((sort_key(next), index)));
         }
     }
+    writer
+        .finish()
+        .map_err(|e| Error::Format(format!("cannot finish merged output: {e}")))?;
     if timing_enabled() {
         eprintln!(
             "[timing] merge runs={} records={} elapsed={:.3}s",

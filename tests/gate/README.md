@@ -1,19 +1,14 @@
 # W1-1 byte-neutrality gate
 
-> **Status: tooling written, goldens NOT yet recorded.**
-> The instance that wrote these files had no command-execution tool in its
-> tool set, so it could not run `--record`, `--verify`, `--self-test`,
-> `m3.sh`, `sha256sum` or `git status`. Everything below is the design and the
-> code; **acceptance items (a)–(e) are unrun and unproven**.
-> To complete the task, a shell-capable instance must run:
->
-> ```bash
-> bash tests/gate/acceptance.sh
-> ```
->
-> That script runs (a)–(e) verbatim and prints the real output of each. Until
-> it has been run and passed, `tests/gate/golden/` is empty and `m3.sh`
-> correctly **fails** its "goldens present" criterion.
+> **Existing oracle: 40 committed golden snapshots plus `golden.sha256`.**
+> `bash tests/gate/acceptance.sh --verify` delegates to the read-only `m3.sh`
+> gate. No arguments is a usage error (exit 2); `--help` prints usage (exit 0).
+> `--record`, unknown arguments and `GOLDEN_DIR`/`GOLDEN_MANIFEST` overrides fail
+> with exit 2 before any work. `m3.sh` verifies the golden digest manifest in
+> addition to counting the files. The old automatic delete/record path has been
+> removed. Golden updates require separate maintainer review and
+> `snapshot.py --record --confirm-record`.
+> Historical W1-1 evidence is in `docs/EVIDENCE-W1-1.md`.
 
 This directory holds the instrument that proves **W1-1 is behaviour-neutral**.
 
@@ -41,30 +36,27 @@ non-zero on any failure. That script is `m3.sh`.
 ## Quick start
 
 ```bash
-# 1. Record the reference behaviour from the PRE-refactor binaries.
-python3 tests/gate/snapshot.py --record \
-    --cutadapt .work/w1-1-baseline/bin/rust-cutadapt.before \
-    --umitools .work/w1-1-baseline/bin/rust-umitools.before \
-    --out tests/gate/golden
-
-# 2. Verify a candidate pair (the workspace builds).
+# 1. Verify a candidate pair against the EXISTING oracle (no recording).
 python3 tests/gate/snapshot.py --verify \
     --cutadapt target/release/rust-cutadapt \
     --umitools target/release/rust-umitools \
     --golden tests/gate/golden
 
-# 3. Prove the harness can actually fail (mandatory).
+# 2. Prove the harness can actually fail (mandatory).
 python3 tests/gate/snapshot.py --self-test \
     --cutadapt target/release/rust-cutadapt \
     --umitools target/release/rust-umitools \
     --golden tests/gate/golden
 
-# 4. The whole gate.
-bash tests/gate/m3.sh
+# 3. The whole read-only gate.
+bash tests/gate/acceptance.sh --verify
+
+# 4. Entry-point safety regression tests (temporary workspace only).
+python3 tests/gate/test_acceptance.py
 ```
 
-Exit codes: `0` pass, `1` a case failed, `3` a precondition (missing binary,
-missing golden, unresolved oracle) was not met. A missing oracle is **never** a
+Exit codes: `0` pass, `1` a case failed, `2` usage error, `3` a precondition
+(missing binary, missing golden, unresolved oracle) was not met. A missing oracle is **never** a
 skip: it is exit 3.
 
 ### `m3.sh` options
@@ -76,6 +68,7 @@ skip: it is exit 3.
 | `BASELINE_CUTADAPT` | reference binary | `.work/w1-1-baseline/bin/rust-cutadapt.before` |
 | `BASELINE_UMITOOLS` | reference binary | `.work/w1-1-baseline/bin/rust-umitools.before` |
 | `GOLDEN_DIR` | golden directory | `tests/gate/golden` |
+| `GOLDEN_MANIFEST` | reviewed SHA-256 list | `tests/gate/golden.sha256` |
 
 `m3.sh` **never** builds. It fails the "binaries present" criterion instead, so
 a reviewer cannot accidentally gate a stale artifact.
@@ -352,16 +345,18 @@ command whose log has volatile lines).
 ## Determinism of the recording itself
 
 `--record` writes one JSON file per case, sorted by key, with no timestamp, no
-hostname, no absolute path and no elapsed time. Running `--record` twice from
-the same binaries therefore produces byte-identical files; verify with
+hostname, no absolute path and no elapsed time. It is maintainer-only and now
+requires `--confirm-record`; `--verify` is the normal validation path. Running
+`--record --confirm-record` twice from the same binaries therefore produces
+byte-identical files. The committed digest list can be checked with:
 
 ```bash
-sha256sum tests/gate/golden/*.json
+sha256sum -c tests/gate/golden.sha256
 ```
 
-before and after a second `--record`. This is checked as criterion **c** of the
-W1-1 acceptance list. Any future field that is not reproducible must not be
-added to a golden; add it as a `note` instead.
+`m3.sh` checks this manifest before `--verify`. This is checked as criterion
+**c** of the historical W1-1 acceptance list. Any future field that is not
+reproducible must not be added to a golden; add it as a `note` instead.
 
 ---
 
@@ -381,7 +376,8 @@ correct.
 
 After these fixes: `--record` is byte-deterministic (verified over two runs),
 `--verify` is 37/37 against both the pre-refactor pair and the post-refactor
-workspace binaries, and `bash tests/gate/m3.sh` reports **9/9 PASS** with
+workspace binaries, and the current `bash tests/gate/m3.sh` reports **10/10
+PASS** (the additional criterion is the golden digest manifest) with
 `SELFTEST PASS`.
 
 ### Fourth fix and one added case
@@ -404,8 +400,10 @@ shared crate. The case compares the full `samtools view -h` rendering of a
 the workspace build); tag names, tag order, `PP` linkage and the remainder of
 the command line are byte-exact.
 
-After these changes: 38 cases, `--record` byte-deterministic over two runs,
-`--verify` 38/38 against both pairs, `m3.sh` 9/9 PASS.
+After these changes: 38 cases in that historical run, `--record`
+byte-deterministic over two runs, `--verify` 38/38 against both pairs. The
+current corpus has 40 cases and the current gate reports 10/10, including the
+golden digest manifest.
 
 ---
 

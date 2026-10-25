@@ -1,0 +1,142 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "bioinfo-tools benchmark result",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "generated_at_utc",
+    "git",
+    "hardware",
+    "toolchain",
+    "binaries",
+    "parameters",
+    "results",
+    "limitations"
+  ],
+  "properties": {
+    "schema_version": {"const": 1},
+    "generated_at_utc": {"type": "string"},
+    "git": {
+      "type": "object",
+      "required": ["commit", "dirty"],
+      "properties": {
+        "commit": {"type": ["string", "null"]},
+        "dirty": {"type": ["boolean", "null"]},
+        "dirty_paths": {"type": "array", "items": {"type": "string"}},
+        "error": {"type": "string"}
+      }
+    },
+    "hardware": {
+      "type": "object",
+      "required": ["platform", "machine", "cpu_model", "logical_cpus"],
+      "properties": {
+        "platform": {"type": "string"},
+        "machine": {"type": "string"},
+        "processor": {"type": "string"},
+        "cpu_model": {"type": "string"},
+        "logical_cpus": {"type": ["integer", "null"]},
+        "memory_kb": {"type": ["integer", "null"]}
+      }
+    },
+    "toolchain": {
+      "type": "object",
+      "properties": {
+        "rustc": {"type": "string"},
+        "cargo": {"type": "string"}
+      }
+    },
+    "binaries": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["path", "sha256", "version"],
+        "properties": {
+          "path": {"type": "string"},
+          "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+          "version": {"type": "string"}
+        }
+      }
+    },
+    "parameters": {
+      "type": "object",
+      "required": ["sizes", "repeats", "record_base"],
+      "properties": {
+        "sizes": {"type": "array", "items": {"type": "integer"}},
+        "repeats": {"type": "integer", "minimum": 1},
+        "record_base": {"type": "integer"}
+      }
+    },
+    "results": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "case",
+          "size_multiplier",
+          "records",
+          "command",
+          "threads",
+          "compression",
+          "repeats",
+          "samples",
+          "summary",
+          "correctness",
+          "input_sha256"
+        ],
+        "properties": {
+          "case": {"type": "string"},
+          "size_multiplier": {"type": "integer"},
+          "records": {"type": "integer"},
+          "command": {"type": "array", "items": {"type": "string"}},
+          "threads": {"type": ["integer", "null"]},
+          "compression": {"type": "string"},
+          "repeats": {"type": "integer"},
+          "samples": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["exit_code", "wall_s", "max_rss_kb", "temp_peak_bytes"],
+              "properties": {
+                "exit_code": {"type": "integer"},
+                "wall_s": {"type": ["number", "null"]},
+                "user_s": {"type": ["number", "null"]},
+                "sys_s": {"type": ["number", "null"]},
+                "max_rss_kb": {"type": ["integer", "null"]},
+                "temp_peak_bytes": {"type": "integer"},
+                "stdout_bytes": {"type": "integer"},
+                "stderr_bytes": {"type": "integer"}
+              }
+            }
+          },
+          "summary": {
+            "type": "object",
+            "required": ["wall_mean_s", "wall_median_s", "max_rss_kb", "temp_peak_bytes"],
+            "properties": {
+              "wall_mean_s": {"type": ["number", "null"]},
+              "wall_median_s": {"type": ["number", "null"]},
+              "wall_min_s": {"type": ["number", "null"]},
+              "wall_max_s": {"type": ["number", "null"]},
+              "cpu_mean_s": {"type": ["number", "null"]},
+              "max_rss_kb": {"type": ["integer", "null"]},
+              "temp_peak_bytes": {"type": "integer"},
+              "output_bytes": {"type": "integer"}
+            }
+          },
+          "correctness": {
+            "type": "object",
+            "required": ["passed", "note"],
+            "properties": {
+              "passed": {"type": "boolean"},
+              "note": {"type": "string"}
+            }
+          },
+          "input_sha256": {
+            "type": "object",
+            "additionalProperties": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+          }
+        }
+      }
+    },
+    "limitations": {"type": "array", "items": {"type": "string"}}
+  }
+}

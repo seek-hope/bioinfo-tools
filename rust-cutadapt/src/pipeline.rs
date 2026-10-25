@@ -22,7 +22,7 @@ use std::thread;
 use flate2::write::GzEncoder;
 use flate2::Compression;
 
-use crate::engine::{ChunkStats, Trimmer};
+use crate::engine::{AdapterChunkStats, ChunkStats, Trimmer};
 use crate::fastq::ParseError;
 
 /// Size of each processing chunk in bytes.
@@ -88,19 +88,26 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn new(input: PathBuf, output: PathBuf, adapter: Vec<u8>) -> Self {
+    /// Build a configuration with an optional single 3' adapter.
+    ///
+    /// An empty `adapter` means the caller will install the adapter set through
+    /// [`Config::adapters`]. A non-empty value is parsed immediately, so invalid
+    /// input is returned as an error rather than panicking in a library caller.
+    ///
+    /// # Errors
+    /// Returns the adapter parser's message when `adapter` is not a valid 3'
+    /// adapter specification.
+    pub fn new(input: PathBuf, output: PathBuf, adapter: Vec<u8>) -> Result<Self, String> {
         let config = crate::adapter::matcher::MatchConfig::default();
-        // An empty `adapter` means "the caller will install the adapter set via
-        // `Config::adapters`"; only a non-empty one is parsed here.
         let adapters = if adapter.is_empty() {
             Vec::new()
         } else {
             vec![
                 crate::adapter::parse('a', &String::from_utf8_lossy(&adapter), 0, None)
-                    .expect("adapter must have been validated by the CLI"),
+                    .map_err(|error| format!("invalid adapter: {error}"))?,
             ]
         };
-        Self {
+        Ok(Self {
             input,
             input2: None,
             interleaved: false,
@@ -126,7 +133,85 @@ impl Config {
             minimum_length: 0,
             threads: 1,
             compression_level: DEFAULT_COMPRESSION_LEVEL,
+        })
+    }
+}
+
+/// Aggregated per-adapter measurements.
+///
+/// The per-chunk collector (`AdapterChunkStats`) still uses vectors because one
+/// chunk is bounded. The run-level accumulator uses histograms, so memory grows
+/// with distinct removed lengths/error pairs rather than with the number of reads.
+#[derive(Default, Clone, Debug, PartialEq, Eq)]
+pub struct AdapterTotals {
+    /// How many times this adapter was the winning match.
+    pub matches: u64,
+    /// Matches that overlapped the read's 5' end (used by `-b` reporting).
+    pub five_prime_overlaps: u64,
+    /// For linked adapters: how many matches removed a 3' part as well.
+    pub three_prime_hits: u64,
+    five_prime_lengths: BTreeMap<usize, u64>,
+    three_prime_lengths: BTreeMap<usize, u64>,
+    five_prime_trimmed: BTreeMap<(usize, usize), u64>,
+    trimmed: BTreeMap<(usize, usize), u64>,
+    adjacent: BTreeMap<Option<u8>, u64>,
+}
+
+impl AdapterTotals {
+    pub fn add(&mut self, other: &AdapterChunkStats) {
+        self.matches += other.matches;
+        self.five_prime_overlaps += other.five_prime_overlaps;
+        self.three_prime_hits += other.three_prime_hits;
+        for &length in &other.five_prime_lengths {
+            *self.five_prime_lengths.entry(length).or_insert(0) += 1;
         }
+        for &length in &other.three_prime_lengths {
+            *self.three_prime_lengths.entry(length).or_insert(0) += 1;
+        }
+        for &pair in &other.five_prime_trimmed {
+            *self.five_prime_trimmed.entry(pair).or_insert(0) += 1;
+        }
+        for &pair in &other.trimmed {
+            *self.trimmed.entry(pair).or_insert(0) += 1;
+        }
+        for &base in &other.adjacent {
+            *self.adjacent.entry(base).or_insert(0) += 1;
+        }
+    }
+
+    /// Materialize the existing report-facing shape.
+    ///
+    /// This runs once when the report is built. It is bounded by the distinct
+    /// histogram keys, not by the number of reads processed.
+    pub fn to_chunk_stats(&self) -> AdapterChunkStats {
+        fn expand<K: Copy>(map: &BTreeMap<K, u64>, out: &mut Vec<K>) {
+            for (&value, &count) in map {
+                for _ in 0..count {
+                    out.push(value);
+                }
+            }
+        }
+
+        let mut stats = AdapterChunkStats {
+            matches: self.matches,
+            five_prime_overlaps: self.five_prime_overlaps,
+            three_prime_hits: self.three_prime_hits,
+            ..AdapterChunkStats::default()
+        };
+        expand(&self.five_prime_lengths, &mut stats.five_prime_lengths);
+        expand(&self.three_prime_lengths, &mut stats.three_prime_lengths);
+        expand(&self.five_prime_trimmed, &mut stats.five_prime_trimmed);
+        expand(&self.trimmed, &mut stats.trimmed);
+        expand(&self.adjacent, &mut stats.adjacent);
+        stats
+    }
+}
+
+impl From<AdapterChunkStats> for AdapterTotals {
+    fn from(chunk: AdapterChunkStats) -> Self {
+        let mut totals = Self::default();
+        totals.add(&chunk);
+        totals
     }
 }
 
@@ -167,9 +252,12 @@ pub struct Stats {
     pub too_long_records: Vec<u8>,
     pub untrimmed_records: Vec<u8>,
     /// Per-adapter measurements for the report, indexed like `Config::adapters`.
-    pub adapter_stats: Vec<crate::engine::AdapterChunkStats>,
+    pub adapter_stats: Vec<AdapterTotals>,
     /// True for a paired-end run.
     pub paired: bool,
+    /// True when aux/demux records were already written incrementally by the
+    /// ordered stage; `write_aux_outputs` must not rewrite them.
+    pub aux_incremental: bool,
     /// Read-2 counters for a paired-end run; `None` for single-end.
     pub read2: Option<Box<Stats>>,
 }
@@ -230,22 +318,232 @@ impl Stats {
             .extend_from_slice(&other.untrimmed_records);
         if self.adapter_stats.len() < other.adapter_stats.len() {
             self.adapter_stats
-                .resize(other.adapter_stats.len(), Default::default());
+                .resize(other.adapter_stats.len(), AdapterTotals::default());
         }
         for (acc, chunk) in self.adapter_stats.iter_mut().zip(&other.adapter_stats) {
-            acc.matches += chunk.matches;
-            acc.five_prime_overlaps += chunk.five_prime_overlaps;
-            acc.three_prime_hits += chunk.three_prime_hits;
-            acc.five_prime_lengths
-                .extend_from_slice(&chunk.five_prime_lengths);
-            acc.three_prime_lengths
-                .extend_from_slice(&chunk.three_prime_lengths);
-            acc.five_prime_trimmed
-                .extend_from_slice(&chunk.five_prime_trimmed);
-            acc.trimmed.extend_from_slice(&chunk.trimmed);
-            acc.adjacent.extend_from_slice(&chunk.adjacent);
+            acc.add(chunk);
         }
     }
+}
+
+fn sink_error(path: &Path, error: io::Error) -> RunError {
+    RunError::Io(io::Error::new(
+        error.kind(),
+        format!("cannot write {}: {error}", path.display()),
+    ))
+}
+
+/// One lazily-created auxiliary file. It is created on first write, or as an empty
+/// file at finish when cutadapt would create one even with no matching reads.
+struct FileSink {
+    path: PathBuf,
+    writer: Option<BufWriter<File>>,
+}
+
+impl FileSink {
+    fn new(path: PathBuf) -> FileSink {
+        FileSink { path, writer: None }
+    }
+
+    fn write(&mut self, bytes: &[u8]) -> Result<(), RunError> {
+        if self.writer.is_none() {
+            let file = File::create(&self.path).map_err(|error| sink_error(&self.path, error))?;
+            self.writer = Some(BufWriter::new(file));
+        }
+        let writer = self.writer.as_mut().ok_or_else(|| {
+            sink_error(
+                &self.path,
+                io::Error::other("internal error: auxiliary writer disappeared"),
+            )
+        })?;
+        writer
+            .write_all(bytes)
+            .map_err(|error| sink_error(&self.path, error))
+    }
+
+    fn finish(&mut self, create_empty: bool) -> Result<(), RunError> {
+        if self.writer.is_none() && create_empty {
+            File::create(&self.path).map_err(|error| sink_error(&self.path, error))?;
+        }
+        if let Some(mut writer) = self.writer.take() {
+            writer
+                .flush()
+                .map_err(|error| sink_error(&self.path, error))?;
+        }
+        Ok(())
+    }
+}
+
+fn flush_lines(sink: &mut Option<FileSink>, lines: &mut Vec<String>) -> Result<(), RunError> {
+    if let Some(sink) = sink.as_mut() {
+        for line in lines.drain(..) {
+            sink.write(line.as_bytes())?;
+            sink.write(b"\n")?;
+        }
+    } else {
+        lines.clear();
+    }
+    Ok(())
+}
+
+fn flush_bytes(sink: &mut Option<FileSink>, bytes: &mut Vec<u8>) -> Result<(), RunError> {
+    if let Some(sink) = sink.as_mut() {
+        if !bytes.is_empty() {
+            sink.write(bytes)?;
+        }
+    }
+    bytes.clear();
+    Ok(())
+}
+
+/// Incremental auxiliary/demultiplex writers for the single-end ordered stage.
+///
+/// One chunk is at most `CHUNK_SIZE`, so flushing after every committed chunk
+/// bounds the aux/demux buffers by one chunk rather than by the input length.
+struct AuxSink {
+    info: Option<FileSink>,
+    rest: Option<FileSink>,
+    wildcard: Option<FileSink>,
+    too_short: Option<FileSink>,
+    too_long: Option<FileSink>,
+    untrimmed: Option<FileSink>,
+    demux: Vec<Option<FileSink>>,
+    demux_unknown: Option<FileSink>,
+    create_empty_demux: bool,
+}
+
+impl AuxSink {
+    fn new(config: &Config) -> Result<AuxSink, RunError> {
+        Self::new_for(
+            &config.aux,
+            &config.output,
+            &config.adapters,
+            config.aux.demultiplex,
+            false,
+        )
+    }
+
+    fn new_for(
+        aux: &crate::auxout::AuxOutputs,
+        template: &Path,
+        adapters: &[crate::adapter::AdapterSpec],
+        demultiplex: bool,
+        create_empty_demux: bool,
+    ) -> Result<AuxSink, RunError> {
+        let new = |path: &Option<PathBuf>| path.clone().map(FileSink::new);
+        let template = template.to_string_lossy();
+        let demux = if demultiplex && template != "-" {
+            (0..adapters.len())
+                .map(|index| {
+                    Some(FileSink::new(PathBuf::from(
+                        template.replace("{name}", &demux_name(adapters, index)),
+                    )))
+                })
+                .collect()
+        } else {
+            Vec::new()
+        };
+        Ok(AuxSink {
+            info: new(&aux.info_file),
+            rest: new(&aux.rest_file),
+            wildcard: new(&aux.wildcard_file),
+            too_short: new(&aux.too_short_output),
+            too_long: new(&aux.too_long_output),
+            untrimmed: new(&aux.untrimmed_output),
+            demux,
+            demux_unknown: (demultiplex && template != "-")
+                .then(|| FileSink::new(PathBuf::from(template.replace("{name}", "unknown")))),
+            create_empty_demux,
+        })
+    }
+
+    fn flush(&mut self, stats: &mut Stats) -> Result<(), RunError> {
+        flush_lines(&mut self.info, &mut stats.info_lines)?;
+        flush_lines(&mut self.rest, &mut stats.rest_lines)?;
+        flush_lines(&mut self.wildcard, &mut stats.wildcard_lines)?;
+        if !stats.paired {
+            flush_bytes(&mut self.too_short, &mut stats.too_short_records)?;
+            flush_bytes(&mut self.too_long, &mut stats.too_long_records)?;
+            flush_bytes(&mut self.untrimmed, &mut stats.untrimmed_records)?;
+        }
+        for (index, records) in stats.demux_records.iter_mut().enumerate() {
+            if let Some(Some(sink)) = self.demux.get_mut(index) {
+                if !records.is_empty() {
+                    sink.write(records)?;
+                }
+            }
+            records.clear();
+        }
+        if let Some(sink) = self.demux_unknown.as_mut() {
+            if !stats.demux_unknown.is_empty() {
+                sink.write(&stats.demux_unknown)?;
+            }
+        }
+        stats.demux_unknown.clear();
+        Ok(())
+    }
+
+    fn finish(&mut self, stats: &mut Stats) -> Result<(), RunError> {
+        self.flush(stats)?;
+        for sink in [
+            &mut self.info,
+            &mut self.rest,
+            &mut self.wildcard,
+            &mut self.too_short,
+            &mut self.too_long,
+            &mut self.untrimmed,
+        ] {
+            if let Some(sink) = sink.as_mut() {
+                sink.finish(true)?;
+            }
+        }
+        for sink in self.demux.iter_mut().flatten() {
+            sink.finish(self.create_empty_demux)?;
+        }
+        if let Some(sink) = self.demux_unknown.as_mut() {
+            sink.finish(false)?;
+        }
+        Ok(())
+    }
+}
+
+fn flush_pair_aux(
+    stats: &mut Stats,
+    first: &mut AuxSink,
+    second: &mut AuxSink,
+) -> Result<(), RunError> {
+    first.flush(stats)?;
+    if let Some(read2) = stats.read2.as_mut() {
+        second.flush(read2)?;
+    }
+    Ok(())
+}
+
+fn finish_pair_aux(
+    stats: &mut Stats,
+    first: &mut AuxSink,
+    second: &mut AuxSink,
+) -> Result<(), RunError> {
+    first.finish(stats)?;
+    if let Some(read2) = stats.read2.as_mut() {
+        second.finish(read2)?;
+    }
+    Ok(())
+}
+
+fn demux_name(adapters: &[crate::adapter::AdapterSpec], index: usize) -> String {
+    adapters.get(index).map_or_else(
+        || (index + 1).to_string(),
+        |spec| {
+            let generated = spec.name.chars().all(|c| c.is_ascii_digit())
+                && spec.name == spec.index.to_string();
+            if generated {
+                (index + 1).to_string()
+            } else {
+                spec.name.clone()
+            }
+        },
+    )
 }
 
 /// Errors that abort a run.
@@ -600,10 +898,12 @@ pub fn run_paired(config: &Config) -> Result<Stats, RunError> {
         open_input2(config)?
     };
     let stats = run_paired_with_io(config, reader1, reader2, writer1, writer2)?;
-    write_aux_outputs(config, &stats)?;
+    if !stats.aux_incremental {
+        write_aux_outputs(config, &stats)?;
+    }
     // Paired demultiplexing: write R1 files from the `-o` template and R2 files
     // from the `-p` template, one per adapter plus the "unknown" file.
-    if demux {
+    if demux && !stats.aux_incremental {
         if let Some(template) = config
             .paired_output
             .as_ref()
@@ -746,6 +1046,23 @@ pub fn run_paired_with_io(
     }
     let mut trimmer2 =
         build_trimmer(&config.adapters2, config, &modifications2, &aux2).with_filters(filters2);
+    let mut aux_sink1 = AuxSink::new_for(
+        &aux1,
+        &config.output,
+        &config.adapters,
+        config.aux.demultiplex,
+        false,
+    )?;
+    let template2 = config
+        .paired_output
+        .as_deref()
+        .unwrap_or(config.output.as_path());
+    let demux2 = config.aux.demultiplex && template2.to_string_lossy().contains("{name}");
+    let mut r2_aux = aux2.clone();
+    r2_aux.info_file = None;
+    r2_aux.rest_file = None;
+    r2_aux.wildcard_file = None;
+    let mut aux_sink2 = AuxSink::new_for(&r2_aux, template2, &config.adapters, demux2, true)?;
     // R2 demultiplexing is only possible when the -p template carries {name}.
     let demux_for_r2 = config
         .paired_output
@@ -778,7 +1095,11 @@ pub fn run_paired_with_io(
     let mut pair_too_long2: Vec<u8> = Vec::new();
     let mut stats = Stats {
         paired: true,
-        read2: Some(Box::new(Stats::default())),
+        aux_incremental: true,
+        read2: Some(Box::new(Stats {
+            aux_incremental: true,
+            ..Stats::default()
+        })),
         ..Stats::default()
     };
 
@@ -1010,6 +1331,7 @@ pub fn run_paired_with_io(
                 if let Some(read2) = stats.read2.as_mut() {
                     read2.add_chunk(&stats2);
                 }
+                flush_pair_aux(&mut stats, &mut aux_sink1, &mut aux_sink2)?;
             } else {
                 // The pair is discarded: count its filters but not its output.
                 let mut only_stats1 = stats1;
@@ -1022,6 +1344,7 @@ pub fn run_paired_with_io(
                     only_stats2.bp_out = 0;
                     read2.add_chunk(&only_stats2);
                 }
+                flush_pair_aux(&mut stats, &mut aux_sink1, &mut aux_sink2)?;
             }
             consumed1 = r1.end;
             consumed2 = r2.end;
@@ -1071,6 +1394,7 @@ pub fn run_paired_with_io(
     if let Some(w) = out2.as_mut() {
         finish_mate(encoder2.take(), w)?;
     }
+    finish_pair_aux(&mut stats, &mut aux_sink1, &mut aux_sink2)?;
     Ok(stats)
 }
 
@@ -1103,7 +1427,9 @@ pub fn run(config: &Config) -> Result<Stats, RunError> {
     };
     let reader = open_input(config)?;
     let stats = run_with_io(config, reader, writer)?;
-    write_aux_outputs(config, &stats)?;
+    if !stats.aux_incremental {
+        write_aux_outputs(config, &stats)?;
+    }
     Ok(stats)
 }
 
@@ -1222,6 +1548,7 @@ pub fn run_with_io(
     let trim_rx: SharedReceiver<_> = Arc::new(Mutex::new(trim_rx));
     let next_index = std::sync::atomic::AtomicU64::new(0);
 
+    let mut aux_sink = AuxSink::new(config)?;
     let result = thread::scope(|scope| -> Result<Stats, RunError> {
         // --- Stage 1: inflate and split into record-aligned chunks ----------
         let producer = scope.spawn(|| -> Result<(), RunError> {
@@ -1383,7 +1710,10 @@ pub fn run_with_io(
         // --- Stage 4: write in input order ------------------------------------
         let mut writer = BufWriter::with_capacity(CHUNK_SIZE, writer);
         let mut pending: BTreeMap<usize, (Vec<u8>, ChunkStats)> = BTreeMap::new();
-        let mut stats = Stats::default();
+        let mut stats = Stats {
+            aux_incremental: true,
+            ..Stats::default()
+        };
         let mut next_write = 0usize;
         let mut first_error: Option<RunError> = None;
         // Records already committed to the writer: used to report honestly
@@ -1396,6 +1726,7 @@ pub fn run_with_io(
                     while let Some((payload, chunk_stats)) = pending.remove(&next_write) {
                         writer.write_all(&payload)?;
                         stats.add(&chunk_stats);
+                        aux_sink.flush(&mut stats)?;
                         written_records += chunk_stats.records_out;
                         next_write += 1;
                     }
@@ -1441,6 +1772,7 @@ pub fn run_with_io(
             // A chunk never arrived: refuse to claim success.
             return Err(RunError::Incomplete);
         }
+        aux_sink.finish(&mut stats)?;
         Ok(stats)
     });
     result

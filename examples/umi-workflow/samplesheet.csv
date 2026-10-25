@@ -1,0 +1,2 @@
+sample,fastq,reference,aligner,mode,umi_tag,gene_tag
+demo,fixtures/reads.fastq,fixtures/reference.fa,,prebuilt,UB,GX

@@ -13,7 +13,7 @@
 //! | Sequence Length Distribution | **yes** | |
 //! | Sequence Duplication Levels | **yes** | 50bp truncation, FastQC's default |
 //! | Overrepresented sequences | **yes** | threshold 0.1% of reads |
-//! | Adapter Content | **emitted empty** | see [`absent`] |
+//! | Adapter Content | **experimental** | exact-match subset of known adapters; not FastQC-oracle-compared |
 //!
 //! ## Status verdicts
 //!
@@ -22,7 +22,7 @@
 //! measured fixtures exhibit rather than claiming to implement the whole limits
 //! file; the thresholds used are recorded in [`Thresholds`].
 
-use crate::stats::{java_double, QcStats, BASE_ORDER};
+use crate::stats::{java_double, QcStats, ADAPTERS, BASE_ORDER};
 
 /// FastQC's module status.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -743,11 +743,29 @@ pub fn overrepresented_sequences(stats: &QcStats, thresholds: &Thresholds) -> Mo
         // 43/160 = 26.875 prints 26.88. FastQC rounds here (unlike %GC, which
         // truncates), so the two columns genuinely differ in treatment.
         let percent = (**count as f64 / total as f64 * 100.0 * 100.0).round() / 100.0;
+        let source = stats
+            .contaminants
+            .iter()
+            .find_map(|(name, contaminant)| {
+                if contaminant.is_empty() {
+                    return None;
+                }
+                if sequence.starts_with(contaminant) || contaminant.starts_with(sequence) {
+                    Some(format!(
+                        "{name} (100% over {}bp)",
+                        sequence.len().min(contaminant.len())
+                    ))
+                } else {
+                    None
+                }
+            })
+            .unwrap_or_else(|| "No Hit".to_string());
         lines.push(format!(
-            "{}\t{}\t{}\tNo Hit",
+            "{}\t{}\t{}\t{}",
             String::from_utf8_lossy(sequence),
             count,
-            java_double(percent)
+            java_double(percent),
+            source
         ));
     }
     // `limits.txt`: `overrepresented warn 0.1` is the REPORTING threshold and
@@ -800,11 +818,45 @@ pub fn round_to(value: f64, places: u32) -> f64 {
 /// from comparison, and that exclusion is named and recorded rather than hidden.
 /// A consumer reading the file sees an empty block, which is visibly incomplete
 /// rather than silently wrong.
-pub fn adapter_content() -> ModuleResult {
-    ModuleResult {
-        name: "Adapter Content",
-        status: Status::Pass,
-        lines: Vec::new(),
+pub fn adapter_content(stats: &QcStats) -> ModuleResult {
+    let total = stats.total_sequences;
+    let mut lines = Vec::new();
+    if total > 0 && !stats.adapter_hits.is_empty() {
+        let mut header = String::from("#Position");
+        for (name, _) in ADAPTERS {
+            header.push('\t');
+            header.push_str(name);
+        }
+        lines.push(header);
+        let mut worst = 0.0f64;
+        for position in 0..stats.max_length() {
+            let mut row = vec![(position + 1).to_string()];
+            for hits in &stats.adapter_hits {
+                let count = hits.get(position).copied().unwrap_or(0);
+                let percent = count as f64 / total as f64 * 100.0;
+                worst = worst.max(percent);
+                row.push(format!("{percent:.6}"));
+            }
+            lines.push(row.join("\t"));
+        }
+        let status = if worst >= 20.0 {
+            Status::Fail
+        } else if worst >= 5.0 {
+            Status::Warn
+        } else {
+            Status::Pass
+        };
+        ModuleResult {
+            name: "Adapter Content",
+            status,
+            lines,
+        }
+    } else {
+        ModuleResult {
+            name: "Adapter Content",
+            status: Status::Pass,
+            lines,
+        }
     }
 }
 
@@ -821,7 +873,7 @@ pub fn all_modules(stats: &QcStats) -> Vec<ModuleResult> {
         sequence_length_distribution(stats),
         sequence_duplication(stats, &thresholds),
         overrepresented_sequences(stats, &thresholds),
-        adapter_content(),
+        adapter_content(stats),
     ]
 }
 

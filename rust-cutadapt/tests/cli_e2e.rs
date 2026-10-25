@@ -57,6 +57,14 @@ fn run(args: &[&str]) -> Output {
         .expect("failed to execute rust-cutadapt")
 }
 
+fn run_in(dir: &Path, args: &[&str]) -> Output {
+    Command::new(binary())
+        .current_dir(dir)
+        .args(args)
+        .output()
+        .expect("failed to execute rust-cutadapt")
+}
+
 fn run_stdin(args: &[&str], input: &[u8]) -> Output {
     let mut child = Command::new(binary())
         .args(args)
@@ -563,7 +571,7 @@ fn read_modifications_and_filters_are_applied() {
             argv.drain(pos..pos + 2);
         }
         let refs: Vec<&str> = argv.iter().map(|s| s.as_str()).collect();
-        let result = run(&refs);
+        let result = run_in(&dir.0, &refs);
         assert_eq!(
             result.status.code(),
             Some(0),

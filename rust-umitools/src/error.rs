@@ -164,12 +164,6 @@ impl fmt::Display for InputError {
 
 impl std::error::Error for Error {}
 
-impl From<rust_htslib::errors::Error> for Error {
-    fn from(e: rust_htslib::errors::Error) -> Self {
-        Error::Format(e.to_string())
-    }
-}
-
 pub type Result<T> = std::result::Result<T, Error>;
 
 /// The classes this binary declares to a workflow engine.

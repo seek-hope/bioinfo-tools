@@ -187,7 +187,11 @@ impl InnerCompressor {
 
 impl Write for InnerCompressor {
     fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
-        match self.sink.as_mut().expect("sink present until finish") {
+        let sink = self
+            .sink
+            .as_mut()
+            .ok_or_else(|| io::Error::other("compressor already finished"))?;
+        match sink {
             Sink::Plain(w) => w.write(buf),
             Sink::Gzip(w) => w.write(buf),
             Sink::Bzip2(w) => w.write(buf),
@@ -197,7 +201,11 @@ impl Write for InnerCompressor {
     }
 
     fn flush(&mut self) -> io::Result<()> {
-        match self.sink.as_mut().expect("sink present until finish") {
+        let sink = self
+            .sink
+            .as_mut()
+            .ok_or_else(|| io::Error::other("compressor already finished"))?;
+        match sink {
             Sink::Plain(w) => w.flush(),
             Sink::Gzip(w) => w.flush(),
             Sink::Bzip2(w) => w.flush(),
@@ -209,7 +217,10 @@ impl Write for InnerCompressor {
 
 impl Compressor for InnerCompressor {
     fn finish(mut self: Box<Self>) -> io::Result<()> {
-        let sink = self.sink.take().expect("finish is called once");
+        let sink = self
+            .sink
+            .take()
+            .ok_or_else(|| io::Error::other("compressor already finished"))?;
         match sink {
             Sink::Plain(mut w) => w.flush(),
             Sink::Gzip(w) => w.finish().map(|_| ()),

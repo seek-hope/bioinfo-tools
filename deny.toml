@@ -1,0 +1,29 @@
+# Approved workspace dependency policy (2026-10-23), approved by the project
+# maintainer via the current session; decision record: tests/security/README.md.
+# License allow-list is a policy choice; no advisory suppression.
+# Licenses: cargo deny --offline --locked check licenses
+# Advisories are intentionally allowed to fail until the custom_derive dependency is replaced.
+
+[advisories]
+ignore = []
+
+[licenses]
+allow = [
+    "MIT",
+    "Apache-2.0",
+    "BSD-3-Clause",
+    "ISC",
+    "Unicode-3.0",
+    "Zlib",
+    "bzip2-1.0.6",
+]
+confidence-threshold = 0.8
+
+[bans]
+multiple-versions = "warn"
+
+[sources]
+unknown-registry = "deny"
+unknown-git = "deny"
+allow-registry = ["https://github.com/rust-lang/crates.io-index"]
+allow-git = []

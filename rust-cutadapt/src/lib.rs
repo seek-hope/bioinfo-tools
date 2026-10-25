@@ -6,6 +6,8 @@
 //! transform and filter reads, [`pair`] coordinates mates, and [`pipeline`]
 //! streams records through the writers and report assembly.
 
+#![forbid(unsafe_code)]
+
 pub mod adapter;
 pub mod align;
 pub mod auxout;

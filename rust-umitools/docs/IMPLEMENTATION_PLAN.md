@@ -1,5 +1,7 @@
 # UMI-tools 的 Rust 高性能版实现方案
 
+> Historical design proposal. BAM/SAM/CRAM I/O was migrated from rust-htslib to noodles on 2026-10-23; see [ADR 0001](adr/0001-noodles-migration.md) and [migration evidence](../../docs/EVIDENCE-NOODLES.md). Statements below about retaining rust-htslib describe the earlier plan.
+
 状态：历史设计提案。起草时的代码基线为 `a35fd81`、包版本为 `0.1.0`；正文中的“当前实现”和阶段安排保留当时语境。后续已实现的能力以 [兼容矩阵](COMPATIBILITY.md) 为准，新一轮迭代优先级、已发现缺陷和验收要求以 [ROADMAP.md](ROADMAP.md) 为准。
 
 项目现已更名为 `rust-umitools`（本方案最初起草时计划保留原名 `rust-umidedup`，随后按用户决定更名），将其发展为覆盖 UMI-tools 常用工作流的 Rust 工具集。先建立可执行的兼容性标准，再扩展命令和优化性能。第一项交付是可靠的单端 `dedup`，而不是在现有单文件实现上直接加入双端分支。
@@ -156,7 +158,7 @@ flowchart TB
 
 ### 3.4 依赖选择
 
-保留 `rust-htslib` 和 Rayon；加入 `clap`、结构化错误类型、必要的有界通道工具。小 UMI 容器和快速哈希的选择由 profiling 决定，不为“可能更快”全面换库。BAM/CRAM 首期继续使用成熟的 HTSlib，不同时重写底层格式库。
+历史方案曾建议保留 `rust-htslib`；该选择已在 2026-10-23 被 noodles 迁移取代。当前实现使用 noodles（BAM/SAM/CRAM）和 Rayon；详见 [ADR 0001](adr/0001-noodles-migration.md)。
 
 HTSlib 提供 I/O，不等于 Rust 包装层直接提供 `samtools sort`。发布版计划用项目自己的“有界排序块 + BAM 临时 runs + k 路归并”实现输出排序；迁移期间若临时调用固定版本 `samtools sort`，必须显式声明该依赖并纳入性能计时。
 

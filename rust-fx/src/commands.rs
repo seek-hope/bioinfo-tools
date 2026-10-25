@@ -13,6 +13,7 @@ use crate::stats::{GcSkewCounts, Merge, QualStats, SeqStats, DEFAULT_GAP_LETTERS
 use crate::table::{self, Layout as TableLayout, StatsRow};
 use crate::transform::{self, Transforms};
 use bioinfo_fastx::writer::Layout;
+use std::collections::BTreeMap;
 use std::io::Write;
 use std::path::{Path, PathBuf};
 
@@ -24,7 +25,7 @@ use std::path::{Path, PathBuf};
 #[derive(Default)]
 struct InputStats {
     records: u64,
-    lengths: Vec<u64>,
+    lengths: BTreeMap<u64, u64>,
     sum_len: u64,
     min_len: Option<u64>,
     max_len: u64,
@@ -40,7 +41,7 @@ impl InputStats {
     fn absorb(&mut self, record: &OwnedRecord, gap_letters: &[u8], quality_base: u8) {
         let sequence = SeqStats::from_sequence(&record.sequence, gap_letters);
         self.records += 1;
-        self.lengths.push(sequence.length);
+        *self.lengths.entry(sequence.length).or_insert(0) += 1;
         self.sum_len += sequence.length;
         self.min_len = Some(match self.min_len {
             Some(current) => current.min(sequence.length),
@@ -64,10 +65,8 @@ impl InputStats {
         } else {
             self.sum_len as f64 / num_seqs as f64
         };
-        let mut lengths = self.lengths.clone();
-        let (n50, n50_num) = table::n50(&mut lengths);
-        let mut for_quartiles = self.lengths.clone();
-        let (q1, q2, q3) = table::quartiles(&mut for_quartiles);
+        let (n50, n50_num) = table::n50_from_histogram(&self.lengths);
+        let (q1, q2, q3) = table::quartiles_from_histogram(&self.lengths);
         StatsRow {
             file: label,
             format: self.format.unwrap_or(InputFormat::Fastq).label(),
@@ -676,7 +675,11 @@ pub fn sample(options: SampleOptions) -> Result<(), CommandError> {
         let strategy = match (options.proportion, options.number) {
             (Some(proportion), None) => Strategy::Proportion(proportion),
             (None, Some(number)) => Strategy::Number(number),
-            _ => unreachable!("validated above"),
+            _ => {
+                return Err(CommandError::usage(
+                    "exactly one of -p/--proportion and -n/--number must be given",
+                ))
+            }
         };
         let mut sampler = Sampler::for_strategy(seed, strategy, total);
 
@@ -731,6 +734,80 @@ pub struct SplitOptions {
     pub force: bool,
 }
 
+/// How a split is planned without buffering the input records.
+#[derive(Clone, Copy, Debug)]
+pub struct PartPlan {
+    total: u64,
+    by: SplitBy,
+    parts: u64,
+}
+
+impl PartPlan {
+    /// Plan a split without buffering the input records.
+    pub fn new(total: u64, by: SplitBy) -> Result<PartPlan, CommandError> {
+        let parts = match by {
+            SplitBy::Size(size) => {
+                if size == 0 {
+                    return Err(CommandError::usage("--by-size must be at least 1"));
+                }
+                split::parts_for_size(total, size)
+            }
+            SplitBy::Parts(parts) => {
+                if parts == 0 {
+                    return Err(CommandError::usage("--by-part must be at least 1"));
+                }
+                parts.min(total)
+            }
+        };
+        Ok(PartPlan { total, by, parts })
+    }
+
+    /// Number of parts this plan will produce.
+    pub fn parts(&self) -> u64 {
+        self.parts
+    }
+
+    /// Half-open record range for 0-based part number `part`.
+    pub fn range(&self, part: u64) -> (u64, u64) {
+        match self.by {
+            SplitBy::Size(size) => {
+                let start = part * size;
+                (start, (start + size).min(self.total))
+            }
+            SplitBy::Parts(parts) => {
+                let parts = parts.min(self.total);
+                let base = self.total / parts;
+                let remainder = self.total % parts;
+                if part < remainder {
+                    let start = part * (base + 1);
+                    (start, start + base + 1)
+                } else {
+                    let start = remainder * (base + 1) + (part - remainder) * base;
+                    (start, start + base)
+                }
+            }
+        }
+    }
+
+    /// Part number containing a 0-based record index.
+    pub fn index(&self, record: u64) -> u64 {
+        match self.by {
+            SplitBy::Size(size) => record / size,
+            SplitBy::Parts(parts) => {
+                let parts = parts.min(self.total);
+                let base = self.total / parts;
+                let remainder = self.total % parts;
+                let extra_end = remainder * (base + 1);
+                if record < extra_end {
+                    record / (base + 1)
+                } else {
+                    remainder + (record - extra_end) / base
+                }
+            }
+        }
+    }
+}
+
 /// Run `split`.
 pub fn split(options: SplitOptions) -> Result<(), CommandError> {
     if options.input == "-" {
@@ -738,39 +815,12 @@ pub fn split(options: SplitOptions) -> Result<(), CommandError> {
             "split needs a real input file: parts are named after it",
         ));
     }
-    // Records are buffered because `--by-part` needs the total before it can place
-    // a boundary, and because a part file must be opened and closed atomically.
-    let mut records = Vec::new();
-    {
-        let mut reader = RecordReader::open(&options.input)?;
-        while let Some(record) = reader.next_record() {
-            records.push(record?);
-        }
-    }
-    let input = Path::new(&options.input);
-    let total = records.len() as u64;
-    let ranges: Vec<(u64, u64)> = match options.by {
-        SplitBy::Size(size) => {
-            if size == 0 {
-                return Err(CommandError::usage("--by-size must be at least 1"));
-            }
-            let parts = split::parts_for_size(total, size);
-            (0..parts)
-                .map(|index| {
-                    let start = index * size;
-                    let end = (start + size).min(total);
-                    (start, end)
-                })
-                .collect()
-        }
-        SplitBy::Parts(parts) => {
-            if parts == 0 {
-                return Err(CommandError::usage("--by-part must be at least 1"));
-            }
-            split::partition_by_parts(total, parts)
-        }
-    };
 
+    // Two passes: one to learn the total (needed for --by-part and the last
+    // by-size part), then a streaming pass that never holds more than one record.
+    let total = count_records(&options.input)?;
+    let plan = PartPlan::new(total, options.by)?;
+    let input = Path::new(&options.input);
     let out_dir: PathBuf = match &options.out_dir {
         Some(dir) => PathBuf::from(dir),
         None => split::default_out_dir(input),
@@ -788,37 +838,75 @@ pub fn split(options: SplitOptions) -> Result<(), CommandError> {
         }
     };
 
-    for (index, (start, end)) in ranges.iter().enumerate() {
-        let part_number = index as u64 + 1;
-        let path = split::part_path(
-            &out_dir,
-            &stem,
-            part_number,
-            options.part_width,
-            &extension,
-            options.extension.as_deref(),
-        );
-        let count = end - start;
-        if options.dry_run {
-            // Diagnostics go to stderr, as SeqKit's do: its stdout stays clean so
-            // a part file or a `--json` report is the only thing on stdout.
-            //
-            //   $ seqkit split -s 1 in.fq > out 2> err
-            //   (out is empty; err carries "[INFO] write 1 sequences to file: ...")
-            eprintln!("[INFO] write {count} sequences to file: {}", path.display());
-            continue;
+    if plan.parts() == 0 {
+        return Ok(());
+    }
+
+    if options.dry_run {
+        // Diagnostics go to stderr, as SeqKit's do: its stdout stays clean so
+        // a part file or a `--json` report is the only thing on stdout.
+        for part in 0..plan.parts() {
+            let (start, end) = plan.range(part);
+            let path = split::part_path(
+                &out_dir,
+                &stem,
+                part + 1,
+                options.part_width,
+                &extension,
+                options.extension.as_deref(),
+            );
+            eprintln!(
+                "[INFO] write {} sequences to file: {}",
+                end - start,
+                path.display()
+            );
         }
-        if let Some(parent) = path.parent() {
-            std::fs::create_dir_all(parent).map_err(|error| {
-                CommandError::io(format!("cannot create {}: {error}", parent.display()))
-            })?;
+        return Ok(());
+    }
+
+    std::fs::create_dir_all(&out_dir).map_err(|error| {
+        CommandError::io(format!("cannot create {}: {error}", out_dir.display()))
+    })?;
+
+    let mut reader = RecordReader::open(&options.input)?;
+    let mut current: Option<(u64, Output, u64, PathBuf)> = None;
+    let mut index = 0u64;
+    while let Some(record) = reader.next_record() {
+        let record = record?;
+        let part = plan.index(index);
+        if current
+            .as_ref()
+            .is_none_or(|(open_part, _, _, _)| *open_part != part)
+        {
+            if let Some((_, out, written, path)) = current.take() {
+                out.finish()?;
+                eprintln!(
+                    "[INFO] write {written} sequences to file: {}",
+                    path.display()
+                );
+            }
+            let path = split::part_path(
+                &out_dir,
+                &stem,
+                part + 1,
+                options.part_width,
+                &extension,
+                options.extension.as_deref(),
+            );
+            let out = Output::create(Some(&path.to_string_lossy()))?;
+            current = Some((part, out, 0, path));
         }
-        let mut out = Output::create(Some(&path.to_string_lossy()))?;
-        for record in &records[*start as usize..*end as usize] {
-            record.write_to(&mut out, layout, 0)?;
-        }
+        let (_, out, written, _) = current.as_mut().expect("part was just opened");
+        record.write_to(out, layout, 0)?;
+        *written += 1;
+        index += 1;
+    }
+    if let Some((_, out, written, path)) = current.take() {
         out.finish()?;
-        eprintln!("[INFO] write {count} sequences to file: {}", path.display());
+        eprintln!(
+            "[INFO] write {written} sequences to file: {}",
+            path.display()
+        );
     }
     Ok(())
 }

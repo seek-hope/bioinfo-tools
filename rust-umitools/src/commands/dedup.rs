@@ -8,12 +8,12 @@ use crate::core::cluster::cluster_with_scratch;
 use crate::core::rng::{RepresentativeStrategy, Rng};
 use crate::error::{Error, InputError, Result};
 use crate::io::alignment::aux_str;
+use crate::io::bam::{self, Record};
 use crate::io::paired::{write_mates, MateRequests};
 use crate::io::sort::SortingWriter;
 use crate::io::spill::{ensure_distinct_outputs, TempOutput};
 use crate::io::RecordSink;
 use crate::runtime::pipeline::map_ordered;
-use rust_htslib::bam::{self, Read, Record};
 use std::path::{Path, PathBuf};
 use std::time::{Duration, Instant};
 
@@ -45,9 +45,9 @@ struct Outcome {
 enum Sink {
     Direct {
         temp: TempOutput,
-        writer: bam::Writer,
+        writer: Box<bam::Writer>,
     },
-    Sorted(SortingWriter),
+    Sorted(Box<SortingWriter>),
 }
 
 impl RecordSink for Sink {
@@ -65,7 +65,10 @@ impl Sink {
     fn finish(self, out_dir: &Path, destination: &Path) -> Result<()> {
         match self {
             Sink::Direct { temp, writer } => {
-                drop(writer);
+                let writer = *writer;
+                writer
+                    .finish()
+                    .map_err(|e| Error::Format(format!("cannot finish output: {e}")))?;
                 temp.commit(destination)
             }
             Sink::Sorted(sorter) => {
@@ -255,9 +258,12 @@ pub fn run(cfg: &DedupConfig) -> Result<RunSummary> {
         writer
             .set_compression_level(crate::io::compression_level(cfg.compresslevel)?)
             .map_err(|e| Error::Format(format!("cannot set compression level: {e}")))?;
-        Sink::Direct { temp, writer }
+        Sink::Direct {
+            temp,
+            writer: Box::new(writer),
+        }
     } else {
-        Sink::Sorted(SortingWriter::new(
+        Sink::Sorted(Box::new(SortingWriter::new(
             &header,
             &cfg.budget.tmpdir,
             cfg.budget.chunk_bytes,
@@ -265,7 +271,7 @@ pub fn run(cfg: &DedupConfig) -> Result<RunSummary> {
             cfg.compresslevel,
             crate::io::output_format(&cfg.output),
             cfg.reference.as_deref(),
-        ))
+        )))
     };
 
     let bundle_cfg = BundleConfig {

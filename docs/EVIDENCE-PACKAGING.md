@@ -1,5 +1,7 @@
 # Packaging preparation evidence
 
+> Historical record: commands, versions and offline flags describe the session at the recorded commit. They are not current project requirements; see [DOC-AUDIT.md](DOC-AUDIT.md).
+
 Status: **all 6 items verified** on the primary **Rust 1.99.1** toolchain.
 **Nothing was published** — no release, tag, version bump, crates.io upload, conda
 channel upload or registry push.

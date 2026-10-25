@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "kind": "p0-offline-quality-gate",
+  "base_commit": "49953ec50ae04b343123a214b77030ff31f39a4b",
+  "working_tree_dirty": true,
+  "task": "P0-03",
+  "status": "partial-local-validation-complete",
+  "checks": [
+    {"command": "bash -n tests/ci/check.sh", "exit_code": 0, "result": "no output"},
+    {"command": "python3 tests/ci/test_check.py -v", "exit_code": 0, "result": "Ran 8 tests; OK"},
+    {
+      "command": "bash tests/ci/check.sh",
+      "exit_code": 0,
+      "workspace_release_tests_passed": 699,
+      "result": "OFFLINE QUALITY PASS (base only; external oracles NOT RUN)"
+    },
+    {
+      "command": "bash tests/ci/check.sh --with-fastx-qc-oracles",
+      "exit_code": 0,
+      "workspace_release_tests_passed": 699,
+      "fastx_oracle": "50/50 cases passed",
+      "qc_oracle": "22/22 fixtures passed",
+      "multiqc": "PASS",
+      "qc_harness_selftest": "SELFTEST PASS",
+      "result": "OFFLINE QUALITY PASS (base + FASTX/QC oracles)"
+    },
+    {
+      "kind": "workflow-static-structure",
+      "method": "Existing MultiQC venv PyYAML BaseLoader; checked triggers, runner labels, fork condition, permissions, checkout credential setting and entry points",
+      "result": "PASS workflow YAML structure (not a GitHub execution)"
+    },
+    {"command": "git diff --check", "exit_code": 0, "result": "no output"}
+  ],
+  "sha256": {
+    "tests/ci/check.sh": "c1ffb9ee0e820e57105370a898eb009e582f46cda33fd0dc165447f12a72c273",
+    "tests/ci/test_check.py": "afa37d533ccc5a0663da9ee64973b5a9d676ab98bb4b25a69f3b7c4ea83299c2",
+    ".github/workflows/quality.yml": "e04b15c9b0d5fec23efa7df80c29b410f95354026d4d6b7cdf4ff32f8999e0df"
+  },
+  "remote_workflow_executed": false,
+  "runner_provisioned": false,
+  "required_checks_configured": false,
+  "release_workflow_changed": false,
+  "release_created": false,
+  "shellcheck_run": false,
+  "remaining": [
+    "Maintainer provisioning of a trusted preinstalled offline runner and repository-level security/required-check settings",
+    "Full cutadapt, UMI and BAM oracle integration",
+    "Nightly fuzz, resource and performance gates",
+    "MSRV, cross-platform/package checks and release gating"
+  ]
+}

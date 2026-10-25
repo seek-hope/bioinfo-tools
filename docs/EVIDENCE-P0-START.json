@@ -1,0 +1,132 @@
+{
+  "schema_version": 1,
+  "kind": "p0-input-integrity",
+  "base_commit": "49953ec50ae04b343123a214b77030ff31f39a4b",
+  "working_tree_dirty": true,
+  "scope_completed": [
+    "PLAN",
+    "P0-01",
+    "P0-02"
+  ],
+  "toolchain": {
+    "rustc": "1.99.1 (58cf8f9c3 2026-10-13)",
+    "cargo": "1.99.1 (5f94df478 2026-08-27)"
+  },
+  "oracles": {
+    "seqkit": "2.14.0",
+    "fq": "0.12.0",
+    "fastqc": "0.13.0",
+    "multiqc": "1.35"
+  },
+  "environment": {
+    "cargo_net_offline": true,
+    "rustup_offline": true,
+    "qc_oracle_network": "unshare -Urn",
+    "multiqc_no_version_check": true,
+    "dependencies_added": false
+  },
+  "regression_before_fix": {
+    "command": "cargo test --release --locked --offline -p rust-fx -p rust-fastqc --test input_integrity --no-fail-fast",
+    "exit_code": 101,
+    "rust_fastqc": {
+      "passed": 2,
+      "failed": 7
+    },
+    "rust_fx": {
+      "passed": 2,
+      "failed": 3
+    }
+  },
+  "checks": [
+    {
+      "command": "cargo test --release --locked --offline -p rust-fx -p rust-fastqc --test input_integrity --no-fail-fast",
+      "exit_code": 0,
+      "result": "rust-fastqc: 9 passed, 0 failed; rust-fx: 5 passed, 0 failed"
+    },
+    {
+      "command": "cargo fmt -p rust-fx -p rust-fastqc",
+      "exit_code": 0,
+      "result": "formatted changed crates"
+    },
+    {
+      "command": "cargo fmt --all -- --check",
+      "exit_code": 0,
+      "result": "no output"
+    },
+    {
+      "command": "cargo clippy --workspace --all-targets --locked --offline -- -D warnings",
+      "exit_code": 0,
+      "result": "no warnings"
+    },
+    {
+      "command": "cargo test --workspace --release --locked --offline",
+      "exit_code": 0,
+      "result": "all suites passed"
+    },
+    {
+      "command": "cargo test --workspace --release --locked --offline --quiet",
+      "exit_code": 0,
+      "passed": 699,
+      "failed": 0,
+      "count_method": "sum of per-suite test result lines, including doc tests"
+    },
+    {
+      "command": "cargo build --release --locked --offline -p rust-fastqc -p rust-fx -p rust-cutadapt",
+      "exit_code": 0,
+      "result": "release binaries built for CLI/oracle checks"
+    },
+    {
+      "command": "cd rust-cutadapt && python3 tests/check.py --bin ../target/release/rust-cutadapt",
+      "exit_code": 0,
+      "result": "all visible conformance cases passed"
+    },
+    {
+      "command": "bash tests/oracle/run_w13_oracle.sh",
+      "exit_code": 0,
+      "result": "50/50 cases passed"
+    },
+    {
+      "command": "MULTIQC_NO_VERSION_CHECK=true unshare -Urn bash tests/oracle/run_qc_oracle.sh",
+      "exit_code": 0,
+      "result": "22/22 fixtures passed; PASS multiqc parses our fastqc_data.txt without warnings"
+    },
+    {
+      "command": "unshare -Urn bash tests/oracle/run_qc_oracle.sh --self-test",
+      "exit_code": 0,
+      "result": "SELFTEST PASS"
+    },
+    {
+      "command": "git diff --check",
+      "exit_code": 0,
+      "result": "no output"
+    },
+    {
+      "command": "git status --short -- rust-umitools rust-cutadapt/tests/fixtures",
+      "exit_code": 0,
+      "result": "no output"
+    }
+  ],
+  "sha256": {
+    "target/release/rust-fx": "a9e33f66de10890522298e3e25704ccf3d2179d7d6ee62c0ea824894305b4783",
+    "target/release/rust-fastqc": "6661804da2996dc6a48c6e9265854b40f14191eb14f89ae03653a9f758259912",
+    "rust-fx/src/io.rs": "1d9acb449575522429363e46197c5c9b7445855f19a167528e9d9ab3631604ad",
+    "rust-fastqc/src/main.rs": "4bc96d5db413a7bb8b102cb10cb120faaf6c8b4b5dfbca5bf22c21ed654606b2",
+    "rust-fx/tests/input_integrity.rs": "d4976c03cc18d0bbfa720133887c5305adb7f2f5e5ed429ab570d76fc3a5dd5f",
+    "rust-fastqc/tests/input_integrity.rs": "072d687390573aed30594c962a26a81d1f0ab97558ea5309c908c1325529d32c"
+  },
+  "limitations": [
+    "QC sequence-prefix counts and per-position statistics remain unbounded with distinct prefixes and longest sequence; only input ingestion is now chunked.",
+    "rust-fx streaming output may contain a valid prefix on failure; callers must check exit status.",
+    "Existing QC oracle exclusions and normalization rules are unchanged.",
+    "Full cutadapt differential, UMI oracle suites, BAM differential and packaging suites were not rerun in this batch.",
+    "No new large-data benchmark, memory stress, cross-platform or coverage-guided fuzz evidence.",
+    "P0-03 CI, P0-04 full documentation synchronization and P0-05 benchmark infrastructure remain pending."
+  ],
+  "preexisting_changes_preserved": [
+    "packaging/conda/check_recipe.py",
+    "packaging/conda/meta.yaml"
+  ],
+  "release_created": false,
+  "commit_created": false,
+  "historical_note": "This batch covered PLAN/P0-01/P0-02. Later work completed P0-03/P0-04/P0-05 locally; the remain-pending sentence describes this snapshot, not the current workspace."
+}

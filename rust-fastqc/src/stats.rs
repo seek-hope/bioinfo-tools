@@ -246,10 +246,28 @@ pub struct QcStats {
     pub quality_distribution: BTreeMap<u8, u64>,
     /// Duplication: sequence (truncated) → count.
     pub sequences: BTreeMap<Vec<u8>, u64>,
+    /// Per-position exact adapter starts, one vector per [`ADAPTERS`] entry.
+    pub adapter_hits: Vec<Vec<u64>>,
+    /// Optional contaminant FASTA entries for the overrepresented-source column.
+    pub contaminants: Vec<(String, Vec<u8>)>,
 }
 
 /// The order `Per base sequence content` prints its columns in.
 pub const BASE_ORDER: [u8; 4] = *b"GATC";
+
+/// Adapter sequences used by the experimental Adapter Content module.
+///
+/// FastQC's own list lives in `Configuration/adapter_list.txt` and uses k-mer
+/// matching with position-dependent tolerances. This is a documented, smaller
+/// exact-match subset; the module is therefore marked experimental and is not
+/// compared against FastQC by the differential.
+pub const ADAPTERS: [(&str, &str); 5] = [
+    ("Illumina Universal Adapter", "AGATCGGAAGAG"),
+    ("Illumina Small RNA 3' Adapter", "TGGAATTCTCGG"),
+    ("Illumina Small RNA 5' Adapter", "GATCGTCGGACT"),
+    ("Nextera Transposase Sequence", "CTGTCTCTTATA"),
+    ("SOLID Small RNA Adapter", "CGCCTTGGCCGT"),
+];
 
 impl QcStats {
     /// Create empty statistics for a file.
@@ -266,7 +284,14 @@ impl QcStats {
             gc_distribution: vec![0.0; 101],
             quality_distribution: BTreeMap::new(),
             sequences: BTreeMap::new(),
+            adapter_hits: vec![Vec::new(); ADAPTERS.len()],
+            contaminants: Vec::new(),
         }
+    }
+
+    /// Install an optional opt-in contaminant list.
+    pub fn set_contaminants(&mut self, contaminants: Vec<(String, Vec<u8>)>) {
+        self.contaminants = contaminants;
     }
 
     /// Number of base positions observed (the longest read seen).
@@ -347,6 +372,23 @@ impl QcStats {
             .map(|byte| byte.to_ascii_uppercase())
             .collect();
         *self.sequences.entry(truncated).or_insert(0) += 1;
+
+        // Exact adapter starts. This is deliberately smaller and more explicit
+        // than FastQC's tolerant k-mer algorithm; the module is experimental.
+        for (index, (_, adapter)) in ADAPTERS.iter().enumerate() {
+            if self.adapter_hits[index].len() < sequence.len() {
+                self.adapter_hits[index].resize(sequence.len(), 0);
+            }
+            let adapter = adapter.as_bytes();
+            if adapter.is_empty() || sequence.len() < adapter.len() {
+                continue;
+            }
+            for start in 0..=sequence.len() - adapter.len() {
+                if sequence[start..start + adapter.len()].eq_ignore_ascii_case(adapter) {
+                    self.adapter_hits[index][start] += 1;
+                }
+            }
+        }
     }
 
     /// Merge quality counts across a range of 1-based positions.

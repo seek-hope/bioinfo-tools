@@ -1424,7 +1424,8 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         description="W1-1 byte-neutrality gate for the bioinfo-tools binaries.")
     mode = parser.add_mutually_exclusive_group(required=True)
-    mode.add_argument("--record", action="store_true", help="record goldens")
+    mode.add_argument("--record", action="store_true",
+                      help="record goldens (requires --confirm-record; maintainer-only)")
     mode.add_argument("--verify", action="store_true", help="verify against goldens")
     mode.add_argument("--self-test", dest="self_test", action="store_true",
                       help="prove the verifier rejects a mutated golden")
@@ -1432,10 +1433,14 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--umitools", help="path to the rust-umitools binary")
     parser.add_argument("--out", help="golden output directory (--record)")
     parser.add_argument("--golden", help="golden directory (--verify/--self-test)")
+    parser.add_argument("--confirm-record", action="store_true",
+                        help="explicitly acknowledge replacing the committed oracle")
     parser.add_argument("--workspace", default=str(ROOT),
                         help="workspace root for oracle discovery (default: repo root)")
     args = parser.parse_args(argv)
 
+    if args.record and not args.confirm_record:
+        parser.error("--record requires --confirm-record; use --verify for normal validation")
     if not args.cutadapt and not args.umitools:
         parser.error("at least one of --cutadapt/--umitools is required")
     if args.record and not args.out:

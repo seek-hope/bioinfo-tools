@@ -1,0 +1,13 @@
+[package]
+name = "bioinfo-kani"
+version = "0.0.0"
+edition = "2021"
+publish = false
+
+[workspace]
+
+[dependencies]
+bioinfo-fastx = { path = "../../bioinfo-fastx" }
+rust-fx = { path = "../../rust-fx" }
+rust-bam = { path = "../../rust-bam" }
+noodles = { version = "0.118.0", default-features = false, features = ["sam"] }

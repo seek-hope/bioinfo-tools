@@ -49,10 +49,18 @@ repositories are required.
 ## Build and test
 
 ```bash
-cargo test --workspace --offline
+cargo test --workspace --locked
 cargo fmt --all -- --check
-cargo clippy --workspace --all-targets --offline -- -D warnings
+cargo clippy --workspace --all-targets --locked -- -D warnings
 ```
+
+Network access and package installation are allowed. Use `--offline` only when
+you intentionally need a cache-only/isolated run. The unified quality gate is
+`bash tests/ci/check.sh`; add `--with-fastx-qc-oracles` to require installed
+FASTX/QC references, and `--offline` for an isolated run. See
+[tests/ci/README.md](tests/ci/README.md) for scope, negative-control tests and the
+GitHub-hosted workflow. The workflow is configured but has only been validated
+locally, not run on GitHub.
 
 The oracle binaries for the FASTX comparisons are pinned in
 [tests/ci/PINS.md](tests/ci/PINS.md). They are downloaded locally, not committed.
@@ -77,5 +85,11 @@ release with both tarballs, checksums and `install.sh`. See
 ## Evidence
 
 Per-step evidence and known gaps are in `docs/EVIDENCE-*.md` and the matching
-JSON files. The development plan remains in
-[docs/DEVELOPMENT-PLAN.md](docs/DEVELOPMENT-PLAN.md).
+JSON files. The current reliability, scale and performance roadmap is
+[docs/DEVELOPMENT-PLAN.md](docs/DEVELOPMENT-PLAN.md); the previous plan is retained
+as [historical context](docs/DEVELOPMENT-PLAN-LEGACY.md).
+The first implementation batch (FASTX input integrity and streaming compressed
+QC input) is recorded in [docs/EVIDENCE-P0-START.md](docs/EVIDENCE-P0-START.md).
+Local validation of the quality gate is in
+[docs/EVIDENCE-P0-CI.md](docs/EVIDENCE-P0-CI.md). The documentation-constraint
+audit and the protected-component list are in [docs/DOC-AUDIT.md](docs/DOC-AUDIT.md).

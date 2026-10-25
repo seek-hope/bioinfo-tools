@@ -1,5 +1,7 @@
 # W1-3 evidence: `rust-fx`
 
+> Historical record: commands, versions and offline flags describe the session at the recorded commit. They are not current project requirements; see [DOC-AUDIT.md](DOC-AUDIT.md).
+
 Status: **VERIFIED** — the plan's oracle differential was run against the exact
 pinned oracle versions and **all 50 cases pass**.
 

@@ -6,7 +6,7 @@
 use crate::core::umi::Umi;
 use crate::error::{Error, InputError, Result};
 use crate::io::alignment::aux_str;
-use rust_htslib::bam::Record;
+use crate::io::bam::Record;
 
 #[derive(Clone, Debug)]
 pub enum UmiSource {

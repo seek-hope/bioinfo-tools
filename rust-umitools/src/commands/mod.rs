@@ -93,11 +93,11 @@ impl Events {
 /// ([`bioinfo_common::provenance::ProgramRecord`]); this function only turns it
 /// into an htslib record. Changing the tags or their order would change
 /// `--add-pg` output bytes.
-pub fn push_program_record(header: &mut rust_htslib::bam::Header) {
+pub fn push_program_record(header: &mut crate::io::bam::Header) {
     let args: Vec<String> = std::env::args().collect();
     let program =
         bioinfo_common::provenance::ProgramRecord::new(PROGRAM, crate::cli::VERSION, &args);
-    let mut record = rust_htslib::bam::header::HeaderRecord::new(b"PG");
+    let mut record = crate::io::bam::HeaderRecord::new(b"PG");
     for (tag, value) in program.tags() {
         record.push_tag(tag, value);
     }
@@ -120,8 +120,8 @@ pub fn parse_tag(name: &str) -> Result<[u8; 2]> {
 ///
 /// htslib's `bam_aux_update_int` (used by pysam's `set_tag(int)`) picks
 /// C/S/I, so matching that keeps the output bytes identical to UMI-tools.
-pub fn push_aux_uint(record: &mut rust_htslib::bam::Record, tag: &[u8], value: u64) -> Result<()> {
-    use rust_htslib::bam::record::Aux;
+pub fn push_aux_uint(record: &mut crate::io::bam::Record, tag: &[u8], value: u64) -> Result<()> {
+    use crate::io::bam::Aux;
     let aux = if value <= u64::from(u8::MAX) {
         Aux::U8(value as u8)
     } else if value <= u64::from(u16::MAX) {

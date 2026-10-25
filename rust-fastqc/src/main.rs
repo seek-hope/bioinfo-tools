@@ -10,6 +10,7 @@ use clap::{Arg, ArgAction, Command};
 
 use rust_fastqc::absent;
 use rust_fastqc::error::{Error, EXIT_CLASSES};
+use rust_fastqc::limits::{check_read, QcLimits};
 use rust_fastqc::stats::QcStats;
 use rust_fastqc::{Report, ReportWriter, COMPUTED_MODULES, FASTQC_VERSION};
 
@@ -95,6 +96,28 @@ fn cli() -> Command {
                 .action(ArgAction::SetTrue)
                 .help("qualities are Phred+64 rather than Phred+33"),
         )
+        .arg(
+            Arg::new("max_read_length")
+                .long("max-read-length")
+                .value_name("BASES")
+                .value_parser(clap::value_parser!(u64))
+                .default_value("1000000")
+                .help("reject a read longer than this before growing per-position statistics"),
+        )
+        .arg(
+            Arg::new("max_distinct_sequences")
+                .long("max-distinct-sequences")
+                .value_name("N")
+                .value_parser(clap::value_parser!(u64))
+                .default_value("10000000")
+                .help("reject a new distinct 50-base prefix beyond this many before inserting it"),
+        )
+        .arg(
+            Arg::new("contaminants")
+                .long("contaminants")
+                .value_name("FASTA")
+                .help("optional contaminant FASTA for overrepresented-sequence source matching"),
+        )
 }
 
 fn run(matches: &clap::ArgMatches) -> Result<(), Error> {
@@ -106,8 +129,21 @@ fn run(matches: &clap::ArgMatches) -> Result<(), Error> {
         return Err(Error::usage("at least one FASTQ file is required"));
     }
     let offset = if matches.get_flag("phred64") { 64 } else { 33 };
+    let limits = QcLimits {
+        max_read_length: *matches
+            .get_one::<u64>("max_read_length")
+            .expect("clap supplies a default"),
+        max_distinct_sequences: *matches
+            .get_one::<u64>("max_distinct_sequences")
+            .expect("clap supplies a default"),
+    };
     let to_stdout = matches.get_flag("stdout");
     let outdir = matches.get_one::<String>("outdir").map(PathBuf::from);
+    let contaminants = matches
+        .get_one::<String>("contaminants")
+        .map(|path| read_contaminants(Path::new(path)))
+        .transpose()?
+        .unwrap_or_default();
 
     if let Some(dir) = &outdir {
         if !dir.is_dir() {
@@ -119,7 +155,7 @@ fn run(matches: &clap::ArgMatches) -> Result<(), Error> {
     }
 
     for input in &inputs {
-        let stats = accumulate(input, offset)?;
+        let stats = accumulate(input, offset, limits, &contaminants)?;
         let report = Report::from_stats(&stats);
         if to_stdout {
             print!("{}", report.render());
@@ -130,6 +166,29 @@ fn run(matches: &clap::ArgMatches) -> Result<(), Error> {
         }
     }
     Ok(())
+}
+
+fn read_contaminants(path: &Path) -> Result<Vec<(String, Vec<u8>)>, Error> {
+    let text = std::fs::read_to_string(path)
+        .map_err(|error| Error::io(format!("{}: {error}", path.display())))?;
+    let mut entries: Vec<(String, Vec<u8>)> = Vec::new();
+    let mut name: Option<String> = None;
+    let mut sequence: Vec<u8> = Vec::new();
+    for line in text.lines() {
+        if let Some(header) = line.strip_prefix('>') {
+            if let Some(previous) = name.take() {
+                entries.push((previous, std::mem::take(&mut sequence)));
+            }
+            name = Some(header.trim().to_string());
+            sequence.clear();
+        } else if name.is_some() {
+            sequence.extend(line.trim().as_bytes());
+        }
+    }
+    if let Some(previous) = name {
+        entries.push((previous, sequence));
+    }
+    Ok(entries)
 }
 
 /// Where a report goes: `<outdir|input-dir>/<sample>_fastqc/fastqc_data.txt`.
@@ -170,16 +229,28 @@ fn strip_fastq_extension(name: &str) -> String {
 
 /// Read `input` through the shared FASTX layer and accumulate statistics.
 ///
-/// Streaming: one record is decoded at a time and folded into fixed-size counters,
-/// so memory does not grow with the number of records. The per-read sequence map
-/// used by the duplication module is the one exception, and it is bounded by the
-/// number of *distinct* sequences.
-fn accumulate(input: &Path, quality_offset: u8) -> Result<QcStats, Error> {
-    use bioinfo_fastx::{Mode, Parser};
+/// Input is decompressed by content and parsed in record-aligned chunks, not
+/// loaded in full. Input buffers scale with the chunk size and longest record.
+/// This is not a bound on total QC memory: per-position counters grow with the
+/// longest sequence, and duplication counts grow with distinct sequence prefixes.
+fn accumulate(
+    input: &Path,
+    quality_offset: u8,
+    limits: QcLimits,
+    contaminants: &[(String, Vec<u8>)],
+) -> Result<QcStats, Error> {
+    use bioinfo_fastx::{Mode, Parser, Reader, DEFAULT_CHUNK_SIZE};
 
-    let bytes =
-        std::fs::read(input).map_err(|error| Error::io(format!("{}: {error}", input.display())))?;
-    let mut parser = Parser::new(&bytes, 0, 1).with_mode(Mode::Strict);
+    let input_error = |error: std::io::Error| {
+        Error::from(std::io::Error::new(
+            error.kind(),
+            format!("{}: {error}", input.display()),
+        ))
+    };
+    // Keep the Path intact (including non-UTF8 names); Reader::open takes &str.
+    let file = std::fs::File::open(input).map_err(input_error)?;
+    let mut reader =
+        Reader::from_stream(Box::new(file), input.display().to_string()).map_err(input_error)?;
 
     // `Filename` is the input's *base name including its extension* — FastQC
     // prints `sample.fastq`, not `sample`, and not the path. The bare stem is
@@ -189,20 +260,41 @@ fn accumulate(input: &Path, quality_offset: u8) -> Result<QcStats, Error> {
         .map(|value| value.to_string_lossy().into_owned())
         .unwrap_or_else(|| input.to_string_lossy().into_owned());
     let mut stats = QcStats::new(filename);
-    loop {
-        match parser.next_record() {
-            Ok(Some(record)) => {
-                if record.qualities.is_empty() {
-                    return Err(Error::input(format!(
-                        "{}: FASTQ input required, but a record has no quality line",
-                        input.display()
-                    )));
+    stats.set_contaminants(contaminants.to_vec());
+    let mut buffer = Vec::new();
+    while let Some(chunk) = reader
+        .next_chunk(&mut buffer, DEFAULT_CHUNK_SIZE)
+        .map_err(input_error)?
+    {
+        let mut parser = Parser::new(chunk.data, chunk.offset, chunk.line).with_mode(Mode::Strict);
+        loop {
+            match parser.next_record() {
+                Ok(Some(record)) => {
+                    if record.qualities.is_empty() {
+                        return Err(Error::input(format!(
+                            "{}: FASTQ input required, but a record has no quality line",
+                            input.display()
+                        )));
+                    }
+                    let prefix: Vec<u8> = record
+                        .sequence
+                        .iter()
+                        .take(50)
+                        .map(|byte| byte.to_ascii_uppercase())
+                        .collect();
+                    check_read(
+                        record.sequence.len(),
+                        !stats.sequences.contains_key(&prefix),
+                        stats.sequences.len(),
+                        limits,
+                    )
+                    .map_err(|message| Error::input(format!("{}: {message}", input.display())))?;
+                    stats.add_read(record.sequence, record.qualities, quality_offset);
                 }
-                stats.add_read(record.sequence, record.qualities, quality_offset);
-            }
-            Ok(None) => break,
-            Err(error) => {
-                return Err(Error::runtime(format!("{}: {error}", input.display())));
+                Ok(None) => break,
+                Err(error) => {
+                    return Err(Error::runtime(format!("{}: {error}", input.display())));
+                }
             }
         }
     }
@@ -254,7 +346,7 @@ mod tests {
         let text = provenance().render();
         assert!(text.contains("rust-fastqc"), "{text}");
         assert!(text.contains("FastQC 0.13.0"), "{text}");
-        assert!(text.contains("Adapter Content"), "{text}");
+        assert!(text.contains("Kmer Content"), "{text}");
     }
 
     #[test]
@@ -263,7 +355,16 @@ mod tests {
         std::fs::create_dir_all(&dir).unwrap();
         let path = dir.join("two.fq");
         std::fs::write(&path, b"@a\nACGT\n+\nIIII\n@b\nACGT\n+\nIIII\n").unwrap();
-        let stats = accumulate(&path, 33).unwrap();
+        let stats = accumulate(
+            &path,
+            33,
+            QcLimits {
+                max_read_length: 1_000_000,
+                max_distinct_sequences: 10_000_000,
+            },
+            &[],
+        )
+        .unwrap();
         assert_eq!(stats.total_sequences, 2);
         assert_eq!(stats.total_bases, 8);
         let _ = std::fs::remove_file(&path);
@@ -272,7 +373,16 @@ mod tests {
 
     #[test]
     fn a_missing_input_is_an_io_error() {
-        let error = accumulate(Path::new("/nonexistent/x.fq"), 33).unwrap_err();
+        let error = accumulate(
+            Path::new("/nonexistent/x.fq"),
+            33,
+            QcLimits {
+                max_read_length: 1_000_000,
+                max_distinct_sequences: 10_000_000,
+            },
+            &[],
+        )
+        .unwrap_err();
         assert_eq!(error.exit_code(), 4);
     }
 }

@@ -407,7 +407,11 @@ pub fn build_stats(
     }
 
     for (index, spec) in adapters.iter().enumerate() {
-        let measured = run.adapter_stats.get(index).cloned().unwrap_or_default();
+        let measured = run
+            .adapter_stats
+            .get(index)
+            .map(|totals| totals.to_chunk_stats())
+            .unwrap_or_default();
         let reverse_complemented = if filters_given.reverse_complement {
             Some(
                 run.adapter_reverse_complemented
@@ -438,7 +442,7 @@ pub fn build_stats(
                     Some(
                         r2.adapter_stats
                             .get(spec.index.saturating_sub(r1_adapter_count))
-                            .cloned()
+                            .map(|totals| totals.to_chunk_stats())
                             .unwrap_or_default(),
                     ),
                     r2.adapter_reverse_complemented
@@ -512,22 +516,25 @@ mod tests {
             demux_unknown: Vec::new(),
             demux_unknown_records: 0,
             paired: false,
+            aux_incremental: false,
             read2: None,
             info_lines: Vec::new(),
             rest_lines: Vec::new(),
             too_short_records: Vec::new(),
             too_long_records: Vec::new(),
             untrimmed_records: Vec::new(),
-            adapter_stats: vec![crate::engine::AdapterChunkStats {
-                matches: 7,
-                trimmed: vec![(6, 1), (13, 0), (13, 0), (13, 0), (23, 1), (53, 1), (13, 1)],
-                adjacent: vec![Some(b'A'), Some(b'T'), None],
-                five_prime_overlaps: 0,
-                five_prime_trimmed: Vec::new(),
-                three_prime_hits: 0,
-                five_prime_lengths: Vec::new(),
-                three_prime_lengths: Vec::new(),
-            }],
+            adapter_stats: vec![crate::pipeline::AdapterTotals::from(
+                crate::engine::AdapterChunkStats {
+                    matches: 7,
+                    trimmed: vec![(6, 1), (13, 0), (13, 0), (13, 0), (23, 1), (53, 1), (13, 1)],
+                    adjacent: vec![Some(b'A'), Some(b'T'), None],
+                    five_prime_overlaps: 0,
+                    five_prime_trimmed: Vec::new(),
+                    three_prime_hits: 0,
+                    five_prime_lengths: Vec::new(),
+                    three_prime_lengths: Vec::new(),
+                },
+            )],
         }
     }
 

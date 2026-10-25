@@ -29,6 +29,8 @@
 //! | 3 | an input precondition was violated (e.g. `index` on an unsorted BAM) |
 //! | 4 | an I/O failure |
 
+#![forbid(unsafe_code)]
+
 pub mod commands;
 pub mod error;
 pub mod format;

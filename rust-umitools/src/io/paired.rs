@@ -11,9 +11,9 @@
 //! cannot be combined with a spilled request set.
 
 use crate::error::{Error, Result};
+use crate::io::bam::{self, Record};
 use crate::io::spill::TempOutput;
 use crate::io::RecordSink;
-use rust_htslib::bam::{self, Read, Record};
 use std::collections::HashSet;
 use std::fs::File;
 use std::io::{BufReader, BufWriter, Read as IoRead, Write as IoWrite};

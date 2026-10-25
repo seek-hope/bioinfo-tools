@@ -11,7 +11,7 @@ use crate::core::rng::Rng;
 use crate::core::umi::Umi;
 use crate::error::{Error, Result};
 use crate::io::alignment::{aux_int, aux_str, read_position};
-use rust_htslib::bam::Record;
+use crate::io::bam::Record;
 use rustc_hash::FxHashMap;
 use std::collections::BTreeMap;
 

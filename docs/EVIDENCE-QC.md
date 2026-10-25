@@ -1,5 +1,11 @@
 # QC prototype evidence: `rust-fastqc`
 
+> Historical snapshot. The original CLI actually read the whole file without
+> decompression; the compressed-input limitation below understated that defect.
+> The subsequent fix, streaming input tests and rerun of this oracle are recorded
+> in [EVIDENCE-P0-START.md](EVIDENCE-P0-START.md). QC statistics still have separate
+> memory-growth limits; this snapshot is not evidence of bounded total memory.
+
 Status: **VERIFIED for the six required modules.** FastQC 0.13.0 differential:
 **22/22 fixtures pass**. MultiQC 1.35 parses the output with no warnings.
 

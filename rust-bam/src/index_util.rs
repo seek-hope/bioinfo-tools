@@ -29,6 +29,7 @@ use std::io::BufWriter;
 use std::path::{Path, PathBuf};
 
 use noodles::bam;
+use noodles::bam::index::Format;
 use noodles::bgzf;
 use noodles::sam;
 
@@ -43,10 +44,26 @@ pub fn bai_path(bam: &Path) -> PathBuf {
     PathBuf::from(name)
 }
 
+/// The conventional CSI path for a BAM: `<path>.csi`.
+pub fn csi_path(bam: &Path) -> PathBuf {
+    let mut name = bam.as_os_str().to_os_string();
+    name.push(".csi");
+    PathBuf::from(name)
+}
+
 /// Build a BAI for the BAM at `input` and write it to `output`.
 ///
 /// Returns the number of records indexed, so the command can report it.
 pub fn build_bai(input: &Path, output: &Path) -> Result<u64> {
+    build_index(input, output, Format::Bai)
+}
+
+/// Build a CSI for the BAM at `input` and write it to `output`.
+pub fn build_csi(input: &Path, output: &Path) -> Result<u64> {
+    build_index(input, output, Format::Csi)
+}
+
+fn build_index(input: &Path, output: &Path, format: Format) -> Result<u64> {
     let file =
         File::open(input).map_err(|error| Error::io(format!("{}: {error}", input.display())))?;
     let mut reader = bam::io::Reader::from(bgzf::io::Reader::new(std::io::BufReader::new(file)));
@@ -57,6 +74,7 @@ pub fn build_bai(input: &Path, output: &Path) -> Result<u64> {
     let reference_count = header.reference_sequences().len();
 
     let mut indexer = bam::index::Indexer::builder()
+        .set_format(format)
         .build()
         .map_err(|error| Error::runtime(format!("cannot create index builder: {error}")))?;
     let mut record = sam::alignment::RecordBuf::default();
@@ -112,24 +130,22 @@ pub fn build_bai(input: &Path, output: &Path) -> Result<u64> {
 
     let index = indexer.build(reference_count);
 
-    // `bam::index::Index` is an enum over BAI and CSI. The default builder makes
-    // a BAI, which is what `samtools index` writes without `-c`; the other arm is
-    // unreachable here but handled rather than unwrapped.
-    let bai = match index {
-        bam::index::Index::Bai(index) => index,
-        bam::index::Index::Csi(_) => {
-            return Err(Error::runtime(
-                "internal: the BAI builder produced a CSI index",
-            ))
-        }
-    };
-
     let out = File::create(output)
         .map_err(|error| Error::io(format!("{}: {error}", output.display())))?;
-    let mut writer = bam::bai::io::Writer::new(BufWriter::new(out));
-    writer
-        .write_index(&bai)
-        .map_err(|error| Error::io(format!("{}: cannot write index: {error}", output.display())))?;
+    match index {
+        bam::index::Index::Bai(index) => {
+            let mut writer = bam::bai::io::Writer::new(BufWriter::new(out));
+            writer.write_index(&index).map_err(|error| {
+                Error::io(format!("{}: cannot write BAI: {error}", output.display()))
+            })?;
+        }
+        bam::index::Index::Csi(index) => {
+            let mut writer = noodles::csi::io::Writer::new(BufWriter::new(out));
+            writer.write_index(&index).map_err(|error| {
+                Error::io(format!("{}: cannot write CSI: {error}", output.display()))
+            })?;
+        }
+    }
 
     Ok(count)
 }

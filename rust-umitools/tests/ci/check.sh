@@ -5,8 +5,9 @@
 set -euo pipefail
 
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-# shellcheck source=tests/ci/env.sh
+# shellcheck source=env.sh
 . "$here/env.sh"
 
+# shellcheck disable=SC2154  # assigned by env.sh above
 cd "$umitools_root"
 exec cargo "$@"
