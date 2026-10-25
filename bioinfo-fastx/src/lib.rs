@@ -8,7 +8,7 @@
 //!
 //! | Module | Responsibility |
 //! | --- | --- |
-//! | [`format`] | magic-byte and extension detection |
+//! | [`mod@format`] | magic-byte and extension detection |
 //! | [`parser`] | strict and lenient FASTQ/FASTA record parsing |
 //! | [`chunker`] | record-aligned chunking for the parallel pipelines |
 //! | [`writer`] | FASTQ/FASTA serialisation |

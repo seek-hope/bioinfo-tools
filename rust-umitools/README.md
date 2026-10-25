@@ -48,7 +48,7 @@ install -m 755 rust-umitools-x86_64-unknown-linux-gnu/rust-umitools ~/.local/bin
 cargo install --git https://github.com/seek-hope/bioinfo-tools --package rust-umitools --locked
 ```
 
-需要 Rust 1.88+；本地 checkout 开发仍推荐：
+需要 Rust 1.91+；本地 checkout 开发仍推荐：
 
 ```bash
 cargo build --release      # 产物 target/release/rust-umitools
@@ -126,7 +126,7 @@ cat in.bam | rust-umitools dedup -I - -S - | samtools view -c -
 | `--reference FASTA` | CRAM 读写参考 |
 | `--partition-genes N` | count 的 gene 分区后备（0=自动） |
 
-仓库提供 `.github/workflows/ci.yml`（x86_64 fmt/clippy/test、MSRV 1.88）与 `Containerfile`。
+仓库提供 workspace 的 `.github/workflows/quality.yml`（x86_64 fmt/clippy/test/rustdoc、MSRV 1.91）与 `Containerfile`。
 
 ## 退出码
 

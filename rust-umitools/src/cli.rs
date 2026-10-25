@@ -100,8 +100,10 @@ pub struct Cli {
     #[command(subcommand)]
     pub command: Option<Command>,
 
-    /// Legacy form: <input.bam> <output.bam> [threads]
-    #[arg(value_name = "INPUT")]
+    #[arg(
+        value_name = "INPUT",
+        help = "Legacy form: <input.bam> <output.bam> [threads]"
+    )]
     pub legacy_input: Option<PathBuf>,
     #[arg(value_name = "OUTPUT")]
     pub legacy_output: Option<PathBuf>,
@@ -350,8 +352,12 @@ pub struct CountArgs {
 #[derive(Args, Debug, Clone)]
 #[command(after_help = COUNT_TAB_HELP)]
 pub struct CountTabArgs {
-    /// Two column table: read_id<sep>UMI and gene, sorted by gene
-    #[arg(short = 'I', long = "input", value_name = "FILE")]
+    #[arg(
+        short = 'I',
+        long = "input",
+        value_name = "FILE",
+        help = "Two column table: read_id<sep>UMI and gene, sorted by gene"
+    )]
     pub input: PathBuf,
     /// Output table (defaults to stdout)
     #[arg(short = 'S', long = "output", value_name = "FILE")]

@@ -59,8 +59,8 @@ you intentionally need a cache-only/isolated run. The unified quality gate is
 `bash tests/ci/check.sh`; add `--with-fastx-qc-oracles` to require installed
 FASTX/QC references, and `--offline` for an isolated run. See
 [tests/ci/README.md](tests/ci/README.md) for scope, negative-control tests and the
-GitHub-hosted workflow. The workflow is configured but has only been validated
-locally, not run on GitHub.
+GitHub-hosted workflow. The workflow has passed on GitHub
+([quality run 40151959375](https://github.com/seek-hope/bioinfo-tools/actions/runs/40151959375)).
 
 The oracle binaries for the FASTX comparisons are pinned in
 [tests/ci/PINS.md](tests/ci/PINS.md). They are downloaded locally, not committed.

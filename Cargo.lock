@@ -75,11 +75,9 @@ version = "0.1.0"
 name = "bioinfo-fastx"
 version = "0.1.0"
 dependencies = [
- "bioinfo-common",
  "bzip2",
  "crc32fast",
  "flate2",
- "lzma-sys",
  "xz2",
  "zstd",
 ]
@@ -759,12 +757,10 @@ dependencies = [
 name = "rust-cutadapt"
 version = "0.1.0"
 dependencies = [
- "bioinfo-common",
  "bioinfo-fastx",
  "bzip2",
  "clap",
  "flate2",
- "lzma-sys",
  "xz2",
 ]
 

@@ -19,7 +19,7 @@ bash tests/ci/check.sh --with-fastx-qc-oracles --isolate-network
 
 | Mode | Checks |
 | --- | --- |
-| Base | `check_docs.py`; workspace `fmt --check`; clippy with warnings denied; release tests; all native binaries; cutadapt visible plain/gzip fixture smoke |
+| Base | `check_docs.py`; workspace `fmt --check`; clippy with warnings denied; rustdoc with warnings denied; release tests; all native binaries; cutadapt visible plain/gzip fixture smoke |
 | `--offline` | Base checks with `CARGO_NET_OFFLINE=true` and `--offline` passed to Cargo; a missing pinned toolchain fails instead of being installed |
 | `--with-fastx-qc-oracles` | Base checks plus SeqKit 2.14.0/fq 0.12.0 and FastQC 0.13.0/MultiQC 1.35 differentials, with version probes first |
 | `--isolate-network` | Runs oracle probes and oracle suites under `unshare -Urn`; requires permitted user/network namespaces |
@@ -70,10 +70,9 @@ controls and `bash tests/ci/check.sh`.
 
 A manual dispatch can request `fastx_qc_oracles`. That optional step expects the
 pinned oracles to be pre-provisioned and fails clearly if they are absent; the
-hosted workflow does not download or fabricate them. The workflow has been
-validated locally as YAML and through the gate, but has **not been executed on
-GitHub** in this workspace. Registering required checks and a release gate remains
-a maintainer decision.
+hosted workflow does not download or fabricate them. The workflow passed on
+GitHub in quality run `40151959375`. Registering required checks and a release
+gate remains a maintainer decision.
 
 ## Remaining integration
 

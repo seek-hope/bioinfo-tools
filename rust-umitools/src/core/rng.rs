@@ -2,9 +2,9 @@
 //!
 //! Two strategies are offered and must not be confused:
 //!
-//! * [`compat::pyrng::PyRandom`] — reproduces CPython's Mersenne Twister so that
+//! * [`crate::compat::pyrng::PyRandom`] — reproduces CPython's Mersenne Twister so that
 //!   `--random-seed N` matches UMI-tools record for record.
-//! * [`compat::pyrng::StableRandom`] — the project's own deterministic stream,
+//! * [`crate::compat::pyrng::StableRandom`] — the project's own deterministic stream,
 //!   identical for every thread count but not bit-identical with upstream.
 
 use std::fmt;

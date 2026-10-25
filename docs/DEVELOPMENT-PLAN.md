@@ -206,8 +206,8 @@ cargo test --workspace --release --locked
 | PLAN | 已落档 | 本文及旧规划存档；其他阶段不标为完成 |
 | P0-01 | 已完成（本地验证） | 空行不再静默截断；5 项进程级回归、既有 FASTX 50/50；见执行证据 |
 | P0-02 | 已完成（输入路径） | 9 项进程级回归、QC 22/22 与 MultiQC；共享解压/分块已接入，S-04 已完成 |
-| P0-03 | 本地完成（默认联网） | `tests/ci/check.sh` 默认联网、保留 `--offline`/`--isolate-network`；12 项负向控制、文档检查及 GitHub-hosted workflow 已就绪；远端执行、required checks、完整 oracle/定期/发布门禁待配置与集成。证据：[EVIDENCE-P0-DOCS-CI](EVIDENCE-P0-DOCS-CI.md) |
-| P0-04 | 已完成（文档审计） | [DOC-AUDIT.md](DOC-AUDIT.md) 记录现行/历史/安全/受保护四类；`rust-umitools` 的过期 MSRV/离线表述仅登记未改；剩余 CLI help 与实现差异继续审计 |
+| P0-03 | 已完成（本地 + 远端 CI） | `tests/ci/check.sh` 默认联网、保留 `--offline`/`--isolate-network`；12 项负向控制、文档检查、rustdoc gate 及 GitHub-hosted workflow 已就绪；quality run 40151959375 已远端通过；required checks、完整 oracle/定期/发布门禁仍待配置。证据：[EVIDENCE-P0-DOCS-CI](EVIDENCE-P0-DOCS-CI.md) |
+| P0-04 | 已完成（文档审计与 2026-10-25 清理） | [DOC-AUDIT.md](DOC-AUDIT.md) 记录现行/历史/安全/受保护四类；2026-10-25 修正 `rust-umitools` MSRV/CI 文案、移除未使用 helper，并修复 rustdoc 链接；剩余 CLI help 与实现差异继续审计 |
 | P0-05 | 已完成（本地） | `bench/run.py`、schema、五 CLI 1×/10×/100× 矩阵；见 `bench/results/current.json` |
 | S-01 | 已完成（本地） | BAM 外部排序 + samtools 1.24 对照；见 `docs/EVIDENCE-FINAL.md` |
 | S-02 | 已完成（本地） | FASTX 直方图 stats + 流式 split；174 lib + 4 streaming tests + 50/50 |
@@ -217,7 +217,7 @@ cargo test --workspace --release --locked
 | F-03 | 已完成（本地） | `examples/umi-workflow/` consumer smoke；aligner 缺失 exit 3 |
 | D-01 | 本地完成 | `docs/DELIVERY.md`；SBOM/可复现/aarch64/配方结构 PASS；未发布 |
 | T11 | 已完成（本地） | 规模矩阵 + docs/PROFILING.md；临时 run BGZF FAST，bam_sort lowmem 7.60→5.27s |
-| T14 | 已完成（本地门禁；历史快照审计通过） | QUALITY PASS（718 tests, 50/50, 22/22）+ K4/K5/K6；自检前快照审计通过；当前工作树由 TeamAgents 复核（PASS WITH FINDINGS） |
+| T14 | 已完成（本地门禁；独立复核通过） | QUALITY PASS（718 tests, 50/50, 22/22）+ K4/K5/K6；自检前快照审计通过；2026-10-25 独立复核与 quality run 40151959375 通过 |
 | C11 | 已完成（本地） | proptest 9、Miri 39、Kani 5、TLA+ 2；`FULL VERIFICATION PASS`；见 `verification/`、`EVIDENCE-FINAL.md` §7 |
 
 ## 7. 证据入口

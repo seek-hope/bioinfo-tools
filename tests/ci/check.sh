@@ -125,6 +125,7 @@ run python3 tests/ci/check_docs.py
 run python3 tests/gate/test_acceptance.py
 run "${CARGO[@]}" fmt --all -- --check
 run "${CARGO[@]}" clippy --workspace --all-targets --locked "${cargo_offline[@]}" -- -D warnings
+RUSTDOCFLAGS="-D warnings" run "${CARGO[@]}" doc --workspace --no-deps --locked "${cargo_offline[@]}"
 run "${CARGO[@]}" test --workspace --release --locked "${cargo_offline[@]}"
 run "${CARGO[@]}" build --workspace --bins --release --locked "${cargo_offline[@]}"
 

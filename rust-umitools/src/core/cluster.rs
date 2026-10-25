@@ -48,15 +48,6 @@ impl Method {
             Method::Directional => "directional",
         }
     }
-
-    /// Methods that build an adjacency graph.
-    #[allow(dead_code)]
-    fn needs_graph(self) -> bool {
-        matches!(
-            self,
-            Method::Cluster | Method::Adjacency | Method::Directional
-        )
-    }
 }
 
 /// UMI-tools asserts that every UMI in a bundle has the same length. We reject

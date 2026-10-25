@@ -1,7 +1,7 @@
 # 文档约束审计
 
 状态：本轮审计结论。分类为四项，修改只作用于“现行约束”和“历史标注”；
-`rust-umitools/` 运行时代码在此前审计快照中保持原样；2026-10-23 用户另行授权 BAM I/O 迁移到 noodles，当前运行时已改变（见 [迁移证据](EVIDENCE-NOODLES.md)），oracle/expected 文件仍未修改。此前按用户“全部解决”请求修复了 `tests/compat/matrix.py` 的尾随 tab 生成器并重新生成 `docs/compatibility.tsv`；后续 shellcheck 处理还遗留了 `tests/ci/check.sh` 和 `tests/ci/env.sh` 的注解/source 指示修改，旧记录遗漏了这两项。此次补记不追认额外授权；这些既有改动仍需维护者复核。本次整改未修改或还原 `rust-umitools/`，其既有 diff/status 的前后哈希一致。
+`rust-umitools/` 运行时代码在此前审计快照中保持原样；2026-10-23 用户另行授权 BAM I/O 迁移到 noodles，当前运行时已改变（见 [迁移证据](EVIDENCE-NOODLES.md)），oracle/expected 文件仍未修改。此前按用户“全部解决”请求修复了 `tests/compat/matrix.py` 的尾随 tab 生成器并重新生成 `docs/compatibility.tsv`；后续 shellcheck 处理还遗留了 `tests/ci/check.sh` 和 `tests/ci/env.sh` 的注解/source 指示修改，旧记录遗漏了这两项。此次补记不追认额外授权；这些既有改动仍需维护者复核。2026-10-25 按用户“整理项目代码与文档”的请求，修正了 `rust-umitools/` 的文档链接、MSRV/CI 文案并删除未使用的私有 helper；oracle/expected 文件未修改。
 
 最终独立审计：2026-10-23 通过（对象为自检前快照）；随后全局自检的代码改动仅经本地 K1/K4 复核。快照见 [EVIDENCE-FINAL.md](EVIDENCE-FINAL.md)。安全入口、依赖策略草案和分支覆盖率补测见 [整改证据](EVIDENCE-AUDIT-REMEDIATION.md)；它们是本地复核，不是新的独立审计。
 
@@ -49,8 +49,10 @@
 
 | 文件 | 发现 | 处置 |
 | --- | --- | --- |
-| `rust-umitools/README.md` | “需要 Rust 1.88+”，与 workspace MSRV 1.91 不一致 | 历史受保护记录；2026-10-23 迁移授权范围仅覆盖 BAM I/O，未顺手修改该 MSRV 文案，仍在待办 |
-| `rust-umitools/README.en.md` | “Rust 1.88+ is required” | 同上 |
+| `rust-umitools/README.md` | “需要 Rust 1.88+”，与 workspace MSRV 1.91 不一致；CI 描述指向不存在的 `ci.yml` | 2026-10-25 已改为 1.91，并指向 workspace `quality.yml` |
+| `rust-umitools/README.en.md` | “Rust 1.88+ is required”；CI 描述指向不存在的 `ci.yml` | 同上 |
+| `rust-umitools/src/core/cluster.rs` | `#[allow(dead_code)]` 的私有 `needs_graph` 无任何调用 | 2026-10-25 删除；无行为变化 |
+| `verification/kani/src/lib.rs` | `#![allow(dead_code)]` | 保留：`#[kani::proof]` 入口不被普通二进制调用，属验证 harness，不是生产死代码 |
 | `rust-umitools/tests/ci/env.sh`、`tests/ci/check.sh` | 默认 `CARGO_NET_OFFLINE=true`；另有上轮 shellcheck 注解/source 指示改动 | 隔离选择未改；如实补记既有测试脚本 diff，本次不再修改，待维护者复核 |
 | `rust-umitools/tests/*` | 多个 oracle 脚本依赖既有环境/路径假设 | 受保护；只通过根门禁调用，不修改比较逻辑。例外：`tests/compat/matrix.py` 的尾随 tab 生成器已按用户授权修复，重新生成的 `docs/compatibility.tsv` 通过 manifest gate |
 | `tests/oracle/run_w13_oracle.sh` | 注释仍说 oracle “cannot be obtained offline”；构建提示含 `--offline` | 属 oracle 脚本保护范围，保留；根门禁使用 `--rust` 传入当前构建，不依赖该提示 |
@@ -60,7 +62,6 @@
 
 ## 5. 后续仍需同步的项
 
-- `rust-umitools` 文档中的 1.88/MSRV 和 CI 描述需要组件维护者授权后修正。
 - `tests/oracle/run_w13_oracle.sh` 的过时注释需要在 oracle 脚本变更窗口内修正。
 - 根 README 的组件版本、发布状态和性能声明在阶段 D 再统一生成，避免再次手写漂移。
 - 文档检查只覆盖明确的过时约束，不替代对每条兼容性声明的逐项复核。
@@ -68,3 +69,11 @@
 ## 6. 2026-10-23 noodles migration
 
 用户明确授权把 `rust-umitools` BAM I/O 从 rust-htslib 迁移到 noodles；运行时源码和 `Cargo.lock` 已改变。迁移证据、oracle 结果、性能与限制见 [EVIDENCE-NOODLES.md](EVIDENCE-NOODLES.md)；ADR 见 [0001-noodles-migration.md](../rust-umitools/docs/adr/0001-noodles-migration.md)。此前“运行时未改”的表述仅适用于旧审计快照。
+
+## 7. 2026-10-25 code/document cleanup
+
+- 用 `RUSTDOCFLAGS='-D warnings' cargo doc --workspace --no-deps --locked` 清理了 7 个 broken/ambiguous doc link，并把同一命令加入 `tests/ci/check.sh` 的 native gate。
+- `cargo-machete 0.9.2` 发现并移除了 `bioinfo-fastx`/`rust-cutadapt` 对 `bioinfo-common` 的无用直接依赖；直接用 `xz2` 的 `static` feature 取代 `lzma-sys` 直接 pin，保留静态 xz 链接。
+- 移除 `rust-umitools/src/core/cluster.rs` 中未调用的私有 `needs_graph`/`allow(dead_code)`；`verification/kani` 的 allow 保留并注明原因。
+- 重新生成 `packaging/sbom.cdx.json` 并由 `packaging/sbom.py --check` 验证；更新 README、quality-gate 文档、`DEVELOPMENT-PLAN`、`EVIDENCE-FINAL` 与 CI 状态。
+- 历史 EVIDENCE 文件继续保留原文；本次只修改当前文档和明确的历史标注，不改 golden/oracle/fixtures。

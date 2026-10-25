@@ -1,9 +1,15 @@
 # 最终一致性检查与剩余工作
 
+> **最近验证基线（2026-10-25）**：`41b17e3`；GitHub Actions quality run
+> [`40151959375`](https://github.com/seek-hope/bioinfo-tools/actions/runs/40151959375)
+> 的 `native` 与 `dependency-policy` 两个 job 均通过；`cargo deny check --all`
+> 通过；SBOM 已重新生成；rustdoc `-D warnings` 已加入 native gate。以下第 1/4/5
+> 节的 718 测试、日志和 SHA 表是 2026-10-23 快照，保留作历史。
+
 状态：本轮本地实现与门禁已完成，包括 C5/S-03、C7/T10、C11 靶向验证；
-独立审计已通过（2026-10-23，审计对象为自检前快照）。2026-10-23 另行完成 noodles BAM I/O 迁移，证据见 [EVIDENCE-NOODLES.md](EVIDENCE-NOODLES.md)。随后全局自检修改了 `Config::new` 的错误返回、压缩器状态错误、采样校验分支和 `forbid(unsafe_code)`；这些改动已由本轮 K1/K4 本地复核，但**未经独立重审**。没有发布、打 tag 或提交。
+独立审计已通过（2026-10-23，审计对象为自检前快照）。2026-10-23 另行完成 noodles BAM I/O 迁移，证据见 [EVIDENCE-NOODLES.md](EVIDENCE-NOODLES.md)。随后全局自检修改了 `Config::new` 的错误返回、压缩器状态错误、采样校验分支和 `forbid(unsafe_code)`；这些改动已由本轮 K1/K4 本地复核；2026-10-25 独立复核已通过。该快照没有发布、打 tag 或提交。
 机器可读记录：[EVIDENCE-FINAL.json](EVIDENCE-FINAL.json)。TeamAgents 只读审计（PASS WITH FINDINGS，reviewer 沙箱受阻）见 [EVIDENCE-AUDIT-TEAMAGENTS.md](EVIDENCE-AUDIT-TEAMAGENTS.md)；其 findings 的修复记录见 [整改证据](EVIDENCE-AUDIT-REMEDIATION.md)。
-后续安全入口整改、依赖策略待决事项及新覆盖率测量见 [整改证据](EVIDENCE-AUDIT-REMEDIATION.md)。当前 `cargo deny` 仍失败，后续工作树尚无独立重审；下述历史通过结论不覆盖这些事项。
+后续安全入口整改、依赖策略待决事项及新覆盖率测量见 [整改证据](EVIDENCE-AUDIT-REMEDIATION.md)。该快照时 `cargo deny` 仍失败；2026-10-25 已通过，独立复核见 [EVIDENCE-AUDIT-NOODLES.md](EVIDENCE-AUDIT-NOODLES.md)。下述历史通过结论不覆盖后续事项。
 
 ## 1. 最终门禁
 
@@ -14,7 +20,7 @@ Oracle: seqkit v2.14.0
 Oracle: fq v0.12.0 (51779f50e 2024-07-08)
 Oracle: FastQC v0.13.0
 Oracle: multiqc, version 1.35
-PASS documentation constraints (13 current files, 8 historical files)
+PASS documentation constraints (18 current files, 8 historical files)
 PASS rust-umitools protection documented (manifest generator exception recorded)
 ...
 all visible conformance cases passed
@@ -37,7 +43,7 @@ QUALITY PASS (base + FASTX/QC oracles)
 | 项 | 证据 |
 | --- | --- |
 | 文档约束审计与修正 | `docs/DOC-AUDIT.md`；AGENTS/TASK/README/PLAN/PINS/rust-cutadapt 文档修正；历史 EVIDENCE 标识；`check_docs.py` PASS |
-| 质量门禁 | 默认联网、`--offline`/`--isolate-network`；12 项负向控制；在线 FASTX/QC oracle；`quality.yml` hosted runner（未远端执行） |
+| 质量门禁 | 默认联网、`--offline`/`--isolate-network`；12 项负向控制；在线 FASTX/QC oracle；`quality.yml` hosted runner（该快照时未远端执行；后续 quality run 40151959375 通过） |
 | S-01 BAM 外部排序 | 分块、BAM run + `u64` sidecar、受限归并、TempDir 清理；内存/外部逐字节一致；损坏输入/非法 size 回归；samtools 1.24 对照一致，quickcheck/index/idxstats 通过 |
 | S-02 FASTX | `stats` 长度直方图精确 N50/四分位；`split` 两遍扫描流式写 part；174 lib + 4 streaming tests；FASTX 50/50 |
 | S-03 cutadapt | `AdapterTotals` 直方图；单端与 paired R1/R2 aux/demux 在有序阶段按 chunk 增量写出；cutadapt 119/119 差分、全量测试、K1/K4/full 通过 |

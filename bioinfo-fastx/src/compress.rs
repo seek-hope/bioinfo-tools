@@ -28,8 +28,8 @@
 //!
 //! # Multi-member gzip
 //!
-//! [`MultiMemberGzWriter`] emits an independent gzip member per [`write_member`]
-//! call. The concatenation is a valid gzip stream that every decoder (`gzip`,
+//! [`MultiMemberGzWriter`] emits an independent gzip member per
+//! [`MultiMemberGzWriter::write_member`] call. The concatenation is a valid gzip stream that every decoder (`gzip`,
 //! Python `gzip`, `MultiGzDecoder`, `samtools`) reads as one, which is what makes
 //! it usable for parallel or streamed output. cutadapt's own pipeline produces a
 //! single member today; the multi-member writer exists for W1-3+ and is tested

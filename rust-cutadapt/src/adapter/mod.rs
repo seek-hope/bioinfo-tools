@@ -323,7 +323,7 @@ fn base_adapter_type(option: char) -> Result<AdapterType, AdapterParseError> {
 ///
 /// * `option` decides the base type: `-a` 3', `-g` 5', `-b` anywhere.
 ///   The read-2 spellings `-A`/`-G`/`-B` are accepted and mean the same three
-///   types (see [`base_adapter_type`]).
+///   types (see `base_adapter_type`).
 /// * A leading `^` on `-a`/`-g` makes it anchored (or linked when it also
 ///   contains `...`).
 /// * A trailing `$` on `-a` makes it anchored 3'.

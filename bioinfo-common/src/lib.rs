@@ -15,7 +15,7 @@
 //!
 //! This crate follows boundary rule 2 of the development plan literally:
 //! **libraries never exit and never print.** Nothing here calls
-//! [`std::process::exit`], reads [`std::env`], or writes to stdout/stderr. Every
+//! [`std::process::exit`], reads [`mod@std::env`], or writes to stdout/stderr. Every
 //! function returns data — a number, a `String`, a rendered document — and the
 //! binary decides where it goes and with which status it leaves. That keeps the
 //! contracts testable without spawning a process, and keeps

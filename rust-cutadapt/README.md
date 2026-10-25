@@ -142,14 +142,14 @@ python3 tests/oracle/differential.py --self-check
 The oracle used for the recorded 119/119 run was a pinned cutadapt 4.6
 binary; the portable declaration is [tests/ci/env.yml](tests/ci/env.yml).
 
-Dependencies are `clap`, `flate2`, `bzip2`, `xz2` and `lzma-sys` (plus the
-workspace-local `bioinfo-common`). The bzip2/xz dependencies were added when
-those formats were implemented; the older `clap` + `flate2`-only rule is
-recorded as superseded in
+Dependencies are `clap`, `flate2`, `bzip2`, `xz2` (built with its `static`
+feature) and the workspace-local `bioinfo-fastx`. The bzip2/xz dependencies were
+added when those formats were implemented; the older `clap` + `flate2`-only rule
+is recorded as superseded in
 [docs/adr/0001-dependency-policy.md](docs/adr/0001-dependency-policy.md), which
-also records why the xz binding moved from `liblzma` to `xz2` when this crate
-joined the `bioinfo-tools` workspace (`liblzma-sys` and the `lzma-sys` that
-`rust-htslib` needs cannot both be linked).
+also records why the xz binding moved from `liblzma` to `xz2`. The former direct
+`lzma-sys` pin was removed after the rust-htslib migration; `xz2/static` keeps
+the bundled xz build.
 
 ## Installation
 

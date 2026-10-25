@@ -462,11 +462,13 @@ fn value_at(lengths: &BTreeMap<u64, u64>, mut rank: u64) -> u64 {
 /// This was determined empirically against SeqKit 2.14.0 over every n from 4 to
 /// 20 with lengths 1..n, plus the two real fixtures used by the differential:
 ///
+/// ```text
 ///   n=4  lengths 1..4   -> Q1=2 Q2=2 Q3=4      (oracle agrees)
 ///   n=8  lengths 1..8   -> Q1=2 Q2=4 Q3=6      (oracle agrees; type-7 gives 3)
 ///   n=20 lengths 1..20  -> Q1=6 Q2=10 Q3=16    (oracle agrees)
 ///   in.fq lengths [4,12,12,34] -> Q1=8 Q2=12 Q3=23
 ///   g.fa  lengths [10,8,4]     -> Q1=6 Q2=8 Q3=9
+/// ```
 ///
 /// Nearest-rank (the previous implementation) and type-7/linear interpolation
 /// both disagree on some n; Tukey hinges agree on all of them. Rounding matters:

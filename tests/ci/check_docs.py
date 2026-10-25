@@ -26,6 +26,11 @@ CURRENT_DOCS = [
     "docs/EVIDENCE-FINAL.md",
     "docs/DELIVERY.md",
     "docs/PROFILING.md",
+    "rust-umitools/README.md",
+    "rust-umitools/README.en.md",
+    "tests/security/README.md",
+    "packaging/README.md",
+    "rust-cutadapt/docs/adr/0001-dependency-policy.md",
 ]
 
 BANNED = [
@@ -78,6 +83,15 @@ def main() -> int:
             for match in pattern.finditer(text):
                 line = text.count("\n", 0, match.start()) + 1
                 errors.append(f"{rel}:{line}: retired constraint: {label}")
+
+    # Production crates must not hide dead code behind an allow attribute. The
+    # Kani proof harness is separate (`verification/kani`) and documents its
+    # intentional allow.
+    for path in sorted((ROOT / "rust-*").glob("src/**/*.rs")):
+        text = path.read_text(encoding="utf-8")
+        if "allow(dead_code)" in text:
+            rel = path.relative_to(ROOT).as_posix()
+            errors.append(f"{rel}: production dead-code allow is not allowed")
 
     agents = read("AGENTS.md")
     if not re.search(r"Network access.*allowed", agents, re.I | re.S):

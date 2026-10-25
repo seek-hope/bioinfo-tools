@@ -10,19 +10,16 @@ repository = "https://github.com/seek-hope/bioinfo-tools"
 keywords = ["bioinformatics", "fastq", "fasta", "gzip", "bgzf"]
 categories = ["science::bioinformatics", "parser-implementations"]
 
-# Dependencies are exactly the compression backends the plan's crate table allows
-# (`flate2`, `bzip2`, `liblzma`, `zstd`), with the xz binding in its `lzma-sys`
-# form for the reason recorded in rust-cutadapt's ADR 0001: Cargo permits only
-# one package per `links` value, and `rust-htslib` already provides
-# `links = "lzma"` through `lzma-sys`. `crc32fast` is required by the BGZF
-# writer, which must compute the same CRC32 as every other BGZF implementation.
+# Dependencies are the compression backends the crate needs. `xz2` is built
+# with its `static` feature so the bundled xz sources are used; this is the
+# feature form of the previous direct `lzma-sys` pin. `crc32fast` is required by
+# the BGZF writer, which must compute the same CRC32 as every other BGZF
+# implementation.
 [dependencies]
-bioinfo-common = { path = "../bioinfo-common" }
 bzip2 = "0.6.1"
 crc32fast = "1"
 flate2 = "1"
-lzma-sys = { version = "0.1.20", features = ["static"] }
-xz2 = "0.1.7"
+xz2 = { version = "0.1.7", features = ["static"] }
 zstd = "0.13.3"
 
 [lib]

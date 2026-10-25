@@ -48,7 +48,7 @@ The source repository is private:
 cargo install --git https://github.com/seek-hope/bioinfo-tools --package rust-umitools --locked
 ```
 
-Rust 1.88+ is required. For local development from a checkout:
+Rust 1.91+ is required. For local development from a checkout:
 
 ```bash
 cargo build --release      # target/release/rust-umitools
@@ -126,7 +126,7 @@ Defaults match upstream: `--method=directional`, `--edit-distance-threshold=1`, 
 | `--reference FASTA` | CRAM read/write reference |
 | `--partition-genes N` | Gene-partition fallback for count (0 = automatic) |
 
-The repository provides `.github/workflows/ci.yml` (x86_64 fmt/clippy/test, MSRV 1.88) and a `Containerfile`.
+The workspace provides `.github/workflows/quality.yml` (x86_64 fmt/clippy/test/rustdoc, MSRV 1.91) and a `Containerfile`.
 
 ## Exit codes
 

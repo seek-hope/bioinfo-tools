@@ -15,9 +15,9 @@
 //!
 //! * [`split_records`] cuts a byte buffer into complete 4-line records so the
 //!   two mates can be zipped;
-//! * [`PairOutcome`] carries the serialized bytes and the per-mate statistics
+//! * `PairOutcome` carries the serialized bytes and the per-mate statistics
 //!   that the report needs;
-//! * [`pair_is_written`] implements `--pair-filter any|both|first`.
+//! * `pair_is_written` implements `--pair-filter any|both|first`.
 //!
 //! # Report numbering
 //!

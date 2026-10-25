@@ -148,6 +148,7 @@ impl Validator {
     /// in the enabled set at any `--single-read-validation-level`, and a file with
     /// duplicate names exits 0:
     ///
+    /// ```text
     ///   $ fq lint --lint-mode log dup.fq ; echo $?
     ///   0                       # two identical @d records, no S007 error
     ///   $ fq lint --single-read-validation-level high --lint-mode log ok.fq
@@ -155,6 +156,7 @@ impl Validator {
     ///        "[S004] CompleteValidator", "[S002] AlphabetValidator",
     ///        "[S001] PlusLineValidator", "[S005] ConsistentSeqQualValidator",
     ///        "[S006] QualityStringValidator"]        # no S007
+    /// ```
     ///
     /// S008 and S009 are likewise known-but-never-enabled. Listing S007 here made
     /// `lint_S007` fail with exit 3 where the oracle exits 0. The implementation
@@ -236,7 +238,9 @@ impl LintError {
     /// Render as `<file>:<line>:<col>: [S005] ConsistentSeqQualValidator: ...`,
     /// which is fq 0.12.0's own shape for a single-read error:
     ///
+    /// ```text
     ///   r1.fq:2:5: [S002] AlphabetValidator: invalid sequence character: 'Z'
+    /// ```
     ///
     /// The file name is supplied by the caller, because a `LintError` does not
     /// know which input it came from. When a position is unknown the record

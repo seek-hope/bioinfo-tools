@@ -35,15 +35,17 @@
     "noodles_migration": "rust-htslib/custom_derive/newtype_derive removed; noodles 0.118.0 + noodles-cram 0.101.0 + noodles-fasta 0.68.0; exact 77/77; formats/spill/determinism/random/extract/oracle pass; M3 10/10"
   },
   "external_unverified": [
-    "GitHub workflow execution and required checks",
     "signing, tag and release",
     "container/conda release signing and upload"
   ],
   "protected_paths_clean": false,
   "release_created": false,
   "tag_created": false,
-  "commit_created": false,
-  "completion_scope": "Historical implementation snapshot and later remediation completed; rust-umitools BAM I/O migrated to noodles on 2026-10-23; independent audit of this migration is the remaining gate.",
+  "commit_created": true,
+  "last_verified_commit": "41b17e3ce7f3388bfc737fbf20d436ed640a1a12",
+  "last_verified_ci_status": "success",
+  "last_verified_ci_run": "40151959375",
+  "completion_scope": "Historical implementation snapshot and later remediation completed; rust-umitools BAM I/O migrated to noodles on 2026-10-23; CI remediation and independent audit completed on 2026-10-25.",
   "audit_status": "passed_pre_self_check_snapshot",
   "completed": {
     "criteria": [
@@ -79,9 +81,9 @@
     ]
   },
   "audit_scope": "Historical audit passed for the pre-self-check snapshot only. The current worktree contains the authorized noodles migration; see current_worktree_audit_evidence.",
-  "self_check": "2026-10-23: fmt/clippy; workspace release 718 tests; K1 QUALITY PASS; noodles exact 77/77 and all UMI oracles; M3 10/10; docs/license/tree checks; no release/tag/commit.",
+  "self_check": "2026-10-23: fmt/clippy; workspace release 718 tests; K1 QUALITY PASS; noodles exact 77/77 and all UMI oracles; M3 10/10; docs/license/tree checks. 2026-10-25: rustdoc -D warnings, cargo-machete clean, SBOM regenerated, cargo deny all ok, CI run 40151959375 passed.",
   "protected_exception": "The 2026-10-23 user-authorized rust-umitools BAM-I/O migration changes runtime source and Cargo.lock. Golden/oracle/fixtures were not modified. Prior matrix.py/shellcheck changes remain recorded; no commit/tag/release.",
-  "current_worktree_audit_status": "noodles_migration_local_verified; independent audit pending",
-  "current_worktree_audit_evidence": "docs/EVIDENCE-NOODLES.md; docs/EVIDENCE-AUDIT-TEAMAGENTS.md",
+  "current_worktree_audit_status": "passed",
+  "current_worktree_audit_evidence": "docs/EVIDENCE-AUDIT-NOODLES.md; https://github.com/seek-hope/bioinfo-tools/actions/runs/40151959375",
   "post_audit_remediation_evidence": "docs/EVIDENCE-AUDIT-REMEDIATION.md; docs/EVIDENCE-NOODLES.md"
 }
