@@ -1,5 +1,8 @@
 # T11 profiling and profile-driven optimization
 
+Historical snapshot: targeted profiling on the recorded `49953ec` dirty
+worktree and host. The measurements below are not results for the current build.
+
 Status: **completed for the targeted profiling pass**. This is not a universal
 performance claim; the numbers belong to the host, binary and synthetic input
 recorded here.
@@ -7,7 +10,7 @@ recorded here.
 ## Environment and input
 
 - Host: 20 logical / 14 physical CPUs, Linux x86_64, shared development machine.
-- Rust: 1.99.1; workspace commit `49953ec` plus the current dirty worktree.
+- Rust: 1.99.1; workspace commit `49953ec` plus the recorded dirty worktree.
 - Input: `bench/run.py --sizes 1000` (1,000,000 FASTQ reads / 1,000,000 SAM
   records), generated deterministically by the benchmark runner.
 - Counters: `perf stat -e task-clock:u,cycles:u,instructions:u,branches:u,branch-misses:u,cache-misses:u -r 2`.
@@ -63,5 +66,5 @@ external-sort byte-equality, malformed-input and temp-cleanup tests) passes.
 ## Remaining performance work
 
 T10 (BAM region/filter/CSI/thread behavior and QC adapter/contaminant detection)
-is now implemented; any future optimization must use the same same-input
-correctness and benchmark evidence.
+is now implemented; any future optimization must use the same-input correctness
+and benchmark evidence.

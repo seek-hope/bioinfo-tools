@@ -73,18 +73,20 @@ fn wants_verbose_version() -> bool {
 
 /// The provenance block, assembled from the shared builder.
 ///
-/// The field set, order and alignment are a byte contract recorded from the
-/// pre-refactor binary; `bioinfo_common::provenance` owns the layout so that
-/// every binary in the workspace prints it identically.
+/// The field set, order and alignment are an output contract. Contract changes
+/// require explicit approval; `bioinfo_common::provenance` owns the shared layout.
 fn provenance() -> Provenance {
     Provenance::new("rust-umitools", rust_umitools::cli::VERSION)
         .with_field(
             "reference",
             "UMI-tools 1.1.6 (3f2cb4f41e07fe4a6cea3b3389f534bee957176b)",
         )
-        .with_field("htslib", "via rust-htslib, libdeflate compression")
-        .with_field("parallel", "rayon worker pool, bounded BGZF threads")
-        .with_field("commands", "dedup, group, count, count_tab")
+        .with_field("library", "noodles 0.118.0 (pure Rust; BAM/SAM/CRAM)")
+        .with_field("parallel", "rayon worker pool, single-threaded BGZF output")
+        .with_field(
+            "commands",
+            "whitelist, extract, dedup, group, count, count_tab",
+        )
         .with_exit_codes(&DECLARED_EXIT_CLASSES)
 }
 
@@ -96,9 +98,8 @@ fn print_verbose_version() {
 mod tests {
     use super::*;
 
-    // The exact block the pre-refactor binary printed. Recorded with
-    // `rust-umitools --version --verbose | cat -A`; the column alignment, field
-    // order and line count are all part of the observable output.
+    // The approved output contract after the noodles/provenance refresh.
+    // Column alignment, field order and line count remain significant.
     #[test]
     fn provenance_block_is_byte_identical_to_the_recorded_output() {
         assert_eq!(
@@ -106,9 +107,9 @@ mod tests {
             concat!(
                 "rust-umitools 0.2.0\n",
                 "reference        : UMI-tools 1.1.6 (3f2cb4f41e07fe4a6cea3b3389f534bee957176b)\n",
-                "htslib           : via rust-htslib, libdeflate compression\n",
-                "parallel         : rayon worker pool, bounded BGZF threads\n",
-                "commands         : dedup, group, count, count_tab\n",
+                "library          : noodles 0.118.0 (pure Rust; BAM/SAM/CRAM)\n",
+                "parallel         : rayon worker pool, single-threaded BGZF output\n",
+                "commands         : whitelist, extract, dedup, group, count, count_tab\n",
                 "exit codes       : 0 ok, 2 usage, 3 input, 4 io/resource\n",
             )
         );
@@ -121,7 +122,14 @@ mod tests {
             .lines()
             .find_map(|line| line.strip_prefix("commands         : "))
             .expect("commands field present");
-        for command in ["dedup", "group", "count", "count_tab"] {
+        for command in [
+            "whitelist",
+            "extract",
+            "dedup",
+            "group",
+            "count",
+            "count_tab",
+        ] {
             assert!(
                 commands.contains(command),
                 "{command} missing from {commands}"

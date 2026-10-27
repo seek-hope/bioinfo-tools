@@ -1,4 +1,4 @@
-//! FastQC's module results, and which of them this prototype computes.
+//! FastQC's module results and the modules computed by this implementation.
 //!
 //! ## What is computed
 //!
@@ -13,14 +13,14 @@
 //! | Sequence Length Distribution | **yes** | |
 //! | Sequence Duplication Levels | **yes** | 50bp truncation, FastQC's default |
 //! | Overrepresented sequences | **yes** | threshold 0.1% of reads |
-//! | Adapter Content | **experimental** | exact-match subset of known adapters; not FastQC-oracle-compared |
+//! | Adapter Content | **yes** | FastQC cumulative 12bp adapter list, BaseGroup rows |
 //!
 //! ## Status verdicts
 //!
 //! FastQC labels each module `pass`, `warn` or `fail` using thresholds from its
-//! `Configuration/limits.txt`. This prototype reproduces the verdicts that the
-//! measured fixtures exhibit rather than claiming to implement the whole limits
-//! file; the thresholds used are recorded in [`Thresholds`].
+//! `Configuration/limits.txt`. This implementation covers the verdicts used by
+//! the measured fixtures, not the whole limits file; the thresholds are recorded
+//! in [`Thresholds`].
 
 use crate::stats::{java_double, QcStats, ADAPTERS, BASE_ORDER};
 
@@ -160,14 +160,21 @@ pub fn format_bases(total_bases: u64) -> String {
     if total_bases < 1000 {
         return format!("{total_bases} bp");
     }
-    // Truncate to one decimal: (bases / 100) as tenths.
-    let tenths = total_bases / 100;
+    // FastQC promotes units at 10^3 boundaries and truncates to one decimal.
+    let (divisor, suffix) = if total_bases >= 1_000_000_000 {
+        (1_000_000_000, "Gbp")
+    } else if total_bases >= 1_000_000 {
+        (1_000_000, "Mbp")
+    } else {
+        (1_000, "kbp")
+    };
+    let tenths = total_bases / (divisor / 10);
     let whole = tenths / 10;
     let fraction = tenths % 10;
     if fraction == 0 {
-        format!("{whole} kbp")
+        format!("{whole} {suffix}")
     } else {
-        format!("{whole}.{fraction} kbp")
+        format!("{whole}.{fraction} {suffix}")
     }
 }
 
@@ -212,7 +219,7 @@ pub fn basic_statistics(stats: &QcStats) -> ModuleResult {
 /// The verdict uses the two thresholds `limits.txt` defines for this module: the
 /// lower quartile (`quality_base_lower`) and the median (`quality_base_median`).
 pub fn per_base_quality(stats: &QcStats, thresholds: &Thresholds) -> ModuleResult {
-    let groups = crate::grouping::base_groups(stats.max_length(), false);
+    let groups = crate::grouping::base_groups(stats.max_length(), stats.nogroup);
     let mut lines = vec![
         "#Base\tMean\tMedian\tLower Quartile\tUpper Quartile\t10th Percentile\t90th Percentile"
             .to_string(),
@@ -342,7 +349,7 @@ pub fn per_sequence_quality(stats: &QcStats, thresholds: &Thresholds) -> ModuleR
 pub fn per_base_sequence_content(stats: &QcStats) -> ModuleResult {
     let mut lines = vec!["#Base\tG\tA\tT\tC".to_string()];
     let mut max_deviation: f64 = 0.0;
-    for group in &crate::grouping::base_groups(stats.max_length(), false) {
+    for group in &crate::grouping::base_groups(stats.max_length(), stats.nogroup) {
         let counts = &stats.bases_in_range(group.start, group.end);
         // counts is [A, C, G, T]
         let total: u64 = counts.iter().sum();
@@ -399,7 +406,7 @@ pub fn per_base_sequence_content(stats: &QcStats) -> ModuleResult {
 pub fn per_base_n_content(stats: &QcStats, thresholds: &Thresholds) -> ModuleResult {
     let mut lines = vec!["#Base\tN-Count".to_string()];
     let mut worst: f64 = 0.0;
-    for group in &crate::grouping::base_groups(stats.max_length(), false) {
+    for group in &crate::grouping::base_groups(stats.max_length(), stats.nogroup) {
         let n_count = &stats.n_in_range(group.start, group.end);
         // Denominator is the number of reads that reached these positions.
         let acgt: u64 = stats.bases_in_range(group.start, group.end).iter().sum();
@@ -743,22 +750,8 @@ pub fn overrepresented_sequences(stats: &QcStats, thresholds: &Thresholds) -> Mo
         // 43/160 = 26.875 prints 26.88. FastQC rounds here (unlike %GC, which
         // truncates), so the two columns genuinely differ in treatment.
         let percent = (**count as f64 / total as f64 * 100.0 * 100.0).round() / 100.0;
-        let source = stats
-            .contaminants
-            .iter()
-            .find_map(|(name, contaminant)| {
-                if contaminant.is_empty() {
-                    return None;
-                }
-                if sequence.starts_with(contaminant) || contaminant.starts_with(sequence) {
-                    Some(format!(
-                        "{name} (100% over {}bp)",
-                        sequence.len().min(contaminant.len())
-                    ))
-                } else {
-                    None
-                }
-            })
+        let source = crate::contaminants::find_best_hit(&stats.contaminants, sequence)
+            .map(|hit| hit.render())
             .unwrap_or_else(|| "No Hit".to_string());
         lines.push(format!(
             "{}\t{}\t{}\t{}",
@@ -808,20 +801,19 @@ pub fn round_to(value: f64, places: u32) -> f64 {
 
 /// Adapter Content.
 ///
-/// Emitted **empty** because the module is not implemented — see [`crate::absent`]
-/// for why. FastQC always writes this block (with a table of per-position adapter
-/// percentages and a `pass`/`warn`/`fail` verdict derived from them), so omitting
-/// the block entirely would change the report's shape.
-///
-/// There is no honest verdict to print for a module that was not computed. The
-/// block therefore carries no status claim: the differential excludes this module
-/// from comparison, and that exclusion is named and recorded rather than hidden.
-/// A consumer reading the file sees an empty block, which is visibly incomplete
-/// rather than silently wrong.
+/// FastQC groups the positions with `BaseGroup`, sums the cumulative adapter
+/// counts in each group, divides by the group width, and prints one decimal.
+/// The module warns above 5% and fails above 10% for any adapter.
 pub fn adapter_content(stats: &QcStats) -> ModuleResult {
     let total = stats.total_sequences;
+    let adapter_length = ADAPTERS
+        .first()
+        .map(|(_, sequence)| sequence.len())
+        .unwrap_or(0);
+    let max_start = stats.max_length().saturating_sub(adapter_length) + 1;
+    let groups = crate::grouping::base_groups(max_start, stats.nogroup);
     let mut lines = Vec::new();
-    if total > 0 && !stats.adapter_hits.is_empty() {
+    if total > 0 && max_start > 0 && !stats.adapter_hits.is_empty() {
         let mut header = String::from("#Position");
         for (name, _) in ADAPTERS {
             header.push('\t');
@@ -829,19 +821,22 @@ pub fn adapter_content(stats: &QcStats) -> ModuleResult {
         }
         lines.push(header);
         let mut worst = 0.0f64;
-        for position in 0..stats.max_length() {
-            let mut row = vec![(position + 1).to_string()];
+        for group in &groups {
+            let width = (group.end - group.start + 1) as f64;
+            let mut row = vec![group.label()];
             for hits in &stats.adapter_hits {
-                let count = hits.get(position).copied().unwrap_or(0);
-                let percent = count as f64 / total as f64 * 100.0;
+                let sum: u64 = (group.start - 1..group.end)
+                    .filter_map(|position| hits.get(position).copied())
+                    .sum();
+                let percent = (sum as f64 * 100.0 / total as f64) / width;
                 worst = worst.max(percent);
-                row.push(format!("{percent:.6}"));
+                row.push(java_double(percent));
             }
             lines.push(row.join("\t"));
         }
-        let status = if worst >= 20.0 {
+        let status = if worst > 10.0 {
             Status::Fail
-        } else if worst >= 5.0 {
+        } else if worst > 5.0 {
             Status::Warn
         } else {
             Status::Pass
@@ -912,6 +907,16 @@ mod tests {
         let text = basic_statistics(&stats).render();
         assert!(text.starts_with(">>Basic Statistics\tpass\n"), "{text}");
         assert!(text.ends_with(">>END_MODULE\n"), "{text}");
+    }
+
+    #[test]
+    fn format_bases_promotes_kbp_mbp_gbp_with_truncation() {
+        assert_eq!(format_bases(999), "999 bp");
+        assert_eq!(format_bases(1000), "1 kbp");
+        assert_eq!(format_bases(1998), "1.9 kbp");
+        assert_eq!(format_bases(1_000_000), "1 Mbp");
+        assert_eq!(format_bases(1_500_000), "1.5 Mbp");
+        assert_eq!(format_bases(1_000_000_000), "1 Gbp");
     }
 
     #[test]

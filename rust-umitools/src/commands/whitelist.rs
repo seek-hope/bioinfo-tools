@@ -10,25 +10,31 @@ use crate::commands::{Logger, PROGRAM};
 use crate::error::{Error, Result};
 use crate::io::fastq::FastqReader;
 use crate::io::spill::TempOutput;
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 use std::io::Write;
 use std::path::Path;
 use std::time::Instant;
 
-fn extract_cell(sequence: &[u8], pattern: &str) -> Option<String> {
+fn extract_barcodes(sequence: &[u8], pattern: &str) -> Option<(String, String)> {
     if sequence.len() < pattern.len() {
         return None;
     }
     let mut cell = Vec::new();
+    let mut umi = Vec::new();
     for (offset, expected) in pattern.bytes().enumerate() {
-        if expected == b'C' || expected == b'c' {
-            cell.push(sequence[offset]);
+        match expected {
+            b'C' | b'c' => cell.push(sequence[offset]),
+            b'N' | b'n' => umi.push(sequence[offset]),
+            _ => {}
         }
     }
     if cell.is_empty() {
         None
     } else {
-        Some(String::from_utf8_lossy(&cell).into_owned())
+        Some((
+            String::from_utf8_lossy(&cell).into_owned(),
+            String::from_utf8_lossy(&umi).into_owned(),
+        ))
     }
 }
 
@@ -159,19 +165,10 @@ pub fn run(args: &WhitelistArgs) -> Result<()> {
             ));
         }
     }
-    if args.method != "reads" {
-        return Err(Error::unsupported(
-            "--method",
-            format!(
-                "'{}' is not implemented in this build; use reads",
-                args.method
-            ),
-        ));
-    }
-    if args.read2_in.is_some() {
-        return Err(Error::unsupported(
-            "--read2-in",
-            "paired whitelist estimation is not implemented in this build; use single-end input",
+    if args.method != "reads" && args.method != "umis" {
+        return Err(Error::usage_with_hint(
+            format!("unknown --method '{}'", args.method),
+            "choose one of: reads, umis",
         ));
     }
     let pattern = args.bc_pattern.as_deref().ok_or_else(|| {
@@ -191,16 +188,43 @@ pub fn run(args: &WhitelistArgs) -> Result<()> {
     }
 
     let mut reader = FastqReader::open(args.input.as_deref())?;
+    let mut reader2 = match &args.read2_in {
+        Some(path) => Some(FastqReader::open(Some(path))?),
+        None => None,
+    };
     let mut counts: BTreeMap<String, u64> = BTreeMap::new();
+    let mut unique_umis: BTreeMap<String, BTreeSet<String>> = BTreeMap::new();
     let mut reads = 0u64;
     while let Some(record) = reader.next_record()? {
         if reads >= args.subset_reads {
             break;
         }
         reads += 1;
-        if let Some(cell) = extract_cell(&record.seq, pattern) {
+        let second = match reader2.as_mut() {
+            Some(reader) => reader.next_record()?,
+            None => None,
+        };
+        let Some((mut cell, mut umi)) = extract_barcodes(&record.seq, pattern) else {
+            continue;
+        };
+        if let (Some(pattern2), Some(second)) = (&args.bc_pattern2, &second) {
+            let Some((cell2, umi2)) = extract_barcodes(&second.seq, pattern2) else {
+                continue;
+            };
+            cell.push_str(&cell2);
+            umi.push_str(&umi2);
+        }
+        if args.method == "umis" {
+            unique_umis.entry(cell).or_default().insert(umi);
+        } else {
             *counts.entry(cell).or_insert(0) += 1;
         }
+    }
+    if args.method == "umis" {
+        counts = unique_umis
+            .into_iter()
+            .map(|(cell, umis)| (cell, umis.len() as u64))
+            .collect();
     }
     let mut ordered: Vec<(String, u64)> = counts.into_iter().collect();
     ordered.sort_by(|left, right| right.1.cmp(&left.1).then(left.0.cmp(&right.0)));

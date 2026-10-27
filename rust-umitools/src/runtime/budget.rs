@@ -377,7 +377,7 @@ impl Budget {
             )));
         }
         // The limit covers buffered bundles, batches, sorting and I/O workers.
-        // HTSlib, the allocator and per-thread stacks need a fixed baseline, so
+        // noodles, the allocator and per-thread stacks need a fixed baseline, so
         // reserve part of the limit for them instead of treating the whole
         // number as data. This keeps the measured RSS close to the requested
         // limit; it is still not a hard whole-process cap.

@@ -1,79 +1,69 @@
-# 文档约束审计
+# 文档与受保护文件分类
 
-状态：本轮审计结论。分类为四项，修改只作用于“现行约束”和“历史标注”；
-`rust-umitools/` 运行时代码在此前审计快照中保持原样；2026-10-23 用户另行授权 BAM I/O 迁移到 noodles，当前运行时已改变（见 [迁移证据](EVIDENCE-NOODLES.md)），oracle/expected 文件仍未修改。此前按用户“全部解决”请求修复了 `tests/compat/matrix.py` 的尾随 tab 生成器并重新生成 `docs/compatibility.tsv`；后续 shellcheck 处理还遗留了 `tests/ci/check.sh` 和 `tests/ci/env.sh` 的注解/source 指示修改，旧记录遗漏了这两项。此次补记不追认额外授权；这些既有改动仍需维护者复核。2026-10-25 按用户“整理项目代码与文档”的请求，修正了 `rust-umitools/` 的文档链接、MSRV/CI 文案并删除未使用的私有 helper；oracle/expected 文件未修改。
+本文定义文档维护边界，避免把历史日志当成当前说明，也避免通过修改期望值来制造通过。
+它不是某次运行的工作日志。
 
-最终独立审计：2026-10-23 通过（对象为自检前快照）；随后全局自检的代码改动仅经本地 K1/K4 复核。快照见 [EVIDENCE-FINAL.md](EVIDENCE-FINAL.md)。安全入口、依赖策略草案和分支覆盖率补测见 [整改证据](EVIDENCE-AUDIT-REMEDIATION.md)；它们是本地复核，不是新的独立审计。
+## 1. 现行约束
 
-## 1. 现行约束：已修正
+以下入口描述当前工作树，修改后必须与实现和可执行证据同步：
 
-| 文件 | 过时或不合理内容 | 修正 |
-| --- | --- | --- |
-| `AGENTS.md` | “No shell network access”、必须 `--offline`、仅 `clap`+`flate2`、单端试验范围、12 小时试运行限制 | 改为当前 monorepo 规则：允许联网/安装，`--locked` 为默认，`--offline` 仅用于隔离；保留依赖审阅、streaming、严格失败、发布审批边界。旧试验限制明确指向 `TASK.md` 历史文件 |
-| `TASK.md` | 将 v0.1.0 单端子集、禁止联网、仅 `clap`+`flate2` 写成任务要求 | 顶部加历史试运行说明；正文保留作为来源记录，并链接当前 README/FULL-COMPATIBILITY |
-| `README.md` | 构建命令强制 `--offline`；称门禁为 “offline gate”；把离线 runner 当作前提 | 改为 `--locked`；说明网络/安装可用、`--offline` 可选；门禁改称 quality gate；链接当前 CI 说明 |
-| `docs/DEVELOPMENT-PLAN.md` | “离线构建、不下载依赖”被写成不可解除的约束；检查命令强制 `--offline`；P0-03 状态仍是“离线门禁” | 改为网络/安装开放、保留安全边界；更新命令、状态和证据链接；增加文档审计入口 |
-| `tests/ci/PINS.md` | “Shell network access is forbidden”；安装说明假定必须人工放置 | 说明允许联网/CI/脚本安装；门禁负责校验版本、路径和已记录校验和 |
-| `tests/ci/PINS-QC.md` | 同上 | 同上 |
-| `rust-cutadapt/README.md` | Rust 1.88、强制离线、把旧提交 `c8b0249` 当作当前树 | 改为 workspace MSRV 1.91；命令使用 `--locked`；明确快照提交与当前 HEAD 的区别 |
-| `rust-cutadapt/docs/adr/0001-dependency-policy.md` | 要求离线构建；MSRV 仍写 1.88 | 改为允许联网、离线为可选；MSRV 1.91 |
-| `tests/ci/check.sh` | 无条件 `CARGO_NET_OFFLINE=true`、禁止自动安装工具链、oracle 强制 `unshare -Urn` | 默认联网；新增 `--offline` 与 `--isolate-network`；仅在隔离时设置离线/命名空间；工具链缺失时在线安装、离线明确失败 |
-| `tests/ci/test_check.py` | 只验证离线路径 | 增加默认在线、`--offline`、工具链安装/缺失和 oracle 隔离的负向控制 |
-| `.github/workflows/quality.yml` | 使用 `self-hosted` 且标注 `bioinfo-tools-offline`，只跑离线 | 改为 GitHub-hosted `ubuntu-latest`，允许网络；安装固定工具链与系统依赖；保留可选 oracle 任务并明确需要预装 |
-| `tests/ci/README.md` | 以 “Offline quality gate” 为标题和前提 | 改为 quality gate：默认可联网，`--offline` 可选，说明 runner/安全边界和未执行事项 |
-
-## 2. 历史记录：保留原文并加标识
-
-以下文件记录的是特定 commit/环境下的运行结果。`--offline`、旧版本和旧 runner
-是当时的环境选择，不是当前规则；正文结果不重写。
-
-| 文件 | 处理 |
+| 文件 | 用途 |
 | --- | --- |
-| `docs/EVIDENCE-2026-10.md`、`docs/EVIDENCE-PACKAGING.md`、`docs/EVIDENCE-QC.md`、`docs/EVIDENCE-W1-1.md` 至 `W1-4.md` | 顶部加 “Historical record” 说明 |
-| `rust-cutadapt/docs/EVIDENCE-2026-10.md` | 顶部加历史说明 |
-| `docs/DEVELOPMENT-PLAN-LEGACY.md` | 已有 historical banner；保留旧任务 ID、来源和旧验收标准 |
-| `docs/EVIDENCE-P0-START.md`、`docs/EVIDENCE-P0-CI.md` | 本批执行记录；注明当时选择离线命令，但离线不是项目要求 |
-| `rust-cutadapt/docs/HISTORY.md`、`rust-cutadapt/docs/RELEASE-FREEZE.md` | 已明确为历史/已取代；不改写历史结论 |
+| `AGENTS.md` | monorepo 工作规则、依赖政策、资源与发布边界 |
+| `README.md` | 组件、构建、文档和分发入口 |
+| `docs/DEVELOPMENT-PLAN.md` | 当前优先级和批次退出条件 |
+| `compat/README.md`、`compat/matrix.tsv` | 五个 CLI 对固定上游版本的支持状态 |
+| `rust-umitools/docs/compatibility.tsv` | UMI-tools 组件矩阵，由 `tests/compat/matrix.py` 生成 |
+| `tests/ci/README.md` | 质量门禁的运行方式和覆盖范围 |
+| 各 crate README 与 CLI help | 用户可见的安装、参数和限制 |
 
-## 3. 安全或发布边界：保留
+文档中的版本、命令数量和测试数字应能由当前文件或命令复核。容易漂移的计数优先交给
+生成器；历史数字必须标明对应构建，不能改写成“当前结果”。
 
-这些不是过时的技术约束，而是当前仍需保留的边界：
+## 2. 历史记录
 
-- 不擅自发布、打 tag 或提交；发布需要维护者批准和完整证据。
-- 不修改 `rust-cutadapt/tests/fixtures/`、expected FASTQ 或其他 oracle 判定文件。
-- 不覆盖用户开始工作前已有的 `packaging/conda/check_recipe.py`、`packaging/conda/meta.yaml` 修改。
-- 默认严格输入；失败不能伪装成成功；性能声明必须绑定同输入正确性。
-- 流式读取不等于整个算法内存有界；必须说明逐位/逐序列结构的实际增长边界。
+`docs/EVIDENCE-*.md`、配套 JSON、`docs/DELIVERY.md`、
+`docs/DEVELOPMENT-PLAN-LEGACY.md`、`rust-cutadapt/docs/HISTORY.md` 和各组件 benchmark
+记录保留其原始结论。它们用于追溯，不用于证明当前工作树仍然通过同一检查。
 
-## 4. 受保护、只记录不修改
+维护规则：
 
-| 文件 | 发现 | 处置 |
-| --- | --- | --- |
-| `rust-umitools/README.md` | “需要 Rust 1.88+”，与 workspace MSRV 1.91 不一致；CI 描述指向不存在的 `ci.yml` | 2026-10-25 已改为 1.91，并指向 workspace `quality.yml` |
-| `rust-umitools/README.en.md` | “Rust 1.88+ is required”；CI 描述指向不存在的 `ci.yml` | 同上 |
-| `rust-umitools/src/core/cluster.rs` | `#[allow(dead_code)]` 的私有 `needs_graph` 无任何调用 | 2026-10-25 删除；无行为变化 |
-| `verification/kani/src/lib.rs` | `#![allow(dead_code)]` | 保留：`#[kani::proof]` 入口不被普通二进制调用，属验证 harness，不是生产死代码 |
-| `rust-umitools/tests/ci/env.sh`、`tests/ci/check.sh` | 默认 `CARGO_NET_OFFLINE=true`；另有上轮 shellcheck 注解/source 指示改动 | 隔离选择未改；如实补记既有测试脚本 diff，本次不再修改，待维护者复核 |
-| `rust-umitools/tests/*` | 多个 oracle 脚本依赖既有环境/路径假设 | 受保护；只通过根门禁调用，不修改比较逻辑。例外：`tests/compat/matrix.py` 的尾随 tab 生成器已按用户授权修复，重新生成的 `docs/compatibility.tsv` 通过 manifest gate |
-| `tests/oracle/run_w13_oracle.sh` | 注释仍说 oracle “cannot be obtained offline”；构建提示含 `--offline` | 属 oracle 脚本保护范围，保留；根门禁使用 `--rust` 传入当前构建，不依赖该提示 |
-| `tests/oracle/run_qc_oracle.sh` | 构建提示含 `--offline` | 同上 |
-| `packaging/repro-check.sh`、`packaging/cross-build-aarch64.sh`、`rust-cutadapt/tests/gate/m0.sh` | 脚本内使用 `--offline` 作为可复现/隔离手段 | 保留：离线是这些检查的实现选择，不是全项目前提 |
-| `bioinfo-common/Cargo.toml` | 注释提到 `cargo --offline` | 属库设计说明，不影响现行构建；暂不改动 |
+- 不重写旧日志来匹配后来的实现；需要澄清时在文件顶部加历史说明或链接新证据。
+- 旧性能倍数只适用于记录的输入、硬件、参数和二进制，不作为当前性能承诺。
+- 历史文件中的旧命令、离线环境、HTSlib 或缺失功能描述保留其时代语境。
+- 当前入口不得把历史快照中的 hash、测试总数或发布状态复制成现状。
 
-## 5. 后续仍需同步的项
+## 3. 安全或发布边界
 
-- `tests/oracle/run_w13_oracle.sh` 的过时注释需要在 oracle 脚本变更窗口内修正。
-- 根 README 的组件版本、发布状态和性能声明在阶段 D 再统一生成，避免再次手写漂移。
-- 文档检查只覆盖明确的过时约束，不替代对每条兼容性声明的逐项复核。
+- 不擅自提交、打 tag、上传或发布；发布需要维护者批准和完整证据。
+- 不修改 `tests/gate/golden`、`rust-cutadapt/tests/fixtures` 或其他 oracle 判定数据来消除失败。
+- 纳入版本控制的期望输出和比较脚本只能在明确的契约变更窗口内更新，并保留独立的上游证据。
+- 保留用户已有的 `packaging/conda/check_recipe.py` 和 `packaging/conda/meta.yaml` 修改。
+- 性能结论必须绑定同输入正确性；失败后的部分输出不能描述为完整成功。
+- 新增依赖需要记录理由、版本、来源和构建/运行影响。
 
-## 6. 2026-10-23 noodles migration
+## 4. 受保护组件
 
-用户明确授权把 `rust-umitools` BAM I/O 从 rust-htslib 迁移到 noodles；运行时源码和 `Cargo.lock` 已改变。迁移证据、oracle 结果、性能与限制见 [EVIDENCE-NOODLES.md](EVIDENCE-NOODLES.md)；ADR 见 [0001-noodles-migration.md](../rust-umitools/docs/adr/0001-noodles-migration.md)。此前“运行时未改”的表述仅适用于旧审计快照。
+`rust-umitools/` 默认需要维护者明确授权才能修改。2026-10-26 用户先后批准了代码/文档整理和
+help/provenance 契约刷新。契约变更只涉及本节约定的文件；其他 golden、fixtures 和 oracle
+判定数据不改。
 
-## 7. 2026-10-25 code/document cleanup
+当前特别边界：
 
-- 用 `RUSTDOCFLAGS='-D warnings' cargo doc --workspace --no-deps --locked` 清理了 7 个 broken/ambiguous doc link，并把同一命令加入 `tests/ci/check.sh` 的 native gate。
-- `cargo-machete 0.9.2` 发现并移除了 `bioinfo-fastx`/`rust-cutadapt` 对 `bioinfo-common` 的无用直接依赖；直接用 `xz2` 的 `static` feature 取代 `lzma-sys` 直接 pin，保留静态 xz 链接。
-- 移除 `rust-umitools/src/core/cluster.rs` 中未调用的私有 `needs_graph`/`allow(dead_code)`；`verification/kani` 的 allow 保留并注明原因。
-- 重新生成 `packaging/sbom.cdx.json` 并由 `packaging/sbom.py --check` 验证；更新 README、quality-gate 文档、`DEVELOPMENT-PLAN`、`EVIDENCE-FINAL` 与 CI 状态。
-- 历史 EVIDENCE 文件继续保留原文；本次只修改当前文档和明确的历史标注，不改 golden/oracle/fixtures。
+- `rust-umitools/src/cli.rs` 的 `--output-stats` help 已改为描述当前实验性统计表；
+  `tests/cli_contract.rs` 与 `tests/cli_help/dedup.txt` 已在获批的 CLI 契约批次同步刷新。
+- `rust-umitools/src/main.rs` 的 provenance/help 契约已于 2026-10-26 经维护者批准更新：
+  字段改为 noodles，parallel/commands 与实现对齐，dedup help 快照同步刷新。
+  后续契约变更仍需单独批准。
+- `rust-umitools/tests/compat/matrix.py` 是组件矩阵的生成源。修改说明后必须重新生成
+  `docs/compatibility.tsv` 并运行 manifest 检查，不能只改生成结果。
+- `verification/kani` 中的 dead-code allow 属于证明 harness，不是生产代码豁免；生产 crate
+  不允许用 `allow(dead_code)` 隐藏未使用实现。
+
+## 5. 自动检查
+
+`tests/ci/check_docs.py` 检查已退役约束、历史标识、部分陈旧声明、本地链接和受保护规则。
+`tests/ci/check_compat.py` 检查统一矩阵、当前 help 和固定上游快照的同步。
+`rust-umitools/tests/compat/matrix.py --check` 检查组件矩阵与生成源同步。
+
+这些检查只能发现已编码的漂移，不能替代人工审读或上游差分。

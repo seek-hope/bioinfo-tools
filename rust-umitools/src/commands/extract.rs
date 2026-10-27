@@ -15,8 +15,6 @@ use regex::Regex;
 use std::path::{Path, PathBuf};
 use std::time::Instant;
 
-const PHRED33: u8 = 33;
-
 struct Output {
     writer: FastqWriter,
     temp: Option<(TempOutput, PathBuf)>,
@@ -73,6 +71,13 @@ struct Stats {
     too_short: u64,
 }
 
+#[derive(Clone, Copy)]
+struct QualityOptions {
+    offset: u8,
+    threshold: Option<u8>,
+    mask: Option<u8>,
+}
+
 /// Extract the UMI from one read and rewrite its name. Returns the UMI, or
 /// `None` when the read is discarded.
 fn extract_umi(
@@ -80,8 +85,7 @@ fn extract_umi(
     pattern: &str,
     three_prime: bool,
     separator: &str,
-    threshold: Option<u8>,
-    mask: Option<u8>,
+    quality_options: QualityOptions,
     stats: &mut Stats,
 ) -> Option<String> {
     let length = pattern.len();
@@ -97,15 +101,17 @@ fn extract_umi(
     let mut umi = Vec::with_capacity(length);
     for (offset, expected) in pattern.bytes().enumerate() {
         let base = record.seq[start + offset];
-        let quality = record.qual[start + offset].saturating_sub(PHRED33);
+        let quality = record.qual[start + offset].saturating_sub(quality_options.offset);
         if expected == b'N' || expected == b'n' {
-            if let Some(minimum) = threshold {
+            if let Some(minimum) = quality_options.threshold {
                 if quality < minimum {
                     stats.discarded_quality += 1;
                     return None;
                 }
             }
-            let masked = mask.is_some_and(|minimum| quality < minimum);
+            let masked = quality_options
+                .mask
+                .is_some_and(|minimum| quality < minimum);
             umi.push(if masked { b'N' } else { base });
         } else if !base.eq_ignore_ascii_case(&expected) {
             stats.discarded_mismatch += 1;
@@ -184,15 +190,22 @@ fn trim_pattern(record: &mut FastqRecord, pattern: &str, three_prime: bool) -> b
 pub fn run(args: &ExtractArgs) -> Result<()> {
     let started = Instant::now();
     let mut log = Logger::new(&args.log, args.quiet)?;
-    if args.quality_encoding != "phred33" {
-        return Err(Error::unsupported(
-            "--quality-encoding",
-            format!(
-                "'{}' is not implemented in this build; use phred33 (see docs/ROADMAP.md, R4)",
-                args.quality_encoding
-            ),
-        ));
-    }
+    let quality_offset = match args.quality_encoding.as_str() {
+        "phred33" => 33,
+        "phred64" => 64,
+        "solexa" => 59,
+        other => {
+            return Err(Error::usage_with_hint(
+                format!("unknown --quality-encoding '{other}'"),
+                "choose one of: phred33, phred64, solexa",
+            ));
+        }
+    };
+    let quality_options = QualityOptions {
+        offset: quality_offset,
+        threshold: args.quality_filter_threshold,
+        mask: args.quality_filter_mask,
+    };
     let method = args.extract_method.as_str();
     let regex_pattern = match method {
         "string" => None,
@@ -270,8 +283,7 @@ pub fn run(args: &ExtractArgs) -> Result<()> {
                     pattern,
                     args.three_prime,
                     &args.umi_separator,
-                    args.quality_filter_threshold,
-                    args.quality_filter_mask,
+                    quality_options,
                     &mut stats,
                 ),
             };
@@ -298,8 +310,7 @@ pub fn run(args: &ExtractArgs) -> Result<()> {
                     pattern,
                     args.three_prime,
                     &args.umi_separator,
-                    args.quality_filter_threshold,
-                    args.quality_filter_mask,
+                    quality_options,
                     &mut stats,
                 ),
             };

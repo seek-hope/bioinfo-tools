@@ -2,6 +2,7 @@
 
 - Status: accepted
 - Date: 2026-10-23
+- Amended: 2026-10-26 (approved help/provenance contract refresh)
 - Decision owner: `rust-umitools` maintainer (user-authorized migration)
 - Supersedes: the earlier decision to keep `rust-htslib` for the first CRAM/BAM
   implementation (`IMPLEMENTATION_PLAN.md`)
@@ -50,10 +51,10 @@ already used, while storing noodles `sam::alignment::RecordBuf` internally.
   `dedup`/`count` are about 10–20% higher RSS on this host.
 - Compressed BAM bytes can differ from htslib (BGZF block/compression choices),
   but the oracle compares the decoded records/header and passes 77/77. The
-  legacy `--version --verbose` field `htslib : via rust-htslib...` is retained
-  verbatim for the recorded text contract; it is now a compatibility label, not
-  a dependency claim. Changing it requires a separately approved contract
-  update.
+  migration initially retained the legacy `htslib` provenance field for byte
+  compatibility. On 2026-10-26 the maintainer approved a contract refresh:
+  provenance now names noodles 0.118.0, describes single-threaded BGZF output,
+  and lists all six commands. The corresponding test contract was updated.
 - License/source policy: `cargo deny check licenses sources` passes. The
   license allow-list in `deny.toml` already covers the noodles dependencies.
 

@@ -2,7 +2,7 @@
 
 > Historical design proposal. BAM/SAM/CRAM I/O was migrated from rust-htslib to noodles on 2026-10-23; see [ADR 0001](adr/0001-noodles-migration.md) and [migration evidence](../../docs/EVIDENCE-NOODLES.md). Statements below about retaining rust-htslib describe the earlier plan.
 
-状态：历史设计提案。起草时的代码基线为 `a35fd81`、包版本为 `0.1.0`；正文中的“当前实现”和阶段安排保留当时语境。后续已实现的能力以 [兼容矩阵](COMPATIBILITY.md) 为准，新一轮迭代优先级、已发现缺陷和验收要求以 [ROADMAP.md](ROADMAP.md) 为准。
+状态：历史设计提案。起草时的代码基线为 `a35fd81`、包版本为 `0.1.0`；正文中的“当前实现”和阶段安排保留当时语境。后续已实现的能力以 [兼容矩阵](COMPATIBILITY.md) 为准，当前优先级见[根开发计划](../../docs/DEVELOPMENT-PLAN.md)；[ROADMAP.md](ROADMAP.md) 保留后续迭代记录。
 
 项目现已更名为 `rust-umitools`（本方案最初起草时计划保留原名 `rust-umidedup`，随后按用户决定更名），将其发展为覆盖 UMI-tools 常用工作流的 Rust 工具集。先建立可执行的兼容性标准，再扩展命令和优化性能。第一项交付是可靠的单端 `dedup`，而不是在现有单文件实现上直接加入双端分支。
 

@@ -22,6 +22,7 @@
 //! so `19.066666666666666` prints in full while `40.0` prints as `40.0`. That is
 //! emulated in [`java_double`].
 
+use crate::contaminants::Contaminant;
 use std::collections::BTreeMap;
 
 /// Java's `Math.round`: `floor(x + 0.5)`.
@@ -248,25 +249,30 @@ pub struct QcStats {
     pub sequences: BTreeMap<Vec<u8>, u64>,
     /// Per-position exact adapter starts, one vector per [`ADAPTERS`] entry.
     pub adapter_hits: Vec<Vec<u64>>,
-    /// Optional contaminant FASTA entries for the overrepresented-source column.
-    pub contaminants: Vec<(String, Vec<u8>)>,
+    /// Optional contaminant entries for the overrepresented-source column.
+    pub contaminants: Vec<Contaminant>,
+    /// Whether to disable grouping of long-read positions.
+    pub nogroup: bool,
+    /// Prefix length used for duplication and overrepresented sequences.
+    pub dup_length: usize,
 }
 
 /// The order `Per base sequence content` prints its columns in.
 pub const BASE_ORDER: [u8; 4] = *b"GATC";
 
-/// Adapter sequences used by the experimental Adapter Content module.
+/// Adapter sequences from FastQC 0.13.0's `Configuration/adapter_list.txt`.
 ///
-/// FastQC's own list lives in `Configuration/adapter_list.txt` and uses k-mer
-/// matching with position-dependent tolerances. This is a documented, smaller
-/// exact-match subset; the module is therefore marked experimental and is not
-/// compared against FastQC by the differential.
-pub const ADAPTERS: [(&str, &str); 5] = [
+/// All entries are 12bp, and the module treats them as cumulative presence:
+/// after the first exact occurrence in a read, every position through the
+/// longest possible adapter start is counted. PolyA and PolyG are part of the
+/// default FastQC list and therefore belong here too.
+pub const ADAPTERS: [(&str, &str); 6] = [
     ("Illumina Universal Adapter", "AGATCGGAAGAG"),
     ("Illumina Small RNA 3' Adapter", "TGGAATTCTCGG"),
     ("Illumina Small RNA 5' Adapter", "GATCGTCGGACT"),
     ("Nextera Transposase Sequence", "CTGTCTCTTATA"),
-    ("SOLID Small RNA Adapter", "CGCCTTGGCCGT"),
+    ("PolyA", "AAAAAAAAAAAA"),
+    ("PolyG", "GGGGGGGGGGGG"),
 ];
 
 impl QcStats {
@@ -286,11 +292,23 @@ impl QcStats {
             sequences: BTreeMap::new(),
             adapter_hits: vec![Vec::new(); ADAPTERS.len()],
             contaminants: Vec::new(),
+            nogroup: false,
+            dup_length: 50,
         }
     }
 
+    /// Set whether long-read positions are emitted individually.
+    pub fn set_nogroup(&mut self, nogroup: bool) {
+        self.nogroup = nogroup;
+    }
+
+    /// Set the prefix length used for duplication and overrepresented sequences.
+    pub fn set_dup_length(&mut self, length: usize) {
+        self.dup_length = length;
+    }
+
     /// Install an optional opt-in contaminant list.
-    pub fn set_contaminants(&mut self, contaminants: Vec<(String, Vec<u8>)>) {
+    pub fn set_contaminants(&mut self, contaminants: Vec<Contaminant>) {
         self.contaminants = contaminants;
     }
 
@@ -364,28 +382,42 @@ impl QcStats {
             *self.quality_distribution.entry(bucket).or_insert(0) += 1;
         }
 
-        // Duplication is computed on the first 50 bases (FastQC's default
-        // `dup_length`), and the sequence is upper-cased so case does not split it.
+        // Duplication is computed on the configured prefix length (50 by default),
+        // and the sequence is upper-cased so case does not split it.
         let truncated: Vec<u8> = sequence
             .iter()
-            .take(50)
+            .take(self.dup_length)
             .map(|byte| byte.to_ascii_uppercase())
             .collect();
         *self.sequences.entry(truncated).or_insert(0) += 1;
 
-        // Exact adapter starts. This is deliberately smaller and more explicit
-        // than FastQC's tolerant k-mer algorithm; the module is experimental.
+        // FastQC's Adapter Content is cumulative from the first exact adapter
+        // occurrence through the longest possible start position. The bytecode
+        // also carries the previous count into newly grown positions, which
+        // matters when reads have different lengths.
+        let max_length = self.max_length();
         for (index, (_, adapter)) in ADAPTERS.iter().enumerate() {
-            if self.adapter_hits[index].len() < sequence.len() {
-                self.adapter_hits[index].resize(sequence.len(), 0);
-            }
             let adapter = adapter.as_bytes();
-            if adapter.is_empty() || sequence.len() < adapter.len() {
+            if adapter.is_empty() || max_length < adapter.len() {
                 continue;
             }
-            for start in 0..=sequence.len() - adapter.len() {
-                if sequence[start..start + adapter.len()].eq_ignore_ascii_case(adapter) {
-                    self.adapter_hits[index][start] += 1;
+            let max_start = max_length - adapter.len() + 1;
+            let hits = &mut self.adapter_hits[index];
+            if hits.len() < max_start {
+                let fill = hits.last().copied().unwrap_or(0);
+                hits.resize(max_start, fill);
+            }
+            if sequence.len() < adapter.len() {
+                continue;
+            }
+            if let Some(start) = sequence
+                .windows(adapter.len())
+                .position(|window| window.eq_ignore_ascii_case(adapter))
+            {
+                if start < max_start {
+                    for count in &mut hits[start..max_start] {
+                        *count += 1;
+                    }
                 }
             }
         }

@@ -1,6 +1,6 @@
 # 最终一致性检查与剩余工作
 
-> **最近验证基线（2026-10-25）**：`41b17e3`；GitHub Actions quality run
+> **历史验证基线（2026-10-25）**：`41b17e3`；GitHub Actions quality run
 > [`40151959375`](https://github.com/seek-hope/bioinfo-tools/actions/runs/40151959375)
 > 的 `native` 与 `dependency-policy` 两个 job 均通过；`cargo deny check --all`
 > 通过；SBOM 已重新生成；rustdoc `-D warnings` 已加入 native gate。以下第 1/4/5

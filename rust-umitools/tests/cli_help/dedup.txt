@@ -70,7 +70,7 @@ Options:
       --no-sort-output
           Write the output in processing order instead of coordinate order
       --output-stats <OUTPUT_STATS>
-          Write per run statistics into this prefix (rejected: null model not implemented)
+          Write per-run statistics tables with this prefix
       --unpaired-reads <UNPAIRED_READS>
           What to do with read1s whose mate is not in the BAM: use, discard, output [default: use]
       --unmapped-reads <UNMAPPED_READS>
@@ -78,7 +78,9 @@ Options:
       --chimeric-pairs <CHIMERIC_PAIRS>
           What to do with chimeric pairs: use, discard, output [default: use]
       --per-gene
-          Group by gene instead of by position (requires --gene-tag)
+          Group by gene instead of by position
+      --per-contig
+          Treat each contig as a gene (requires --per-gene)
       --gene-tag <GENE_TAG>
           Gene tag when --per-gene is used
       --buffer-whole-contig
@@ -93,8 +95,8 @@ Options:
           Accepted UMIs, one per line (first column); required by --filter-umi
       --umi-whitelist-paired <FILE>
           Read2 whitelist; combined with --umi-whitelist as a cartesian product
-      --gene-transcript-map <GENE_TRANSCRIPT_MAP>
-          Gene to transcript map (count --per-contig only; dedup rejects it)
+      --gene-transcript-map <FILE>
+          Tab-separated gene/transcript map (requires --per-contig)
   -h, --help
           Print help
 

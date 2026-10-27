@@ -1,19 +1,22 @@
 //! `dedup`: release one representative read per inferred molecule.
 
 use crate::cli::{DedupConfig, Policy, VERSION};
+use crate::commands::dedup_stats::{BundleStatsRow, StatsCollector};
 use crate::commands::{push_program_record, Events, Io, Logger, PROGRAM};
 use crate::compat::pyrng::{PyRandom, StableRandom};
 use crate::core::bundle::{Bundle, BundleConfig, Bundler, GeneBundler, Storage};
 use crate::core::cluster::cluster_with_scratch;
 use crate::core::rng::{RepresentativeStrategy, Rng};
+use crate::core::umi::Umi;
 use crate::error::{Error, InputError, Result};
 use crate::io::alignment::aux_str;
-use crate::io::bam::{self, Record};
+use crate::io::bam::{self, Aux, Record};
 use crate::io::paired::{write_mates, MateRequests};
 use crate::io::sort::SortingWriter;
 use crate::io::spill::{ensure_distinct_outputs, TempOutput};
 use crate::io::RecordSink;
 use crate::runtime::pipeline::map_ordered;
+use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 use std::time::{Duration, Instant};
 
@@ -39,6 +42,7 @@ struct Outcome {
     reads: Vec<Record>,
     clusters: usize,
     filtered: u64,
+    stats: Option<BundleStatsRow>,
 }
 
 /// Either a direct writer (`--no-sort-output`) or the streaming sorter.
@@ -86,6 +90,8 @@ fn cluster_bundle(bundle: Bundle, cfg: &DedupConfig) -> Result<Outcome> {
     let Bundle {
         order, mut entries, ..
     } = bundle;
+    let pre: Vec<(Umi, u64)> = order.iter().cloned().zip(counts.iter().copied()).collect();
+    let pre_size = pre.len();
 
     if cfg.ignore_umi {
         let reads = order
@@ -101,6 +107,7 @@ fn cluster_bundle(bundle: Bundle, cfg: &DedupConfig) -> Result<Outcome> {
             reads,
             clusters: order.len(),
             filtered: 0,
+            stats: None,
         });
     }
 
@@ -132,10 +139,26 @@ fn cluster_bundle(bundle: Bundle, cfg: &DedupConfig) -> Result<Outcome> {
             .ok_or_else(|| Error::Format("missing representative record".to_string()))?;
         reads.push(record);
     }
+    let post: Vec<(Umi, u64)> = groups
+        .iter()
+        .map(|group| {
+            let umi = order[group[0]].clone();
+            let count = group.iter().map(|index| counts[*index]).sum();
+            (umi, count)
+        })
+        .collect();
+    let post_size = post.len();
+    let stats = cfg.output_stats.as_ref().map(|_| BundleStatsRow {
+        pre,
+        post,
+        pre_size,
+        post_size,
+    });
     Ok(Outcome {
         reads,
         clusters: groups.len(),
         filtered,
+        stats,
     })
 }
 
@@ -145,6 +168,7 @@ fn flush_batch(
     sink: &mut Sink,
     processed: &mut ProcStats,
     mates: &mut MateRequests,
+    stats: &mut StatsCollector,
 ) -> Result<()> {
     if batch.is_empty() {
         return Ok(());
@@ -152,11 +176,19 @@ fn flush_batch(
     let items = std::mem::take(batch);
     let outcomes: Vec<Result<Outcome>> = map_ordered(items, |bundle| cluster_bundle(bundle, cfg));
     for outcome in outcomes {
-        let outcome = outcome?;
+        let Outcome {
+            reads,
+            clusters,
+            filtered,
+            stats: row,
+        } = outcome?;
+        if let Some(row) = row {
+            stats.push(row);
+        }
         processed.bundles += 1;
-        processed.clusters += outcome.clusters as u64;
-        processed.filtered += outcome.filtered;
-        for record in outcome.reads {
+        processed.clusters += clusters as u64;
+        processed.filtered += filtered;
+        for record in reads {
             // Register the mate only for the read that survives deduplication.
             // Requesting it when the read1 is read would keep the mate of a
             // read1 that lost the representative draw, which upstream never does.
@@ -178,6 +210,33 @@ fn open_reader(path: &Path, reference: Option<&Path>) -> Result<bam::Reader> {
     })?;
     crate::io::set_reference(&mut reader, reference)?;
     Ok(reader)
+}
+
+fn load_gene_map(path: &Path, references: &[Vec<u8>]) -> Result<HashMap<Vec<u8>, Vec<u8>>> {
+    let text = std::fs::read_to_string(path).map_err(|e| Error::io(path, e))?;
+    let refs: std::collections::HashSet<&[u8]> =
+        references.iter().map(|name| name.as_slice()).collect();
+    let mut map = HashMap::new();
+    for (line_no, line) in text.lines().enumerate() {
+        let line = line.trim_end_matches('\r');
+        if line.starts_with('#') || line.trim().is_empty() {
+            continue;
+        }
+        let Some((gene, transcript)) = line.split_once('\t') else {
+            return Err(Error::usage_with_hint(
+                format!(
+                    "{}:{}: expected gene<TAB>transcript",
+                    path.display(),
+                    line_no + 1
+                ),
+                "the map is tab separated with gene in column 1 and transcript in column 2",
+            ));
+        };
+        if refs.contains(transcript.as_bytes()) {
+            map.insert(transcript.as_bytes().to_vec(), gene.as_bytes().to_vec());
+        }
+    }
+    Ok(map)
 }
 
 pub fn run(cfg: &DedupConfig) -> Result<RunSummary> {
@@ -212,6 +271,16 @@ pub fn run(cfg: &DedupConfig) -> Result<RunSummary> {
     reader
         .set_threads(io_threads)
         .map_err(|e| Error::Format(format!("cannot set reader threads: {e}")))?;
+    let contig_names: Vec<Vec<u8>> = {
+        let view = reader.header();
+        (0..view.target_count())
+            .map(|tid| view.tid2name(tid).to_vec())
+            .collect()
+    };
+    let gene_map = match &cfg.gene_transcript_map {
+        Some(path) => Some(load_gene_map(path, &contig_names)?),
+        None => None,
+    };
     // Resolve --chrom against the header before reading records.
     let target_tid: Option<i32> = match &cfg.chrom {
         Some(name) => {
@@ -299,6 +368,7 @@ pub fn run(cfg: &DedupConfig) -> Result<RunSummary> {
     let mut bundler = Bundler::new();
     let mut gene_bundler = GeneBundler::new();
     let mut processed = ProcStats::default();
+    let mut stats = StatsCollector::new(cfg.random_seed);
     let mut events = Events::default();
     let mut batch: Vec<Bundle> = Vec::new();
     let mut batch_umis = 0usize;
@@ -317,7 +387,7 @@ pub fn run(cfg: &DedupConfig) -> Result<RunSummary> {
     let mut last_coord: Option<(i32, i64)> = None;
 
     for record in reader.records() {
-        let record = record.map_err(|e| Error::Format(format!("corrupt input: {e}")))?;
+        let mut record = record.map_err(|e| Error::Format(format!("corrupt input: {e}")))?;
         if let Some(tid) = target_tid {
             if record.tid() != tid || record.is_unmapped() {
                 continue;
@@ -408,14 +478,37 @@ pub fn run(cfg: &DedupConfig) -> Result<RunSummary> {
         }
 
         if cfg.per_gene {
-            let tag = cfg.gene_tag.expect("--per-gene validates --gene-tag");
-            let gene = match aux_str(&record, &tag) {
-                Ok(value) if !value.is_empty() => value,
-                _ => continue,
+            let gene: Vec<u8> = if cfg.per_contig {
+                let tid = record.tid();
+                if tid < 0 || tid as usize >= contig_names.len() {
+                    continue;
+                }
+                let name = &contig_names[tid as usize];
+                match &gene_map {
+                    Some(map) => match map.get(name) {
+                        Some(gene) => gene.clone(),
+                        None => continue,
+                    },
+                    None => name.clone(),
+                }
+            } else if let Some(tag) = cfg.gene_tag {
+                match aux_str(&record, &tag) {
+                    Ok(value) if !value.is_empty() => value.into_bytes(),
+                    _ => continue,
+                }
+            } else {
+                continue;
             };
+            if cfg.per_contig && gene_map.is_some() {
+                gene_bundler.set_flush_on_contig(false);
+                let value = String::from_utf8_lossy(&gene).into_owned();
+                record
+                    .push_aux(b"MC", Aux::String(value))
+                    .map_err(|e| Error::Format(format!("cannot set MC tag: {e}")))?;
+            }
             gene_bundler.push(
                 record,
-                gene.into_bytes().into(),
+                gene.into_boxed_slice(),
                 &bundle_cfg,
                 rng.as_mut(),
                 &mut emitted,
@@ -433,7 +526,14 @@ pub fn run(cfg: &DedupConfig) -> Result<RunSummary> {
                 batch.push(bundle);
             }
             if batch_umis >= cfg.budget.max_batch_umis {
-                flush_batch(&mut batch, cfg, &mut sink, &mut processed, &mut mates)?;
+                flush_batch(
+                    &mut batch,
+                    cfg,
+                    &mut sink,
+                    &mut processed,
+                    &mut mates,
+                    &mut stats,
+                )?;
                 batch_umis = 0;
             }
             continue;
@@ -454,7 +554,14 @@ pub fn run(cfg: &DedupConfig) -> Result<RunSummary> {
         if partition_coord != Some(coord) && bundler.live_umis() > partition_limit {
             bundler.finish(&mut emitted);
             batch.append(&mut emitted);
-            flush_batch(&mut batch, cfg, &mut sink, &mut processed, &mut mates)?;
+            flush_batch(
+                &mut batch,
+                cfg,
+                &mut sink,
+                &mut processed,
+                &mut mates,
+                &mut stats,
+            )?;
             batch_umis = 0;
         }
         partition_coord = Some(coord);
@@ -480,7 +587,14 @@ pub fn run(cfg: &DedupConfig) -> Result<RunSummary> {
                     events.input_reads, batch_umis
                 );
             }
-            flush_batch(&mut batch, cfg, &mut sink, &mut processed, &mut mates)?;
+            flush_batch(
+                &mut batch,
+                cfg,
+                &mut sink,
+                &mut processed,
+                &mut mates,
+                &mut stats,
+            )?;
             if trace {
                 eprintln!("[trace] flush done reads={}", events.input_reads);
             }
@@ -496,7 +610,14 @@ pub fn run(cfg: &DedupConfig) -> Result<RunSummary> {
     for bundle in emitted.drain(..) {
         batch.push(bundle);
     }
-    flush_batch(&mut batch, cfg, &mut sink, &mut processed, &mut mates)?;
+    flush_batch(
+        &mut batch,
+        cfg,
+        &mut sink,
+        &mut processed,
+        &mut mates,
+        &mut stats,
+    )?;
 
     let parse_elapsed = started.elapsed();
     let mut mate_count = 0u64;
@@ -520,6 +641,9 @@ pub fn run(cfg: &DedupConfig) -> Result<RunSummary> {
         .expect("dedup always has an output path")
         .to_path_buf();
     sink.finish(&out_dir, &output_path)?;
+    if let Some(prefix) = &cfg.output_stats {
+        stats.write(prefix, cfg.method.as_str())?;
+    }
     let sort_elapsed = started.elapsed();
 
     if progress {

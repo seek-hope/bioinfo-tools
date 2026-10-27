@@ -122,6 +122,7 @@ run() {
 }
 
 run python3 tests/ci/check_docs.py
+run python3 tests/ci/check_compat.py
 run python3 tests/gate/test_acceptance.py
 run "${CARGO[@]}" fmt --all -- --check
 run "${CARGO[@]}" clippy --workspace --all-targets --locked "${cargo_offline[@]}" -- -D warnings

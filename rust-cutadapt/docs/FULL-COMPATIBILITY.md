@@ -195,7 +195,7 @@ The single genuinely shared case (`a3_regular`) already produces byte-identical
 read data, which confirms the Phase 0 trimming core is sound; everything else is
 missing surface area.
 
-### Known deviations (tracked honestly)
+### Known deviations
 
 | Area | Status | Detail |
 | --- | --- | --- |

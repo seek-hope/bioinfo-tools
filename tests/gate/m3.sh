@@ -215,9 +215,9 @@ fi
 if [ -x "$UMITOOLS_BIN" ]; then
     expected='rust-umitools 0.2.0
 reference        : UMI-tools 1.1.6 (3f2cb4f41e07fe4a6cea3b3389f534bee957176b)
-htslib           : via rust-htslib, libdeflate compression
-parallel         : rayon worker pool, bounded BGZF threads
-commands         : dedup, group, count, count_tab
+library          : noodles 0.118.0 (pure Rust; BAM/SAM/CRAM)
+parallel         : rayon worker pool, single-threaded BGZF output
+commands         : whitelist, extract, dedup, group, count, count_tab
 exit codes       : 0 ok, 2 usage, 3 input, 4 io/resource'
     actual=$("$UMITOOLS_BIN" --version --verbose 2>/dev/null)
     if [ "$actual" = "$expected" ]; then

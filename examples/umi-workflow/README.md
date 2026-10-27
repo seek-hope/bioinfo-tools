@@ -66,7 +66,7 @@ The smoke considers itself failed if `quickcheck` fails, `counts.tsv` is empty, 
 the QC report is missing. If MultiQC is not installed it prints a skip; that is
 not counted as a pass.
 
-## What is deliberately not claimed
+## Scope and limits
 
 - The synthetic pre-aligned path is not evidence of alignment accuracy or a
   biological UMI result.

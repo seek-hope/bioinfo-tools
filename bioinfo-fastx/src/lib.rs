@@ -54,7 +54,10 @@ pub mod reader;
 pub mod writer;
 
 pub use chunker::{last_complete_record_end, split_records, RecordRange, DEFAULT_CHUNK_SIZE};
-pub use compress::{compressor, compressor_for, decompress, Levels, MultiMemberGzWriter};
+pub use compress::{
+    compressor, compressor_for, compressor_for_with_levels, compressor_with_levels, decompress,
+    CompressionLevels, Levels, MultiMemberGzWriter,
+};
 pub use format::{format_from_extension, Format};
 pub use parser::{Mode, ParseError, Parser, Record};
 pub use reader::{Chunk, Reader, Writer};

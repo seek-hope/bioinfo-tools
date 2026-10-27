@@ -1,0 +1,1 @@
+rust-fastqc 0.1.0

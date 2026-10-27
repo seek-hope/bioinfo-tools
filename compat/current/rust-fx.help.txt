@@ -1,0 +1,35 @@
+FASTX manipulation with SeqKit-compatible subcommands (experimental)
+
+Usage: rust-fx <COMMAND>
+
+Commands:
+  stats      simple statistics of FASTA/Q files [alias: stat]
+  seq        transform sequences (extract ID, filter by length, remove gaps, reverse complement...)
+  fq2fa      convert FASTQ to FASTA
+  fx2tab     convert FASTA/Q to tabular format (and length, GC content, average quality...)
+  sample     sample sequences by number or proportion
+  split      split sequences into files by size or number of parts
+  head       print the first N FASTA/Q records, or leading records whose total length >= L
+  subseq     get subsequences by region (1-based, negative indices supported)
+  range      print FASTA/Q records in a range (start:end)
+  sliding    extract subsequences in sliding windows
+  duplicate  duplicate sequences N times
+  rmdup      remove duplicated sequences by ID, name or sequence
+  faidx      create/extract from a FASTA index (region extraction)
+  rename     rename duplicated IDs
+  replace    replace name/sequence by regular expression
+  tab2fx     convert tabular format (first two/three columns) to FASTA/Q
+  restart    reset start position (rotate) for circular genomes
+  fa2fq      retrieve corresponding FASTQ records by a FASTA file
+  translate  translate DNA/RNA to protein sequence
+  common     find common/shared sequences of multiple files
+  grep       search sequences by ID, full name or sequence
+  sort       sort sequences by id, full name, sequence, length or non-gap bases
+  lint       FASTQ file pair validator (fq 0.12.0 validator set)
+  help       Print this message or the help of the given subcommand(s)
+
+Options:
+  -h, --help     Print help
+  -V, --version  Print version
+
+Compatibility: this build implements the documented SeqKit 2.14.0 behaviour for stats, seq, fq2fa, fx2tab, sample, split, head, grep, sort, subseq, range, sliding, duplicate, rmdup, faidx, rename, replace, tab2fx, restart, fa2fq, translate, common and lint, and fq 0.12.0's validator set for lint. head has direct SeqKit 2.14 differential evidence for positive -n/-l, -n 0 and global raw-output flags; grep has direct evidence for ID/name/sequence, strand, motif, region, duplicate-pattern and error paths; sort has natural-order/prefix and selected two-pass/index evidence. See compat/matrix.tsv for per-surface status.

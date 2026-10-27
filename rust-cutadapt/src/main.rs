@@ -245,9 +245,8 @@ fn describe(error: &RunError) -> String {
         RunError::Io(e) => format!("error: {e}"),
         other => format!("error: {other}"),
     };
-    // cutadapt prints only the diagnostic. The one case where extra honesty is
-    // required is a PARTIAL output file: that is a real hazard a user must know
-    // about, and cutadapt does not report it either, so it is called out here.
+    // cutadapt prints only the diagnostic. A PARTIAL output file needs an
+    // additional warning: the user must not mistake it for a complete result.
     let records = error.records_written();
     if records == 0 {
         detail

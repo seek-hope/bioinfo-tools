@@ -16,7 +16,6 @@ The compatibility and benchmark snapshot below was recorded at code commit `c8b0
 | --- | --- |
 | Documented cutadapt 4.6 options | 60, all implemented |
 | Differential cases against real cutadapt 4.6 | 119 / 119 pass |
-| Rust tests | 208 pass (171 lib + 14 CLI + 21 CLI end-to-end + 1 differential + 1 doc-test) |
 | `cargo fmt` / `cargo clippy --all-targets -- -D warnings` | clean |
 | Source tree | no tags, no release published for this tree |
 
@@ -74,8 +73,8 @@ compression, template errors) exit 1.
 ## Compatibility and known deviations
 
 The full compatibility contract is in
-[docs/FULL-COMPATIBILITY.md](docs/FULL-COMPATIBILITY.md). The current
-differences from cutadapt 4.6 are limited and deliberate:
+[docs/FULL-COMPATIBILITY.md](docs/FULL-COMPATIBILITY.md). The known differences
+from cutadapt 4.6 are:
 
 | Area | Current behaviour |
 | --- | --- |
@@ -85,7 +84,7 @@ differences from cutadapt 4.6 are limited and deliberate:
 | `--max-average-error-rate` on an empty read | cutadapt 4.6 raises `ZeroDivisionError`; rust-cutadapt matches the observable exit code, stdout and diagnostic without a traceback. |
 | Oracle quirks | Where cutadapt 4.6 has a documented quirk, the differential suite records the observable behaviour rather than silently "fixing" it. |
 
-No uncompressed read-data or report deviation is currently known.
+The 119-case suite found no other uncompressed read-data or report differences.
 
 ## Performance
 
@@ -99,7 +98,7 @@ No uncompressed read-data or report deviation is currently known.
 - speed-up vs the recorded 4.4363 s baseline: **6.60x**
 - speed-up vs a same-session oracle run (9.65 s under load): **14.36x**
 
-The 5x target is met with the default four-worker configuration. cutadapt
+The recorded default configuration exceeds the historical 5x target. cutadapt
 defaults to one core; `-j 1` keeps exact single-thread parity but is slower:
 2.352 s mean (1.89x baseline, 4.16x same-session), recorded at commit
 `281a8dd`. `hyperfine` was not installed, so the raw evidence is five

@@ -153,13 +153,12 @@ impl ProgramRecord {
 mod tests {
     use super::*;
 
-    // The exact block the pre-refactor rust-umitools binary printed. Captured
-    // with `rust-umitools --version --verbose | cat -A`, which showed:
+    // Current rust-umitools provenance, used here to pin the shared layout:
     //   rust-umitools 0.2.0$
     //   reference        : UMI-tools 1.1.6 (3f2cb4f41e07fe4a6cea3b3389f534bee957176b)$
-    //   htslib           : via rust-htslib, libdeflate compression$
-    //   parallel         : rayon worker pool, bounded BGZF threads$
-    //   commands         : dedup, group, count, count_tab$
+    //   library          : noodles 0.118.0 (pure Rust; BAM/SAM/CRAM)$
+    //   parallel         : rayon worker pool, single-threaded BGZF output$
+    //   commands         : whitelist, extract, dedup, group, count, count_tab$
     //   exit codes       : 0 ok, 2 usage, 3 input, 4 io/resource$
     fn umitools() -> Provenance {
         Provenance::new("rust-umitools", "0.2.0")
@@ -167,9 +166,12 @@ mod tests {
                 "reference",
                 "UMI-tools 1.1.6 (3f2cb4f41e07fe4a6cea3b3389f534bee957176b)",
             )
-            .with_field("htslib", "via rust-htslib, libdeflate compression")
-            .with_field("parallel", "rayon worker pool, bounded BGZF threads")
-            .with_field("commands", "dedup, group, count, count_tab")
+            .with_field("library", "noodles 0.118.0 (pure Rust; BAM/SAM/CRAM)")
+            .with_field("parallel", "rayon worker pool, single-threaded BGZF output")
+            .with_field(
+                "commands",
+                "whitelist, extract, dedup, group, count, count_tab",
+            )
             .with_exit_codes(&[
                 ExitClass::Success,
                 ExitClass::Usage,
@@ -179,15 +181,15 @@ mod tests {
     }
 
     #[test]
-    fn reproduces_the_pre_refactor_verbose_block_exactly() {
+    fn renders_the_current_umitools_block_exactly() {
         assert_eq!(
             umitools().render(),
             concat!(
                 "rust-umitools 0.2.0\n",
                 "reference        : UMI-tools 1.1.6 (3f2cb4f41e07fe4a6cea3b3389f534bee957176b)\n",
-                "htslib           : via rust-htslib, libdeflate compression\n",
-                "parallel         : rayon worker pool, bounded BGZF threads\n",
-                "commands         : dedup, group, count, count_tab\n",
+                "library          : noodles 0.118.0 (pure Rust; BAM/SAM/CRAM)\n",
+                "parallel         : rayon worker pool, single-threaded BGZF output\n",
+                "commands         : whitelist, extract, dedup, group, count, count_tab\n",
                 "exit codes       : 0 ok, 2 usage, 3 input, 4 io/resource\n",
             )
         );

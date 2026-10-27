@@ -16,8 +16,9 @@ use bioinfo_common::exit::ExitClass;
 use bioinfo_fastx::parser::{Mode, ParseError};
 use bioinfo_fastx::reader::Writer;
 use bioinfo_fastx::writer::Layout;
-use bioinfo_fastx::Levels;
+use bioinfo_fastx::{format_from_extension, CompressionLevels, Format, Levels};
 use std::io::{self, Write};
+use std::path::Path;
 
 /// Which record format the input turned out to be.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -125,6 +126,7 @@ pub struct CommandError {
     pub class: ExitClass,
     /// What went wrong, without the `ERROR: ` prefix.
     pub message: String,
+    code: Option<i32>,
 }
 
 impl CommandError {
@@ -133,10 +135,17 @@ impl CommandError {
         CommandError {
             class: ExitClass::Usage,
             message: message.into(),
+            code: None,
         }
     }
 
-    /// An input-precondition failure (exit 3).
+    /// Attach an upstream-specific process exit code without changing the
+    /// diagnostic class used for normal workspace errors.
+    pub fn with_code(mut self, code: i32) -> CommandError {
+        self.code = Some(code);
+        self
+    }
+
     /// A runtime failure discovered while processing (exit 1).
     ///
     /// `fq lint` reports a validation failure this way: the command line was
@@ -146,6 +155,7 @@ impl CommandError {
         CommandError {
             class: ExitClass::Runtime,
             message: message.into(),
+            code: None,
         }
     }
 
@@ -157,6 +167,7 @@ impl CommandError {
         CommandError {
             class: ExitClass::Input,
             message: message.into(),
+            code: None,
         }
     }
 
@@ -165,12 +176,13 @@ impl CommandError {
         CommandError {
             class: ExitClass::Io,
             message: message.into(),
+            code: None,
         }
     }
 
     /// The numeric exit code.
     pub fn exit_code(&self) -> i32 {
-        self.class.code()
+        self.code.unwrap_or_else(|| self.class.code())
     }
 }
 
@@ -552,6 +564,22 @@ enum OutputInner {
     Stdout(io::BufWriter<io::Stdout>),
 }
 
+fn check_compression_level(
+    level: i32,
+    min: i32,
+    max: i32,
+    format: &str,
+) -> Result<(), CommandError> {
+    if (min..=max).contains(&level) {
+        Ok(())
+    } else {
+        Err(CommandError::runtime(format!(
+            "compression level out of range for {format} format ({min}-{max}): {level}"
+        ))
+        .with_code(255))
+    }
+}
+
 impl Output {
     /// Create the sink for `path` (`-` or absent means stdout).
     pub fn create(path: Option<&str>) -> Result<Output, CommandError> {
@@ -567,6 +595,45 @@ impl Output {
                 })
             }
         }
+    }
+
+    /// Create the sink with an optional SeqKit-style numeric compression level.
+    ///
+    /// `None` (the CLI's `-1`) preserves the existing writer defaults. xz and
+    /// plain output ignore the setting, as SeqKit does. gzip/bzip2 accept 1–9;
+    /// zstd accepts 1–4 and maps those presets to 1, 3, 7 and 11.
+    pub fn create_with_level(
+        path: Option<&str>,
+        level: Option<i32>,
+    ) -> Result<Output, CommandError> {
+        let Some(level) = level else {
+            return Self::create(path);
+        };
+        let Some(path) = path.filter(|path| *path != "-") else {
+            return Self::create(path);
+        };
+        let format = format_from_extension(Path::new(path));
+        let mut overrides = CompressionLevels::default();
+        match format {
+            Format::Gzip | Format::Bgzf => {
+                check_compression_level(level, 1, 9, "gzip")?;
+                overrides.gzip = Some(level as u32);
+            }
+            Format::Bzip2 => {
+                check_compression_level(level, 1, 9, "bzip2")?;
+                overrides.bzip2 = Some(level as u32);
+            }
+            Format::Zstd => {
+                check_compression_level(level, 1, 4, "zstd")?;
+                overrides.zstd = Some([1, 3, 7, 11][(level - 1) as usize]);
+            }
+            Format::Xz | Format::Plain => return Self::create(Some(path)),
+        }
+        let writer = Writer::create_with_levels(path, overrides)
+            .map_err(|error| CommandError::io(format!("cannot create {path}: {error}")))?;
+        Ok(Output {
+            inner: OutputInner::Writer(writer),
+        })
     }
 
     /// Finish the stream. Must be called: a gzip output without its footer does

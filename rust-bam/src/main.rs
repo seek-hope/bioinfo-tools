@@ -8,7 +8,9 @@ use std::process::ExitCode;
 
 use clap::{Arg, ArgAction, Command};
 
-use rust_bam::commands::{self, SortOptions, ViewOptions};
+use rust_bam::commands::{
+    self, CoverageOptions, DepthOptions, HeadOptions, SortOptions, ViewOptions,
+};
 use rust_bam::error::{Error, EXIT_CLASSES};
 use rust_bam::COMMANDS;
 
@@ -81,7 +83,7 @@ fn cli() -> Command {
 
     Command::new(PROGRAM)
         .version(VERSION)
-        .about("SAM/BAM view, flagstat, idxstats, quickcheck, index and sort (noodles 0.118.0)")
+        .about("SAM/BAM view, flagstat, idxstats, quickcheck, index, sort, depth, coverage, flags and head (noodles 0.118.0)")
         .subcommand_required(true)
         .arg_required_else_help(true)
         .subcommand(
@@ -168,6 +170,270 @@ fn cli() -> Command {
                         .value_parser(clap::value_parser!(usize))
                         .default_value("1")
                         .help("worker threads for BAM output compression (SAM output stays single-threaded)"),
+                ),
+        )
+        .subcommand(
+            Command::new("depth")
+                .about("Compute per-position depth (-a/-aa/-s/-f/-g/-G/-H/-q/-Q/-l/-J/-r/-b subset)")
+                .arg(
+                    Arg::new("inputs")
+                        .value_name("FILE")
+                        .required(false)
+                        .num_args(0..)
+                        .help("one or more input SAM/BAM files; one depth column each"),
+                )
+                .arg(
+                    Arg::new("file_list")
+                        .short('f')
+                        .value_name("FILE")
+                        .help("read input paths from FILE, one per line; overrides positional inputs"),
+                )
+                .arg(
+                    Arg::new("remove_flags")
+                        .short('g')
+                        .value_name("FLAGS")
+                        .help("remove flags from the default excluded set"),
+                )
+                .arg(
+                    Arg::new("exclude_flags")
+                        .short('G')
+                        .long("excl-flags")
+                        .value_name("FLAGS")
+                        .help("add flags to the default excluded set"),
+                )
+                .arg(
+                    Arg::new("include_flags")
+                        .long("incl-flags")
+                        .value_name("FLAGS")
+                        .help("require at least one flag bit"),
+                )
+                .arg(
+                    Arg::new("require_flags")
+                        .long("require-flags")
+                        .value_name("FLAGS")
+                        .help("require all flag bits"),
+                )
+                .arg(
+                    Arg::new("all")
+                        .short('a')
+                        .action(ArgAction::Count)
+                        .help("emit zero-depth positions; -aa also emits unused references"),
+                )
+                .arg(
+                    Arg::new("remove_overlaps")
+                        .short('s')
+                        .action(ArgAction::SetTrue)
+                        .help("count only one mate at overlapping template positions"),
+                )
+                .arg(
+                    Arg::new("header")
+                        .short('H')
+                        .action(ArgAction::SetTrue)
+                        .help("print the #CHROM/POS/sample header"),
+                )
+                .arg(
+                    Arg::new("min_baseq")
+                        .short('q')
+                        .long("min-BQ")
+                        .value_name("INT")
+                        .value_parser(clap::value_parser!(u8))
+                        .default_value("0")
+                        .help("minimum base quality"),
+                )
+                .arg(
+                    Arg::new("min_mapq")
+                        .short('Q')
+                        .long("min-MQ")
+                        .value_name("INT")
+                        .value_parser(clap::value_parser!(u8))
+                        .default_value("0")
+                        .help("minimum mapping quality"),
+                )
+                .arg(
+                    Arg::new("min_read_len")
+                        .short('l')
+                        .value_name("INT")
+                        .value_parser(clap::value_parser!(usize))
+                        .default_value("0")
+                        .help("minimum read length"),
+                )
+                .arg(
+                    Arg::new("include_deletions")
+                        .short('J')
+                        .action(ArgAction::SetTrue)
+                        .help("count CIGAR deletions as covered reference bases"),
+                )
+                .arg(
+                    Arg::new("region")
+                        .short('r')
+                        .value_name("REGION")
+                        .help("restrict output to chr or chr:from-to"),
+                )
+                .arg(
+                    Arg::new("bed")
+                        .short('b')
+                        .long("bed")
+                        .value_name("FILE")
+                        .help("restrict output to BED intervals (0-based half-open)"),
+                )
+                .arg(
+                    Arg::new("output")
+                        .short('o')
+                        .long("output")
+                        .value_name("FILE")
+                        .help("write to FILE instead of standard output"),
+                ),
+        )
+        .subcommand(
+            Command::new("coverage")
+                .about("Report per-reference coverage summary (-b/--min-depth/-r/-q/-Q/-l/-H/-o subset)")
+                .arg(input().required(false).num_args(0..))
+                .arg(
+                    Arg::new("bam_list")
+                        .short('b')
+                        .long("bam-list")
+                        .value_name("FILE")
+                        .help("read input paths from FILE, one per line; overrides positional inputs"),
+                )
+                .arg(
+                    Arg::new("required_flags")
+                        .long("rf")
+                        .value_name("FLAGS")
+                        .help("require at least one flag bit"),
+                )
+                .arg(
+                    Arg::new("filter_flags")
+                        .long("ff")
+                        .value_name("FLAGS")
+                        .help("replace the default excluded flag set"),
+                )
+                .arg(
+                    Arg::new("region")
+                        .short('r')
+                        .value_name("REGION")
+                        .help("restrict output to chr or chr:from-to"),
+                )
+                .arg(
+                    Arg::new("min_mapq")
+                        .short('q')
+                        .long("min-MQ")
+                        .value_name("INT")
+                        .value_parser(clap::value_parser!(u8))
+                        .default_value("0")
+                        .help("minimum mapping quality"),
+                )
+                .arg(
+                    Arg::new("min_baseq")
+                        .short('Q')
+                        .long("min-BQ")
+                        .value_name("INT")
+                        .value_parser(clap::value_parser!(u8))
+                        .default_value("0")
+                        .help("minimum base quality"),
+                )
+                .arg(
+                    Arg::new("min_read_len")
+                        .short('l')
+                        .value_name("INT")
+                        .value_parser(clap::value_parser!(usize))
+                        .default_value("0")
+                        .help("minimum read length"),
+                )
+                .arg(
+                    Arg::new("min_depth")
+                        .long("min-depth")
+                        .value_name("INT")
+                        .value_parser(clap::value_parser!(u32))
+                        .default_value("1")
+                        .help("minimum per-position depth included in coverage statistics"),
+                )
+                .arg(
+                    Arg::new("max_depth")
+                        .short('d')
+                        .long("depth")
+                        .value_name("INT")
+                        .value_parser(clap::value_parser!(usize))
+                        .default_value("1000000")
+                        .help("maximum reads per alignment start in each input; 0 means unlimited"),
+                )
+                .arg(
+                    Arg::new("histogram")
+                        .short('m')
+                        .long("histogram")
+                        .action(ArgAction::SetTrue)
+                        .help("show breadth-of-coverage histogram instead of the table"),
+                )
+                .arg(
+                    Arg::new("plot_depth")
+                        .short('D')
+                        .long("plot-depth")
+                        .action(ArgAction::SetTrue)
+                        .help("show depth histogram instead of the table"),
+                )
+                .arg(
+                    Arg::new("ascii")
+                        .short('A')
+                        .long("ascii")
+                        .action(ArgAction::SetTrue)
+                        .help("use ASCII histogram glyphs"),
+                )
+                .arg(
+                    Arg::new("n_bins")
+                        .short('w')
+                        .long("n-bins")
+                        .value_name("INT")
+                        .value_parser(clap::value_parser!(usize))
+                        .help("number of histogram bins (also selects histogram output)"),
+                )
+                .arg(
+                    Arg::new("no_header")
+                        .short('H')
+                        .action(ArgAction::SetTrue)
+                        .help("suppress the header row"),
+                )
+                .arg(
+                    Arg::new("output")
+                        .short('o')
+                        .long("output")
+                        .value_name("FILE")
+                        .help("write to FILE instead of standard output"),
+                ),
+        )
+        .subcommand(
+            Command::new("head")
+                .about("Display selected SAM header lines and alignment records")
+                // -h is the upstream --headers option, not a help shortcut.
+                .disable_help_flag(true)
+                .arg(input().required(false))
+                .arg(
+                    Arg::new("headers")
+                        .short('h')
+                        .long("headers")
+                        .value_name("INT")
+                        .value_parser(clap::value_parser!(usize))
+                        .help("display at most INT header lines [all]"),
+                )
+                .arg(
+                    Arg::new("records")
+                        .short('n')
+                        .long("records")
+                        .value_name("INT")
+                        .value_parser(clap::value_parser!(usize))
+                        .default_value("0")
+                        .help("display at most INT alignment records [none]"),
+                ),
+        )
+        .subcommand(
+            Command::new("flags")
+                .about("Convert between textual and numeric flag representation")
+                // samtools flags has no option parser: even --help is treated as
+                // a flag argument and rejected. No arguments prints usage.
+                .disable_help_flag(true)
+                .arg(
+                    Arg::new("values")
+                        .value_name("FLAGS")
+                        .num_args(0..)
+                        .allow_hyphen_values(true),
                 ),
         )
         .subcommand(
@@ -304,6 +570,95 @@ fn run(matches: &clap::ArgMatches) -> Result<(), Error> {
             // first two win, and so do we (see commands::view).
             commands::view(options)
         }
+        Some(("depth", sub)) => {
+            let inputs: Vec<PathBuf> = sub
+                .get_many::<String>("inputs")
+                .map(|values| values.map(PathBuf::from).collect())
+                .unwrap_or_default();
+            let options = DepthOptions {
+                inputs,
+                output: optional_path(sub, "output"),
+                all_positions: *sub.get_one::<u8>("all").unwrap_or(&0) > 0,
+                absolutely_all: *sub.get_one::<u8>("all").unwrap_or(&0) > 1,
+                remove_overlaps: sub.get_flag("remove_overlaps"),
+                header: sub.get_flag("header"),
+                min_baseq: *sub.get_one::<u8>("min_baseq").unwrap_or(&0),
+                min_mapq: *sub.get_one::<u8>("min_mapq").unwrap_or(&0),
+                min_read_len: *sub.get_one::<usize>("min_read_len").unwrap_or(&0),
+                include_deletions: sub.get_flag("include_deletions"),
+                region: sub.get_one::<String>("region").cloned(),
+                bed: optional_path(sub, "bed"),
+                file_list: optional_path(sub, "file_list"),
+                remove_flags: sub
+                    .get_one::<String>("remove_flags")
+                    .map(|value| commands::parse_flag_value(value))
+                    .transpose()?
+                    .unwrap_or(0),
+                exclude_flags: sub
+                    .get_one::<String>("exclude_flags")
+                    .map(|value| commands::parse_flag_value(value))
+                    .transpose()?
+                    .unwrap_or(0),
+                include_flags: sub
+                    .get_one::<String>("include_flags")
+                    .map(|value| commands::parse_flag_value(value))
+                    .transpose()?
+                    .unwrap_or(0),
+                require_flags: sub
+                    .get_one::<String>("require_flags")
+                    .map(|value| commands::parse_flag_value(value))
+                    .transpose()?
+                    .unwrap_or(0),
+            };
+            commands::depth(options)
+        }
+        Some(("coverage", sub)) => {
+            let options = CoverageOptions {
+                inputs: sub
+                    .get_many::<String>("input")
+                    .map(|values| values.map(PathBuf::from).collect())
+                    .unwrap_or_default(),
+                bam_list: optional_path(sub, "bam_list"),
+                output: optional_path(sub, "output"),
+                no_header: sub.get_flag("no_header"),
+                region: sub.get_one::<String>("region").cloned(),
+                min_mapq: *sub.get_one::<u8>("min_mapq").unwrap_or(&0),
+                min_baseq: *sub.get_one::<u8>("min_baseq").unwrap_or(&0),
+                min_read_len: *sub.get_one::<usize>("min_read_len").unwrap_or(&0),
+                min_depth: *sub.get_one::<u32>("min_depth").unwrap_or(&1),
+                max_depth: *sub.get_one::<usize>("max_depth").unwrap_or(&1_000_000),
+                histogram: sub.get_flag("histogram"),
+                plot_depth: sub.get_flag("plot_depth"),
+                ascii: sub.get_flag("ascii"),
+                n_bins: sub.get_one::<usize>("n_bins").copied(),
+                required_flags: sub
+                    .get_one::<String>("required_flags")
+                    .map(|value| commands::parse_flag_value(value))
+                    .transpose()?
+                    .unwrap_or(0),
+                filter_flags: sub
+                    .get_one::<String>("filter_flags")
+                    .map(|value| commands::parse_flag_value(value))
+                    .transpose()?,
+            };
+            commands::coverage(options)
+        }
+        Some(("head", sub)) => {
+            let options = HeadOptions {
+                input: optional_path(sub, "input").unwrap_or_else(|| PathBuf::from("-")),
+                headers: sub.get_one::<usize>("headers").copied(),
+                records: *sub.get_one::<usize>("records").unwrap_or(&0),
+            };
+            commands::head(options)
+        }
+        Some(("flags", sub)) => {
+            let values: Vec<String> = sub
+                .get_many::<String>("values")
+                .map(|values| values.cloned().collect())
+                .unwrap_or_default();
+            let text = commands::flags(&values)?;
+            write_stdout(&text)
+        }
         Some(("flagstat", sub)) => {
             let text = commands::flagstat(&path(sub, "input")?)?;
             write_text(sub, &text)
@@ -434,18 +789,20 @@ fn parse_size(text: &str) -> Result<u64, Error> {
 }
 
 fn write_text(sub: &clap::ArgMatches, text: &str) -> Result<(), Error> {
-    use std::io::Write;
     match optional_path(sub, "output") {
-        None => {
-            let stdout = std::io::stdout();
-            let mut lock = stdout.lock();
-            lock.write_all(text.as_bytes())
-                .and_then(|()| lock.flush())
-                .map_err(|error| Error::io(format!("cannot write output: {error}")))
-        }
+        None => write_stdout(text),
         Some(path) => std::fs::write(&path, text)
             .map_err(|error| Error::io(format!("{}: {error}", path.display()))),
     }
+}
+
+fn write_stdout(text: &str) -> Result<(), Error> {
+    use std::io::Write;
+    let stdout = std::io::stdout();
+    let mut lock = stdout.lock();
+    lock.write_all(text.as_bytes())
+        .and_then(|()| lock.flush())
+        .map_err(|error| Error::io(format!("cannot write output: {error}")))
 }
 
 fn path(sub: &clap::ArgMatches, name: &str) -> Result<PathBuf, Error> {
@@ -463,7 +820,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn the_cli_declares_all_six_commands() {
+    fn the_cli_declares_all_commands() {
         let command = cli();
         let names: Vec<&str> = command
             .get_subcommands()
@@ -482,9 +839,13 @@ mod tests {
     fn every_command_requires_an_input() {
         for sub in cli().get_subcommands() {
             let name = sub.get_name();
-            if name == "quickcheck" {
-                // quickcheck takes `inputs`, plural, also required.
+            if name == "quickcheck" || name == "depth" {
+                // quickcheck and depth take `inputs`, plural, also required.
                 assert!(sub.get_arguments().any(|a| a.get_id() == "inputs"));
+                continue;
+            }
+            if name == "flags" {
+                assert!(sub.get_arguments().any(|a| a.get_id() == "values"));
                 continue;
             }
             assert!(
@@ -519,7 +880,9 @@ mod tests {
         assert!(text.contains("samtools 1.24"), "{text}");
         assert!(text.contains("noodles 0.118.0"), "{text}");
         assert!(
-            text.contains("view, flagstat, idxstats, quickcheck, index, sort"),
+            text.contains(
+                "view, flagstat, idxstats, quickcheck, index, sort, depth, coverage, flags, head"
+            ),
             "{text}"
         );
     }

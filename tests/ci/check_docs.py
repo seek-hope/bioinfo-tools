@@ -23,9 +23,6 @@ CURRENT_DOCS = [
     "rust-cutadapt/README.md",
     "tests/ci/PINS.md",
     "tests/ci/PINS-QC.md",
-    "docs/EVIDENCE-FINAL.md",
-    "docs/DELIVERY.md",
-    "docs/PROFILING.md",
     "rust-umitools/README.md",
     "rust-umitools/README.en.md",
     "tests/security/README.md",
@@ -53,6 +50,9 @@ BANNED = [
 
 HISTORICAL = [
     "docs/EVIDENCE-2026-10.md",
+    "docs/DELIVERY.md",
+    "docs/EVIDENCE-FINAL.md",
+    "docs/PROFILING.md",
     "docs/EVIDENCE-PACKAGING.md",
     "docs/EVIDENCE-QC.md",
     "docs/EVIDENCE-W1-1.md",
@@ -154,7 +154,7 @@ def main() -> int:
             errors.append(f"docs/DEVELOPMENT-PLAN.md: stale completed-capability claim: {stale}")
     final = read("docs/EVIDENCE-FINAL.md")
     if "10 current files" in final:
-        errors.append("docs/EVIDENCE-FINAL.md: stale K3 output (10 current files; actual 13)")
+        errors.append("docs/EVIDENCE-FINAL.md: stale K3 output referencing 10 current files")
     delivery = read("docs/DELIVERY.md")
     for stale in ["本轮未重跑完整 119 差分", "cutadapt 119、UMI exact"]:
         if stale in delivery:

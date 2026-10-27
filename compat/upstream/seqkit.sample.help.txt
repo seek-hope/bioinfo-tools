@@ -1,0 +1,55 @@
+sample sequences by number or proportion.
+
+Sampling modes (N = requested number, p = requested proportion):
+
+----------------------------------------------------------------------------------
+  Mode     sample                       sample2
+----------------------------------------------------------------------------------
+  -p       count varies; one pass       count varies;     one pass
+  -p -2    count varies; one pass       floor(total * p); two passes
+  -n       up to N; loads all records   exactly min(N, total); loads all records
+  -n -2    up to N; two passes          exactly min(N, total); two passes
+----------------------------------------------------------------------------------
+
+For a proportion, use either command with -p; both stream the input, including stdin.
+For an exact number, use 'seqkit sample2 -n N': add -2 for large files to
+store only N record indices instead of all records. Two-pass mode needs a file,
+not stdin. 'seqkit sample -n N' is approximate and may return fewer than N;
+it is not uniform fixed-size sampling.
+
+Results are deterministic for the same input and seed. To vary results across
+runs, add '-r/--non-deterministic' for a time-based seed.
+
+Usage:
+  seqkit sample [flags] 
+
+Flags:
+  -h, --help                help for sample
+  -r, --non-deterministic   use a time-based seed to vary results across runs
+  -n, --number int          sample by number (may return fewer than requested; without -2, loads all records)
+  -p, --proportion float    sample by proportion
+  -s, --rand-seed int       random seed. For paired-end data, use the same seed across fastq files to
+                            sample the same read pairs (default 11)
+  -2, --two-pass            for -n, count records first to avoid loading all; -p sampling is unchanged.
+                            Requires a file
+
+Global Flags:
+      --alphabet-guess-seq-length int   length of sequence prefix of the first FASTA record based on
+                                        which seqkit guesses the sequence type (0 for whole seq)
+                                        (default 10000)
+      --compress-level int              compression level for gzip, zstd, xz and bzip2. type "seqkit -h"
+                                        for the range and default value for each format (default -1)
+      --id-ncbi                         FASTA head is NCBI-style, e.g. >gi|110645304|ref|NC_002516.2|
+                                        Pseud...
+      --id-regexp string                regular expression for parsing ID (default "^(\\S+)\\s?")
+  -X, --infile-list string              file of input files list (one file per line), if given, they are
+                                        appended to files from cli arguments
+  -w, --line-width int                  line width when outputting FASTA format (0 for no wrap) (default 60)
+  -o, --out-file string                 out file ("-" for stdout, suffix .gz for gzipped out) (default "-")
+      --quiet                           be quiet and do not show extra information
+  -t, --seq-type string                 sequence type (dna|rna|protein|unlimit|auto) (for auto, it
+                                        automatically detect by the first sequence) (default "auto")
+      --skip-file-check                 skip input file checking when given a file list if you believe
+                                        these files do exist
+  -j, --threads int                     number of CPUs. can also set with environment variable
+                                        SEQKIT_THREADS) (default 4)

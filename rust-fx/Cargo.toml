@@ -28,3 +28,7 @@ path = "src/lib.rs"
 bioinfo-common = { path = "../bioinfo-common" }
 bioinfo-fastx = { path = "../bioinfo-fastx" }
 clap = { version = "4", features = ["derive"] }
+# `seqkit replace` needs the same capture-variable regular expressions as
+# upstream; this is the workspace-pinned regex crate already used by
+# rust-umitools, not a new package in Cargo.lock.
+regex = "1"

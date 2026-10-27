@@ -118,7 +118,7 @@ The gzip output was decompressed and checked three ways:
 Output determinism was checked by comparing decompressed output across 1, 2, 3
 and 4 worker threads (`RUST_CUTADAPT_THREADS`): identical.
 
-## Compression-level trade-off (honest note)
+## Compression-level trade-off
 
 Output size and speed both depend on the deflate level. The Rust build uses
 `flate2`'s default `miniz_oxide` backend (no extra dependencies allowed), whose

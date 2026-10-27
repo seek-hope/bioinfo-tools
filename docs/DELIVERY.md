@@ -1,6 +1,9 @@
-> Historical delivery snapshot. `rust-umitools` BAM I/O was subsequently migrated to noodles (2026-10-23); see [EVIDENCE-NOODLES.md](EVIDENCE-NOODLES.md). The hashes/status below describe the earlier snapshot.
+# 历史交付快照（49953ec）
 
-# 本地候选交付准备
+本文记录早期本地候选交付检查，基线为 `49953ec`，且工作树含有未提交修改。此后
+`rust-umitools` 已迁移到 noodles（见 [EVIDENCE-NOODLES](EVIDENCE-NOODLES.md)），
+其他组件也有后续改动。当前支持状态见 [兼容矩阵](../compat/README.md)；
+下文的 hash、测试数量和“本轮”结论不属于当前构建。
 
 状态：本地候选交付检查已完成；**没有发布、打 tag 或上传任何产物**。
 容器与 Conda 的实际构建已在本轮执行，见 §3/§4。已有
@@ -73,8 +76,7 @@ FASTX streaming 测试和工作流 consumer smoke 覆盖；没有把 `--version`
 2. **容器/Conda 发布级签名/上传**：Docker 镜像 `bioinfo-tools-selftest:local`
    （`sha256:3bdafb58…`）和 conda 包已本地构建/运行；未签名、未上传、未纳入发布。
 3. **签名/attestation、SLSA、发布**：未执行。任何发布都需要维护者另行批准。
-4. **签名/attestation、SLSA、发布**：未执行。任何发布都需要维护者另行批准。
-5. **多平台**：只有 linux x86_64 实测；aarch64 是交叉构建+qemu smoke，不是原生性能。
+4. **多平台**：只有 linux x86_64 实测；aarch64 是交叉构建+qemu smoke，不是原生性能。
 
 ## 5. 候选交付判断
 

@@ -1,0 +1,35 @@
+Rust high-performance implementation of UMI-tools workflows
+
+Usage: rust-umitools [OPTIONS] [INPUT] [OUTPUT] [THREADS]
+       rust-umitools <COMMAND>
+
+Commands:
+  whitelist  Estimate true cell barcodes from FASTQ
+  extract    Extract UMI from FASTQ reads into the read name
+  dedup      Deduplicate reads grouped by UMI
+  group      Group reads by UMI and tag them with UG/BX
+  count      Count unique UMIs per gene (or per cell and gene)
+  count_tab  Count unique UMIs from a two column read/gene table
+
+Arguments:
+  [INPUT]    Legacy form: <input.bam> <output.bam> [threads]
+  [OUTPUT]   
+  [THREADS]  
+
+Options:
+      --verbose  Print detailed build information together with --version
+  -h, --help     Print help
+  -V, --version  Print version
+
+EXAMPLES:
+  rust-umitools dedup -I in.bam -S out.bam
+  rust-umitools dedup -I in.bam -S out.bam --method=directional --random-seed 1
+  rust-umitools group -I in.bam -S grouped.bam --output-bam --group-out groups.tsv
+  rust-umitools count -I assigned.bam -S counts.tsv --per-gene --gene-tag GX
+  rust-umitools count_tab -I reads.tsv -S counts.tsv
+
+DEFAULTS:
+  --method=directional  --edit-distance-threshold=1  --umi-separator=_
+  --compresslevel=1 (use --compresslevel 6 for smaller output)
+  threads = min(logical CPUs, 16); memory = half of MemAvailable (clamped)
+  The run summary reports the detected hardware and the chosen budget.

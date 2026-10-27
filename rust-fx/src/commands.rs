@@ -1,9 +1,9 @@
-//! The seven subcommands.
+//! The SeqKit/fq subcommands.
 //!
 //! Each command is a thin planner over the shared reader/writer in
 //! [`crate::io`]. The behaviour they implement is SeqKit 2.14.0's documented
-//! behaviour (and fq 0.12.0's for `lint`); the oracles are unavailable in this
-//! environment, so see `docs/EVIDENCE-W1-3.md` for the status of each claim.
+//! behaviour (and fq 0.12.0's for `lint`). Direct per-command differential
+//! evidence and remaining gaps are recorded in `compat/matrix.tsv`.
 
 use crate::io::{CommandError, InputFormat, LintReader, Output, OwnedRecord, RecordReader};
 use crate::lint::{Level, LintRecord, Linter};
@@ -13,6 +13,7 @@ use crate::stats::{GcSkewCounts, Merge, QualStats, SeqStats, DEFAULT_GAP_LETTERS
 use crate::table::{self, Layout as TableLayout, StatsRow};
 use crate::transform::{self, Transforms};
 use bioinfo_fastx::writer::Layout;
+use regex::RegexBuilder;
 use std::collections::BTreeMap;
 use std::io::Write;
 use std::path::{Path, PathBuf};
@@ -102,6 +103,8 @@ impl InputStats {
 
 /// The parsed `stats` options.
 pub struct StatsOptions {
+    /// Optional SeqKit compression level (`None` means `-1`).
+    pub compress_level: Option<i32>,
     /// Input files; empty means standard input.
     pub inputs: Vec<String>,
     /// `-T`: tab-separated output with no digit grouping.
@@ -151,7 +154,7 @@ pub fn stats(options: StatsOptions) -> Result<(), CommandError> {
             TableLayout::Human
         },
     );
-    let mut out = Output::create(options.out_file.as_deref())?;
+    let mut out = Output::create_with_level(options.out_file.as_deref(), options.compress_level)?;
     out.write_all(rendered.as_bytes())?;
     out.finish()
 }
@@ -200,6 +203,8 @@ fn collect_stats(
 
 /// The parsed `seq` options.
 pub struct SeqOptions {
+    /// Optional SeqKit compression level (`None` means `-1`).
+    pub compress_level: Option<i32>,
     /// Input files; empty means standard input.
     pub inputs: Vec<String>,
     /// `-n`: print names only.
@@ -253,7 +258,7 @@ pub fn seq(options: SeqOptions) -> Result<(), CommandError> {
     } else {
         options.inputs.clone()
     };
-    let mut out = Output::create(options.out_file.as_deref())?;
+    let mut out = Output::create_with_level(options.out_file.as_deref(), options.compress_level)?;
     for input in &inputs {
         let mut reader = RecordReader::open(input)?;
         let input_format = reader.format();
@@ -355,11 +360,1784 @@ fn write_seq_record(
 }
 
 // --------------------------------------------------------------------------- //
+// head
+// --------------------------------------------------------------------------- //
+
+/// The parsed `head` options.
+pub struct HeadOptions {
+    /// Optional SeqKit compression level (`None` means `-1`).
+    pub compress_level: Option<i32>,
+    /// Input files; empty means standard input.
+    pub inputs: Vec<String>,
+    /// `-n`: number of records to print (ignored when `length` is set).
+    pub number: u64,
+    /// `-l`: stop after the total sequence length reaches this value.
+    pub length: Option<u64>,
+    /// `-X`: additional input paths, one per line.
+    pub infile_list: Option<String>,
+    /// Skip the input existence check for list-driven invocations.
+    pub skip_file_check: bool,
+    /// `-w`: FASTA line width.
+    pub line_width: usize,
+    /// `-o`: output file.
+    pub out_file: Option<String>,
+}
+
+/// Run `head`.
+pub fn head(options: HeadOptions) -> Result<(), CommandError> {
+    let mut inputs = options.inputs.clone();
+    if let Some(path) = &options.infile_list {
+        let text = std::fs::read_to_string(path)
+            .map_err(|error| CommandError::io(format!("{path}: {error}")))?;
+        inputs.extend(
+            text.lines()
+                .map(str::trim)
+                .filter(|line| !line.is_empty())
+                .map(str::to_string),
+        );
+    }
+    if !options.skip_file_check {
+        for input in &inputs {
+            if input != "-" {
+                std::fs::File::open(input)
+                    .map_err(|error| CommandError::io(format!("{input}: {error}")))?;
+            }
+        }
+    }
+    let inputs = if inputs.is_empty() {
+        vec!["-".to_string()]
+    } else {
+        inputs
+    };
+    let mut out = Output::create_with_level(options.out_file.as_deref(), options.compress_level)?;
+    let mut written = 0u64;
+    let mut total_length = 0u64;
+    // SeqKit treats -l 0 as "no length limit" (and still overrides -n).
+    let length_limit = options.length.filter(|limit| *limit > 0);
+    let all_by_length = options.length == Some(0);
+    for input in &inputs {
+        let mut reader = RecordReader::open(input)?;
+        let layout = match reader.format() {
+            InputFormat::Fastq => Layout::Fastq,
+            InputFormat::Fasta => Layout::Fasta,
+        };
+        while let Some(record) = reader.next_record() {
+            let record = record?;
+            if let Some(limit) = length_limit {
+                if total_length >= limit {
+                    break;
+                }
+                total_length += record.sequence.len() as u64;
+                record.write_to(&mut out, layout, options.line_width)?;
+                if total_length >= limit {
+                    break;
+                }
+            } else if all_by_length {
+                record.write_to(&mut out, layout, options.line_width)?;
+            } else {
+                if written >= options.number {
+                    break;
+                }
+                record.write_to(&mut out, layout, options.line_width)?;
+                written += 1;
+            }
+        }
+        if length_limit
+            .map(|limit| total_length >= limit)
+            .unwrap_or(false)
+            || (!all_by_length && options.length.is_none() && written >= options.number)
+        {
+            break;
+        }
+    }
+    out.finish()
+}
+
+// --------------------------------------------------------------------------- //
+// subseq
+// --------------------------------------------------------------------------- //
+
+/// The parsed `subseq` options.
+pub struct SubseqOptions {
+    /// Optional SeqKit compression level (`None` means `-1`).
+    pub compress_level: Option<i32>,
+    /// Input files; empty means standard input.
+    pub inputs: Vec<String>,
+    /// `-r`: 1-based region, negative indices allowed.
+    pub region: Option<String>,
+    /// `--bed`: 0-based half-open intervals.
+    pub bed: Option<String>,
+    /// `--gtf`: 1-based GTF features.
+    pub gtf: Option<String>,
+    /// `--feature`: optional GTF feature filter.
+    pub features: Vec<String>,
+    /// `--gtf-tag`: GTF attribute used as the output comment.
+    pub gtf_tag: String,
+    /// `--chr`: optional BED/GTF chromosome filter.
+    pub chr: Vec<String>,
+    /// `-u`: upstream flank length.
+    pub up_stream: usize,
+    /// `-d`: downstream flank length.
+    pub down_stream: usize,
+    /// `-f`: only return flanking sequence.
+    pub only_flank: bool,
+    /// `-R`: append the region coordinates to the record name.
+    pub region_coord: bool,
+    /// `-w`: FASTA line width.
+    pub line_width: usize,
+    /// `-o`: output file.
+    pub out_file: Option<String>,
+}
+
+pub(crate) struct Region {
+    start: i64,
+    end: i64,
+}
+
+impl Region {
+    pub(crate) fn parse(text: &str) -> Result<Region, CommandError> {
+        let (start, end) = text.split_once(':').ok_or_else(|| {
+            CommandError::usage("--region must be START:END, for example 1:12 or -12:-1")
+        })?;
+        let start = start
+            .parse::<i64>()
+            .map_err(|_| CommandError::usage(format!("invalid region start '{start}'")))?;
+        let end = end
+            .parse::<i64>()
+            .map_err(|_| CommandError::usage(format!("invalid region end '{end}'")))?;
+        if start == 0 || end == 0 {
+            return Err(CommandError::usage(
+                "region indices are 1-based and must not be 0",
+            ));
+        }
+        Ok(Region { start, end })
+    }
+
+    pub(crate) fn bounds(&self, length: usize) -> (usize, usize) {
+        let resolve = |index: i64| -> i64 {
+            if index > 0 {
+                index - 1
+            } else {
+                length as i64 + index
+            }
+        };
+        let start = resolve(self.start).clamp(0, length as i64);
+        let end = resolve(self.end).clamp(0, length as i64);
+        if end < start {
+            (start as usize, start as usize)
+        } else {
+            (start as usize, (end + 1).min(length as i64) as usize)
+        }
+    }
+}
+
+/// Run `subseq -r`.
+pub fn subseq(options: SubseqOptions) -> Result<(), CommandError> {
+    let inputs = if options.inputs.is_empty() {
+        vec!["-".to_string()]
+    } else {
+        options.inputs.clone()
+    };
+    if let Some(gtf) = &options.gtf {
+        return subseq_gtf(&options, gtf, &inputs);
+    }
+    if let Some(bed) = &options.bed {
+        return subseq_bed(&options, bed, &inputs);
+    }
+    let region_text = options
+        .region
+        .as_deref()
+        .ok_or_else(|| CommandError::usage("subseq needs -r/--region or --bed"))?;
+    let region = Region::parse(region_text)?;
+    let mut out = Output::create_with_level(options.out_file.as_deref(), options.compress_level)?;
+    for input in &inputs {
+        let mut reader = RecordReader::open(input)?;
+        let layout = match reader.format() {
+            InputFormat::Fastq => Layout::Fastq,
+            InputFormat::Fasta => Layout::Fasta,
+        };
+        while let Some(record) = reader.next_record() {
+            let mut record = record?;
+            let (start, end) = region.bounds(record.sequence.len());
+            record.sequence = record.sequence[start..end].to_vec();
+            if record.has_quality_line {
+                record.qualities = record.qualities[start..end].to_vec();
+            }
+            if options.region_coord {
+                let suffix = format!(":{}-{} ", region.start, region.end);
+                record.name.extend_from_slice(suffix.as_bytes());
+                if !record.raw_header.is_empty() {
+                    record.raw_header.extend_from_slice(suffix.as_bytes());
+                }
+            }
+            record.write_to(&mut out, layout, options.line_width)?;
+        }
+    }
+    out.finish()
+}
+
+struct BedInterval {
+    chrom: String,
+    start: usize,
+    end: usize,
+    strand: String,
+}
+
+fn read_bed(path: &str) -> Result<Vec<BedInterval>, CommandError> {
+    let text = std::fs::read_to_string(path)
+        .map_err(|error| CommandError::io(format!("{path}: {error}")))?;
+    let mut intervals = Vec::new();
+    for (line_no, line) in text.lines().enumerate() {
+        let line = line.trim_end_matches('\r');
+        if line.trim().is_empty() || line.starts_with('#') || line.starts_with("track ") {
+            continue;
+        }
+        let fields: Vec<&str> = line.split_whitespace().collect();
+        if fields.len() < 3 {
+            return Err(CommandError::input(format!(
+                "{path}:{}: BED needs at least 3 columns",
+                line_no + 1
+            )));
+        }
+        let start = fields[1].parse::<usize>().map_err(|_| {
+            CommandError::input(format!("{path}:{}: invalid BED start", line_no + 1))
+        })?;
+        let end = fields[2]
+            .parse::<usize>()
+            .map_err(|_| CommandError::input(format!("{path}:{}: invalid BED end", line_no + 1)))?;
+        if start >= end {
+            return Err(CommandError::input(format!(
+                "{path}:{}: BED start must be less than end",
+                line_no + 1
+            )));
+        }
+        intervals.push(BedInterval {
+            chrom: fields[0].to_string(),
+            start,
+            end,
+            strand: fields.get(5).copied().unwrap_or(".").to_string(),
+        });
+    }
+    Ok(intervals)
+}
+
+fn subseq_bed(options: &SubseqOptions, bed: &str, inputs: &[String]) -> Result<(), CommandError> {
+    let intervals = read_bed(bed)?;
+    let mut out = Output::create_with_level(options.out_file.as_deref(), options.compress_level)?;
+    for input in inputs {
+        let mut reader = RecordReader::open(input)?;
+        let layout = match reader.format() {
+            InputFormat::Fastq => Layout::Fastq,
+            InputFormat::Fasta => Layout::Fasta,
+        };
+        let mut records = Vec::new();
+        while let Some(record) = reader.next_record() {
+            records.push(record?);
+        }
+        for interval in &intervals {
+            if !options.chr.is_empty()
+                && !options
+                    .chr
+                    .iter()
+                    .any(|name| name.eq_ignore_ascii_case(&interval.chrom))
+            {
+                continue;
+            }
+            let Some(source) = records
+                .iter()
+                .find(|record| record.id() == interval.chrom.as_bytes())
+            else {
+                continue;
+            };
+            let length = source.sequence.len();
+            if interval.start >= length {
+                continue;
+            }
+            let end = interval.end.min(length);
+            let mut record = source.clone();
+            let mut start = interval.start;
+            let mut stop = end;
+            let mut suffix = String::new();
+            if options.only_flank {
+                if options.up_stream > 0 && options.down_stream > 0 {
+                    return Err(CommandError::usage(
+                        "-f/--only-flank allows only one of -u/--up-stream and -d/--down-stream",
+                    ));
+                }
+                if options.up_stream > 0 {
+                    start = start.saturating_sub(options.up_stream);
+                    stop = interval.start.min(length);
+                    suffix.push_str(&format!("_usf:{}", options.up_stream));
+                } else if options.down_stream > 0 {
+                    start = end.min(length);
+                    stop = (end + options.down_stream).min(length);
+                    suffix.push_str(&format!("_dsf:{}", options.down_stream));
+                } else {
+                    continue;
+                }
+            } else {
+                if options.up_stream > 0 {
+                    start = start.saturating_sub(options.up_stream);
+                    suffix.push_str(&format!("_us:{}", options.up_stream));
+                }
+                if options.down_stream > 0 {
+                    stop = (stop + options.down_stream).min(length);
+                    suffix.push_str(&format!("_ds:{}", options.down_stream));
+                }
+            }
+            record.sequence = record.sequence[start..stop].to_vec();
+            if record.has_quality_line {
+                record.qualities = record.qualities[start..stop].to_vec();
+            }
+            let header = format!(
+                "{}_{}-{}:{}{}",
+                interval.chrom,
+                interval.start + 1,
+                interval.end,
+                interval.strand,
+                suffix
+            );
+            record.name = format!("{header} ").into_bytes();
+            let marker = record.raw_header.first().copied().unwrap_or(b'>');
+            record.raw_header = format!("{}{} ", char::from(marker), header).into_bytes();
+            record.write_to(&mut out, layout, options.line_width)?;
+        }
+    }
+    out.finish()
+}
+
+struct GtfInterval {
+    chrom: String,
+    start: usize,
+    end: usize,
+    strand: String,
+    tag: String,
+}
+
+fn read_gtf(
+    path: &str,
+    wanted_features: &[String],
+    tag_name: &str,
+) -> Result<Vec<GtfInterval>, CommandError> {
+    let text = std::fs::read_to_string(path)
+        .map_err(|error| CommandError::io(format!("{path}: {error}")))?;
+    let mut intervals = Vec::new();
+    for (line_no, line) in text.lines().enumerate() {
+        let line = line.trim_end_matches('\r');
+        if line.trim().is_empty() || line.starts_with('#') {
+            continue;
+        }
+        let fields: Vec<&str> = line.split('\t').collect();
+        if fields.len() < 9 {
+            return Err(CommandError::input(format!(
+                "{path}:{}: GTF needs 9 tab-separated columns",
+                line_no + 1
+            )));
+        }
+        if !wanted_features.is_empty()
+            && !wanted_features
+                .iter()
+                .any(|feature| feature.eq_ignore_ascii_case(fields[2]))
+        {
+            continue;
+        }
+        let start = fields[3].parse::<usize>().map_err(|_| {
+            CommandError::input(format!("{path}:{}: invalid GTF start", line_no + 1))
+        })?;
+        let end = fields[4]
+            .parse::<usize>()
+            .map_err(|_| CommandError::input(format!("{path}:{}: invalid GTF end", line_no + 1)))?;
+        if start == 0 || end < start {
+            return Err(CommandError::input(format!(
+                "{path}:{}: invalid 1-based GTF interval",
+                line_no + 1
+            )));
+        }
+        let tag = gtf_attribute(fields[8], tag_name).unwrap_or_default();
+        intervals.push(GtfInterval {
+            chrom: fields[0].to_string(),
+            start: start - 1,
+            end,
+            strand: fields[6].to_string(),
+            tag,
+        });
+    }
+    Ok(intervals)
+}
+
+fn gtf_attribute(attributes: &str, name: &str) -> Option<String> {
+    for part in attributes.split(';') {
+        let part = part.trim();
+        let (key, value) = part.split_once(' ')?;
+        if key == name {
+            return Some(value.trim().trim_matches('"').to_string());
+        }
+    }
+    None
+}
+
+fn subseq_gtf(options: &SubseqOptions, gtf: &str, inputs: &[String]) -> Result<(), CommandError> {
+    let intervals = read_gtf(gtf, &options.features, &options.gtf_tag)?;
+    let mut out = Output::create_with_level(options.out_file.as_deref(), options.compress_level)?;
+    for input in inputs {
+        let mut reader = RecordReader::open(input)?;
+        let layout = match reader.format() {
+            InputFormat::Fastq => Layout::Fastq,
+            InputFormat::Fasta => Layout::Fasta,
+        };
+        let mut records = Vec::new();
+        while let Some(record) = reader.next_record() {
+            records.push(record?);
+        }
+        for interval in &intervals {
+            if !options.chr.is_empty()
+                && !options
+                    .chr
+                    .iter()
+                    .any(|name| name.eq_ignore_ascii_case(&interval.chrom))
+            {
+                continue;
+            }
+            let Some(source) = records
+                .iter()
+                .find(|record| record.id() == interval.chrom.as_bytes())
+            else {
+                continue;
+            };
+            if interval.start >= source.sequence.len() {
+                continue;
+            }
+            let end = interval.end.min(source.sequence.len());
+            let length = source.sequence.len();
+            let negative = interval.strand == "-";
+            let mut start = interval.start;
+            let mut stop = end;
+            let mut suffix = String::new();
+            if options.only_flank {
+                if options.up_stream > 0 && options.down_stream > 0 {
+                    return Err(CommandError::usage(
+                        "-f/--only-flank allows only one of -u/--up-stream and -d/--down-stream",
+                    ));
+                }
+                if options.up_stream > 0 {
+                    if negative {
+                        start = end.min(length);
+                        stop = (end + options.up_stream).min(length);
+                    } else {
+                        start = start.saturating_sub(options.up_stream);
+                        stop = interval.start.min(length);
+                    }
+                    suffix.push_str(&format!("_usf:{}", options.up_stream));
+                } else if options.down_stream > 0 {
+                    if negative {
+                        start = start.saturating_sub(options.down_stream);
+                        stop = interval.start.min(length);
+                    } else {
+                        start = end.min(length);
+                        stop = (end + options.down_stream).min(length);
+                    }
+                    suffix.push_str(&format!("_dsf:{}", options.down_stream));
+                } else {
+                    continue;
+                }
+            } else {
+                let (left, right) = if negative {
+                    (options.down_stream, options.up_stream)
+                } else {
+                    (options.up_stream, options.down_stream)
+                };
+                if left > 0 {
+                    start = start.saturating_sub(left);
+                }
+                if right > 0 {
+                    stop = (stop + right).min(length);
+                }
+                if options.up_stream > 0 {
+                    suffix.push_str(&format!("_us:{}", options.up_stream));
+                }
+                if options.down_stream > 0 {
+                    suffix.push_str(&format!("_ds:{}", options.down_stream));
+                }
+            }
+            let mut record = source.clone();
+            record.sequence = record.sequence[start..stop].to_vec();
+            if record.has_quality_line {
+                record.qualities = record.qualities[start..stop].to_vec();
+            }
+            if interval.strand == "-" {
+                record.sequence = transform::reverse_complement(&record.sequence);
+                if record.has_quality_line {
+                    record.qualities.reverse();
+                }
+            }
+            let base = format!(
+                "{}_{}-{}:{}{}",
+                interval.chrom,
+                interval.start + 1,
+                interval.end,
+                interval.strand,
+                suffix
+            );
+            let comment = if interval.tag.is_empty() {
+                if suffix.is_empty() {
+                    base
+                } else {
+                    format!("{base} ")
+                }
+            } else {
+                format!("{base} {}", interval.tag)
+            };
+            record.name = comment.clone().into_bytes();
+            let marker = record.raw_header.first().copied().unwrap_or(b'>');
+            record.raw_header = format!("{}{}", char::from(marker), comment).into_bytes();
+            record.write_to(&mut out, layout, options.line_width)?;
+        }
+    }
+    out.finish()
+}
+
+// --------------------------------------------------------------------------- //
+// range
+// --------------------------------------------------------------------------- //
+
+/// The parsed `range` options.
+pub struct RangeOptions {
+    /// Optional SeqKit compression level (`None` means `-1`).
+    pub compress_level: Option<i32>,
+    /// Input files; empty means standard input.
+    pub inputs: Vec<String>,
+    /// `-r`: 1-based record range, negative indices allowed.
+    pub region: String,
+    /// `-w`: FASTA line width.
+    pub line_width: usize,
+    /// `-o`: output file.
+    pub out_file: Option<String>,
+}
+
+struct IndexRange {
+    start: i64,
+    end: i64,
+}
+
+impl IndexRange {
+    fn parse(text: &str) -> Result<IndexRange, CommandError> {
+        let (start, end) = text.split_once(':').ok_or_else(|| {
+            CommandError::usage("--range must be START:END, for example 1:12 or -12:-1")
+        })?;
+        let start = start
+            .parse::<i64>()
+            .map_err(|_| CommandError::usage(format!("invalid range start '{start}'")))?;
+        let end = end
+            .parse::<i64>()
+            .map_err(|_| CommandError::usage(format!("invalid range end '{end}'")))?;
+        if start == 0 || end == 0 {
+            return Err(CommandError::usage(
+                "range indices are 1-based and must not be 0",
+            ));
+        }
+        Ok(IndexRange { start, end })
+    }
+
+    fn bounds(&self, length: usize) -> (usize, usize) {
+        let resolve = |index: i64| -> i64 {
+            if index > 0 {
+                index - 1
+            } else {
+                length as i64 + index
+            }
+        };
+        let start = resolve(self.start).clamp(0, length as i64);
+        let end = resolve(self.end).clamp(0, length as i64);
+        if end < start {
+            (start as usize, start as usize)
+        } else {
+            (start as usize, (end + 1).min(length as i64) as usize)
+        }
+    }
+}
+
+/// Run `range -r` independently for each input file.
+pub fn range(options: RangeOptions) -> Result<(), CommandError> {
+    let region = IndexRange::parse(&options.region)?;
+    let inputs = if options.inputs.is_empty() {
+        vec!["-".to_string()]
+    } else {
+        options.inputs.clone()
+    };
+    let mut out = Output::create_with_level(options.out_file.as_deref(), options.compress_level)?;
+    for input in &inputs {
+        let both_negative = region.start < 0 && region.end < 0;
+        let needs_total = region.start < 0 || region.end < 0;
+        if both_negative {
+            let keep = region.start.unsigned_abs().max(region.end.unsigned_abs()) as usize;
+            let mut tail: std::collections::VecDeque<(OwnedRecord, Layout)> =
+                std::collections::VecDeque::with_capacity(keep);
+            let mut total = 0usize;
+            let mut reader = RecordReader::open(input)?;
+            let layout = match reader.format() {
+                InputFormat::Fastq => Layout::Fastq,
+                InputFormat::Fasta => Layout::Fasta,
+            };
+            while let Some(record) = reader.next_record() {
+                let record = record?;
+                if tail.len() == keep {
+                    tail.pop_front();
+                }
+                tail.push_back((record, layout));
+                total += 1;
+            }
+            let (start, end) = region.bounds(total);
+            let first = total.saturating_sub(tail.len());
+            for (offset, (record, layout)) in tail.into_iter().enumerate() {
+                let index = first + offset;
+                if index >= start && index < end {
+                    record.write_to(&mut out, layout, options.line_width)?;
+                }
+            }
+            continue;
+        }
+
+        if needs_total && input != "-" {
+            let total = count_range_records(input)?;
+            let (start, end) = region.bounds(total);
+            write_range_from_reader(input, start, end, &mut out, options.line_width)?;
+            continue;
+        }
+        if needs_total {
+            let mut reader = RecordReader::open(input)?;
+            let layout = match reader.format() {
+                InputFormat::Fastq => Layout::Fastq,
+                InputFormat::Fasta => Layout::Fasta,
+            };
+            let mut records = Vec::new();
+            while let Some(record) = reader.next_record() {
+                records.push(record?);
+            }
+            let (start, end) = region.bounds(records.len());
+            for (index, record) in records.into_iter().enumerate() {
+                if index >= start && index < end {
+                    record.write_to(&mut out, layout, options.line_width)?;
+                }
+            }
+            continue;
+        }
+
+        let start = region.start.max(1) as usize - 1;
+        let end = region.end.max(0) as usize;
+        let mut index = 0usize;
+        let mut reader = RecordReader::open(input)?;
+        let layout = match reader.format() {
+            InputFormat::Fastq => Layout::Fastq,
+            InputFormat::Fasta => Layout::Fasta,
+        };
+        while let Some(record) = reader.next_record() {
+            let record = record?;
+            if index >= end {
+                break;
+            }
+            if index >= start && index < end {
+                record.write_to(&mut out, layout, options.line_width)?;
+            }
+            index += 1;
+        }
+    }
+    out.finish()
+}
+
+fn write_range_from_reader(
+    input: &str,
+    start: usize,
+    end: usize,
+    out: &mut Output,
+    line_width: usize,
+) -> Result<(), CommandError> {
+    let mut reader = RecordReader::open(input)?;
+    let layout = match reader.format() {
+        InputFormat::Fastq => Layout::Fastq,
+        InputFormat::Fasta => Layout::Fasta,
+    };
+    let mut index = 0usize;
+    while let Some(record) = reader.next_record() {
+        let record = record?;
+        if index >= start && index < end {
+            record.write_to(out, layout, line_width)?;
+        }
+        index += 1;
+    }
+    Ok(())
+}
+
+fn count_range_records(input: &str) -> Result<usize, CommandError> {
+    let mut reader = RecordReader::open(input)?;
+    let mut total = 0usize;
+    while let Some(record) = reader.next_record() {
+        record?;
+        total += 1;
+    }
+    Ok(total)
+}
+// --------------------------------------------------------------------------- //
+// sliding
+// --------------------------------------------------------------------------- //
+
+/// The parsed `sliding` options.
+pub struct SlidingOptions {
+    /// Optional SeqKit compression level (`None` means `-1`).
+    pub compress_level: Option<i32>,
+    /// Input files; empty means standard input.
+    pub inputs: Vec<String>,
+    /// `-W`: window size.
+    pub window: usize,
+    /// `-s`: step size.
+    pub step: usize,
+    /// `-S`: suffix added to the ID.
+    pub suffix: String,
+    /// `-g`: include a final shorter window.
+    pub greedy: bool,
+    /// `-c/-C`: allow windows to cross the circular origin.
+    pub circular: bool,
+    /// `-X`: additional input paths, one per line.
+    pub infile_list: Option<String>,
+    /// Skip the input existence check.
+    pub skip_file_check: bool,
+    /// `-w`: FASTA line width.
+    pub line_width: usize,
+    /// `-o`: output file.
+    pub out_file: Option<String>,
+}
+
+/// Run `sliding`.
+pub fn sliding(options: SlidingOptions) -> Result<(), CommandError> {
+    let mut inputs = options.inputs.clone();
+    if let Some(path) = &options.infile_list {
+        let text = std::fs::read_to_string(path)
+            .map_err(|error| CommandError::io(format!("{path}: {error}")))?;
+        inputs.extend(
+            text.lines()
+                .map(str::trim)
+                .filter(|line| !line.is_empty())
+                .map(str::to_string),
+        );
+    }
+    if !options.skip_file_check {
+        for input in &inputs {
+            if input != "-" {
+                std::fs::File::open(input)
+                    .map_err(|error| CommandError::io(format!("{input}: {error}")))?;
+            }
+        }
+    }
+    let inputs = if inputs.is_empty() {
+        vec!["-".to_string()]
+    } else {
+        inputs
+    };
+    let mut out = Output::create_with_level(options.out_file.as_deref(), options.compress_level)?;
+    for input in &inputs {
+        let mut reader = RecordReader::open(input)?;
+        let layout = match reader.format() {
+            InputFormat::Fastq => Layout::Fastq,
+            InputFormat::Fasta => Layout::Fasta,
+        };
+        while let Some(record) = reader.next_record() {
+            let record = record?;
+            let length = record.sequence.len();
+            let extended_length = if options.circular {
+                length + options.window.saturating_sub(1)
+            } else {
+                length
+            };
+            let mut start = 0usize;
+            loop {
+                let end = if options.circular || start + options.window <= length {
+                    start + options.window
+                } else if options.greedy && start < length {
+                    length
+                } else {
+                    break;
+                };
+                if end > extended_length || start >= length {
+                    break;
+                }
+                let mut window = record.clone();
+                window.sequence = if options.circular {
+                    let mut sequence = Vec::with_capacity(extended_length);
+                    while sequence.len() < extended_length {
+                        sequence.extend_from_slice(&record.sequence);
+                    }
+                    sequence[start..end].to_vec()
+                } else {
+                    record.sequence[start..end].to_vec()
+                };
+                if window.has_quality_line {
+                    window.qualities = if options.circular {
+                        let mut qualities = Vec::with_capacity(extended_length);
+                        while qualities.len() < extended_length {
+                            qualities.extend_from_slice(&record.qualities);
+                        }
+                        qualities[start..end].to_vec()
+                    } else {
+                        record.qualities[start..end].to_vec()
+                    };
+                }
+                let stem = String::from_utf8_lossy(record.name.trim_ascii_end());
+                let display_end = if options.circular {
+                    (end - 1) % length + 1
+                } else {
+                    end
+                };
+                let name = format!("{}{}:{}-{}", stem, options.suffix, start + 1, display_end);
+                window.name = name.clone().into_bytes();
+                let marker = record.raw_header.first().copied().unwrap_or(b'>');
+                window.raw_header = format!("{}{}", char::from(marker), name).into_bytes();
+                window.write_to(&mut out, layout, options.line_width)?;
+                if !options.circular && end == length && !options.greedy {
+                    break;
+                }
+                start += options.step;
+                if start >= length {
+                    break;
+                }
+            }
+        }
+    }
+    out.finish()
+}
+
+// --------------------------------------------------------------------------- //
+// duplicate
+// --------------------------------------------------------------------------- //
+
+/// The parsed `duplicate` options.
+pub struct DuplicateOptions {
+    /// Optional SeqKit compression level (`None` means `-1`).
+    pub compress_level: Option<i32>,
+    /// Input files; empty means standard input.
+    pub inputs: Vec<String>,
+    /// `-n`: duplication number.
+    pub times: usize,
+    /// `-w`: FASTA line width.
+    pub line_width: usize,
+    /// `-o`: output file.
+    pub out_file: Option<String>,
+}
+
+/// Run `duplicate`.
+pub fn duplicate(options: DuplicateOptions) -> Result<(), CommandError> {
+    let inputs = if options.inputs.is_empty() {
+        vec!["-".to_string()]
+    } else {
+        options.inputs.clone()
+    };
+    let mut out = Output::create_with_level(options.out_file.as_deref(), options.compress_level)?;
+    for input in &inputs {
+        let mut reader = RecordReader::open(input)?;
+        let layout = match reader.format() {
+            InputFormat::Fastq => Layout::Fastq,
+            InputFormat::Fasta => Layout::Fasta,
+        };
+        while let Some(record) = reader.next_record() {
+            let record = record?;
+            for _ in 0..options.times {
+                record.write_to(&mut out, layout, options.line_width)?;
+            }
+        }
+    }
+    out.finish()
+}
+
+// --------------------------------------------------------------------------- //
+// rmdup
+// --------------------------------------------------------------------------- //
+
+/// The parsed `rmdup` options.
+pub struct RmdupOptions {
+    /// Optional SeqKit compression level (`None` means `-1`).
+    pub compress_level: Option<i32>,
+    /// Input files; empty means standard input.
+    pub inputs: Vec<String>,
+    /// `-n`: compare full names.
+    pub by_name: bool,
+    /// `-s`: compare sequences.
+    pub by_seq: bool,
+    /// `-i`: ignore case for sequence comparison.
+    pub ignore_case: bool,
+    /// `-P`: only compare the positive strand.
+    pub only_positive: bool,
+    /// `-D`: write duplicate counts and ID lists here.
+    pub dup_num_file: Option<String>,
+    /// `-d`: write records after the first occurrence here.
+    pub dup_seqs_file: Option<String>,
+    /// `-w`: FASTA line width.
+    pub line_width: usize,
+    /// `-o`: output file.
+    pub out_file: Option<String>,
+}
+
+/// Run `rmdup`.
+pub fn rmdup(options: RmdupOptions) -> Result<(), CommandError> {
+    let inputs = if options.inputs.is_empty() {
+        vec!["-".to_string()]
+    } else {
+        options.inputs.clone()
+    };
+    let report_duplicates = options.dup_num_file.is_some() || options.dup_seqs_file.is_some();
+    let mut out = Output::create_with_level(options.out_file.as_deref(), options.compress_level)?;
+    let mut seen: BTreeMap<Vec<u8>, usize> = BTreeMap::new();
+    let mut groups: Vec<(Vec<Vec<u8>>, Vec<OwnedRecord>)> = Vec::new();
+    let mut layout = Layout::Fasta;
+    for input in &inputs {
+        let mut reader = RecordReader::open(input)?;
+        layout = match reader.format() {
+            InputFormat::Fastq => Layout::Fastq,
+            InputFormat::Fasta => Layout::Fasta,
+        };
+        while let Some(record) = reader.next_record() {
+            let record = record?;
+            let mut key = if options.by_seq {
+                let mut sequence = record.sequence.clone();
+                if options.ignore_case {
+                    sequence.make_ascii_uppercase();
+                }
+                if !options.only_positive {
+                    let reverse = transform::reverse_complement(&sequence);
+                    if reverse < sequence {
+                        sequence = reverse;
+                    }
+                }
+                sequence
+            } else if options.by_name {
+                record.name.clone()
+            } else {
+                record.id().to_vec()
+            };
+            if options.by_seq && options.ignore_case {
+                key.make_ascii_uppercase();
+            }
+            if let Some(index) = seen.get(&key).copied() {
+                if report_duplicates {
+                    groups[index].0.push(record.name.clone());
+                    if options.dup_seqs_file.is_some() {
+                        groups[index].1.push(record);
+                    }
+                }
+            } else {
+                let index = groups.len();
+                seen.insert(key, index);
+                if report_duplicates {
+                    groups.push((vec![record.name.clone()], Vec::new()));
+                }
+                record.write_to(&mut out, layout, options.line_width)?;
+            }
+        }
+    }
+    out.finish()?;
+    if let Some(path) = &options.dup_num_file {
+        let mut report = Output::create_with_level(Some(path), options.compress_level)?;
+        for (names, _) in &groups {
+            if names.len() > 1 {
+                writeln!(
+                    report,
+                    "{}\t{}",
+                    names.len(),
+                    names
+                        .iter()
+                        .map(|name| String::from_utf8_lossy(name))
+                        .collect::<Vec<_>>()
+                        .join(", ")
+                )
+                .map_err(|error| {
+                    CommandError::io(format!("cannot write duplicate counts: {error}"))
+                })?;
+            }
+        }
+        report.finish()?;
+    }
+    if let Some(path) = &options.dup_seqs_file {
+        let mut report = Output::create_with_level(Some(path), options.compress_level)?;
+        for (_, records) in &groups {
+            for record in records {
+                record.write_to(&mut report, layout, options.line_width)?;
+            }
+        }
+        report.finish()?;
+    }
+    Ok(())
+}
+
+// --------------------------------------------------------------------------- //
+// faidx
+// --------------------------------------------------------------------------- //
+
+/// The parsed `faidx` options.
+pub struct FaidxOptions {
+    /// Optional SeqKit compression level (`None` means `-1`).
+    pub compress_level: Option<i32>,
+    /// FASTA file.
+    pub fasta: String,
+    /// Positional regions.
+    pub regions: Vec<String>,
+    /// `-f`: full header.
+    pub full_head: bool,
+    /// `-i`: case-insensitive IDs.
+    pub ignore_case: bool,
+    /// `-l`: region list file.
+    pub region_file: Option<String>,
+    /// `-r`: regex IDs.
+    pub regexp: bool,
+    /// `-U`: rebuild an existing FASTA index.
+    pub update_faidx: bool,
+    /// `-w`: FASTA line width.
+    pub line_width: usize,
+    /// `-o`: output file.
+    pub out_file: Option<String>,
+}
+
+fn parse_faidx_region(text: &str) -> Option<(&str, i64, i64)> {
+    let (id, coords) = text.rsplit_once(':')?;
+    let (start, end) = coords.split_once('-')?;
+    let start = start.parse::<i64>().ok()?;
+    let end = end.parse::<i64>().ok()?;
+    if start == 0 || end == 0 || id.is_empty() {
+        return None;
+    }
+    Some((id, start, end))
+}
+
+/// Run `faidx` region extraction.
+pub fn faidx(options: FaidxOptions) -> Result<(), CommandError> {
+    let input = Path::new(&options.fasta);
+    let index_path = if options.full_head {
+        PathBuf::from(format!("{}.seqkit.fai", input.display()))
+    } else {
+        PathBuf::from(format!("{}.fai", input.display()))
+    };
+    let entries =
+        crate::sort::load_or_build_fai(input, &index_path, options.update_faidx, 1, b"- \t.")?;
+    let mut regions = options.regions.clone();
+    if let Some(path) = &options.region_file {
+        let text = std::fs::read_to_string(path)
+            .map_err(|error| CommandError::io(format!("{path}: {error}")))?;
+        regions.extend(
+            text.lines()
+                .map(str::trim)
+                .filter(|line| !line.is_empty() && !line.starts_with('#'))
+                .map(str::to_string),
+        );
+    }
+    let mut out = Output::create_with_level(options.out_file.as_deref(), options.compress_level)?;
+    for region in &regions {
+        if options.regexp {
+            let regex = RegexBuilder::new(region)
+                .case_insensitive(options.ignore_case)
+                .build()
+                .map_err(|error| {
+                    CommandError::usage(format!("invalid ID regexp: {error}")).with_code(255)
+                })?;
+            for entry in &entries {
+                if !regex.is_match(&String::from_utf8_lossy(&entry.id)) {
+                    continue;
+                }
+                let mut record = crate::sort::read_record_at(input, entry)?;
+                let header = if options.full_head {
+                    entry.name.clone()
+                } else {
+                    entry.id.clone()
+                };
+                record.name = header.clone();
+                record.raw_header = format!(">{}", String::from_utf8_lossy(&header)).into_bytes();
+                record.write_to(&mut out, Layout::Fasta, options.line_width)?;
+            }
+            continue;
+        }
+        let Some((id, raw_start, raw_end)) = parse_faidx_region(region) else {
+            continue;
+        };
+        let Some(entry) = entries.iter().find(|entry| {
+            if options.ignore_case {
+                entry.id.eq_ignore_ascii_case(id.as_bytes())
+            } else {
+                entry.id == id.as_bytes()
+            }
+        }) else {
+            continue;
+        };
+        let mut record = crate::sort::read_record_at(input, entry)?;
+        let length = record.sequence.len();
+        let resolve = |index: i64| -> i64 {
+            if index > 0 {
+                index - 1
+            } else {
+                length as i64 + index
+            }
+        };
+        let start = resolve(raw_start).clamp(0, length as i64);
+        let end = resolve(raw_end).clamp(0, length as i64);
+        if end < start {
+            continue;
+        }
+        let end = (end + 1).min(length as i64) as usize;
+        record.sequence = record.sequence[start as usize..end].to_vec();
+        if record.has_quality_line {
+            record.qualities = record.qualities[start as usize..end].to_vec();
+        }
+        let coords = region
+            .rsplit_once(':')
+            .map(|(_, value)| value)
+            .unwrap_or(region);
+        let mut header = if options.full_head {
+            entry.name.clone()
+        } else {
+            entry.id.clone()
+        };
+        header.extend_from_slice(format!(":{coords}").as_bytes());
+        record.name = header.clone();
+        record.raw_header = format!(">{}", String::from_utf8_lossy(&header)).into_bytes();
+        record.write_to(&mut out, Layout::Fasta, options.line_width)?;
+    }
+    out.finish()
+}
+
+// --------------------------------------------------------------------------- //
+// rename
+// --------------------------------------------------------------------------- //
+
+/// The parsed `rename` options.
+pub struct RenameOptions {
+    /// Optional SeqKit compression level (`None` means `-1`).
+    pub compress_level: Option<i32>,
+    /// Input files; empty means standard input.
+    pub inputs: Vec<String>,
+    /// `-n`: check duplicates by full name.
+    pub by_name: bool,
+    /// `-1`: rename the first record too.
+    pub rename_first: bool,
+    /// `-s`: separator.
+    pub separator: String,
+    /// `-N`: first duplicate counter.
+    pub start_num: u64,
+    /// `-m`: write one output file per input file.
+    pub multiple_outfiles: bool,
+    /// `-O`: directory for multiple output files.
+    pub out_dir: Option<String>,
+    /// `-f`: suppress the non-empty output-directory warning.
+    pub force: bool,
+    /// `-w`: FASTA line width.
+    pub line_width: usize,
+    /// `-o`: output file.
+    pub out_file: Option<String>,
+}
+
+/// Run `rename`.
+pub fn rename(options: RenameOptions) -> Result<(), CommandError> {
+    let inputs = if options.inputs.is_empty() {
+        vec!["-".to_string()]
+    } else {
+        options.inputs.clone()
+    };
+    let multiple = options.multiple_outfiles;
+    let out_dir = options
+        .out_dir
+        .clone()
+        .unwrap_or_else(|| "renamed".to_string());
+    if multiple {
+        if inputs.iter().any(|input| input == "-") {
+            return Err(CommandError::usage(
+                "rename -m requires file inputs, not standard input",
+            ));
+        }
+        std::fs::create_dir_all(&out_dir)
+            .map_err(|error| CommandError::io(format!("{out_dir}: {error}")))?;
+        let nonempty = std::fs::read_dir(&out_dir)
+            .map_err(|error| CommandError::io(format!("{out_dir}: {error}")))?
+            .next()
+            .is_some();
+        if nonempty && !options.force {
+            eprintln!("[WARN] outdir not empty: {out_dir}, you can use --force to overwrite");
+        }
+    }
+    let mut out = if multiple {
+        None
+    } else {
+        Some(Output::create_with_level(
+            options.out_file.as_deref(),
+            options.compress_level,
+        )?)
+    };
+    let mut counts: BTreeMap<Vec<u8>, u64> = BTreeMap::new();
+    for input in &inputs {
+        if multiple {
+            let name = Path::new(input)
+                .file_name()
+                .ok_or_else(|| CommandError::input(format!("{input}: no file name")))?;
+            let path = Path::new(&out_dir).join(name);
+            out = Some(Output::create_with_level(
+                Some(path.to_string_lossy().as_ref()),
+                options.compress_level,
+            )?);
+        }
+        let mut reader = RecordReader::open(input)?;
+        let layout = match reader.format() {
+            InputFormat::Fastq => Layout::Fastq,
+            InputFormat::Fasta => Layout::Fasta,
+        };
+        while let Some(record) = reader.next_record() {
+            let mut record = record?;
+            let key = if options.by_name {
+                record.name.clone()
+            } else {
+                record.id().to_vec()
+            };
+            let count = counts.entry(key).or_insert(0);
+            *count += 1;
+            let renamed = *count > 1 || options.rename_first;
+            if renamed {
+                let suffix = format!(
+                    "{}{}",
+                    options.separator,
+                    if *count == 1 {
+                        1
+                    } else {
+                        options.start_num + *count - 2
+                    }
+                );
+                if options.by_name {
+                    record.name.extend_from_slice(suffix.as_bytes());
+                } else {
+                    let id_len = record.id().len();
+                    record.name.splice(id_len..id_len, suffix.bytes());
+                }
+                let marker = record.raw_header.first().copied().unwrap_or(b'>');
+                record.raw_header = format!(
+                    "{}{}",
+                    char::from(marker),
+                    String::from_utf8_lossy(&record.name)
+                )
+                .into_bytes();
+            }
+            record.write_to(
+                out.as_mut().expect("output is initialized"),
+                layout,
+                options.line_width,
+            )?;
+        }
+        if multiple {
+            out.take().expect("output is initialized").finish()?;
+        }
+    }
+    if multiple {
+        Ok(())
+    } else {
+        out.take().expect("output is initialized").finish()
+    }
+}
+
+// --------------------------------------------------------------------------- //
+// replace
+// --------------------------------------------------------------------------- //
+
+pub use crate::replace::ReplaceOptions;
+
+/// Run `replace`.
+pub fn replace(options: ReplaceOptions) -> Result<(), CommandError> {
+    crate::replace::run(options)
+}
+
+// --------------------------------------------------------------------------- //
+// tab2fx
+// --------------------------------------------------------------------------- //
+
+/// The parsed `tab2fx` options.
+pub struct Tab2fxOptions {
+    /// Optional SeqKit compression level (`None` means `-1`).
+    pub compress_level: Option<i32>,
+    /// Input files; empty means standard input.
+    pub inputs: Vec<String>,
+    /// Comment-line prefixes to skip; defaults to `#` and `//`.
+    pub comment_prefixes: Vec<String>,
+    /// `-b`: maximum tabular line size in bytes, including its newline.
+    /// Negative values retain SeqKit's scanner-error behavior.
+    pub buffer_size: i64,
+    /// `-w`: FASTA line width.
+    pub line_width: usize,
+    /// `-o`: output file.
+    pub out_file: Option<String>,
+}
+
+/// Run `tab2fx`.
+pub fn tab2fx(options: Tab2fxOptions) -> Result<(), CommandError> {
+    let inputs = if options.inputs.is_empty() {
+        vec!["-".to_string()]
+    } else {
+        options.inputs.clone()
+    };
+    let mut out = Output::create_with_level(options.out_file.as_deref(), options.compress_level)?;
+    for input in &inputs {
+        let text = if input == "-" {
+            let mut text = String::new();
+            std::io::Read::read_to_string(&mut std::io::stdin(), &mut text)
+                .map_err(|e| CommandError::io(format!("stdin: {e}")))?;
+            text
+        } else {
+            std::fs::read_to_string(input).map_err(|e| CommandError::io(format!("{input}: {e}")))?
+        };
+        if text
+            .split_inclusive('\n')
+            .any(|line| options.buffer_size < 0 || line.len() as i64 > options.buffer_size)
+        {
+            return Err(CommandError::runtime("bufio.Scanner: token too long").with_code(255));
+        }
+        for (line_no, raw_line) in text.split_inclusive('\n').enumerate() {
+            let line = raw_line.strip_suffix('\n').unwrap_or(raw_line);
+            let line = line.trim_end_matches('\r');
+            if line.is_empty()
+                || options
+                    .comment_prefixes
+                    .iter()
+                    .any(|prefix| !prefix.is_empty() && line.starts_with(prefix))
+            {
+                continue;
+            }
+            let fields: Vec<&str> = line.split('\t').collect();
+            if fields.len() < 2 || fields.len() > 3 {
+                return Err(CommandError::input(format!(
+                    "{input}:{}: expected 2 or 3 tab-separated columns",
+                    line_no + 1
+                )));
+            }
+            if fields.len() == 2 {
+                out.write_all(b">")
+                    .map_err(|e| CommandError::io(format!("stdout: {e}")))?;
+                out.write_all(fields[0].as_bytes())
+                    .map_err(|e| CommandError::io(format!("stdout: {e}")))?;
+                out.write_all(b"\n")
+                    .map_err(|e| CommandError::io(format!("stdout: {e}")))?;
+                if options.line_width == 0 {
+                    out.write_all(fields[1].as_bytes())
+                        .map_err(|e| CommandError::io(format!("stdout: {e}")))?;
+                    out.write_all(b"\n")
+                        .map_err(|e| CommandError::io(format!("stdout: {e}")))?;
+                } else {
+                    for chunk in fields[1].as_bytes().chunks(options.line_width) {
+                        out.write_all(chunk)
+                            .map_err(|e| CommandError::io(format!("stdout: {e}")))?;
+                        out.write_all(b"\n")
+                            .map_err(|e| CommandError::io(format!("stdout: {e}")))?;
+                    }
+                }
+            } else {
+                if fields[1].len() != fields[2].len() {
+                    return Err(CommandError::input(format!(
+                        "{input}:{}: sequence and quality lengths differ",
+                        line_no + 1
+                    )));
+                }
+                out.write_all(b"@")
+                    .map_err(|e| CommandError::io(format!("stdout: {e}")))?;
+                out.write_all(fields[0].as_bytes())
+                    .map_err(|e| CommandError::io(format!("stdout: {e}")))?;
+                out.write_all(b"\n")
+                    .map_err(|e| CommandError::io(format!("stdout: {e}")))?;
+                out.write_all(fields[1].as_bytes())
+                    .map_err(|e| CommandError::io(format!("stdout: {e}")))?;
+                out.write_all(b"\n+\n")
+                    .map_err(|e| CommandError::io(format!("stdout: {e}")))?;
+                out.write_all(fields[2].as_bytes())
+                    .map_err(|e| CommandError::io(format!("stdout: {e}")))?;
+                out.write_all(b"\n")
+                    .map_err(|e| CommandError::io(format!("stdout: {e}")))?;
+            }
+        }
+    }
+    out.finish()
+}
+
+// --------------------------------------------------------------------------- //
+// restart
+// --------------------------------------------------------------------------- //
+
+/// The parsed `restart` options.
+pub struct RestartOptions {
+    /// Optional SeqKit compression level (`None` means `-1`).
+    pub compress_level: Option<i32>,
+    /// Input files; empty means standard input.
+    pub inputs: Vec<String>,
+    /// `-i`: 1-based new start; negative counts from the end.
+    pub new_start: i64,
+    /// `-s`: rotate to this subsequence instead of a numeric start.
+    pub start_with: Option<String>,
+    /// `-I`: ignore case while finding `--start-with`.
+    pub ignore_case: bool,
+    /// `-m`: maximum mismatches while finding `--start-with`.
+    pub max_mismatch: usize,
+    /// `-w`: FASTA line width.
+    pub line_width: usize,
+    /// `-o`: output file.
+    pub out_file: Option<String>,
+}
+
+fn find_motif(
+    sequence: &[u8],
+    motif: &[u8],
+    ignore_case: bool,
+    max_mismatch: usize,
+) -> Option<usize> {
+    if motif.is_empty() {
+        return Some(0);
+    }
+    if motif.len() > sequence.len() {
+        return None;
+    }
+    sequence.windows(motif.len()).position(|window| {
+        window
+            .iter()
+            .zip(motif)
+            .filter(|(left, right)| {
+                if ignore_case {
+                    !left.eq_ignore_ascii_case(right)
+                } else {
+                    left != right
+                }
+            })
+            .count()
+            <= max_mismatch
+    })
+}
+
+fn rotate_record(record: &mut OwnedRecord, start: usize, _reverse: bool) {
+    let length = record.sequence.len();
+    if length == 0 {
+        return;
+    }
+    let start = start.min(length - 1);
+    let mut sequence = Vec::with_capacity(length);
+    sequence.extend_from_slice(&record.sequence[start..]);
+    sequence.extend_from_slice(&record.sequence[..start]);
+    record.sequence = sequence;
+    if record.has_quality_line {
+        let mut quality = Vec::with_capacity(length);
+        quality.extend_from_slice(&record.qualities[start..]);
+        quality.extend_from_slice(&record.qualities[..start]);
+        record.qualities = quality;
+    }
+}
+
+/// Run `restart -i` or `restart -s`.
+pub fn restart(options: RestartOptions) -> Result<(), CommandError> {
+    let inputs = if options.inputs.is_empty() {
+        vec!["-".to_string()]
+    } else {
+        options.inputs.clone()
+    };
+    let mut out = Output::create_with_level(options.out_file.as_deref(), options.compress_level)?;
+    for input in &inputs {
+        let mut reader = RecordReader::open(input)?;
+        let layout = match reader.format() {
+            InputFormat::Fastq => Layout::Fastq,
+            InputFormat::Fasta => Layout::Fasta,
+        };
+        while let Some(record) = reader.next_record() {
+            let mut record = record?;
+            if let Some(motif) = &options.start_with {
+                let motif = motif.as_bytes();
+                if let Some(start) = find_motif(
+                    &record.sequence,
+                    motif,
+                    options.ignore_case,
+                    options.max_mismatch,
+                ) {
+                    rotate_record(&mut record, start, false);
+                } else {
+                    let reverse = transform::reverse_complement(&record.sequence);
+                    if let Some(start) =
+                        find_motif(&reverse, motif, options.ignore_case, options.max_mismatch)
+                    {
+                        record.sequence = reverse;
+                        if record.has_quality_line {
+                            record.qualities.reverse();
+                        }
+                        rotate_record(&mut record, start, true);
+                    } else {
+                        eprintln!(
+                            "[WARN] the given subsequence is not found in both strands of sequence: {}",
+                            String::from_utf8_lossy(record.id())
+                        );
+                        continue;
+                    }
+                }
+                record.write_to(&mut out, layout, options.line_width)?;
+                continue;
+            }
+            let length = record.sequence.len();
+            if length == 0 {
+                record.write_to(&mut out, layout, options.line_width)?;
+                continue;
+            }
+            let start = if options.new_start > 0 {
+                (options.new_start - 1) as usize
+            } else {
+                (length as i64 + options.new_start) as usize
+            }
+            .min(length - 1);
+            let mut sequence = Vec::with_capacity(length);
+            sequence.extend_from_slice(&record.sequence[start..]);
+            sequence.extend_from_slice(&record.sequence[..start]);
+            record.sequence = sequence;
+            if record.has_quality_line {
+                let mut quality = Vec::with_capacity(length);
+                quality.extend_from_slice(&record.qualities[start..]);
+                quality.extend_from_slice(&record.qualities[..start]);
+                record.qualities = quality;
+            }
+            record.write_to(&mut out, layout, options.line_width)?;
+        }
+    }
+    out.finish()
+}
+
+// --------------------------------------------------------------------------- //
+// fa2fq
+// --------------------------------------------------------------------------- //
+
+/// The parsed `fa2fq` options.
+pub struct Fa2fqOptions {
+    /// Optional SeqKit compression level (`None` means `-1`).
+    pub compress_level: Option<i32>,
+    /// FASTA file whose names select FASTQ records.
+    pub fasta: String,
+    /// FASTQ inputs; empty means stdin.
+    pub inputs: Vec<String>,
+    /// `-P`: only compare the positive strand.
+    pub only_positive: bool,
+    /// `-w`: FASTA line width (unused for FASTQ).
+    pub line_width: usize,
+    /// `-o`: output file.
+    pub out_file: Option<String>,
+}
+
+/// Run `fa2fq`.
+pub fn fa2fq(options: Fa2fqOptions) -> Result<(), CommandError> {
+    let mut queries: std::collections::BTreeMap<Vec<u8>, Vec<OwnedRecord>> =
+        std::collections::BTreeMap::new();
+    let mut fasta = RecordReader::open(&options.fasta)?;
+    while let Some(record) = fasta.next_record() {
+        let record = record?;
+        queries.entry(record.name.clone()).or_default().push(record);
+    }
+    let inputs = if options.inputs.is_empty() {
+        vec!["-".to_string()]
+    } else {
+        options.inputs.clone()
+    };
+    let mut out = Output::create_with_level(options.out_file.as_deref(), options.compress_level)?;
+    for input in &inputs {
+        let mut reader = RecordReader::open(input)?;
+        while let Some(record) = reader.next_record() {
+            let record = record?;
+            let Some(candidates) = queries.get(&record.name) else {
+                continue;
+            };
+            for query in candidates {
+                if query.sequence.is_empty() {
+                    continue;
+                }
+                if let Some(start) = find_subsequence(&record.sequence, &query.sequence) {
+                    let end = start + query.sequence.len();
+                    let mut matched = record.clone();
+                    matched.sequence = record.sequence[start..end].to_vec();
+                    matched.qualities = record.qualities[start..end].to_vec();
+                    matched.write_to(&mut out, Layout::Fastq, options.line_width)?;
+                } else if !options.only_positive {
+                    let reverse = transform::reverse_complement(&query.sequence);
+                    if let Some(start) = find_subsequence(&record.sequence, &reverse) {
+                        let end = start + reverse.len();
+                        let mut matched = record.clone();
+                        matched.sequence = query.sequence.clone();
+                        matched.qualities =
+                            record.qualities[start..end].iter().rev().copied().collect();
+                        matched.write_to(&mut out, Layout::Fastq, options.line_width)?;
+                    }
+                }
+            }
+        }
+    }
+    out.finish()
+}
+
+fn find_subsequence(sequence: &[u8], query: &[u8]) -> Option<usize> {
+    if query.is_empty() || query.len() > sequence.len() {
+        return None;
+    }
+    sequence
+        .windows(query.len())
+        .position(|window| window == query)
+}
+
+// --------------------------------------------------------------------------- //
+// translate
+// --------------------------------------------------------------------------- //
+
+pub use crate::translate::TranslateOptions;
+
+/// Run `translate`.
+pub fn translate(options: TranslateOptions) -> Result<(), CommandError> {
+    crate::translate::run(options)
+}
+
+// grep
+// --------------------------------------------------------------------------- //
+
+pub use crate::grep::GrepOptions;
+
+/// Run `grep`.
+pub fn grep(options: GrepOptions) -> Result<(), CommandError> {
+    crate::grep::run(options)
+}
+
+// --------------------------------------------------------------------------- //
+// sort
+// --------------------------------------------------------------------------- //
+
+/// The parsed `sort` options.
+pub struct SortOptions {
+    /// Optional SeqKit compression level (`None` means `-1`).
+    pub compress_level: Option<i32>,
+    /// Input files; empty means standard input.
+    pub inputs: Vec<String>,
+    /// `-l`: sort by sequence length.
+    pub by_length: bool,
+    /// `-n`: sort by full name.
+    pub by_name: bool,
+    /// `-s`: sort by sequence.
+    pub by_seq: bool,
+    /// `-b`: sort by non-gap bases.
+    pub by_bases: bool,
+    /// `-i`: ignore case.
+    pub ignore_case: bool,
+    /// `-r`: reverse the result.
+    pub reverse: bool,
+    /// `-G`: gap letters for `-b`.
+    pub gap_letters: Vec<u8>,
+    /// `-L`: sequence prefix length used for sequence sorting; 0 means whole sequence.
+    pub seq_prefix_length: usize,
+    /// `-N`: use natural ordering for IDs/full names.
+    pub natural_order: bool,
+    /// `-2`: use metadata and byte offsets instead of buffering all FASTA records.
+    pub two_pass: bool,
+    /// `-U`: rebuild an existing `.seqkit.fai`.
+    pub update_faidx: bool,
+    /// `-k`: retain temporary files when a two-pass path needs them.
+    pub keep_temp: bool,
+    /// `-w`: FASTA line width.
+    pub line_width: usize,
+    /// `-o`: output file.
+    pub out_file: Option<String>,
+}
+
+fn sort_text(bytes: &[u8], ignore_case: bool) -> Vec<u8> {
+    if ignore_case {
+        bytes.to_ascii_lowercase()
+    } else {
+        bytes.to_vec()
+    }
+}
+
+/// Run `sort`.
+pub fn sort(options: SortOptions) -> Result<(), CommandError> {
+    let modes = [
+        options.by_length,
+        options.by_name,
+        options.by_seq,
+        options.by_bases,
+    ]
+    .iter()
+    .filter(|flag| **flag)
+    .count();
+    if modes > 1 {
+        return Err(CommandError::usage(
+            "only one of -l/--by-length, -n/--by-name, -s/--by-seq and -b/--by-bases may be given",
+        ));
+    }
+    if options.two_pass {
+        return crate::sort::two_pass(&options);
+    }
+    let inputs = if options.inputs.is_empty() {
+        vec!["-".to_string()]
+    } else {
+        options.inputs.clone()
+    };
+    let mut records: Vec<(OwnedRecord, Layout)> = Vec::new();
+    for input in &inputs {
+        let mut reader = RecordReader::open(input)?;
+        let layout = match reader.format() {
+            InputFormat::Fastq => Layout::Fastq,
+            InputFormat::Fasta => Layout::Fasta,
+        };
+        while let Some(record) = reader.next_record() {
+            records.push((record?, layout));
+        }
+    }
+    records.sort_by(|(left, _), (right, _)| {
+        let ordering = if options.by_length {
+            left.sequence.len().cmp(&right.sequence.len())
+        } else if options.by_bases {
+            let count = |sequence: &[u8]| {
+                sequence
+                    .iter()
+                    .filter(|base| !options.gap_letters.contains(base))
+                    .count()
+            };
+            count(&left.sequence).cmp(&count(&right.sequence))
+        } else if options.by_seq {
+            let prefix_length = if options.seq_prefix_length == 0 {
+                usize::MAX
+            } else {
+                options.seq_prefix_length
+            };
+            let left_sequence = &left.sequence[..left.sequence.len().min(prefix_length)];
+            let right_sequence = &right.sequence[..right.sequence.len().min(prefix_length)];
+            let ordering = sort_text(left_sequence, options.ignore_case)
+                .cmp(&sort_text(right_sequence, options.ignore_case));
+            if ordering == std::cmp::Ordering::Equal && prefix_length > 0 {
+                sort_text(&left.sequence, options.ignore_case)
+                    .cmp(&sort_text(&right.sequence, options.ignore_case))
+            } else {
+                ordering
+            }
+        } else if options.by_name {
+            if options.natural_order {
+                crate::sort::natural_cmp(&left.name, &right.name, options.ignore_case)
+            } else {
+                sort_text(&left.name, options.ignore_case)
+                    .cmp(&sort_text(&right.name, options.ignore_case))
+            }
+        } else if options.natural_order {
+            crate::sort::natural_cmp(left.id(), right.id(), options.ignore_case)
+        } else {
+            sort_text(left.id(), options.ignore_case)
+                .cmp(&sort_text(right.id(), options.ignore_case))
+        };
+        if options.reverse {
+            ordering.reverse()
+        } else {
+            ordering
+        }
+    });
+    let mut out = Output::create_with_level(options.out_file.as_deref(), options.compress_level)?;
+    for (record, layout) in records {
+        record.write_to(&mut out, layout, options.line_width)?;
+    }
+    out.finish()
+}
+
+// --------------------------------------------------------------------------- //
 // fq2fa
 // --------------------------------------------------------------------------- //
 
 /// The parsed `fq2fa` options.
 pub struct Fq2faOptions {
+    /// Optional SeqKit compression level (`None` means `-1`).
+    pub compress_level: Option<i32>,
     /// Input files; empty means standard input.
     pub inputs: Vec<String>,
     /// `-w`: FASTA line width (0 disables wrapping).
@@ -378,7 +2156,7 @@ pub fn fq2fa(options: Fq2faOptions) -> Result<(), CommandError> {
     } else {
         options.inputs.clone()
     };
-    let mut out = Output::create(options.out_file.as_deref())?;
+    let mut out = Output::create_with_level(options.out_file.as_deref(), options.compress_level)?;
     for input in &inputs {
         let mut reader = RecordReader::open(input)?;
         while let Some(record) = reader.next_record() {
@@ -394,6 +2172,8 @@ pub fn fq2fa(options: Fq2faOptions) -> Result<(), CommandError> {
 
 /// The parsed `fx2tab` options.
 pub struct Fx2tabOptions {
+    /// Optional SeqKit compression level (`None` means `-1`).
+    pub compress_level: Option<i32>,
     /// Input files; empty means standard input.
     pub inputs: Vec<String>,
     /// `-H`: print a header line naming the metrics.
@@ -441,7 +2221,7 @@ pub fn fx2tab(options: Fx2tabOptions) -> Result<(), CommandError> {
     } else {
         options.inputs.clone()
     };
-    let mut out = Output::create(options.out_file.as_deref())?;
+    let mut out = Output::create_with_level(options.out_file.as_deref(), options.compress_level)?;
     if options.header_line {
         let mut columns: Vec<String> = Vec::new();
         if options.file_name || options.basename {
@@ -620,6 +2400,8 @@ fn alphabet(sequence: &[u8]) -> String {
 
 /// The parsed `sample` options.
 pub struct SampleOptions {
+    /// Optional SeqKit compression level (`None` means `-1`).
+    pub compress_level: Option<i32>,
     /// Input files; empty means standard input.
     pub inputs: Vec<String>,
     /// `-p`: keep each record with this probability.
@@ -664,7 +2446,7 @@ pub fn sample(options: SampleOptions) -> Result<(), CommandError> {
         options.rand_seed
     };
 
-    let mut out = Output::create(options.out_file.as_deref())?;
+    let mut out = Output::create_with_level(options.out_file.as_deref(), options.compress_level)?;
     for input in &inputs {
         // `-p` needs no total. `-n` does, so that input is counted once first;
         // SeqKit documents the same cost for `-n` without `--two-pass`.
@@ -716,6 +2498,8 @@ fn count_records(input: &str) -> Result<u64, CommandError> {
 
 /// The parsed `split` options.
 pub struct SplitOptions {
+    /// Optional SeqKit compression level (`None` means `-1`).
+    pub compress_level: Option<i32>,
     /// The input file; `split` needs a real file to name parts after.
     pub input: String,
     /// `-s/--by-size` or `-p/--by-part`.
@@ -893,7 +2677,8 @@ pub fn split(options: SplitOptions) -> Result<(), CommandError> {
                 &extension,
                 options.extension.as_deref(),
             );
-            let out = Output::create(Some(&path.to_string_lossy()))?;
+            let out =
+                Output::create_with_level(Some(&path.to_string_lossy()), options.compress_level)?;
             current = Some((part, out, 0, path));
         }
         let (_, out, written, _) = current.as_mut().expect("part was just opened");
@@ -1298,6 +3083,265 @@ pub fn lint(options: LintOptions) -> Result<(), CommandError> {
     Ok(())
 }
 
+// --------------------------------------------------------------------------- //
+// common
+// --------------------------------------------------------------------------- //
+
+/// The parsed `common` options.
+pub struct CommonOptions {
+    /// Optional SeqKit compression level (`None` means `-1`).
+    pub compress_level: Option<i32>,
+    /// Input files; at least two.
+    pub inputs: Vec<String>,
+    /// `-n`: match by full name.
+    pub by_name: bool,
+    /// `-s`: match by sequence.
+    pub by_seq: bool,
+    /// `-e`: match embedded subsequences of exact sequences in the files.
+    pub embedded: bool,
+    /// `-i`: ignore case.
+    pub ignore_case: bool,
+    /// `-P`: only the positive strand for -s.
+    pub only_positive: bool,
+    /// `-w`: FASTA line width.
+    pub line_width: usize,
+    /// `-o`: output file.
+    pub out_file: Option<String>,
+}
+
+fn common_key(record: &OwnedRecord, options: &CommonOptions) -> Vec<u8> {
+    let mut key = if options.by_seq {
+        let mut sequence = record.sequence.clone();
+        if options.ignore_case {
+            sequence.make_ascii_uppercase();
+        }
+        if !options.only_positive {
+            let reverse = transform::reverse_complement(&sequence);
+            if reverse < sequence {
+                sequence = reverse;
+            }
+        }
+        sequence
+    } else if options.by_name {
+        record.name.clone()
+    } else {
+        record.id().to_vec()
+    };
+    if options.ignore_case && !options.by_seq {
+        key.make_ascii_lowercase();
+    }
+    key
+}
+
+/// Run `common`.
+pub fn common(options: CommonOptions) -> Result<(), CommandError> {
+    if options.inputs.len() < 2 {
+        return Err(CommandError::usage("common needs at least two input files"));
+    }
+    if options.by_name && options.by_seq {
+        return Err(CommandError::usage(
+            "only one/none of the flags -s (--by-seq) and -n (--by-name) is allowed",
+        ));
+    }
+    if options.embedded && !options.by_seq {
+        return Err(CommandError::usage(
+            "flag -s (--by-seq) needed when using -e (--check-embedded-seqs)",
+        ));
+    }
+    if options.embedded {
+        return common_embedded(&options);
+    }
+    let mut first: Vec<(Vec<u8>, OwnedRecord)> = Vec::new();
+    let mut shared: std::collections::BTreeSet<Vec<u8>> = std::collections::BTreeSet::new();
+    for (index, input) in options.inputs.iter().enumerate() {
+        let mut reader = RecordReader::open(input)?;
+        let mut set = std::collections::BTreeSet::new();
+        while let Some(record) = reader.next_record() {
+            let record = record?;
+            let key = common_key(&record, &options);
+            set.insert(key.clone());
+            if index == 0 {
+                first.push((key, record));
+            }
+        }
+        shared = if index == 0 {
+            set
+        } else {
+            shared.intersection(&set).cloned().collect()
+        };
+    }
+    let mut out = Output::create_with_level(options.out_file.as_deref(), options.compress_level)?;
+    for (key, record) in first {
+        if shared.contains(&key) {
+            record.write_to(&mut out, Layout::Fasta, options.line_width)?;
+        }
+    }
+    out.finish()
+}
+
+fn sequence_contains(sequence: &[u8], needle: &[u8], options: &CommonOptions) -> bool {
+    if needle.is_empty() || needle.len() > sequence.len() {
+        return false;
+    }
+    if sequence
+        .windows(needle.len())
+        .any(|window| window == needle)
+    {
+        return true;
+    }
+    if !options.only_positive {
+        let reverse = transform::reverse_complement(needle);
+        reverse != needle
+            && sequence
+                .windows(reverse.len())
+                .any(|window| window == reverse)
+    } else {
+        false
+    }
+}
+
+fn embedded_candidate(sequence: &[u8], options: &CommonOptions) -> Vec<u8> {
+    if options.only_positive {
+        return sequence.to_vec();
+    }
+    let reverse = transform::reverse_complement(sequence);
+    if reverse.as_slice() < sequence {
+        reverse
+    } else {
+        sequence.to_vec()
+    }
+}
+
+fn common_embedded(options: &CommonOptions) -> Result<(), CommandError> {
+    let mut first: Vec<OwnedRecord> = Vec::new();
+    let mut files: Vec<Vec<Vec<u8>>> = Vec::new();
+    let mut candidates: Vec<Vec<u8>> = Vec::new();
+    let mut seen: std::collections::BTreeSet<Vec<u8>> = std::collections::BTreeSet::new();
+    for (index, input) in options.inputs.iter().enumerate() {
+        let mut reader = RecordReader::open(input)?;
+        let mut sequences = Vec::new();
+        while let Some(record) = reader.next_record() {
+            let record = record?;
+            let mut sequence = record.sequence.clone();
+            if options.ignore_case {
+                sequence.make_ascii_uppercase();
+            }
+            let candidate = embedded_candidate(&sequence, options);
+            if !candidate.is_empty() && seen.insert(candidate.clone()) {
+                candidates.push(candidate);
+            }
+            sequences.push(sequence);
+            if index == 0 {
+                first.push(record);
+            }
+        }
+        files.push(sequences);
+    }
+
+    let common: Vec<Vec<u8>> = candidates
+        .into_iter()
+        .filter(|candidate| {
+            files.iter().all(|sequences| {
+                sequences
+                    .iter()
+                    .any(|sequence| sequence_contains(sequence, candidate, options))
+            })
+        })
+        .collect();
+
+    // A shorter common sequence contained in a longer common sequence is an
+    // embedded subsequence; upstream emits only the longer one.
+    let maximal: Vec<Vec<u8>> = common
+        .iter()
+        .filter(|candidate| {
+            !common.iter().any(|other| {
+                other.len() > candidate.len() && sequence_contains(other, candidate, options)
+            })
+        })
+        .cloned()
+        .collect();
+
+    let mut out = Output::create_with_level(options.out_file.as_deref(), options.compress_level)?;
+    for record in &first {
+        let mut sequence = record.sequence.clone();
+        if options.ignore_case {
+            sequence.make_ascii_uppercase();
+        }
+
+        let mut full = false;
+        for candidate in &maximal {
+            let reverse_full = !options.only_positive
+                && record.sequence.len() == candidate.len()
+                && transform::reverse_complement(&sequence) == *candidate;
+            if sequence == *candidate || reverse_full {
+                full = true;
+                break;
+            }
+        }
+        if full {
+            record.write_to(&mut out, Layout::Fasta, options.line_width)?;
+            continue;
+        }
+
+        let mut intervals: Vec<(usize, usize)> = Vec::new();
+        for candidate in &maximal {
+            // Upstream emits the first embedded occurrence of each candidate;
+            // multiple candidates in one record are ordered by coordinate.
+            let mut first_interval: Option<(usize, usize)> = None;
+            let mut needles = vec![candidate.clone()];
+            if !options.only_positive {
+                let reverse = transform::reverse_complement(candidate);
+                if reverse != *candidate {
+                    needles.push(reverse);
+                }
+            }
+            for needle in &needles {
+                if needle.is_empty() || needle.len() > sequence.len() {
+                    continue;
+                }
+                if let Some(start) = sequence
+                    .windows(needle.len())
+                    .position(|window| window == needle.as_slice())
+                {
+                    let interval = (start, start + needle.len());
+                    first_interval = match first_interval {
+                        Some(current) if current.0 <= interval.0 => Some(current),
+                        _ => Some(interval),
+                    };
+                }
+            }
+            if let Some(interval) = first_interval {
+                intervals.push(interval);
+            }
+        }
+        intervals.sort_unstable();
+        intervals.dedup();
+
+        for (start, end) in intervals {
+            let id = record.id();
+            let suffix = &record.name[id.len()..];
+            let mut name = Vec::with_capacity(id.len() + suffix.len() + 16);
+            name.extend_from_slice(id);
+            name.extend_from_slice(format!(":{}-{}", start + 1, end).as_bytes());
+            name.extend_from_slice(suffix);
+            let mut raw_header = Vec::with_capacity(name.len() + 1);
+            raw_header.push(b'>');
+            raw_header.extend_from_slice(&name);
+            let embedded = OwnedRecord {
+                name,
+                raw_header,
+                sequence: record.sequence[start..end].to_vec(),
+                plus: Vec::new(),
+                qualities: Vec::new(),
+                has_quality_line: false,
+                index: record.index,
+            };
+            embedded.write_to(&mut out, Layout::Fasta, options.line_width)?;
+        }
+    }
+    out.finish()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -1340,6 +3384,7 @@ mod tests {
             skip_err: false,
             quality_base: 33,
             out_file: Some(out.to_string_lossy().into_owned()),
+            compress_level: None,
         })
         .unwrap();
         let text = read(&out);
@@ -1376,6 +3421,7 @@ mod tests {
             skip_err: false,
             quality_base: 33,
             out_file: Some(out.to_string_lossy().into_owned()),
+            compress_level: None,
         })
         .unwrap();
         let text = read(&out);
@@ -1402,6 +3448,7 @@ mod tests {
             skip_err: false,
             quality_base: 33,
             out_file: Some(out.to_string_lossy().into_owned()),
+            compress_level: None,
         })
         .unwrap();
         assert!(read(&out).contains("RNA"));
@@ -1427,6 +3474,7 @@ mod tests {
             quality_base: 33,
             line_width: 60,
             out_file: Some(out.to_string_lossy().into_owned()),
+            compress_level: None,
         }
     }
 
@@ -1552,6 +3600,7 @@ mod tests {
             inputs: vec![input.to_string_lossy().into_owned()],
             line_width: 60,
             out_file: Some(out.to_string_lossy().into_owned()),
+            compress_level: None,
         })
         .unwrap();
         assert_eq!(read(&out), ">r1 a\nACGT\n");
@@ -1563,6 +3612,7 @@ mod tests {
             inputs: vec![out.to_string_lossy().into_owned()],
             line_width: 60,
             out_file: Some(out2.to_string_lossy().into_owned()),
+            compress_level: None,
         })
         .unwrap();
         assert_eq!(read(&out2), read(&out));
@@ -1594,6 +3644,7 @@ mod tests {
             quality_base: 33,
             stdin_label: "-".to_string(),
             out_file: Some(out.to_string_lossy().into_owned()),
+            compress_level: None,
         }
     }
 
@@ -1757,6 +3808,7 @@ mod tests {
                 non_deterministic: false,
                 line_width: 60,
                 out_file: Some(out.to_string_lossy().into_owned()),
+                compress_level: None,
             })
             .unwrap();
             read(out)
@@ -1782,6 +3834,7 @@ mod tests {
             non_deterministic: false,
             line_width: 60,
             out_file: Some(out3.to_string_lossy().into_owned()),
+            compress_level: None,
         })
         .unwrap();
         assert_ne!(
@@ -1808,6 +3861,7 @@ mod tests {
             non_deterministic: false,
             line_width: 60,
             out_file: Some(out.to_string_lossy().into_owned()),
+            compress_level: None,
         })
         .unwrap();
         let count = read(&out).lines().count() / 4;
@@ -1831,6 +3885,7 @@ mod tests {
                 non_deterministic: false,
                 line_width: 60,
                 out_file: None,
+                compress_level: None,
             })
             .expect_err("must reject");
             assert_eq!(error.exit_code(), 2);
@@ -1854,6 +3909,7 @@ mod tests {
             extension: None,
             dry_run: false,
             force: false,
+            compress_level: None,
         })
         .unwrap();
         let mut names: Vec<String> = std::fs::read_dir(&dir)
@@ -1897,6 +3953,7 @@ mod tests {
             extension: None,
             dry_run: false,
             force: false,
+            compress_level: None,
         })
         .unwrap();
         let stem = crate::split::part_stem(&input);
@@ -1929,6 +3986,7 @@ mod tests {
             extension: None,
             dry_run: true,
             force: false,
+            compress_level: None,
         })
         .unwrap();
         assert!(!dir.exists(), "a dry run must not create the directory");
@@ -1946,6 +4004,7 @@ mod tests {
             extension: None,
             dry_run: true,
             force: false,
+            compress_level: None,
         })
         .expect_err("must reject stdin");
         assert_eq!(error.exit_code(), 2);

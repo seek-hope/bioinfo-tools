@@ -1,0 +1,2690 @@
+{
+  "schema_version": 1,
+  "targets": {
+    "rust-cutadapt": "cutadapt 4.6",
+    "rust-umitools": "UMI-tools 1.1.6",
+    "rust-bam": "samtools 1.24",
+    "rust-fastqc": "FastQC 0.13.0",
+    "rust-fx": "SeqKit 2.14.0 / fq 0.12.0"
+  },
+  "snapshots": {
+    "cutadapt.help.txt": "84445fa3af6d09298ea47138d4b7bdc6d51da0460ebab1f17b91b1882f47d2cf",
+    "cutadapt.version.txt": "8048d1e7e392843de42064d4c1ae59880ce5b149895a2cb79b0680fbf35e488c",
+    "fastqc.help.txt": "cd56e2fe33b7e15f8261c86769f34f509500e50fd4f4e2202cb0c50ab3a68bba",
+    "fastqc.version.txt": "0c52d8b4b19ec6bdb98e8ba074e32675d0d2174916c3c4afcc925066b6bcaabb",
+    "fq.help.txt": "5651ddb6cf9d2ece29a53126da7253a8fa4ef248d0a9fecda1f2c06e346e4954",
+    "fq.lint.help.txt": "35134877ee9a02f26bb44e1f8de5bedffb7c9afb3117e829a800ca2e1d69777d",
+    "fq.version.txt": "746f106a06ff9b6cd55d3b44a8996cdace10dfe893cc2d7553fd97af766150ef",
+    "samtools.depth.help.txt": "bb53dbcaaa5699bcc114161ffc23ddd9a8318b3cb98a2b48bc296e36211da5dd",
+    "samtools.flagstat.help.txt": "101c0ac4614fc5cc3e1b82e24f34c8f961bb42eb5e4a7e20bacffbe98d8a7ba5",
+    "samtools.help.txt": "5cbd1dbce2f1fadbe155026ac24488f4888af8ea021a9e985c178d55a65100f9",
+    "samtools.idxstats.help.txt": "f561cb9ef0559cc8bee9d75dcc00aef4f966128c14e2e546465619028a3d3f5a",
+    "samtools.index.help.txt": "2b27b1b59d787d6ef92f88d4177f67b212a00ae22b18b06e8a83dd44a5d1b668",
+    "samtools.merge.help.txt": "6a4b8098b39f291bd8e0c5d37931818f2c75d7e4ed68b96e858fc1f97faf1842",
+    "samtools.quickcheck.help.txt": "656f1c30996a8678a475c669908955dc325e13e34ff314fbe7fda62ea033cfc7",
+    "samtools.sort.help.txt": "45467a4b55e40534188a4360209c71bef55a889f3ee5724d6b78135dc59cbd20",
+    "samtools.version.txt": "0ff007d7916dc270db7bdde12aa68c73c39c538f8c2d7530eb17674cfc4e6924",
+    "samtools.view.help.txt": "51ad3d20accceeb547514f7fac8b5c55e09f34f4ca8fcda6d74b0edce5677bfe",
+    "seqkit.fq2fa.help.txt": "2681c5b872b9917c11ae2e701fdf305a5e392a9ade4d852cb255f3799be5d003",
+    "seqkit.fx2tab.help.txt": "5c006dffb60c03fac74dd6984f3f94ffffa50309d69c747c2e396bb735bc577a",
+    "seqkit.grep.help.txt": "4c7448b41947cd5f11db35222153df2efa8cf5e513524b5994d54f741500dd18",
+    "seqkit.head.help.txt": "628e3fdcc317c755fc54ae45cae38dd977cf7872d5809710c18b0fa30e27b563",
+    "seqkit.help.txt": "f7a93abbb95bbffe642d1cca3a4e8740c6c9f9a73a83ca928284825e2169549d",
+    "seqkit.sample.help.txt": "0f97e75f559598b13d14e27fb9f2b4bc974c931d622c52fb89a6a8ccdd084a87",
+    "seqkit.seq.help.txt": "860397d80d92fa7f47ac7bf50e59efe5277e8588dcdc7819a58f4c3f5b072420",
+    "seqkit.sort.help.txt": "5a26dc69117d604ac06cb277939d29eff36267fd1b021aeef6bf5dabc936c5af",
+    "seqkit.split.help.txt": "36f865e516346687d657a7d0823f416f7922466dac5d0b0ae572220edeb4e512",
+    "seqkit.stats.help.txt": "0f8c24037cc90fb8fdb4bfe5bc5cd966bfdeb50c5d5f3512a7321f3fca1a5d3a",
+    "seqkit.version.txt": "56b6fb4ff966c08b06c2db5a3c2d8b29d41c5d1de2daf1dfc200f1bea73e7222",
+    "umi_tools.count.help.txt": "86c169cf1dafedcb364e24d88eceba7504242ba44cd96637f2fed2fcd3caad0e",
+    "umi_tools.count_tab.help.txt": "7472d77ad05eadf1af3c27560713bcc7934f47c28c7719baec35b63d7f8c14de",
+    "umi_tools.dedup.help.txt": "b962c05981c8178a8bc4ccdfb6192b8a772ce7a5fdd8379533912b018e2216c5",
+    "umi_tools.extract.help.txt": "f018818ca67e4230d37ff68820da67f7516cbf3458b9ba94f3b30805fa3f20fc",
+    "umi_tools.group.help.txt": "91a419ba7cb1342b76114716f8fd0684b64d2a04b42110b1b167b6c709d79d2e",
+    "umi_tools.help.txt": "98f42a35dd83fbe08c158d573d2888d4e25600cb4890a042473376201d96e345",
+    "umi_tools.version.txt": "4b05ab0d8134f9ceaac3e906f5852c841627586538aca3e8b90b8c75f652df39",
+    "umi_tools.whitelist.help.txt": "60f910416103fa8213d1386f40e7d809388518f3307db2fb202176de876dbe7a"
+  },
+  "rows": [
+    {
+      "tool": "rust-cutadapt",
+      "upstream": "cutadapt 4.6",
+      "surface": "-h --help",
+      "kind": "option",
+      "status": "verified",
+      "evidence": "cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-cutadapt",
+      "upstream": "cutadapt 4.6",
+      "surface": "--version",
+      "kind": "option",
+      "status": "verified",
+      "evidence": "cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-cutadapt",
+      "upstream": "cutadapt 4.6",
+      "surface": "--debug",
+      "kind": "option",
+      "status": "verified",
+      "evidence": "cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-cutadapt",
+      "upstream": "cutadapt 4.6",
+      "surface": "-j --cores",
+      "kind": "option",
+      "status": "verified",
+      "evidence": "cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-cutadapt",
+      "upstream": "cutadapt 4.6",
+      "surface": "-a --adapter",
+      "kind": "option",
+      "status": "verified",
+      "evidence": "cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-cutadapt",
+      "upstream": "cutadapt 4.6",
+      "surface": "-g --front",
+      "kind": "option",
+      "status": "verified",
+      "evidence": "cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-cutadapt",
+      "upstream": "cutadapt 4.6",
+      "surface": "-b --anywhere",
+      "kind": "option",
+      "status": "verified",
+      "evidence": "cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-cutadapt",
+      "upstream": "cutadapt 4.6",
+      "surface": "-e --error-rate --errors",
+      "kind": "option",
+      "status": "verified",
+      "evidence": "cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-cutadapt",
+      "upstream": "cutadapt 4.6",
+      "surface": "--no-indels",
+      "kind": "option",
+      "status": "verified",
+      "evidence": "cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-cutadapt",
+      "upstream": "cutadapt 4.6",
+      "surface": "-n --times",
+      "kind": "option",
+      "status": "verified",
+      "evidence": "cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-cutadapt",
+      "upstream": "cutadapt 4.6",
+      "surface": "-O --overlap",
+      "kind": "option",
+      "status": "verified",
+      "evidence": "cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-cutadapt",
+      "upstream": "cutadapt 4.6",
+      "surface": "--match-read-wildcards",
+      "kind": "option",
+      "status": "verified",
+      "evidence": "cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-cutadapt",
+      "upstream": "cutadapt 4.6",
+      "surface": "-N --no-match-adapter-wildcards",
+      "kind": "option",
+      "status": "verified",
+      "evidence": "cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-cutadapt",
+      "upstream": "cutadapt 4.6",
+      "surface": "--action",
+      "kind": "option",
+      "status": "verified",
+      "evidence": "cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-cutadapt",
+      "upstream": "cutadapt 4.6",
+      "surface": "--rc --revcomp",
+      "kind": "option",
+      "status": "verified",
+      "evidence": "cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-cutadapt",
+      "upstream": "cutadapt 4.6",
+      "surface": "-u --cut",
+      "kind": "option",
+      "status": "verified",
+      "evidence": "cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-cutadapt",
+      "upstream": "cutadapt 4.6",
+      "surface": "--nextseq-trim",
+      "kind": "option",
+      "status": "verified",
+      "evidence": "cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-cutadapt",
+      "upstream": "cutadapt 4.6",
+      "surface": "-q --quality-cutoff",
+      "kind": "option",
+      "status": "verified",
+      "evidence": "cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-cutadapt",
+      "upstream": "cutadapt 4.6",
+      "surface": "--quality-base",
+      "kind": "option",
+      "status": "verified",
+      "evidence": "cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-cutadapt",
+      "upstream": "cutadapt 4.6",
+      "surface": "--poly-a",
+      "kind": "option",
+      "status": "verified",
+      "evidence": "cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-cutadapt",
+      "upstream": "cutadapt 4.6",
+      "surface": "--length -l",
+      "kind": "option",
+      "status": "verified",
+      "evidence": "cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-cutadapt",
+      "upstream": "cutadapt 4.6",
+      "surface": "--trim-n",
+      "kind": "option",
+      "status": "verified",
+      "evidence": "cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-cutadapt",
+      "upstream": "cutadapt 4.6",
+      "surface": "--length-tag",
+      "kind": "option",
+      "status": "verified",
+      "evidence": "cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-cutadapt",
+      "upstream": "cutadapt 4.6",
+      "surface": "--strip-suffix",
+      "kind": "option",
+      "status": "verified",
+      "evidence": "cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-cutadapt",
+      "upstream": "cutadapt 4.6",
+      "surface": "-x --prefix",
+      "kind": "option",
+      "status": "verified",
+      "evidence": "cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-cutadapt",
+      "upstream": "cutadapt 4.6",
+      "surface": "-y --suffix",
+      "kind": "option",
+      "status": "verified",
+      "evidence": "cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-cutadapt",
+      "upstream": "cutadapt 4.6",
+      "surface": "--rename",
+      "kind": "option",
+      "status": "verified",
+      "evidence": "cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-cutadapt",
+      "upstream": "cutadapt 4.6",
+      "surface": "--zero-cap -z",
+      "kind": "option",
+      "status": "verified",
+      "evidence": "cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-cutadapt",
+      "upstream": "cutadapt 4.6",
+      "surface": "-m --minimum-length",
+      "kind": "option",
+      "status": "verified",
+      "evidence": "cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-cutadapt",
+      "upstream": "cutadapt 4.6",
+      "surface": "-M --maximum-length",
+      "kind": "option",
+      "status": "verified",
+      "evidence": "cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-cutadapt",
+      "upstream": "cutadapt 4.6",
+      "surface": "--max-n",
+      "kind": "option",
+      "status": "verified",
+      "evidence": "cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-cutadapt",
+      "upstream": "cutadapt 4.6",
+      "surface": "--max-expected-errors --max-ee",
+      "kind": "option",
+      "status": "verified",
+      "evidence": "cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-cutadapt",
+      "upstream": "cutadapt 4.6",
+      "surface": "--max-average-error-rate --max-aer",
+      "kind": "option",
+      "status": "verified",
+      "evidence": "cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-cutadapt",
+      "upstream": "cutadapt 4.6",
+      "surface": "--discard-trimmed --discard",
+      "kind": "option",
+      "status": "verified",
+      "evidence": "cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-cutadapt",
+      "upstream": "cutadapt 4.6",
+      "surface": "--discard-untrimmed --trimmed-only",
+      "kind": "option",
+      "status": "verified",
+      "evidence": "cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-cutadapt",
+      "upstream": "cutadapt 4.6",
+      "surface": "--discard-casava",
+      "kind": "option",
+      "status": "verified",
+      "evidence": "cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-cutadapt",
+      "upstream": "cutadapt 4.6",
+      "surface": "--quiet",
+      "kind": "option",
+      "status": "verified",
+      "evidence": "cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-cutadapt",
+      "upstream": "cutadapt 4.6",
+      "surface": "--report",
+      "kind": "option",
+      "status": "verified",
+      "evidence": "cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-cutadapt",
+      "upstream": "cutadapt 4.6",
+      "surface": "--json",
+      "kind": "option",
+      "status": "verified",
+      "evidence": "cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-cutadapt",
+      "upstream": "cutadapt 4.6",
+      "surface": "-o --output",
+      "kind": "option",
+      "status": "verified",
+      "evidence": "cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-cutadapt",
+      "upstream": "cutadapt 4.6",
+      "surface": "--fasta",
+      "kind": "option",
+      "status": "verified",
+      "evidence": "cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-cutadapt",
+      "upstream": "cutadapt 4.6",
+      "surface": "-Z",
+      "kind": "option",
+      "status": "verified",
+      "evidence": "cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-cutadapt",
+      "upstream": "cutadapt 4.6",
+      "surface": "--info-file",
+      "kind": "option",
+      "status": "verified",
+      "evidence": "cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-cutadapt",
+      "upstream": "cutadapt 4.6",
+      "surface": "-r --rest-file",
+      "kind": "option",
+      "status": "verified",
+      "evidence": "cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-cutadapt",
+      "upstream": "cutadapt 4.6",
+      "surface": "--wildcard-file",
+      "kind": "option",
+      "status": "verified",
+      "evidence": "cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-cutadapt",
+      "upstream": "cutadapt 4.6",
+      "surface": "--too-short-output",
+      "kind": "option",
+      "status": "verified",
+      "evidence": "cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-cutadapt",
+      "upstream": "cutadapt 4.6",
+      "surface": "--too-long-output",
+      "kind": "option",
+      "status": "verified",
+      "evidence": "cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-cutadapt",
+      "upstream": "cutadapt 4.6",
+      "surface": "--untrimmed-output",
+      "kind": "option",
+      "status": "verified",
+      "evidence": "cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-cutadapt",
+      "upstream": "cutadapt 4.6",
+      "surface": "-A",
+      "kind": "option",
+      "status": "verified",
+      "evidence": "cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-cutadapt",
+      "upstream": "cutadapt 4.6",
+      "surface": "-G",
+      "kind": "option",
+      "status": "verified",
+      "evidence": "cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-cutadapt",
+      "upstream": "cutadapt 4.6",
+      "surface": "-B",
+      "kind": "option",
+      "status": "verified",
+      "evidence": "cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-cutadapt",
+      "upstream": "cutadapt 4.6",
+      "surface": "-U",
+      "kind": "option",
+      "status": "verified",
+      "evidence": "cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-cutadapt",
+      "upstream": "cutadapt 4.6",
+      "surface": "-Q",
+      "kind": "option",
+      "status": "verified",
+      "evidence": "cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-cutadapt",
+      "upstream": "cutadapt 4.6",
+      "surface": "-p --paired-output",
+      "kind": "option",
+      "status": "verified",
+      "evidence": "cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-cutadapt",
+      "upstream": "cutadapt 4.6",
+      "surface": "--pair-adapters",
+      "kind": "option",
+      "status": "verified",
+      "evidence": "cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-cutadapt",
+      "upstream": "cutadapt 4.6",
+      "surface": "--pair-filter",
+      "kind": "option",
+      "status": "verified",
+      "evidence": "cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-cutadapt",
+      "upstream": "cutadapt 4.6",
+      "surface": "--interleaved",
+      "kind": "option",
+      "status": "verified",
+      "evidence": "cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-cutadapt",
+      "upstream": "cutadapt 4.6",
+      "surface": "--untrimmed-paired-output",
+      "kind": "option",
+      "status": "verified",
+      "evidence": "cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-cutadapt",
+      "upstream": "cutadapt 4.6",
+      "surface": "--too-short-paired-output",
+      "kind": "option",
+      "status": "verified",
+      "evidence": "cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-cutadapt",
+      "upstream": "cutadapt 4.6",
+      "surface": "--too-long-paired-output",
+      "kind": "option",
+      "status": "verified",
+      "evidence": "cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-cutadapt",
+      "upstream": "cutadapt 4.6",
+      "surface": "report:text",
+      "kind": "feature",
+      "status": "verified",
+      "evidence": "119/119 differential; text report cases",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-cutadapt",
+      "upstream": "cutadapt 4.6",
+      "surface": "report:json",
+      "kind": "feature",
+      "status": "verified",
+      "evidence": "119/119 differential; JSON schema cases",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-cutadapt",
+      "upstream": "cutadapt 4.6",
+      "surface": "compression:gzip/bzip2/xz",
+      "kind": "feature",
+      "status": "verified",
+      "evidence": "differential and conformance fixtures",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-cutadapt",
+      "upstream": "cutadapt 4.6",
+      "surface": "paired/interleaved",
+      "kind": "feature",
+      "status": "verified",
+      "evidence": "119/119 differential; paired cases",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-cutadapt",
+      "upstream": "cutadapt 4.6",
+      "surface": "determinism:thread-count",
+      "kind": "feature",
+      "status": "verified",
+      "evidence": "tests/cli_e2e.rs parallel/single-thread",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-cutadapt",
+      "upstream": "cutadapt 4.6",
+      "surface": "performance:5x-target",
+      "kind": "feature",
+      "status": "verified",
+      "evidence": "rust-cutadapt/docs/FULL-COMPATIBILITY.md measured 6.60x",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-umitools",
+      "upstream": "UMI-tools 1.1.6",
+      "surface": "global:--memory-limit",
+      "kind": "feature",
+      "status": "verified",
+      "evidence": "spill and determinism suites; exit code + bytes",
+      "deviation": "64 MiB minimum working set",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-umitools",
+      "upstream": "UMI-tools 1.1.6",
+      "surface": "global:--quiet, --progress, --summary-json",
+      "kind": "feature",
+      "status": "verified",
+      "evidence": "formats suite; stream contents",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-umitools",
+      "upstream": "UMI-tools 1.1.6",
+      "surface": "global:--threads",
+      "kind": "feature",
+      "status": "verified",
+      "evidence": "determinism suite; decompressed bytes",
+      "deviation": "1/2/8/16",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-umitools",
+      "upstream": "UMI-tools 1.1.6",
+      "surface": "global:-I - / -S - (stdin/stdout)",
+      "kind": "feature",
+      "status": "verified",
+      "evidence": "formats suite; decompressed bytes",
+      "deviation": "two-pass processing spools stdin",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-umitools",
+      "upstream": "UMI-tools 1.1.6",
+      "surface": "global:CRAM input/output with --reference",
+      "kind": "feature",
+      "status": "verified",
+      "evidence": "formats suite; core fields",
+      "deviation": "derived MD/NM tags may be added when decoding",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-umitools",
+      "upstream": "UMI-tools 1.1.6",
+      "surface": "count:--gene-transcript-map",
+      "kind": "feature",
+      "status": "verified",
+      "evidence": "1.1.6; edge cases; tsv bytes",
+      "deviation": "requires --per-contig",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-umitools",
+      "upstream": "UMI-tools 1.1.6",
+      "surface": "count:--partition-genes",
+      "kind": "feature",
+      "status": "verified",
+      "evidence": "spill suite; TSV bytes",
+      "deviation": "automatic gene partition fallback",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-umitools",
+      "upstream": "UMI-tools 1.1.6",
+      "surface": "count:--per-cell",
+      "kind": "feature",
+      "status": "verified",
+      "evidence": "1.1.6; edge cases; tsv bytes",
+      "deviation": "sparse triplet form",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-umitools",
+      "upstream": "UMI-tools 1.1.6",
+      "surface": "count:--per-contig",
+      "kind": "feature",
+      "status": "verified",
+      "evidence": "1.1.6; per-contig; tsv bytes",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-umitools",
+      "upstream": "UMI-tools 1.1.6",
+      "surface": "count:--per-gene --gene-tag",
+      "kind": "feature",
+      "status": "verified",
+      "evidence": "1.1.6; tagged; tsv bytes",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-umitools",
+      "upstream": "UMI-tools 1.1.6",
+      "surface": "count:--wide",
+      "kind": "feature",
+      "status": "verified",
+      "evidence": "1.1.6; edge cases; tsv bytes",
+      "deviation": "dense gene x cell matrix",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-umitools",
+      "upstream": "UMI-tools 1.1.6",
+      "surface": "count_tab:--per-cell",
+      "kind": "feature",
+      "status": "verified",
+      "evidence": "1.1.6; cell table; tsv bytes",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-umitools",
+      "upstream": "UMI-tools 1.1.6",
+      "surface": "count_tab:default",
+      "kind": "feature",
+      "status": "verified",
+      "evidence": "1.1.6; two column table; tsv bytes",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-umitools",
+      "upstream": "UMI-tools 1.1.6",
+      "surface": "dedup:--add-pg",
+      "kind": "feature",
+      "status": "verified",
+      "evidence": "n/a; not compared; extension, not upstream",
+      "deviation": "changes output bytes",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-umitools",
+      "upstream": "UMI-tools 1.1.6",
+      "surface": "dedup:--buffer-whole-contig",
+      "kind": "feature",
+      "status": "verified",
+      "evidence": "1.1.6; edge cases; decompressed bytes",
+      "deviation": "contig-wide bundle window",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-umitools",
+      "upstream": "UMI-tools 1.1.6",
+      "surface": "dedup:--chrom NAME",
+      "kind": "feature",
+      "status": "verified",
+      "evidence": "1.1.6; edge cases; decompressed bytes",
+      "deviation": "whole-contig filter, unknown name refused",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-umitools",
+      "upstream": "UMI-tools 1.1.6",
+      "surface": "dedup:--compresslevel 0-9",
+      "kind": "feature",
+      "status": "verified",
+      "evidence": "1.1.6; edge cases; decompressed bytes",
+      "deviation": "0 stores uncompressed blocks; default 1, 6 matches upstream size",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-umitools",
+      "upstream": "UMI-tools 1.1.6",
+      "surface": "dedup:--edit-distance-threshold=0|1|2|at-length",
+      "kind": "feature",
+      "status": "verified",
+      "evidence": "1.1.6; edge cases; decompressed bytes",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-umitools",
+      "upstream": "UMI-tools 1.1.6",
+      "surface": "dedup:--extract-umi-method=read_id",
+      "kind": "feature",
+      "status": "verified",
+      "evidence": "1.1.6; families; decompressed bytes",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-umitools",
+      "upstream": "UMI-tools 1.1.6",
+      "surface": "dedup:--extract-umi-method=tag",
+      "kind": "feature",
+      "status": "verified",
+      "evidence": "1.1.6; tagged; decompressed bytes",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-umitools",
+      "upstream": "UMI-tools 1.1.6",
+      "surface": "dedup:--extract-umi-method=umis",
+      "kind": "feature",
+      "status": "verified",
+      "evidence": "1.1.6; umis source; decompressed bytes",
+      "deviation": "UMI_ fields in query name",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-umitools",
+      "upstream": "UMI-tools 1.1.6",
+      "surface": "dedup:--filter-umi [--umi-whitelist|--umi-whitelist-paired]",
+      "kind": "feature",
+      "status": "verified",
+      "evidence": "1.1.6; edge cases; decompressed bytes",
+      "deviation": "single and paired whitelists",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-umitools",
+      "upstream": "UMI-tools 1.1.6",
+      "surface": "dedup:--gene-transcript-map",
+      "kind": "feature",
+      "status": "experimental",
+      "evidence": "1.1.6; five PYTHONHASHSEED probes; fixed-seed repeats; BAM bytes",
+      "deviation": "accepted upstream set-order nondeterminism; representative may differ",
+      "next_action": "Accepted upstream nondeterminism; retain experimental"
+    },
+    {
+      "tool": "rust-umitools",
+      "upstream": "UMI-tools 1.1.6",
+      "surface": "dedup:--ignore-tlen",
+      "kind": "feature",
+      "status": "verified",
+      "evidence": "1.1.6; edge cases; decompressed bytes",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-umitools",
+      "upstream": "UMI-tools 1.1.6",
+      "surface": "dedup:--mapping-quality",
+      "kind": "feature",
+      "status": "verified",
+      "evidence": "1.1.6; edge cases; decompressed bytes",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-umitools",
+      "upstream": "UMI-tools 1.1.6",
+      "surface": "dedup:--method=unique|percentile|cluster|adjacency|directional",
+      "kind": "feature",
+      "status": "verified",
+      "evidence": "1.1.6; families, paired-repeat; decompressed bytes",
+      "deviation": "five methods",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-umitools",
+      "upstream": "UMI-tools 1.1.6",
+      "surface": "dedup:--multimapping-detection-method=NH|X0|XT",
+      "kind": "feature",
+      "status": "verified",
+      "evidence": "1.1.6; edge cases; decompressed bytes",
+      "deviation": "tie draw consumes the same RNG values as upstream",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-umitools",
+      "upstream": "UMI-tools 1.1.6",
+      "surface": "dedup:--no-sort-output",
+      "kind": "feature",
+      "status": "verified",
+      "evidence": "1.1.6; single-nosort, paired-nosort; decompressed bytes",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-umitools",
+      "upstream": "UMI-tools 1.1.6",
+      "surface": "dedup:--output-stats",
+      "kind": "feature",
+      "status": "verified",
+      "evidence": "1.1.6; unique/directional/cluster/adjacency/percentile and multi-bundle; TSV bytes",
+      "deviation": "NumPy RandomState null model; unique duplicate-key overwrite",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-umitools",
+      "upstream": "UMI-tools 1.1.6",
+      "surface": "dedup:--paired",
+      "kind": "feature",
+      "status": "verified",
+      "evidence": "1.1.6; paired, paired-repeat; decompressed bytes",
+      "deviation": "includes repeated pairs and mate recovery",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-umitools",
+      "upstream": "UMI-tools 1.1.6",
+      "surface": "dedup:--per-cell --cell-tag",
+      "kind": "feature",
+      "status": "verified",
+      "evidence": "1.1.6; edge cases; decompressed bytes",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-umitools",
+      "upstream": "UMI-tools 1.1.6",
+      "surface": "dedup:--per-gene --gene-tag",
+      "kind": "feature",
+      "status": "verified",
+      "evidence": "1.1.6; edge cases; decompressed bytes",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-umitools",
+      "upstream": "UMI-tools 1.1.6",
+      "surface": "dedup:--random-seed",
+      "kind": "feature",
+      "status": "verified",
+      "evidence": "1.1.6; all exact cases; decompressed bytes",
+      "deviation": "CPython MT19937 reproduction",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-umitools",
+      "upstream": "UMI-tools 1.1.6",
+      "surface": "dedup:--read-length",
+      "kind": "feature",
+      "status": "verified",
+      "evidence": "1.1.6; edge cases; decompressed bytes",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-umitools",
+      "upstream": "UMI-tools 1.1.6",
+      "surface": "dedup:--representative=stable",
+      "kind": "feature",
+      "status": "experimental",
+      "evidence": "unit tests; molecule set",
+      "deviation": "project RNG, not CPython",
+      "next_action": "T4: close with upstream evidence or re-scope"
+    },
+    {
+      "tool": "rust-umitools",
+      "upstream": "UMI-tools 1.1.6",
+      "surface": "dedup:--representative=upstream",
+      "kind": "feature",
+      "status": "verified",
+      "evidence": "1.1.6; exact cases + oracle C3; decompressed bytes",
+      "deviation": "representative tie handling",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-umitools",
+      "upstream": "UMI-tools 1.1.6",
+      "surface": "dedup:--spliced-is-unique",
+      "kind": "feature",
+      "status": "verified",
+      "evidence": "1.1.6; edge cases; decompressed bytes",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-umitools",
+      "upstream": "UMI-tools 1.1.6",
+      "surface": "dedup:--subset P",
+      "kind": "feature",
+      "status": "verified",
+      "evidence": "1.1.6; edge cases; decompressed bytes",
+      "deviation": "shared RNG with the tie draw",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-umitools",
+      "upstream": "UMI-tools 1.1.6",
+      "surface": "dedup:bounded paths: window, mate join, disk bundle",
+      "kind": "feature",
+      "status": "verified",
+      "evidence": "spill suite; decompressed bytes",
+      "deviation": "K9 forced paths",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-umitools",
+      "upstream": "UMI-tools 1.1.6",
+      "surface": "dedup:default coordinate sort",
+      "kind": "feature",
+      "status": "verified",
+      "evidence": "1.1.6; exact cases + oracle B04; decompressed bytes",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-umitools",
+      "upstream": "UMI-tools 1.1.6",
+      "surface": "extract:--extract-method=regex",
+      "kind": "feature",
+      "status": "verified",
+      "evidence": "1.1.6; extract cases; FASTQ bytes",
+      "deviation": "named umi_* and discard_* groups",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-umitools",
+      "upstream": "UMI-tools 1.1.6",
+      "surface": "extract:--extract-method=string with -p",
+      "kind": "feature",
+      "status": "verified",
+      "evidence": "1.1.6; extract cases; FASTQ bytes",
+      "deviation": "single/paired, 3prime, gzip, quality filter/mask",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-umitools",
+      "upstream": "UMI-tools 1.1.6",
+      "surface": "extract:--quality-encoding phred64/solexa",
+      "kind": "feature",
+      "status": "verified",
+      "evidence": "1.1.6; extract cases; FASTQ bytes",
+      "deviation": "quality filter/mask offset",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-umitools",
+      "upstream": "UMI-tools 1.1.6",
+      "surface": "extract:invalid methods rejected",
+      "kind": "feature",
+      "status": "verified",
+      "evidence": "1.1.6; extract cases; exit before output",
+      "deviation": "upstream accepts string/regex only",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-umitools",
+      "upstream": "UMI-tools 1.1.6",
+      "surface": "group:--group-out",
+      "kind": "feature",
+      "status": "verified",
+      "evidence": "1.1.6; families x five methods; bam bytes + tsv bytes",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-umitools",
+      "upstream": "UMI-tools 1.1.6",
+      "surface": "group:--output-bam",
+      "kind": "feature",
+      "status": "verified",
+      "evidence": "1.1.6; families x five methods; bam bytes",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-umitools",
+      "upstream": "UMI-tools 1.1.6",
+      "surface": "group:--per-gene [--per-cell]",
+      "kind": "feature",
+      "status": "verified",
+      "evidence": "1.1.6; edge cases; bam bytes + tsv bytes",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-umitools",
+      "upstream": "UMI-tools 1.1.6",
+      "surface": "group:UG and BX tags",
+      "kind": "feature",
+      "status": "verified",
+      "evidence": "1.1.6; families x five methods; bam bytes",
+      "deviation": "UG uses C/S/I",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-umitools",
+      "upstream": "UMI-tools 1.1.6",
+      "surface": "whitelist:--ed-above-threshold=discard|correct",
+      "kind": "feature",
+      "status": "verified",
+      "evidence": "1.1.6; whitelist cases; TSV bytes",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-umitools",
+      "upstream": "UMI-tools 1.1.6",
+      "surface": "whitelist:--knee-method=distance|density, --set-cell-number",
+      "kind": "feature",
+      "status": "verified",
+      "evidence": "1.1.6; whitelist cases; TSV bytes",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-umitools",
+      "upstream": "UMI-tools 1.1.6",
+      "surface": "whitelist:--method=umis, --read2-in [--bc-pattern2]",
+      "kind": "feature",
+      "status": "verified",
+      "evidence": "1.1.6; whitelist cases; TSV bytes",
+      "deviation": "unique UMI counts and paired pattern2",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-umitools",
+      "upstream": "UMI-tools 1.1.6",
+      "surface": "whitelist",
+      "kind": "command",
+      "status": "verified",
+      "evidence": "oracle whitelist cases; exact 9",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-umitools",
+      "upstream": "UMI-tools 1.1.6",
+      "surface": "extract",
+      "kind": "command",
+      "status": "verified",
+      "evidence": "oracle extract 11; exact cases",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-umitools",
+      "upstream": "UMI-tools 1.1.6",
+      "surface": "dedup",
+      "kind": "command",
+      "status": "verified",
+      "evidence": "exact 77/77 and semantic oracle cases",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-umitools",
+      "upstream": "UMI-tools 1.1.6",
+      "surface": "group",
+      "kind": "command",
+      "status": "verified",
+      "evidence": "exact group cases + oracle C2",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-umitools",
+      "upstream": "UMI-tools 1.1.6",
+      "surface": "count",
+      "kind": "command",
+      "status": "verified",
+      "evidence": "exact count/count_tab cases + oracle",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-umitools",
+      "upstream": "UMI-tools 1.1.6",
+      "surface": "count_tab",
+      "kind": "command",
+      "status": "verified",
+      "evidence": "exact count_tab cases",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-umitools",
+      "upstream": "UMI-tools 1.1.6",
+      "surface": "global:--help/--version",
+      "kind": "option",
+      "status": "verified",
+      "evidence": "compat/current/rust-umitools.help.txt",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-bam",
+      "upstream": "samtools 1.24",
+      "surface": "dict",
+      "kind": "command",
+      "status": "unsupported",
+      "evidence": "absent from compat/current/rust-bam.help.txt",
+      "deviation": "samtools command not implemented",
+      "next_action": "T5: implement with samtools differential"
+    },
+    {
+      "tool": "rust-bam",
+      "upstream": "samtools 1.24",
+      "surface": "faidx",
+      "kind": "command",
+      "status": "unsupported",
+      "evidence": "absent from compat/current/rust-bam.help.txt",
+      "deviation": "samtools command not implemented",
+      "next_action": "T5: implement with samtools differential"
+    },
+    {
+      "tool": "rust-bam",
+      "upstream": "samtools 1.24",
+      "surface": "fqidx",
+      "kind": "command",
+      "status": "unsupported",
+      "evidence": "absent from compat/current/rust-bam.help.txt",
+      "deviation": "samtools command not implemented",
+      "next_action": "T5: implement with samtools differential"
+    },
+    {
+      "tool": "rust-bam",
+      "upstream": "samtools 1.24",
+      "surface": "index",
+      "kind": "command",
+      "status": "verified",
+      "evidence": "target/release/rust-bam + tests/view_filters.rs",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-bam",
+      "upstream": "samtools 1.24",
+      "surface": "calmd",
+      "kind": "command",
+      "status": "unsupported",
+      "evidence": "absent from compat/current/rust-bam.help.txt",
+      "deviation": "samtools command not implemented",
+      "next_action": "T5: implement with samtools differential"
+    },
+    {
+      "tool": "rust-bam",
+      "upstream": "samtools 1.24",
+      "surface": "fixmate",
+      "kind": "command",
+      "status": "unsupported",
+      "evidence": "absent from compat/current/rust-bam.help.txt",
+      "deviation": "samtools command not implemented",
+      "next_action": "T5: implement with samtools differential"
+    },
+    {
+      "tool": "rust-bam",
+      "upstream": "samtools 1.24",
+      "surface": "reheader",
+      "kind": "command",
+      "status": "unsupported",
+      "evidence": "absent from compat/current/rust-bam.help.txt",
+      "deviation": "samtools command not implemented",
+      "next_action": "T5: implement with samtools differential"
+    },
+    {
+      "tool": "rust-bam",
+      "upstream": "samtools 1.24",
+      "surface": "targetcut",
+      "kind": "command",
+      "status": "unsupported",
+      "evidence": "absent from compat/current/rust-bam.help.txt",
+      "deviation": "samtools command not implemented",
+      "next_action": "T5: implement with samtools differential"
+    },
+    {
+      "tool": "rust-bam",
+      "upstream": "samtools 1.24",
+      "surface": "addreplacerg",
+      "kind": "command",
+      "status": "unsupported",
+      "evidence": "absent from compat/current/rust-bam.help.txt",
+      "deviation": "samtools command not implemented",
+      "next_action": "T5: implement with samtools differential"
+    },
+    {
+      "tool": "rust-bam",
+      "upstream": "samtools 1.24",
+      "surface": "markdup",
+      "kind": "command",
+      "status": "unsupported",
+      "evidence": "absent from compat/current/rust-bam.help.txt",
+      "deviation": "samtools command not implemented",
+      "next_action": "T5: implement with samtools differential"
+    },
+    {
+      "tool": "rust-bam",
+      "upstream": "samtools 1.24",
+      "surface": "ampliconclip",
+      "kind": "command",
+      "status": "unsupported",
+      "evidence": "absent from compat/current/rust-bam.help.txt",
+      "deviation": "samtools command not implemented",
+      "next_action": "T5: implement with samtools differential"
+    },
+    {
+      "tool": "rust-bam",
+      "upstream": "samtools 1.24",
+      "surface": "collate",
+      "kind": "command",
+      "status": "unsupported",
+      "evidence": "absent from compat/current/rust-bam.help.txt",
+      "deviation": "samtools command not implemented",
+      "next_action": "T5: implement with samtools differential"
+    },
+    {
+      "tool": "rust-bam",
+      "upstream": "samtools 1.24",
+      "surface": "cat",
+      "kind": "command",
+      "status": "unsupported",
+      "evidence": "absent from compat/current/rust-bam.help.txt",
+      "deviation": "samtools command not implemented",
+      "next_action": "T5: implement with samtools differential"
+    },
+    {
+      "tool": "rust-bam",
+      "upstream": "samtools 1.24",
+      "surface": "consensus",
+      "kind": "command",
+      "status": "unsupported",
+      "evidence": "absent from compat/current/rust-bam.help.txt",
+      "deviation": "samtools command not implemented",
+      "next_action": "T5: implement with samtools differential"
+    },
+    {
+      "tool": "rust-bam",
+      "upstream": "samtools 1.24",
+      "surface": "merge",
+      "kind": "command",
+      "status": "unsupported",
+      "evidence": "absent from compat/current/rust-bam.help.txt",
+      "deviation": "samtools command not implemented",
+      "next_action": "T5: implement with samtools differential"
+    },
+    {
+      "tool": "rust-bam",
+      "upstream": "samtools 1.24",
+      "surface": "mpileup",
+      "kind": "command",
+      "status": "unsupported",
+      "evidence": "absent from compat/current/rust-bam.help.txt",
+      "deviation": "samtools command not implemented",
+      "next_action": "T5: implement with samtools differential"
+    },
+    {
+      "tool": "rust-bam",
+      "upstream": "samtools 1.24",
+      "surface": "sort",
+      "kind": "command",
+      "status": "verified",
+      "evidence": "target/release/rust-bam + tests/view_filters.rs",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-bam",
+      "upstream": "samtools 1.24",
+      "surface": "split",
+      "kind": "command",
+      "status": "unsupported",
+      "evidence": "absent from compat/current/rust-bam.help.txt",
+      "deviation": "samtools command not implemented",
+      "next_action": "T5: implement with samtools differential"
+    },
+    {
+      "tool": "rust-bam",
+      "upstream": "samtools 1.24",
+      "surface": "quickcheck",
+      "kind": "command",
+      "status": "verified",
+      "evidence": "target/release/rust-bam + tests/view_filters.rs",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-bam",
+      "upstream": "samtools 1.24",
+      "surface": "fastq",
+      "kind": "command",
+      "status": "unsupported",
+      "evidence": "absent from compat/current/rust-bam.help.txt",
+      "deviation": "samtools command not implemented",
+      "next_action": "T5: implement with samtools differential"
+    },
+    {
+      "tool": "rust-bam",
+      "upstream": "samtools 1.24",
+      "surface": "fasta",
+      "kind": "command",
+      "status": "unsupported",
+      "evidence": "absent from compat/current/rust-bam.help.txt",
+      "deviation": "samtools command not implemented",
+      "next_action": "T5: implement with samtools differential"
+    },
+    {
+      "tool": "rust-bam",
+      "upstream": "samtools 1.24",
+      "surface": "import",
+      "kind": "command",
+      "status": "unsupported",
+      "evidence": "absent from compat/current/rust-bam.help.txt",
+      "deviation": "samtools command not implemented",
+      "next_action": "T5: implement with samtools differential"
+    },
+    {
+      "tool": "rust-bam",
+      "upstream": "samtools 1.24",
+      "surface": "reference",
+      "kind": "command",
+      "status": "unsupported",
+      "evidence": "absent from compat/current/rust-bam.help.txt",
+      "deviation": "samtools command not implemented",
+      "next_action": "T5: implement with samtools differential"
+    },
+    {
+      "tool": "rust-bam",
+      "upstream": "samtools 1.24",
+      "surface": "reset",
+      "kind": "command",
+      "status": "unsupported",
+      "evidence": "absent from compat/current/rust-bam.help.txt",
+      "deviation": "samtools command not implemented",
+      "next_action": "T5: implement with samtools differential"
+    },
+    {
+      "tool": "rust-bam",
+      "upstream": "samtools 1.24",
+      "surface": "bedcov",
+      "kind": "command",
+      "status": "unsupported",
+      "evidence": "absent from compat/current/rust-bam.help.txt",
+      "deviation": "samtools command not implemented",
+      "next_action": "T5: implement with samtools differential"
+    },
+    {
+      "tool": "rust-bam",
+      "upstream": "samtools 1.24",
+      "surface": "coverage",
+      "kind": "command",
+      "status": "experimental",
+      "evidence": "rust-bam/tests/depth.rs or tests/coverage.rs + samtools 1.24 manual diff",
+      "deviation": "subset; coverage: all current tabular/histogram options implemented; CRAM unsupported; -r is sequential",
+      "next_action": "T5: expand depth/coverage options"
+    },
+    {
+      "tool": "rust-bam",
+      "upstream": "samtools 1.24",
+      "surface": "depth",
+      "kind": "command",
+      "status": "verified",
+      "evidence": "target/release/rust-bam + tests/view_filters.rs",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-bam",
+      "upstream": "samtools 1.24",
+      "surface": "flagstat",
+      "kind": "command",
+      "status": "verified",
+      "evidence": "target/release/rust-bam + tests/view_filters.rs",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-bam",
+      "upstream": "samtools 1.24",
+      "surface": "idxstats",
+      "kind": "command",
+      "status": "verified",
+      "evidence": "target/release/rust-bam + tests/view_filters.rs",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-bam",
+      "upstream": "samtools 1.24",
+      "surface": "cram-size",
+      "kind": "command",
+      "status": "unsupported",
+      "evidence": "absent from compat/current/rust-bam.help.txt",
+      "deviation": "samtools command not implemented",
+      "next_action": "T5: implement with samtools differential"
+    },
+    {
+      "tool": "rust-bam",
+      "upstream": "samtools 1.24",
+      "surface": "phase",
+      "kind": "command",
+      "status": "unsupported",
+      "evidence": "absent from compat/current/rust-bam.help.txt",
+      "deviation": "samtools command not implemented",
+      "next_action": "T5: implement with samtools differential"
+    },
+    {
+      "tool": "rust-bam",
+      "upstream": "samtools 1.24",
+      "surface": "stats",
+      "kind": "command",
+      "status": "unsupported",
+      "evidence": "absent from compat/current/rust-bam.help.txt",
+      "deviation": "samtools command not implemented",
+      "next_action": "T5: implement with samtools differential"
+    },
+    {
+      "tool": "rust-bam",
+      "upstream": "samtools 1.24",
+      "surface": "ampliconstats",
+      "kind": "command",
+      "status": "unsupported",
+      "evidence": "absent from compat/current/rust-bam.help.txt",
+      "deviation": "samtools command not implemented",
+      "next_action": "T5: implement with samtools differential"
+    },
+    {
+      "tool": "rust-bam",
+      "upstream": "samtools 1.24",
+      "surface": "checksum",
+      "kind": "command",
+      "status": "unsupported",
+      "evidence": "absent from compat/current/rust-bam.help.txt",
+      "deviation": "samtools command not implemented",
+      "next_action": "T5: implement with samtools differential"
+    },
+    {
+      "tool": "rust-bam",
+      "upstream": "samtools 1.24",
+      "surface": "flags",
+      "kind": "command",
+      "status": "verified",
+      "evidence": "rust-bam/tests/flags.rs + samtools 1.24 29/29 differential",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-bam",
+      "upstream": "samtools 1.24",
+      "surface": "head",
+      "kind": "command",
+      "status": "verified",
+      "evidence": "rust-bam/tests/head.rs + samtools 1.24 36/36 exact file/stdin differential",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-bam",
+      "upstream": "samtools 1.24",
+      "surface": "tview",
+      "kind": "command",
+      "status": "unsupported",
+      "evidence": "absent from compat/current/rust-bam.help.txt",
+      "deviation": "samtools command not implemented",
+      "next_action": "T5: implement with samtools differential"
+    },
+    {
+      "tool": "rust-bam",
+      "upstream": "samtools 1.24",
+      "surface": "view",
+      "kind": "command",
+      "status": "verified",
+      "evidence": "target/release/rust-bam + tests/view_filters.rs",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-bam",
+      "upstream": "samtools 1.24",
+      "surface": "depad",
+      "kind": "command",
+      "status": "unsupported",
+      "evidence": "absent from compat/current/rust-bam.help.txt",
+      "deviation": "samtools command not implemented",
+      "next_action": "T5: implement with samtools differential"
+    },
+    {
+      "tool": "rust-bam",
+      "upstream": "samtools 1.24",
+      "surface": "samples",
+      "kind": "command",
+      "status": "unsupported",
+      "evidence": "absent from compat/current/rust-bam.help.txt",
+      "deviation": "samtools command not implemented",
+      "next_action": "T5: implement with samtools differential"
+    },
+    {
+      "tool": "rust-bam",
+      "upstream": "samtools 1.24",
+      "surface": "view:filters -f/-F/-q",
+      "kind": "feature",
+      "status": "verified",
+      "evidence": "tests/view_filters.rs + samtools 1.24 differential",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-bam",
+      "upstream": "samtools 1.24",
+      "surface": "view:--region BAI/CSI",
+      "kind": "feature",
+      "status": "verified",
+      "evidence": "tests/view_filters.rs + samtools differential",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-bam",
+      "upstream": "samtools 1.24",
+      "surface": "index:--csi",
+      "kind": "feature",
+      "status": "verified",
+      "evidence": "tests/view_filters.rs",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-bam",
+      "upstream": "samtools 1.24",
+      "surface": "sort:external-memory",
+      "kind": "feature",
+      "status": "verified",
+      "evidence": "tests/external_sort.rs + samtools differential",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-bam",
+      "upstream": "samtools 1.24",
+      "surface": "depth:basic -a/-aa/-s/-f/-g/-G/--incl-flags/--require-flags/-H/-q/-Q/-l/-J/-r/-b/-o",
+      "kind": "feature",
+      "status": "verified",
+      "evidence": "rust-bam/tests/depth.rs (10 tests) + samtools 1.24 32/32 -a/-aa/-s + 35/35 flag differential",
+      "deviation": "missing -X/CRAM; -r is sequential; BTreeMap memory is covered positions",
+      "next_action": "T5: custom index and CRAM support"
+    },
+    {
+      "tool": "rust-bam",
+      "upstream": "samtools 1.24",
+      "surface": "coverage:basic -b/--min-depth/-r/-q/-Q/-l/-H/-o/--rf/--ff/-d/-m/-D/-w/-A/multiple inputs",
+      "kind": "feature",
+      "status": "verified",
+      "evidence": "rust-bam/tests/coverage.rs (10 tests) + samtools 1.24 57/57 histogram/depth/region/width differential + 35/35 flag differential",
+      "deviation": "CRAM unsupported; -r is sequential; BTreeMap memory is covered positions",
+      "next_action": "T5: CRAM support or re-scope"
+    },
+    {
+      "tool": "rust-fastqc",
+      "upstream": "FastQC 0.13.0",
+      "surface": "-h --help",
+      "kind": "option",
+      "status": "verified",
+      "evidence": "docs/EVIDENCE-QC.md; 22/22 fixtures",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-fastqc",
+      "upstream": "FastQC 0.13.0",
+      "surface": "-v --version",
+      "kind": "option",
+      "status": "verified",
+      "evidence": "docs/EVIDENCE-QC.md; 22/22 fixtures",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-fastqc",
+      "upstream": "FastQC 0.13.0",
+      "surface": "--outdir",
+      "kind": "option",
+      "status": "verified",
+      "evidence": "docs/EVIDENCE-QC.md; 22/22 fixtures",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-fastqc",
+      "upstream": "FastQC 0.13.0",
+      "surface": "-c --contaminants",
+      "kind": "option",
+      "status": "verified",
+      "evidence": "FastQC 0.13.0 default-list 22/22 + custom source 7/7 differential",
+      "deviation": "custom name<TAB>sequence lists replace the built-in FastQC 0.13.0 list",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-fastqc",
+      "upstream": "FastQC 0.13.0",
+      "surface": "-a --adapters",
+      "kind": "option",
+      "status": "unsupported",
+      "evidence": "absent from compat/current/rust-fastqc.help.txt",
+      "deviation": "",
+      "next_action": "T6: implement or re-scope"
+    },
+    {
+      "tool": "rust-fastqc",
+      "upstream": "FastQC 0.13.0",
+      "surface": "-l --limits",
+      "kind": "option",
+      "status": "unsupported",
+      "evidence": "absent from compat/current/rust-fastqc.help.txt",
+      "deviation": "",
+      "next_action": "T6: implement or re-scope"
+    },
+    {
+      "tool": "rust-fastqc",
+      "upstream": "FastQC 0.13.0",
+      "surface": "-d --dir",
+      "kind": "option",
+      "status": "unsupported",
+      "evidence": "absent from compat/current/rust-fastqc.help.txt",
+      "deviation": "",
+      "next_action": "T6: implement or re-scope"
+    },
+    {
+      "tool": "rust-fastqc",
+      "upstream": "FastQC 0.13.0",
+      "surface": "--min_length",
+      "kind": "option",
+      "status": "verified",
+      "evidence": "FastQC 0.13.0 5/5 option differential; rust-fastqc 20 integration tests",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-fastqc",
+      "upstream": "FastQC 0.13.0",
+      "surface": "--max_length",
+      "kind": "option",
+      "status": "verified",
+      "evidence": "FastQC 0.13.0 5/5 option differential; rust-fastqc 20 integration tests",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-fastqc",
+      "upstream": "FastQC 0.13.0",
+      "surface": "--dup_length",
+      "kind": "option",
+      "status": "verified",
+      "evidence": "FastQC 0.13.0 5/5 option differential; rust-fastqc 20 integration tests",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-fastqc",
+      "upstream": "FastQC 0.13.0",
+      "surface": "--memory",
+      "kind": "option",
+      "status": "unsupported",
+      "evidence": "absent from compat/current/rust-fastqc.help.txt",
+      "deviation": "",
+      "next_action": "T6: implement or re-scope"
+    },
+    {
+      "tool": "rust-fastqc",
+      "upstream": "FastQC 0.13.0",
+      "surface": "-t --threads",
+      "kind": "option",
+      "status": "unsupported",
+      "evidence": "absent from compat/current/rust-fastqc.help.txt",
+      "deviation": "",
+      "next_action": "T6: implement or re-scope"
+    },
+    {
+      "tool": "rust-fastqc",
+      "upstream": "FastQC 0.13.0",
+      "surface": "-q --quiet",
+      "kind": "option",
+      "status": "verified",
+      "evidence": "FastQC 0.13.0 quiet/progress behavior and artifact smoke",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-fastqc",
+      "upstream": "FastQC 0.13.0",
+      "surface": "--fast5",
+      "kind": "option",
+      "status": "unsupported",
+      "evidence": "absent from compat/current/rust-fastqc.help.txt",
+      "deviation": "",
+      "next_action": "T6: implement or re-scope"
+    },
+    {
+      "tool": "rust-fastqc",
+      "upstream": "FastQC 0.13.0",
+      "surface": "--phred64",
+      "kind": "option",
+      "status": "verified",
+      "evidence": "docs/EVIDENCE-QC.md; 22/22 fixtures",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-fastqc",
+      "upstream": "FastQC 0.13.0",
+      "surface": "-j --java",
+      "kind": "option",
+      "status": "unsupported",
+      "evidence": "absent from compat/current/rust-fastqc.help.txt",
+      "deviation": "",
+      "next_action": "T6: implement or re-scope"
+    },
+    {
+      "tool": "rust-fastqc",
+      "upstream": "FastQC 0.13.0",
+      "surface": "--nogroup",
+      "kind": "option",
+      "status": "verified",
+      "evidence": "FastQC 0.13.0 5/5 option differential; rust-fastqc 20 integration tests",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-fastqc",
+      "upstream": "FastQC 0.13.0",
+      "surface": "--png",
+      "kind": "option",
+      "status": "unsupported",
+      "evidence": "absent from compat/current/rust-fastqc.help.txt",
+      "deviation": "",
+      "next_action": "T6: implement or re-scope"
+    },
+    {
+      "tool": "rust-fastqc",
+      "upstream": "FastQC 0.13.0",
+      "surface": "--extract",
+      "kind": "option",
+      "status": "verified",
+      "evidence": "FastQC 0.13.0 default/extract/delete layout differential (4/4)",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-fastqc",
+      "upstream": "FastQC 0.13.0",
+      "surface": "--delete",
+      "kind": "option",
+      "status": "verified",
+      "evidence": "FastQC 0.13.0 default/extract/delete layout differential (4/4)",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-fastqc",
+      "upstream": "FastQC 0.13.0",
+      "surface": "-f --format",
+      "kind": "option",
+      "status": "unsupported",
+      "evidence": "absent from compat/current/rust-fastqc.help.txt",
+      "deviation": "",
+      "next_action": "T6: implement or re-scope"
+    },
+    {
+      "tool": "rust-fastqc",
+      "upstream": "FastQC 0.13.0",
+      "surface": "--debug",
+      "kind": "option",
+      "status": "unsupported",
+      "evidence": "absent from compat/current/rust-fastqc.help.txt",
+      "deviation": "",
+      "next_action": "T6: implement or re-scope"
+    },
+    {
+      "tool": "rust-fastqc",
+      "upstream": "FastQC 0.13.0",
+      "surface": "report:fastqc_data.txt",
+      "kind": "report",
+      "status": "verified",
+      "evidence": "22/22 QC fixtures; MultiQC parses data",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-fastqc",
+      "upstream": "FastQC 0.13.0",
+      "surface": "report:HTML",
+      "kind": "report",
+      "status": "experimental",
+      "evidence": "data-table HTML with every module; no plot images or FastQC auxiliary assets",
+      "deviation": "",
+      "next_action": "T6: implement plots or retain the documented data-table scope"
+    },
+    {
+      "tool": "rust-fastqc",
+      "upstream": "FastQC 0.13.0",
+      "surface": "report:ZIP",
+      "kind": "report",
+      "status": "experimental",
+      "evidence": "stored ZIP with data, summary and HTML; no plot images or FastQC auxiliary assets",
+      "deviation": "",
+      "next_action": "T6: implement plots or retain the documented data-table scope"
+    },
+    {
+      "tool": "rust-fastqc",
+      "upstream": "FastQC 0.13.0",
+      "surface": "module:adapter-content",
+      "kind": "feature",
+      "status": "verified",
+      "evidence": "FastQC cumulative 12bp adapter algorithm; rust-fastqc 13/13; T8 1x/10x full fastqc_data exact",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-fastqc",
+      "upstream": "FastQC 0.13.0",
+      "surface": "module:contaminants",
+      "kind": "feature",
+      "status": "verified",
+      "evidence": "default FastQC 0.13.0 contaminant list plus custom overrides; 22/22 baseline + 7/7 custom source differential",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-fastqc",
+      "upstream": "FastQC 0.13.0",
+      "surface": "module:custom-contaminants",
+      "kind": "feature",
+      "status": "verified",
+      "evidence": "rust-fastqc/src/contaminants.rs + FastQC 0.13.0 7/7 source differential; forward/reverse/longest/one-mismatch cases",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-fx",
+      "upstream": "SeqKit 2.14.0 / fq 0.12.0",
+      "surface": "seqkit:faidx",
+      "kind": "command",
+      "status": "experimental",
+      "evidence": "rust-fx/tests/faidx.rs (4 tests) + SeqKit 2.14 region/regex/index differential",
+      "deviation": "regex output follows input order; upstream Go map order is unstable",
+      "next_action": "T7: implement faidx index side effects and regex IDs"
+    },
+    {
+      "tool": "rust-fx",
+      "upstream": "SeqKit 2.14.0 / fq 0.12.0",
+      "surface": "seqkit:scat",
+      "kind": "command",
+      "status": "unsupported",
+      "evidence": "absent from compat/current/rust-fx.help.txt",
+      "deviation": "",
+      "next_action": "T7: implement selected SeqKit command"
+    },
+    {
+      "tool": "rust-fx",
+      "upstream": "SeqKit 2.14.0 / fq 0.12.0",
+      "surface": "seqkit:seq",
+      "kind": "command",
+      "status": "verified",
+      "evidence": "50/50 W1-3 FASTX differential plus component tests",
+      "deviation": "selected surface; other global flags are not covered",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-fx",
+      "upstream": "SeqKit 2.14.0 / fq 0.12.0",
+      "surface": "seqkit:sliding",
+      "kind": "command",
+      "status": "verified",
+      "evidence": "rust-fx/tests/sliding.rs (4 tests) + SeqKit 2.14 7/7 circular/greedy/global differential + compression tests",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-fx",
+      "upstream": "SeqKit 2.14.0 / fq 0.12.0",
+      "surface": "seqkit:stats",
+      "kind": "command",
+      "status": "verified",
+      "evidence": "50/50 W1-3 FASTX differential plus component tests",
+      "deviation": "selected surface; other global flags are not covered",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-fx",
+      "upstream": "SeqKit 2.14.0 / fq 0.12.0",
+      "surface": "seqkit:subseq",
+      "kind": "command",
+      "status": "experimental",
+      "evidence": "rust-fx/tests/subseq*.rs + SeqKit 2.14 9/9 multi-file BED/GTF/flank differential",
+      "deviation": "records are buffered per input; -U is unsupported",
+      "next_action": "T7: complete subseq BED/GTF/flank semantics"
+    },
+    {
+      "tool": "rust-fx",
+      "upstream": "SeqKit 2.14.0 / fq 0.12.0",
+      "surface": "seqkit:translate",
+      "kind": "command",
+      "status": "experimental",
+      "evidence": "rust-fx/tests/translate.rs (7 tests) + SeqKit 2.14 55/55 listing differential + translation tables",
+      "deviation": "invalid-base exit/partial-output behavior differs",
+      "next_action": "T7: align invalid-input commit policy"
+    },
+    {
+      "tool": "rust-fx",
+      "upstream": "SeqKit 2.14.0 / fq 0.12.0",
+      "surface": "seqkit:watch",
+      "kind": "command",
+      "status": "unsupported",
+      "evidence": "absent from compat/current/rust-fx.help.txt",
+      "deviation": "",
+      "next_action": "T7: implement selected SeqKit command"
+    },
+    {
+      "tool": "rust-fx",
+      "upstream": "SeqKit 2.14.0 / fq 0.12.0",
+      "surface": "seqkit:convert",
+      "kind": "command",
+      "status": "unsupported",
+      "evidence": "absent from compat/current/rust-fx.help.txt",
+      "deviation": "",
+      "next_action": "T7: implement selected SeqKit command"
+    },
+    {
+      "tool": "rust-fx",
+      "upstream": "SeqKit 2.14.0 / fq 0.12.0",
+      "surface": "seqkit:fa2fq",
+      "kind": "command",
+      "status": "verified",
+      "evidence": "rust-fx/tests/fa2fq.rs (3 tests) + SeqKit 2.14 forward/reverse subsequence and quality differential + compression tests",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-fx",
+      "upstream": "SeqKit 2.14.0 / fq 0.12.0",
+      "surface": "seqkit:fq2fa",
+      "kind": "command",
+      "status": "verified",
+      "evidence": "50/50 W1-3 FASTX differential plus component tests",
+      "deviation": "selected surface; other global flags are not covered",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-fx",
+      "upstream": "SeqKit 2.14.0 / fq 0.12.0",
+      "surface": "seqkit:fx2tab",
+      "kind": "command",
+      "status": "verified",
+      "evidence": "50/50 W1-3 FASTX differential plus component tests",
+      "deviation": "selected surface; other global flags are not covered",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-fx",
+      "upstream": "SeqKit 2.14.0 / fq 0.12.0",
+      "surface": "seqkit:tab2fx",
+      "kind": "command",
+      "status": "experimental",
+      "evidence": "rust-fx/tests/tab2fx.rs (4 tests) + SeqKit 2.14 comment-prefix and 12 buffer/line-boundary differentials",
+      "deviation": "input is buffered per file; malformed-row and quality-validation behavior differs",
+      "next_action": "T7: align malformed-row policy or re-scope"
+    },
+    {
+      "tool": "rust-fx",
+      "upstream": "SeqKit 2.14.0 / fq 0.12.0",
+      "surface": "seqkit:amplicon",
+      "kind": "command",
+      "status": "unsupported",
+      "evidence": "absent from compat/current/rust-fx.help.txt",
+      "deviation": "",
+      "next_action": "T7: implement selected SeqKit command"
+    },
+    {
+      "tool": "rust-fx",
+      "upstream": "SeqKit 2.14.0 / fq 0.12.0",
+      "surface": "seqkit:fish",
+      "kind": "command",
+      "status": "unsupported",
+      "evidence": "absent from compat/current/rust-fx.help.txt",
+      "deviation": "",
+      "next_action": "T7: implement selected SeqKit command"
+    },
+    {
+      "tool": "rust-fx",
+      "upstream": "SeqKit 2.14.0 / fq 0.12.0",
+      "surface": "seqkit:grep",
+      "kind": "command",
+      "status": "verified",
+      "evidence": "rust-fx/tests/grep.rs (7 tests) + SeqKit 2.14 33/33 grep differential + compression tests",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-fx",
+      "upstream": "SeqKit 2.14.0 / fq 0.12.0",
+      "surface": "seqkit:locate",
+      "kind": "command",
+      "status": "unsupported",
+      "evidence": "absent from compat/current/rust-fx.help.txt",
+      "deviation": "",
+      "next_action": "T7: implement selected SeqKit command"
+    },
+    {
+      "tool": "rust-fx",
+      "upstream": "SeqKit 2.14.0 / fq 0.12.0",
+      "surface": "seqkit:common",
+      "kind": "command",
+      "status": "verified",
+      "evidence": "rust-fx/tests/common.rs (8 tests) + 14/14 ID/name/sequence/embedded SeqKit 2.14 diff",
+      "deviation": "none observed on the command-specific surface (-n/-s/-e/-i/-P/-w/-o)",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-fx",
+      "upstream": "SeqKit 2.14.0 / fq 0.12.0",
+      "surface": "seqkit:duplicate",
+      "kind": "command",
+      "status": "verified",
+      "evidence": "rust-fx/tests/duplicate.rs + 3/3 repeated records SeqKit 2.14 diff",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-fx",
+      "upstream": "SeqKit 2.14.0 / fq 0.12.0",
+      "surface": "seqkit:head",
+      "kind": "command",
+      "status": "verified",
+      "evidence": "rust-fx/tests/head.rs (5 tests) + SeqKit 2.14 10/10 head differential + compression tests",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-fx",
+      "upstream": "SeqKit 2.14.0 / fq 0.12.0",
+      "surface": "seqkit:head-genome",
+      "kind": "command",
+      "status": "unsupported",
+      "evidence": "absent from compat/current/rust-fx.help.txt",
+      "deviation": "",
+      "next_action": "T7: implement selected SeqKit command"
+    },
+    {
+      "tool": "rust-fx",
+      "upstream": "SeqKit 2.14.0 / fq 0.12.0",
+      "surface": "seqkit:pair",
+      "kind": "command",
+      "status": "unsupported",
+      "evidence": "absent from compat/current/rust-fx.help.txt",
+      "deviation": "",
+      "next_action": "T7: implement selected SeqKit command"
+    },
+    {
+      "tool": "rust-fx",
+      "upstream": "SeqKit 2.14.0 / fq 0.12.0",
+      "surface": "seqkit:range",
+      "kind": "command",
+      "status": "experimental",
+      "evidence": "rust-fx/tests/range.rs (2 tests) + SeqKit 2.14 5/5 multi-file range differential",
+      "deviation": "mixed-sign stdin buffers records",
+      "next_action": "T7: complete range streaming/multi-file semantics"
+    },
+    {
+      "tool": "rust-fx",
+      "upstream": "SeqKit 2.14.0 / fq 0.12.0",
+      "surface": "seqkit:rmdup",
+      "kind": "command",
+      "status": "verified",
+      "evidence": "rust-fx/tests/rmdup.rs (3 tests) + SeqKit 2.14 duplicate-report differential + compression tests",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-fx",
+      "upstream": "SeqKit 2.14.0 / fq 0.12.0",
+      "surface": "seqkit:sample",
+      "kind": "command",
+      "status": "verified",
+      "evidence": "50/50 W1-3 FASTX differential plus component tests",
+      "deviation": "selected surface; other global flags are not covered",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-fx",
+      "upstream": "SeqKit 2.14.0 / fq 0.12.0",
+      "surface": "seqkit:sample2",
+      "kind": "command",
+      "status": "unsupported",
+      "evidence": "absent from compat/current/rust-fx.help.txt",
+      "deviation": "",
+      "next_action": "T7: implement selected SeqKit command"
+    },
+    {
+      "tool": "rust-fx",
+      "upstream": "SeqKit 2.14.0 / fq 0.12.0",
+      "surface": "seqkit:split",
+      "kind": "command",
+      "status": "verified",
+      "evidence": "50/50 W1-3 FASTX differential plus component tests",
+      "deviation": "selected surface; other global flags are not covered",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-fx",
+      "upstream": "SeqKit 2.14.0 / fq 0.12.0",
+      "surface": "seqkit:split2",
+      "kind": "command",
+      "status": "unsupported",
+      "evidence": "absent from compat/current/rust-fx.help.txt",
+      "deviation": "",
+      "next_action": "T7: implement selected SeqKit command"
+    },
+    {
+      "tool": "rust-fx",
+      "upstream": "SeqKit 2.14.0 / fq 0.12.0",
+      "surface": "seqkit:concat",
+      "kind": "command",
+      "status": "unsupported",
+      "evidence": "absent from compat/current/rust-fx.help.txt",
+      "deviation": "",
+      "next_action": "T7: implement selected SeqKit command"
+    },
+    {
+      "tool": "rust-fx",
+      "upstream": "SeqKit 2.14.0 / fq 0.12.0",
+      "surface": "seqkit:mutate",
+      "kind": "command",
+      "status": "unsupported",
+      "evidence": "absent from compat/current/rust-fx.help.txt",
+      "deviation": "",
+      "next_action": "T7: implement selected SeqKit command"
+    },
+    {
+      "tool": "rust-fx",
+      "upstream": "SeqKit 2.14.0 / fq 0.12.0",
+      "surface": "seqkit:rename",
+      "kind": "command",
+      "status": "verified",
+      "evidence": "rust-fx/tests/rename.rs (3 tests) + SeqKit 2.14 multiple-outfiles/force differential + compression tests",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-fx",
+      "upstream": "SeqKit 2.14.0 / fq 0.12.0",
+      "surface": "seqkit:replace",
+      "kind": "command",
+      "status": "experimental",
+      "evidence": "rust-fx/tests/replace.rs (4 tests) + SeqKit 2.14 15/15 special-symbol/filter differential",
+      "deviation": "UUID is checked for shape and uniqueness, not byte equality",
+      "next_action": "T7: complete replace filters and special symbols"
+    },
+    {
+      "tool": "rust-fx",
+      "upstream": "SeqKit 2.14.0 / fq 0.12.0",
+      "surface": "seqkit:restart",
+      "kind": "command",
+      "status": "verified",
+      "evidence": "rust-fx/tests/restart.rs (2 tests) + SeqKit 2.14 start-with forward/reverse/mismatch differential + compression tests",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-fx",
+      "upstream": "SeqKit 2.14.0 / fq 0.12.0",
+      "surface": "seqkit:sana",
+      "kind": "command",
+      "status": "unsupported",
+      "evidence": "absent from compat/current/rust-fx.help.txt",
+      "deviation": "",
+      "next_action": "T7: implement selected SeqKit command"
+    },
+    {
+      "tool": "rust-fx",
+      "upstream": "SeqKit 2.14.0 / fq 0.12.0",
+      "surface": "seqkit:shuffle",
+      "kind": "command",
+      "status": "unsupported",
+      "evidence": "absent from compat/current/rust-fx.help.txt",
+      "deviation": "",
+      "next_action": "T7: implement selected SeqKit command"
+    },
+    {
+      "tool": "rust-fx",
+      "upstream": "SeqKit 2.14.0 / fq 0.12.0",
+      "surface": "seqkit:sort",
+      "kind": "command",
+      "status": "experimental",
+      "evidence": "rust-fx/tests/sort.rs (7 tests) + SeqKit 2.14 direct natural/prefix/two-pass/index differential",
+      "deviation": "two-pass by-seq is broken in upstream 2.14; compressed two-pass is unsupported",
+      "next_action": "T7: complete sort options and bounded-memory mode"
+    },
+    {
+      "tool": "rust-fx",
+      "upstream": "SeqKit 2.14.0 / fq 0.12.0",
+      "surface": "seqkit:bam",
+      "kind": "command",
+      "status": "unsupported",
+      "evidence": "absent from compat/current/rust-fx.help.txt",
+      "deviation": "",
+      "next_action": "T7: implement selected SeqKit command"
+    },
+    {
+      "tool": "rust-fx",
+      "upstream": "SeqKit 2.14.0 / fq 0.12.0",
+      "surface": "seqkit:merge-slides",
+      "kind": "command",
+      "status": "unsupported",
+      "evidence": "absent from compat/current/rust-fx.help.txt",
+      "deviation": "",
+      "next_action": "T7: implement selected SeqKit command"
+    },
+    {
+      "tool": "rust-fx",
+      "upstream": "SeqKit 2.14.0 / fq 0.12.0",
+      "surface": "seqkit:sum",
+      "kind": "command",
+      "status": "unsupported",
+      "evidence": "absent from compat/current/rust-fx.help.txt",
+      "deviation": "",
+      "next_action": "T7: implement selected SeqKit command"
+    },
+    {
+      "tool": "rust-fx",
+      "upstream": "SeqKit 2.14.0 / fq 0.12.0",
+      "surface": "seqkit:genautocomplete",
+      "kind": "command",
+      "status": "unsupported",
+      "evidence": "absent from compat/current/rust-fx.help.txt",
+      "deviation": "",
+      "next_action": "T7: implement selected SeqKit command"
+    },
+    {
+      "tool": "rust-fx",
+      "upstream": "SeqKit 2.14.0 / fq 0.12.0",
+      "surface": "global:--compress-level",
+      "kind": "feature",
+      "status": "verified",
+      "evidence": "rust-fx/tests/compression.rs (3 tests) + SeqKit 2.14 gzip/zstd/bzip2/xz level differential",
+      "deviation": "decompressed records match; compressed bytes use different backends",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-fx",
+      "upstream": "SeqKit 2.14.0 / fq 0.12.0",
+      "surface": "head:basic -n/-l/-X/global raw-output flags",
+      "kind": "feature",
+      "status": "verified",
+      "evidence": "rust-fx/tests/head.rs (5 tests) + SeqKit 2.14 10/10 head differential + compression tests",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-fx",
+      "upstream": "SeqKit 2.14.0 / fq 0.12.0",
+      "surface": "head:global -X/--id-regexp/--id-ncbi/--seq-type/--quiet/--skip-file-check",
+      "kind": "feature",
+      "status": "verified",
+      "evidence": "rust-fx/tests/head.rs infile-list/global test + SeqKit 2.14 10/10 head differential",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-fx",
+      "upstream": "SeqKit 2.14.0 / fq 0.12.0",
+      "surface": "fa2fq:basic -f/-P/subsequence/quality",
+      "kind": "feature",
+      "status": "verified",
+      "evidence": "rust-fx/tests/fa2fq.rs (3 tests) + SeqKit 2.14 forward/reverse subsequence and quality differential + compression tests",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-fx",
+      "upstream": "SeqKit 2.14.0 / fq 0.12.0",
+      "surface": "faidx:index-and-regexp -r/-f/-U/.fai/.seqkit.fai",
+      "kind": "feature",
+      "status": "verified",
+      "evidence": "rust-fx/tests/faidx.rs (4 tests) + SeqKit 2.14 region/regex/index differential",
+      "deviation": "regex output follows input order; upstream Go map order is unstable",
+      "next_action": "Accepted upstream order limitation; retain selected-surface scope"
+    },
+    {
+      "tool": "rust-fx",
+      "upstream": "SeqKit 2.14.0 / fq 0.12.0",
+      "surface": "grep:basic -p/-f/-n/-s/-v/-C/-i/-r/-d/-R/-P/-m/-D/-c",
+      "kind": "feature",
+      "status": "verified",
+      "evidence": "rust-fx/tests/grep.rs (7 tests) + SeqKit 2.14 33/33 grep differential + compression tests",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-fx",
+      "upstream": "SeqKit 2.14.0 / fq 0.12.0",
+      "surface": "grep:advanced --delete-matched/-I/-X/--id-regexp/--quiet",
+      "kind": "feature",
+      "status": "verified",
+      "evidence": "rust-fx/tests/grep.rs + SeqKit 2.14 33/33 grep differential + compression tests",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-fx",
+      "upstream": "SeqKit 2.14.0 / fq 0.12.0",
+      "surface": "rename:multiple-outfiles -m/-O/-f",
+      "kind": "feature",
+      "status": "verified",
+      "evidence": "rust-fx/tests/rename.rs + SeqKit 2.14 multiple-outfiles/force differential + compression tests",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-fx",
+      "upstream": "SeqKit 2.14.0 / fq 0.12.0",
+      "surface": "subseq:basic -r/--bed/--gtf/-u/-d/-f/--feature/--chr",
+      "kind": "feature",
+      "status": "verified",
+      "evidence": "rust-fx/tests/subseq*.rs + SeqKit 2.14 9/9 multi-file BED/GTF/flank differential",
+      "deviation": "records are buffered per input; -U is unsupported",
+      "next_action": "T7: use FASTA index or document the memory bound"
+    },
+    {
+      "tool": "rust-fx",
+      "upstream": "SeqKit 2.14.0 / fq 0.12.0",
+      "surface": "subseq:multi-file BED/GTF/flank/gene-tag",
+      "kind": "feature",
+      "status": "verified",
+      "evidence": "rust-fx/tests/subseq_gtf_flank.rs + SeqKit 2.14 9/9 multi-file differential including gene_id",
+      "deviation": "records are buffered per input; -U is unsupported",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-fx",
+      "upstream": "SeqKit 2.14.0 / fq 0.12.0",
+      "surface": "translate:basic -f/-F/-s/--clean/-m/-e/-x/-M",
+      "kind": "feature",
+      "status": "verified",
+      "evidence": "rust-fx/tests/translate.rs (7 tests) + SeqKit 2.14 full option differential",
+      "deviation": "invalid-base exit/partial-output behavior differs",
+      "next_action": "T7: align invalid-input commit policy"
+    },
+    {
+      "tool": "rust-fx",
+      "upstream": "SeqKit 2.14.0 / fq 0.12.0",
+      "surface": "translate:tables 1-6,9-14,16,21-31",
+      "kind": "feature",
+      "status": "verified",
+      "evidence": "Biopython NCBI table generation + SeqKit 2.14 29/29 table differential",
+      "deviation": "unsupported IDs fail before output",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-fx",
+      "upstream": "SeqKit 2.14.0 / fq 0.12.0",
+      "surface": "translate:listing -l/-L",
+      "kind": "feature",
+      "status": "verified",
+      "evidence": "rust-fx/tests/translate.rs + SeqKit 2.14 55/55 table/listing differential",
+      "deviation": "unknown positive IDs return an empty successful listing",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-fx",
+      "upstream": "SeqKit 2.14.0 / fq 0.12.0",
+      "surface": "replace:special-and-filters {nr}/{fn}/{fbn}/{fbne}/{kv}/f-*",
+      "kind": "feature",
+      "status": "verified",
+      "evidence": "rust-fx/tests/replace.rs (4 tests) + SeqKit 2.14 15/15 special-symbol/filter differential + UUID shape",
+      "deviation": "--compress-level is covered; UUID is not byte-compared",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-fx",
+      "upstream": "SeqKit 2.14.0 / fq 0.12.0",
+      "surface": "tab2fx:comment-prefix -p",
+      "kind": "feature",
+      "status": "verified",
+      "evidence": "rust-fx/tests/tab2fx.rs (4 tests) + SeqKit 2.14 custom comment-prefix differential",
+      "deviation": "input is buffered per file; malformed-row and quality-validation behavior differs",
+      "next_action": "T7: align malformed-row policy or re-scope"
+    },
+    {
+      "tool": "rust-fx",
+      "upstream": "SeqKit 2.14.0 / fq 0.12.0",
+      "surface": "tab2fx:buffer-size -b",
+      "kind": "feature",
+      "status": "verified",
+      "evidence": "rust-fx/tests/tab2fx.rs + SeqKit 2.14 12/12 line-boundary/partial-output differential",
+      "deviation": "invalid units fail before output; negative values retain scanner-error behavior",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-fx",
+      "upstream": "SeqKit 2.14.0 / fq 0.12.0",
+      "surface": "range:streaming positive/negative/multi-file",
+      "kind": "feature",
+      "status": "verified",
+      "evidence": "rust-fx/tests/range.rs + SeqKit 2.14 5/5 multi-file range differential",
+      "deviation": "mixed-sign stdin buffers records",
+      "next_action": "T7: implement a spool for mixed-sign stdin or re-scope"
+    },
+    {
+      "tool": "rust-fx",
+      "upstream": "SeqKit 2.14.0 / fq 0.12.0",
+      "surface": "sliding:basic -W/-s/-S/-g/-c/-C/-X",
+      "kind": "feature",
+      "status": "verified",
+      "evidence": "rust-fx/tests/sliding.rs (4 tests) + SeqKit 2.14 7/7 circular/greedy/global differential + compression tests",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-fx",
+      "upstream": "SeqKit 2.14.0 / fq 0.12.0",
+      "surface": "rmdup:duplicate-reports -D/-d",
+      "kind": "feature",
+      "status": "verified",
+      "evidence": "rust-fx/tests/rmdup.rs duplicate reports + SeqKit 2.14 duplicate-report differential + compression tests",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-fx",
+      "upstream": "SeqKit 2.14.0 / fq 0.12.0",
+      "surface": "restart:start-with -s/-m/-I",
+      "kind": "feature",
+      "status": "verified",
+      "evidence": "rust-fx/tests/restart.rs (2 tests) + SeqKit 2.14 start-with forward/reverse/mismatch differential + compression tests",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-fx",
+      "upstream": "SeqKit 2.14.0 / fq 0.12.0",
+      "surface": "sort:basic -l/-n/-s/-b/-r/-i/-G/-N/-L",
+      "kind": "feature",
+      "status": "verified",
+      "evidence": "rust-fx/tests/sort.rs (7 tests) + SeqKit 2.14 natural/prefix/two-pass/index differential",
+      "deviation": "two-pass by-seq is upstream-broken in 2.14; compressed two-pass is unsupported",
+      "next_action": "T7: document upstream defect or add a separate compatibility mode"
+    },
+    {
+      "tool": "rust-fx",
+      "upstream": "SeqKit 2.14.0 / fq 0.12.0",
+      "surface": "sort:two-pass -2/-U/-k (default/by-name/by-length)",
+      "kind": "feature",
+      "status": "verified",
+      "evidence": "rust-fx/tests/sort.rs + SeqKit 2.14 two-pass/index and multi-input rejection differential",
+      "deviation": "two-pass by-seq is upstream-broken in 2.14; compressed two-pass unsupported",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-fx",
+      "upstream": "SeqKit 2.14.0 / fq 0.12.0",
+      "surface": "fq:lint",
+      "kind": "command",
+      "status": "verified",
+      "evidence": "50/50 W1-3 differential; fq 0.12.0 validator cases",
+      "deviation": "",
+      "next_action": ""
+    },
+    {
+      "tool": "rust-fx",
+      "upstream": "SeqKit 2.14.0 / fq 0.12.0",
+      "surface": "fq:filter",
+      "kind": "command",
+      "status": "unsupported",
+      "evidence": "absent from compat/current/rust-fx.help.txt",
+      "deviation": "",
+      "next_action": "T7: implement or re-scope"
+    },
+    {
+      "tool": "rust-fx",
+      "upstream": "SeqKit 2.14.0 / fq 0.12.0",
+      "surface": "fq:generate",
+      "kind": "command",
+      "status": "unsupported",
+      "evidence": "absent from compat/current/rust-fx.help.txt",
+      "deviation": "",
+      "next_action": "T7: implement or re-scope"
+    },
+    {
+      "tool": "rust-fx",
+      "upstream": "SeqKit 2.14.0 / fq 0.12.0",
+      "surface": "fq:subsample",
+      "kind": "command",
+      "status": "unsupported",
+      "evidence": "absent from compat/current/rust-fx.help.txt",
+      "deviation": "",
+      "next_action": "T7: implement or re-scope"
+    }
+  ]
+}

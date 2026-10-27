@@ -780,6 +780,7 @@ dependencies = [
  "bioinfo-common",
  "bioinfo-fastx",
  "clap",
+ "regex",
 ]
 
 [[package]]

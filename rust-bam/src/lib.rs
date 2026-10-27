@@ -1,8 +1,7 @@
 //! `rust-bam`: SAM/BAM inspection and manipulation built on **noodles 0.118.0**.
 //!
-//! Implements the six `samtools`-shaped subcommands required by
-//! `docs/DEVELOPMENT-PLAN.md` W1-4: `view`, `flagstat`, `idxstats`,
-//! `quickcheck`, `index` and `sort`.
+//! Implements ten `samtools`-shaped subcommands: `view`, `flagstat`, `idxstats`,
+//! `quickcheck`, `index`, `sort`, `depth`, `coverage`, `flags` and `head`.
 //!
 //! ## Design decisions
 //!
@@ -41,12 +40,16 @@ pub mod stats;
 
 pub use error::{Error, Result};
 
-/// The subcommands this binary implements, in the order the plan lists them.
-pub const COMMANDS: [&str; 6] = [
+/// The subcommands this binary implements.
+pub const COMMANDS: [&str; 10] = [
     "view",
     "flagstat",
     "idxstats",
     "quickcheck",
     "index",
     "sort",
+    "depth",
+    "coverage",
+    "flags",
+    "head",
 ];

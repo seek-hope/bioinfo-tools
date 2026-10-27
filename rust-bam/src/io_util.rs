@@ -1,6 +1,6 @@
 //! A uniform reader over SAM and BAM.
 //!
-//! The six subcommands all need the same two things: the header, and a stream of
+//! All alignment subcommands need the same two things: the header, and a stream of
 //! records. SAM and BAM differ in both, so this module hides the difference
 //! behind one type and keeps each command free of format branching.
 //!
@@ -22,7 +22,7 @@ use noodles::sam;
 use noodles::sam::alignment::io::Write as AlignmentWrite;
 
 use crate::error::{Error, Result};
-use crate::format::{detect_reader, Format};
+use crate::format::{detect_reader, Format, GZIP_MAGIC};
 
 /// Alias for the SAM record type, which is what both formats decode to.
 pub type Record = sam::alignment::RecordBuf;
@@ -41,13 +41,12 @@ impl AlignmentReader {
     /// The format is detected from content, as `samtools` does, not from the
     /// extension.
     pub fn open(path: &Path) -> Result<AlignmentReader> {
-        let source: Box<dyn Read + Send> = if path.as_os_str() == "-" {
-            Box::new(io::stdin())
-        } else {
-            let file = File::open(path)
-                .map_err(|error| Error::io(format!("{}: {error}", path.display())))?;
-            Box::new(file)
-        };
+        if path.as_os_str() == "-" {
+            return Self::open_stdin();
+        }
+        let source: Box<dyn Read + Send> = Box::new(
+            File::open(path).map_err(|error| Error::io(format!("{}: {error}", path.display())))?,
+        );
         let mut buffered = BufReader::new(source);
         let format = detect_reader(&mut buffered).map_err(|error| {
             if path.as_os_str() == "-" {
@@ -63,12 +62,7 @@ impl AlignmentReader {
         match format {
             Format::Sam => {
                 // Detection consumed a few bytes; re-open so the parser starts at
-                // offset zero. Only regular files can be re-opened.
-                if path.as_os_str() == "-" {
-                    return Err(Error::usage(
-                        "SAM on standard input is not supported: format detection must peek first",
-                    ));
-                }
+                // offset zero.
                 let file = File::open(path)
                     .map_err(|error| Error::io(format!("{}: {error}", path.display())))?;
                 let reader =
@@ -76,11 +70,6 @@ impl AlignmentReader {
                 Ok(AlignmentReader::Sam(reader))
             }
             Format::Bam => {
-                if path.as_os_str() == "-" {
-                    return Err(Error::usage(
-                        "BAM on standard input is not supported: format detection must peek first",
-                    ));
-                }
                 let file = File::open(path)
                     .map_err(|error| Error::io(format!("{}: {error}", path.display())))?;
                 let bgzf_reader =
@@ -88,6 +77,43 @@ impl AlignmentReader {
                 let reader = bam::io::Reader::from(bgzf_reader);
                 Ok(AlignmentReader::Bam(reader))
             }
+            Format::Cram => Err(Error::usage(
+                "CRAM is not supported by this build; convert it with `samtools view -b` first",
+            )),
+        }
+    }
+
+    /// Open standard input without discarding the bytes used for detection.
+    fn open_stdin() -> Result<AlignmentReader> {
+        let mut source = io::stdin();
+        let mut head = [0u8; 4];
+        let mut read = 0;
+        while read < head.len() {
+            match source.read(&mut head[read..]) {
+                Ok(0) => break,
+                Ok(count) => read += count,
+                Err(error) if error.kind() == io::ErrorKind::Interrupted => continue,
+                Err(error) => return Err(Error::io(format!("cannot read stdin: {error}"))),
+            }
+        }
+        if read == 0 {
+            return Err(Error::input("empty input: not a SAM or BAM file"));
+        }
+        let prefix = head[..read].to_vec();
+        // BGZF starts with gzip magic. The BAM parser validates the decompressed
+        // BAM magic, so no second consuming detection pass is needed here.
+        let format = if prefix.starts_with(&GZIP_MAGIC) {
+            Format::Bam
+        } else {
+            detect_reader(&mut io::Cursor::new(prefix.clone()))?
+        };
+        let chained = io::Cursor::new(prefix).chain(source);
+        let buffered = BufReader::new(Box::new(chained) as Box<dyn Read + Send>);
+        match format {
+            Format::Sam => Ok(AlignmentReader::Sam(sam::io::Reader::new(buffered))),
+            Format::Bam => Ok(AlignmentReader::Bam(bam::io::Reader::from(
+                bgzf::io::Reader::new(buffered),
+            ))),
             Format::Cram => Err(Error::usage(
                 "CRAM is not supported by this build; convert it with `samtools view -b` first",
             )),

@@ -1,0 +1,68 @@
+usage: fastqc [-h] [-v] [--outdir OUTDIR] [-c CONTAMINANTS] [-a ADAPTERS] [-l LIMITS] [-d DIR]
+              [--min_length MIN_LENGTH] [--max_length MAX_LENGTH] [--dup_length DUP_LENGTH] [--memory MEMORY]
+              [-t THREADS] [-q] [--fast5 FAST5] [--phred64] [-j JAVA] [--nogroup] [--png] [--extract] [--delete]
+              [-f FORMAT] [--debug]
+              [files ...]
+
+A high throughput sequence QC analysis tool
+
+positional arguments:
+  files                 Files to process
+
+options:
+  -h, --help            show this help message and exit
+  -v, --version         Print FastQC version
+  --outdir OUTDIR       Create all output files in the specified output directory. Please note that this directory
+                        must exist as the program will not create it. If this option is not set then the output file
+                        for each sequence file is created in the same directory as the sequence file which was
+                        processed.
+  -c CONTAMINANTS, --contaminants CONTAMINANTS
+                        Specifies a non-default file which contains the list of contaminants to screen overrepresented
+                        sequences against. The file must contain sets of named contaminants in the form
+                        name[tab]sequence. Lines prefixed with a hash will be ignored.
+  -a ADAPTERS, --adapters ADAPTERS
+                        Specifies a non-default file which contains the list of adapter sequences which will be
+                        explicity searched against the library. The file must contain sets of named adapters in the
+                        form name[tab]sequence. Lines prefixed with a hash will be ignored.
+  -l LIMITS, --limits LIMITS
+                        Specifies a non-default file which contains a set of criteria which will be used to determine
+                        the warn/error limits for the various modules. This file can also be used to selectively
+                        remove some modules from the output all together. The format needs to mirror the default
+                        limits.txt file found in the Configuration folder.
+  -d DIR, --dir DIR     Selects a directory to be used for temporary files written when generating report images.
+                        Defaults to system temp directory if not specified.
+  --min_length MIN_LENGTH
+                        Ignore reads shorter than this length (bp)
+  --max_length MAX_LENGTH
+                        Ignore reads longer than this length (bp)
+  --dup_length DUP_LENGTH
+                        Sets a length to which the sequences will be truncated when defining them to be duplicates,
+                        affecting the duplication and overrepresented sequences plot. This can be useful if you have
+                        long reads with higher levels of miscalls, or contamination with adapter dimers containing UMI
+                        sequences.
+  --memory MEMORY       Sets the base amount of memory, in Megabytes, used to process each file. Defaults to 512MB.
+                        You may need to increase this if you have a file with very long sequences in it.
+  -t THREADS, --threads THREADS
+                        Total number of CPU threads to use. Processing a single file can use up to 4 threads. Defaults
+                        to 4, capped at the number of available CPUs.
+  -q, --quiet           Supress all progress messages
+  --fast5 FAST5         Files come in fast5 format. In this mode you can pass in directories to process and the
+                        program will take in all fast5 files within those directories and produce a single output file
+                        from the sequences found in all files.
+  --phred64             Quality scores are encoded in the obsolete Phred64 format.
+  -j JAVA, --java JAVA  Provides the full path to the java binary you want to use to launch FastQC. If not supplied
+                        then the program will look for an embedded JRE in a folder called jre in the root of the
+                        FastQC installation, or java will be assumed to be in your path.
+  --nogroup             Disable grouping of bases for reads >50bp. All reports will show data for every base in the
+                        read. WARNING: Using this option will cause fastqc to crash and burn if you use it on really
+                        long reads, and your plots may end up a ridiculous size. You have been warned!
+  --png                 Save the graphs in the report in PNG format. Without this option graphs will be SVG format by
+                        default
+  --extract             If set then the zipped output file will be uncompressed in the same directory after it has
+                        been created. If --delete is also specified then the zip file will be removed after the
+                        contents are unzipped.
+  --delete              If used with --extract then the zip file of metrics will be deleted after being extracted
+  -f FORMAT, --format FORMAT
+                        Bypasses the normal sequence file format detection and forces the program to use the specified
+                        format. Valid formats are bam, sam,bam_mapped, sam_mapped and fastq.
+  --debug               Write debug information from launch script

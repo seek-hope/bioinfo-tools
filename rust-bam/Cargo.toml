@@ -3,7 +3,7 @@ name = "rust-bam"
 version = "0.1.0"
 edition = "2021"
 rust-version = "1.91"
-description = "SAM/BAM view, flagstat, idxstats, quickcheck, index and sort on noodles"
+description = "SAM/BAM inspection and manipulation on noodles"
 license = "MIT"
 
 [dependencies]

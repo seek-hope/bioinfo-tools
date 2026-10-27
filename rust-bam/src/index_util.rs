@@ -19,10 +19,9 @@
 //!
 //! ## What is written
 //!
-//! A BAI (`.bai`) via `noodles_bam::bai`. CSI is available in noodles but is not
-//! written here; `--csi` is deliberately absent rather than advertised and
-//! unimplemented. `samtools index -c` writes CSI, and that gap is recorded in the
-//! evidence as a limitation.
+//! A BAI or CSI is written through `noodles_bam::index`, selected by the
+//! `build_bai`/`build_csi` entry points. Both formats are covered by region-query
+//! integration tests.
 
 use std::fs::File;
 use std::io::BufWriter;

@@ -1,13 +1,9 @@
-//! FastQC modules intentionally absent from this prototype.
+//! FastQC modules that are not implemented.
 //!
-//! This module exists so the omission is a documented decision with a reason,
-//! rather than an unexplained gap. It is data, so a reviewer can check the claim
-//! mechanically instead of reading prose.
-//!
-//! Scope reminder: this prototype emits **`fastqc_data.txt` only**. No HTML, no
-//! plots, no zip archive.
+//! The report bundle contains data, summary and data-table HTML/ZIP artifacts;
+//! plot images are not emitted.
 
-/// A module FastQC 0.13.0 has that this prototype does not implement.
+/// A FastQC 0.13.0 module that this implementation does not emit.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct AbsentModule {
     /// The module name FastQC uses.
@@ -18,8 +14,8 @@ pub struct AbsentModule {
     pub requirement: &'static str,
 }
 
-/// Every FastQC 0.13.0 module this prototype omits.
-pub const ABSENT_MODULES: [AbsentModule; 3] = [
+/// FastQC 0.13.0 modules that are not implemented.
+pub const ABSENT_MODULES: [AbsentModule; 2] = [
     AbsentModule {
         name: "Kmer Content",
         reason: "FastQC reports position-specific k-mer enrichment using a binomial \
@@ -38,16 +34,6 @@ pub const ABSENT_MODULES: [AbsentModule; 3] = [
         requirement: "Implement tile extraction from the CASAVA header and the per-tile \
                       deviation calculation.",
     },
-    AbsentModule {
-        name: "Per base sequence quality (grouped bases for long reads)",
-        reason: "FastQC groups base positions into bins once reads exceed 50bp, using \
-                 BaseGroup.makeBaseGroups with linear, exponential and logarithmic \
-                 strategies. This prototype reports **every position** (`--nogroup` \
-                 behaviour), so for reads longer than 50bp its per-base tables are \
-                 longer than FastQC's default output.",
-        requirement: "Port BaseGroup.makeBaseGroups and the grouping strategy selection. \
-                      Until then, compare against FastQC run with --nogroup.",
-    },
 ];
 
 /// The names of the absent modules, for a quick assertion.
@@ -58,7 +44,7 @@ pub fn absent_module_names() -> Vec<&'static str> {
 /// A single human-readable summary of what is missing, for `--version --verbose`
 /// and for the evidence document.
 pub fn summary() -> String {
-    let mut out = String::from("Modules intentionally absent from this prototype:\n");
+    let mut out = String::from("Modules not implemented:\n");
     for module in ABSENT_MODULES {
         out.push_str(&format!("  - {}: {}\n", module.name, module.reason));
     }

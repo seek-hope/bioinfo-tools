@@ -1,7 +1,8 @@
-//! `rust-fastqc`: a FastQC-compatible QC prototype.
+//! `rust-fastqc`: FastQC-compatible QC reports.
 //!
-//! Emits `fastqc_data.txt` in FastQC 0.13.0's format. HTML/plots are deliberately
-//! out of scope (see `docs/EVIDENCE-QC.md`).
+//! Emits `fastqc_data.txt` in FastQC 0.13.0's format, plus `summary.txt`, a
+//! data-table HTML report and a stored ZIP. Plot images are not emitted
+//! (see `docs/EVIDENCE-QC.md`).
 //!
 //! ## Why the format is reproduced rather than approximated
 //!
@@ -28,21 +29,22 @@
 //! Present: Basic Statistics, Per base sequence quality, Per sequence quality
 //! scores, Per base sequence content, Per base N content, Per sequence GC content,
 //! Sequence Length Distribution, Sequence Duplication Levels, Overrepresented
-//! sequences, Adapter Content (experimental exact-match subset).
+//! sequences, Adapter Content (FastQC cumulative 12bp adapter list).
 //!
-//! See [`modules`] for exactly which are computed and which are emitted as empty
-//! placeholders, and [`absent`] for what the prototype omits.
+//! See [`modules`] for the emitted modules and [`absent`] for the remaining gaps.
 
 #![forbid(unsafe_code)]
 #![warn(missing_docs)]
 
 pub mod absent;
+pub mod contaminants;
 pub mod error;
 pub mod grouping;
 pub mod limits;
 pub mod modules;
 pub mod report;
 pub mod stats;
+mod zip;
 
 pub use error::{Error, Result};
 pub use report::{Report, ReportWriter};
@@ -54,7 +56,7 @@ pub const FASTQC_VERSION: &str = "0.13.0";
 /// The `##FastQC` header line, byte for byte.
 pub const HEADER: &str = "##FastQC\t0.13.0";
 
-/// The QC modules this prototype computes.
+/// The QC modules this implementation computes.
 pub const COMPUTED_MODULES: [&str; 10] = [
     "Basic Statistics",
     "Per base sequence quality",

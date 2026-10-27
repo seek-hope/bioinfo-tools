@@ -1,0 +1,13 @@
+idxstats: unrecognized option '--help'
+Usage: samtools idxstats [options] <in.bam>
+  -X           Include customized index file
+      --input-fmt-option OPT[=VAL]
+               Specify a single input file format option in the form
+               of OPTION or OPTION=VALUE
+  -@, --threads INT
+               Number of additional threads to use [0]
+      --verbosity INT
+               Set level of verbosity
+
+See https://www.htslib.org/doc/samtools.html#GLOBAL_COMMAND_OPTIONS
+for more details.

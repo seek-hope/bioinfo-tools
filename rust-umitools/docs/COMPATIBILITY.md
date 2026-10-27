@@ -8,7 +8,7 @@
 | 状态 | 含义 |
 |---|---|
 | `verified` | 有可执行对照证据（oracle、exact、格式或 spill 套件），结果一致 |
-| `experimental` | 已实现并通过单元/冒烟测试，但未做逐项上游对照 |
+| `experimental` | 已实现，但只有部分上游对照，或仍有明确差异 |
 | `unsupported` | 创建任何输出文件之前明确拒绝 |
 
 机器可读的逐项状态见 [`compatibility.tsv`](compatibility.tsv)（由 `tests/compat/matrix.py` 生成，`tests/ci/check_manifest.sh` 校验同步）。
@@ -30,8 +30,8 @@ bash tests/oracle/run_formats.sh     # stdin/stdout、CRAM、摘要
 | 五种归并方法 | `--method=unique\|percentile\|cluster\|adjacency\|directional` | `verified` | oracle C2 + exact 用例 |
 | 距离阈值 | `--edit-distance-threshold=0,1,2,≥长度` | `verified` | exact 用例 |
 | 单端 / 双端 | `--paired` | `verified` | exact `paired-*` 与 6 个 `paired-repeat`；oracle C8 |
-| UMI 来源 | `read_id`、`tag` | `verified` | exact `tag-source`；`--extract-umi-method=umis` 为 `experimental` |
-| 固定 seed 记录一致 | `--random-seed` | `verified` | 全部 exact + 全量 small.bam 记录摘要 |
+| UMI 来源 | `read_id`、`tag`、`umis` | `verified` | exact `tag-source`、`umis source`；后两者均有上游逐字节证据 |
+| 固定 seed 常规路径 | `--random-seed` | `verified` | 全部 exact + 全量 small.bam 记录摘要；gene-map 例外见下 |
 | 默认坐标排序 / 保留顺序 | `--no-sort-output` | `verified` | oracle B04 |
 | 代表 read | `--representative=upstream` | `verified` | oracle C3；`stable` 为扩展（`experimental`） |
 | MAPQ 过滤 | `--mapping-quality` | `verified` | exact `mapq filter` |
@@ -39,9 +39,10 @@ bash tests/oracle/run_formats.sh     # stdin/stdout、CRAM、摘要
 | 分组维度 | `--spliced-is-unique`、`--ignore-tlen`、`--read-length` | `verified` | exact `spliced`、`ignore-tlen`、`read-length` |
 | 抽样 | `--subset P` | `verified` | exact `subset`（与平局共享 RNG） |
 | 逐基因 / 逐细胞 | `--per-gene --gene-tag`、`--per-cell --cell-tag` | `verified` | exact `per-gene`、`per-cell` |
+| gene/transcript 聚合 | `--per-gene --per-contig [--gene-transcript-map]` | `experimental` | 已写 MC tag；上游 contig set 顺序受 `PYTHONHASHSEED` 影响，代表 read 可能不同；五次探针后接受该限制 |
 | 单 contig | `--chrom NAME` | `verified` | exact `--chrom`；未知名写前拒绝 |
 | 有界内存 | `--memory-limit`、`--partition-genes`、磁盘邻居 | `verified` | K9 强制路径与内存路径逐字节一致 |
-| 统计输出 | `--output-stats` | `unsupported` | null model 未实现，写前 exit 2 |
+| 统计输出 | `--output-stats` | `verified` | unique/directional/cluster/adjacency/percentile 逐字节一致；含多 bundle 与 NumPy null 模型 |
 | 白名单过滤 / 整 contig 缓冲 | `--filter-umi --umi-whitelist`（含 `--umi-whitelist-paired`）、`--buffer-whole-contig` | `verified` | exact 单端/配对白名单、soft-clip 窗口 |
 | 头部溯源 | `--add-pg` | 扩展 | 默认不写；显式开启会改变输出字节 |
 
@@ -55,7 +56,7 @@ bash tests/oracle/run_formats.sh     # stdin/stdout、CRAM、摘要
 | `count --per-gene --gene-tag` | `verified` | exact `count --per-gene` |
 | `count --per-cell`（长表稀疏三元组） | `verified` | exact `count --per-cell` |
 | `count --wide`（稠密 gene×cell） | `verified` | exact `count --wide` |
-| `count --per-contig` | `experimental` | 单元测试 |
+| `count --per-contig` | `verified` | exact `count --per-contig` |
 | `count --per-contig --gene-transcript-map` | `verified` | exact `count --gene-transcript-map` |
 | `count_tab` / `--per-cell` | `verified` | exact `count_tab` |
 
@@ -65,10 +66,11 @@ bash tests/oracle/run_formats.sh     # stdin/stdout、CRAM、摘要
 |---|---|---|
 | `--extract-method=string`（`-p`、5′/3′、配对、gzip、质量过滤/掩码） | `verified` | K10 与上游逐字节对比 |
 | `--extract-method=regex`（`umi_*`/`discard_*` 命名分组） | `verified` | K10 `regex extraction` |
-| `--extract-method` 其他值、phred64、缺 `umi_` 分组 | `unsupported` | 写前 exit 2 |
+| `--quality-encoding phred64/solexa`（quality filter/mask offset） | `verified` | extract oracle；phred64 过滤逐字节一致 |
+| `--extract-method` 其他值、缺 `umi_` 分组 | `verified` | 与上游一致，写前 exit 2 |
 | `whitelist --knee-method=distance\|density`、`--set-cell-number` | `verified` | K10 五组 TSV 逐字节一致 |
 | `whitelist --ed-above-threshold=discard\|correct` | `verified` | K10 `correct/discard above threshold` |
-| `whitelist --method=umis`、`--read2-in` | `unsupported` | 写前 exit 2 |
+| `whitelist --method=umis`、`--read2-in [--bc-pattern2]` | `verified` | whitelist oracle；单端 UMI 计数与配对 pattern2 逐字节一致 |
 
 ## 格式与管道
 
@@ -89,9 +91,10 @@ bash tests/oracle/run_formats.sh     # stdin/stdout、CRAM、摘要
 5. **输入排序校验**：本实现校验 `(tid, pos)` 单调，未排序报 exit 3；上游不校验。
 6. **混合 UMI 长度**：本实现 exit 3 并给出可操作信息。
 7. **退出码与错误文本**：定义 0/2/3/4 契约。
-8. **CRAM 派生标签**：解码可能按 htslib 设置补出 `MD/NM`，按核心字段比较。
+8. **CRAM 派生标签**：noodles 解码可能补出 `MD/NM`，按核心字段比较。
 9. **有界内存路径的机制**：bundle 窗口在位置边界提前结束（无需持久化状态回放）；mate 请求/gene 聚合/超大 bundle 的 pair 索引与 CSR 落盘，结果与内存路径逐字节一致。
 10. **单个超大 gene**：gene 分区后仍可能超出预算，报 exit 4（不 OOM）。
+11. **gene-map 代表 read**：上游按 Python `set` 遍历 contig，`PYTHONHASHSEED` 会改变 RNG 消耗顺序；固定 hash seed 可重复，但不把跨 hash seed 的逐字节一致作为目标。
 
 ## 资源行为
 

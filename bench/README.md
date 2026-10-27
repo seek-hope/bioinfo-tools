@@ -48,7 +48,7 @@ filesystem quota. Every timed command runs in its own case directory. Inputs are
 generated outside the timed command, so generation is not included in the
 measurement.
 
-## What this does not claim
+## Scope and limits
 
 - It does not compare every case to cutadapt/SeqKit/FastQC/UMI-tools oracles; the
   correctness checks are structural/record-count based. Oracle suites remain
@@ -61,3 +61,32 @@ measurement.
   RSS.
 - It does not claim hosted-runner or cross-platform performance. Shared-machine
   noise is reduced by repeats but not eliminated.
+
+## Upstream correctness benchmark
+
+`upstream.py` complements this structural runner with direct upstream output
+comparison. It runs the rust binary and the pinned upstream binary on the same
+generated input, for cutadapt, FastQC, SeqKit stats, samtools sort and UMI-tools
+dedup. It records the same `/usr/bin/time -v` and provenance fields, plus output
+hashes and a normalized comparison:
+
+```sh
+export PATH="$PWD/tests/ci/env/bin:$PATH"
+export CUTADAPT_ORACLE=/path/to/cutadapt-4.6
+python3 bench/upstream.py --sizes 1,10 --repeats 2 \
+  --out bench/results/upstream-current.json
+```
+
+In the recorded 1x/10x, two-repeat run, all 10 size/case combinations were
+output-equivalent ([`results/upstream-current.json`](results/upstream-current.json)).
+`fastqc_data.txt` was byte-identical after the FastQC Adapter Content and Basic
+Statistics unit fixes; BAM cases compare records plus a header with `@PG`
+provenance lines removed, while FASTQ and TSV cases compare bytes. Upstream binaries are supplied via
+`CUTADAPT_ORACLE`/`UMI_TOOLS_ORACLE`/`SAMTOOLS_ORACLE`/`FASTQC_ORACLE`/
+`SEQKIT_ORACLE`, or resolved from `tests/ci/env/bin`.
+
+FastQC upstream timing is dominated by JVM startup and temporary files; the
+recorded 1x/10x speed ratios are not universal performance claims. Small
+`fx_stats`/`bam_sort` cases are sub-20ms and their ratios are startup-noise
+dominated. This runner compares `fastqc_data.txt`; it does not compare the HTML
+or ZIP artifacts.

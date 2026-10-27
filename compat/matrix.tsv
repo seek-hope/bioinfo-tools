@@ -1,0 +1,265 @@
+tool	upstream	surface	kind	status	evidence	deviation	next_action
+rust-cutadapt	cutadapt 4.6	-h --help	option	verified	cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md		
+rust-cutadapt	cutadapt 4.6	--version	option	verified	cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md		
+rust-cutadapt	cutadapt 4.6	--debug	option	verified	cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md		
+rust-cutadapt	cutadapt 4.6	-j --cores	option	verified	cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md		
+rust-cutadapt	cutadapt 4.6	-a --adapter	option	verified	cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md		
+rust-cutadapt	cutadapt 4.6	-g --front	option	verified	cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md		
+rust-cutadapt	cutadapt 4.6	-b --anywhere	option	verified	cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md		
+rust-cutadapt	cutadapt 4.6	-e --error-rate --errors	option	verified	cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md		
+rust-cutadapt	cutadapt 4.6	--no-indels	option	verified	cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md		
+rust-cutadapt	cutadapt 4.6	-n --times	option	verified	cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md		
+rust-cutadapt	cutadapt 4.6	-O --overlap	option	verified	cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md		
+rust-cutadapt	cutadapt 4.6	--match-read-wildcards	option	verified	cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md		
+rust-cutadapt	cutadapt 4.6	-N --no-match-adapter-wildcards	option	verified	cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md		
+rust-cutadapt	cutadapt 4.6	--action	option	verified	cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md		
+rust-cutadapt	cutadapt 4.6	--rc --revcomp	option	verified	cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md		
+rust-cutadapt	cutadapt 4.6	-u --cut	option	verified	cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md		
+rust-cutadapt	cutadapt 4.6	--nextseq-trim	option	verified	cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md		
+rust-cutadapt	cutadapt 4.6	-q --quality-cutoff	option	verified	cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md		
+rust-cutadapt	cutadapt 4.6	--quality-base	option	verified	cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md		
+rust-cutadapt	cutadapt 4.6	--poly-a	option	verified	cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md		
+rust-cutadapt	cutadapt 4.6	--length -l	option	verified	cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md		
+rust-cutadapt	cutadapt 4.6	--trim-n	option	verified	cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md		
+rust-cutadapt	cutadapt 4.6	--length-tag	option	verified	cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md		
+rust-cutadapt	cutadapt 4.6	--strip-suffix	option	verified	cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md		
+rust-cutadapt	cutadapt 4.6	-x --prefix	option	verified	cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md		
+rust-cutadapt	cutadapt 4.6	-y --suffix	option	verified	cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md		
+rust-cutadapt	cutadapt 4.6	--rename	option	verified	cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md		
+rust-cutadapt	cutadapt 4.6	--zero-cap -z	option	verified	cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md		
+rust-cutadapt	cutadapt 4.6	-m --minimum-length	option	verified	cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md		
+rust-cutadapt	cutadapt 4.6	-M --maximum-length	option	verified	cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md		
+rust-cutadapt	cutadapt 4.6	--max-n	option	verified	cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md		
+rust-cutadapt	cutadapt 4.6	--max-expected-errors --max-ee	option	verified	cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md		
+rust-cutadapt	cutadapt 4.6	--max-average-error-rate --max-aer	option	verified	cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md		
+rust-cutadapt	cutadapt 4.6	--discard-trimmed --discard	option	verified	cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md		
+rust-cutadapt	cutadapt 4.6	--discard-untrimmed --trimmed-only	option	verified	cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md		
+rust-cutadapt	cutadapt 4.6	--discard-casava	option	verified	cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md		
+rust-cutadapt	cutadapt 4.6	--quiet	option	verified	cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md		
+rust-cutadapt	cutadapt 4.6	--report	option	verified	cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md		
+rust-cutadapt	cutadapt 4.6	--json	option	verified	cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md		
+rust-cutadapt	cutadapt 4.6	-o --output	option	verified	cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md		
+rust-cutadapt	cutadapt 4.6	--fasta	option	verified	cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md		
+rust-cutadapt	cutadapt 4.6	-Z	option	verified	cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md		
+rust-cutadapt	cutadapt 4.6	--info-file	option	verified	cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md		
+rust-cutadapt	cutadapt 4.6	-r --rest-file	option	verified	cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md		
+rust-cutadapt	cutadapt 4.6	--wildcard-file	option	verified	cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md		
+rust-cutadapt	cutadapt 4.6	--too-short-output	option	verified	cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md		
+rust-cutadapt	cutadapt 4.6	--too-long-output	option	verified	cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md		
+rust-cutadapt	cutadapt 4.6	--untrimmed-output	option	verified	cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md		
+rust-cutadapt	cutadapt 4.6	-A	option	verified	cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md		
+rust-cutadapt	cutadapt 4.6	-G	option	verified	cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md		
+rust-cutadapt	cutadapt 4.6	-B	option	verified	cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md		
+rust-cutadapt	cutadapt 4.6	-U	option	verified	cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md		
+rust-cutadapt	cutadapt 4.6	-Q	option	verified	cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md		
+rust-cutadapt	cutadapt 4.6	-p --paired-output	option	verified	cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md		
+rust-cutadapt	cutadapt 4.6	--pair-adapters	option	verified	cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md		
+rust-cutadapt	cutadapt 4.6	--pair-filter	option	verified	cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md		
+rust-cutadapt	cutadapt 4.6	--interleaved	option	verified	cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md		
+rust-cutadapt	cutadapt 4.6	--untrimmed-paired-output	option	verified	cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md		
+rust-cutadapt	cutadapt 4.6	--too-short-paired-output	option	verified	cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md		
+rust-cutadapt	cutadapt 4.6	--too-long-paired-output	option	verified	cutadapt 4.6: 119/119 differential; rust-cutadapt/docs/FULL-COMPATIBILITY.md		
+rust-cutadapt	cutadapt 4.6	report:text	feature	verified	119/119 differential; text report cases		
+rust-cutadapt	cutadapt 4.6	report:json	feature	verified	119/119 differential; JSON schema cases		
+rust-cutadapt	cutadapt 4.6	compression:gzip/bzip2/xz	feature	verified	differential and conformance fixtures		
+rust-cutadapt	cutadapt 4.6	paired/interleaved	feature	verified	119/119 differential; paired cases		
+rust-cutadapt	cutadapt 4.6	determinism:thread-count	feature	verified	tests/cli_e2e.rs parallel/single-thread		
+rust-cutadapt	cutadapt 4.6	performance:5x-target	feature	verified	rust-cutadapt/docs/FULL-COMPATIBILITY.md measured 6.60x		
+rust-umitools	UMI-tools 1.1.6	global:--memory-limit	feature	verified	spill and determinism suites; exit code + bytes	64 MiB minimum working set	
+rust-umitools	UMI-tools 1.1.6	global:--quiet, --progress, --summary-json	feature	verified	formats suite; stream contents		
+rust-umitools	UMI-tools 1.1.6	global:--threads	feature	verified	determinism suite; decompressed bytes	1/2/8/16	
+rust-umitools	UMI-tools 1.1.6	global:-I - / -S - (stdin/stdout)	feature	verified	formats suite; decompressed bytes	two-pass processing spools stdin	
+rust-umitools	UMI-tools 1.1.6	global:CRAM input/output with --reference	feature	verified	formats suite; core fields	derived MD/NM tags may be added when decoding	
+rust-umitools	UMI-tools 1.1.6	count:--gene-transcript-map	feature	verified	1.1.6; edge cases; tsv bytes	requires --per-contig	
+rust-umitools	UMI-tools 1.1.6	count:--partition-genes	feature	verified	spill suite; TSV bytes	automatic gene partition fallback	
+rust-umitools	UMI-tools 1.1.6	count:--per-cell	feature	verified	1.1.6; edge cases; tsv bytes	sparse triplet form	
+rust-umitools	UMI-tools 1.1.6	count:--per-contig	feature	verified	1.1.6; per-contig; tsv bytes		
+rust-umitools	UMI-tools 1.1.6	count:--per-gene --gene-tag	feature	verified	1.1.6; tagged; tsv bytes		
+rust-umitools	UMI-tools 1.1.6	count:--wide	feature	verified	1.1.6; edge cases; tsv bytes	dense gene x cell matrix	
+rust-umitools	UMI-tools 1.1.6	count_tab:--per-cell	feature	verified	1.1.6; cell table; tsv bytes		
+rust-umitools	UMI-tools 1.1.6	count_tab:default	feature	verified	1.1.6; two column table; tsv bytes		
+rust-umitools	UMI-tools 1.1.6	dedup:--add-pg	feature	verified	n/a; not compared; extension, not upstream	changes output bytes	
+rust-umitools	UMI-tools 1.1.6	dedup:--buffer-whole-contig	feature	verified	1.1.6; edge cases; decompressed bytes	contig-wide bundle window	
+rust-umitools	UMI-tools 1.1.6	dedup:--chrom NAME	feature	verified	1.1.6; edge cases; decompressed bytes	whole-contig filter, unknown name refused	
+rust-umitools	UMI-tools 1.1.6	dedup:--compresslevel 0-9	feature	verified	1.1.6; edge cases; decompressed bytes	0 stores uncompressed blocks; default 1, 6 matches upstream size	
+rust-umitools	UMI-tools 1.1.6	dedup:--edit-distance-threshold=0|1|2|at-length	feature	verified	1.1.6; edge cases; decompressed bytes		
+rust-umitools	UMI-tools 1.1.6	dedup:--extract-umi-method=read_id	feature	verified	1.1.6; families; decompressed bytes		
+rust-umitools	UMI-tools 1.1.6	dedup:--extract-umi-method=tag	feature	verified	1.1.6; tagged; decompressed bytes		
+rust-umitools	UMI-tools 1.1.6	dedup:--extract-umi-method=umis	feature	verified	1.1.6; umis source; decompressed bytes	UMI_ fields in query name	
+rust-umitools	UMI-tools 1.1.6	dedup:--filter-umi [--umi-whitelist|--umi-whitelist-paired]	feature	verified	1.1.6; edge cases; decompressed bytes	single and paired whitelists	
+rust-umitools	UMI-tools 1.1.6	dedup:--gene-transcript-map	feature	experimental	1.1.6; five PYTHONHASHSEED probes; fixed-seed repeats; BAM bytes	accepted upstream set-order nondeterminism; representative may differ	Accepted upstream nondeterminism; retain experimental
+rust-umitools	UMI-tools 1.1.6	dedup:--ignore-tlen	feature	verified	1.1.6; edge cases; decompressed bytes		
+rust-umitools	UMI-tools 1.1.6	dedup:--mapping-quality	feature	verified	1.1.6; edge cases; decompressed bytes		
+rust-umitools	UMI-tools 1.1.6	dedup:--method=unique|percentile|cluster|adjacency|directional	feature	verified	1.1.6; families, paired-repeat; decompressed bytes	five methods	
+rust-umitools	UMI-tools 1.1.6	dedup:--multimapping-detection-method=NH|X0|XT	feature	verified	1.1.6; edge cases; decompressed bytes	tie draw consumes the same RNG values as upstream	
+rust-umitools	UMI-tools 1.1.6	dedup:--no-sort-output	feature	verified	1.1.6; single-nosort, paired-nosort; decompressed bytes		
+rust-umitools	UMI-tools 1.1.6	dedup:--output-stats	feature	verified	1.1.6; unique/directional/cluster/adjacency/percentile and multi-bundle; TSV bytes	NumPy RandomState null model; unique duplicate-key overwrite	
+rust-umitools	UMI-tools 1.1.6	dedup:--paired	feature	verified	1.1.6; paired, paired-repeat; decompressed bytes	includes repeated pairs and mate recovery	
+rust-umitools	UMI-tools 1.1.6	dedup:--per-cell --cell-tag	feature	verified	1.1.6; edge cases; decompressed bytes		
+rust-umitools	UMI-tools 1.1.6	dedup:--per-gene --gene-tag	feature	verified	1.1.6; edge cases; decompressed bytes		
+rust-umitools	UMI-tools 1.1.6	dedup:--random-seed	feature	verified	1.1.6; all exact cases; decompressed bytes	CPython MT19937 reproduction	
+rust-umitools	UMI-tools 1.1.6	dedup:--read-length	feature	verified	1.1.6; edge cases; decompressed bytes		
+rust-umitools	UMI-tools 1.1.6	dedup:--representative=stable	feature	experimental	unit tests; molecule set	project RNG, not CPython	T4: close with upstream evidence or re-scope
+rust-umitools	UMI-tools 1.1.6	dedup:--representative=upstream	feature	verified	1.1.6; exact cases + oracle C3; decompressed bytes	representative tie handling	
+rust-umitools	UMI-tools 1.1.6	dedup:--spliced-is-unique	feature	verified	1.1.6; edge cases; decompressed bytes		
+rust-umitools	UMI-tools 1.1.6	dedup:--subset P	feature	verified	1.1.6; edge cases; decompressed bytes	shared RNG with the tie draw	
+rust-umitools	UMI-tools 1.1.6	dedup:bounded paths: window, mate join, disk bundle	feature	verified	spill suite; decompressed bytes	K9 forced paths	
+rust-umitools	UMI-tools 1.1.6	dedup:default coordinate sort	feature	verified	1.1.6; exact cases + oracle B04; decompressed bytes		
+rust-umitools	UMI-tools 1.1.6	extract:--extract-method=regex	feature	verified	1.1.6; extract cases; FASTQ bytes	named umi_* and discard_* groups	
+rust-umitools	UMI-tools 1.1.6	extract:--extract-method=string with -p	feature	verified	1.1.6; extract cases; FASTQ bytes	single/paired, 3prime, gzip, quality filter/mask	
+rust-umitools	UMI-tools 1.1.6	extract:--quality-encoding phred64/solexa	feature	verified	1.1.6; extract cases; FASTQ bytes	quality filter/mask offset	
+rust-umitools	UMI-tools 1.1.6	extract:invalid methods rejected	feature	verified	1.1.6; extract cases; exit before output	upstream accepts string/regex only	
+rust-umitools	UMI-tools 1.1.6	group:--group-out	feature	verified	1.1.6; families x five methods; bam bytes + tsv bytes		
+rust-umitools	UMI-tools 1.1.6	group:--output-bam	feature	verified	1.1.6; families x five methods; bam bytes		
+rust-umitools	UMI-tools 1.1.6	group:--per-gene [--per-cell]	feature	verified	1.1.6; edge cases; bam bytes + tsv bytes		
+rust-umitools	UMI-tools 1.1.6	group:UG and BX tags	feature	verified	1.1.6; families x five methods; bam bytes	UG uses C/S/I	
+rust-umitools	UMI-tools 1.1.6	whitelist:--ed-above-threshold=discard|correct	feature	verified	1.1.6; whitelist cases; TSV bytes		
+rust-umitools	UMI-tools 1.1.6	whitelist:--knee-method=distance|density, --set-cell-number	feature	verified	1.1.6; whitelist cases; TSV bytes		
+rust-umitools	UMI-tools 1.1.6	whitelist:--method=umis, --read2-in [--bc-pattern2]	feature	verified	1.1.6; whitelist cases; TSV bytes	unique UMI counts and paired pattern2	
+rust-umitools	UMI-tools 1.1.6	whitelist	command	verified	oracle whitelist cases; exact 9		
+rust-umitools	UMI-tools 1.1.6	extract	command	verified	oracle extract 11; exact cases		
+rust-umitools	UMI-tools 1.1.6	dedup	command	verified	exact 77/77 and semantic oracle cases		
+rust-umitools	UMI-tools 1.1.6	group	command	verified	exact group cases + oracle C2		
+rust-umitools	UMI-tools 1.1.6	count	command	verified	exact count/count_tab cases + oracle		
+rust-umitools	UMI-tools 1.1.6	count_tab	command	verified	exact count_tab cases		
+rust-umitools	UMI-tools 1.1.6	global:--help/--version	option	verified	compat/current/rust-umitools.help.txt		
+rust-bam	samtools 1.24	dict	command	unsupported	absent from compat/current/rust-bam.help.txt	samtools command not implemented	T5: implement with samtools differential
+rust-bam	samtools 1.24	faidx	command	unsupported	absent from compat/current/rust-bam.help.txt	samtools command not implemented	T5: implement with samtools differential
+rust-bam	samtools 1.24	fqidx	command	unsupported	absent from compat/current/rust-bam.help.txt	samtools command not implemented	T5: implement with samtools differential
+rust-bam	samtools 1.24	index	command	verified	target/release/rust-bam + tests/view_filters.rs		
+rust-bam	samtools 1.24	calmd	command	unsupported	absent from compat/current/rust-bam.help.txt	samtools command not implemented	T5: implement with samtools differential
+rust-bam	samtools 1.24	fixmate	command	unsupported	absent from compat/current/rust-bam.help.txt	samtools command not implemented	T5: implement with samtools differential
+rust-bam	samtools 1.24	reheader	command	unsupported	absent from compat/current/rust-bam.help.txt	samtools command not implemented	T5: implement with samtools differential
+rust-bam	samtools 1.24	targetcut	command	unsupported	absent from compat/current/rust-bam.help.txt	samtools command not implemented	T5: implement with samtools differential
+rust-bam	samtools 1.24	addreplacerg	command	unsupported	absent from compat/current/rust-bam.help.txt	samtools command not implemented	T5: implement with samtools differential
+rust-bam	samtools 1.24	markdup	command	unsupported	absent from compat/current/rust-bam.help.txt	samtools command not implemented	T5: implement with samtools differential
+rust-bam	samtools 1.24	ampliconclip	command	unsupported	absent from compat/current/rust-bam.help.txt	samtools command not implemented	T5: implement with samtools differential
+rust-bam	samtools 1.24	collate	command	unsupported	absent from compat/current/rust-bam.help.txt	samtools command not implemented	T5: implement with samtools differential
+rust-bam	samtools 1.24	cat	command	unsupported	absent from compat/current/rust-bam.help.txt	samtools command not implemented	T5: implement with samtools differential
+rust-bam	samtools 1.24	consensus	command	unsupported	absent from compat/current/rust-bam.help.txt	samtools command not implemented	T5: implement with samtools differential
+rust-bam	samtools 1.24	merge	command	unsupported	absent from compat/current/rust-bam.help.txt	samtools command not implemented	T5: implement with samtools differential
+rust-bam	samtools 1.24	mpileup	command	unsupported	absent from compat/current/rust-bam.help.txt	samtools command not implemented	T5: implement with samtools differential
+rust-bam	samtools 1.24	sort	command	verified	target/release/rust-bam + tests/view_filters.rs		
+rust-bam	samtools 1.24	split	command	unsupported	absent from compat/current/rust-bam.help.txt	samtools command not implemented	T5: implement with samtools differential
+rust-bam	samtools 1.24	quickcheck	command	verified	target/release/rust-bam + tests/view_filters.rs		
+rust-bam	samtools 1.24	fastq	command	unsupported	absent from compat/current/rust-bam.help.txt	samtools command not implemented	T5: implement with samtools differential
+rust-bam	samtools 1.24	fasta	command	unsupported	absent from compat/current/rust-bam.help.txt	samtools command not implemented	T5: implement with samtools differential
+rust-bam	samtools 1.24	import	command	unsupported	absent from compat/current/rust-bam.help.txt	samtools command not implemented	T5: implement with samtools differential
+rust-bam	samtools 1.24	reference	command	unsupported	absent from compat/current/rust-bam.help.txt	samtools command not implemented	T5: implement with samtools differential
+rust-bam	samtools 1.24	reset	command	unsupported	absent from compat/current/rust-bam.help.txt	samtools command not implemented	T5: implement with samtools differential
+rust-bam	samtools 1.24	bedcov	command	unsupported	absent from compat/current/rust-bam.help.txt	samtools command not implemented	T5: implement with samtools differential
+rust-bam	samtools 1.24	coverage	command	experimental	rust-bam/tests/depth.rs or tests/coverage.rs + samtools 1.24 manual diff	subset; coverage: all current tabular/histogram options implemented; CRAM unsupported; -r is sequential	T5: expand depth/coverage options
+rust-bam	samtools 1.24	depth	command	verified	target/release/rust-bam + tests/view_filters.rs		
+rust-bam	samtools 1.24	flagstat	command	verified	target/release/rust-bam + tests/view_filters.rs		
+rust-bam	samtools 1.24	idxstats	command	verified	target/release/rust-bam + tests/view_filters.rs		
+rust-bam	samtools 1.24	cram-size	command	unsupported	absent from compat/current/rust-bam.help.txt	samtools command not implemented	T5: implement with samtools differential
+rust-bam	samtools 1.24	phase	command	unsupported	absent from compat/current/rust-bam.help.txt	samtools command not implemented	T5: implement with samtools differential
+rust-bam	samtools 1.24	stats	command	unsupported	absent from compat/current/rust-bam.help.txt	samtools command not implemented	T5: implement with samtools differential
+rust-bam	samtools 1.24	ampliconstats	command	unsupported	absent from compat/current/rust-bam.help.txt	samtools command not implemented	T5: implement with samtools differential
+rust-bam	samtools 1.24	checksum	command	unsupported	absent from compat/current/rust-bam.help.txt	samtools command not implemented	T5: implement with samtools differential
+rust-bam	samtools 1.24	flags	command	verified	rust-bam/tests/flags.rs + samtools 1.24 29/29 differential		
+rust-bam	samtools 1.24	head	command	verified	rust-bam/tests/head.rs + samtools 1.24 36/36 exact file/stdin differential		
+rust-bam	samtools 1.24	tview	command	unsupported	absent from compat/current/rust-bam.help.txt	samtools command not implemented	T5: implement with samtools differential
+rust-bam	samtools 1.24	view	command	verified	target/release/rust-bam + tests/view_filters.rs		
+rust-bam	samtools 1.24	depad	command	unsupported	absent from compat/current/rust-bam.help.txt	samtools command not implemented	T5: implement with samtools differential
+rust-bam	samtools 1.24	samples	command	unsupported	absent from compat/current/rust-bam.help.txt	samtools command not implemented	T5: implement with samtools differential
+rust-bam	samtools 1.24	view:filters -f/-F/-q	feature	verified	tests/view_filters.rs + samtools 1.24 differential		
+rust-bam	samtools 1.24	view:--region BAI/CSI	feature	verified	tests/view_filters.rs + samtools differential		
+rust-bam	samtools 1.24	index:--csi	feature	verified	tests/view_filters.rs		
+rust-bam	samtools 1.24	sort:external-memory	feature	verified	tests/external_sort.rs + samtools differential		
+rust-bam	samtools 1.24	depth:basic -a/-aa/-s/-f/-g/-G/--incl-flags/--require-flags/-H/-q/-Q/-l/-J/-r/-b/-o	feature	verified	rust-bam/tests/depth.rs (10 tests) + samtools 1.24 32/32 -a/-aa/-s + 35/35 flag differential	missing -X/CRAM; -r is sequential; BTreeMap memory is covered positions	T5: custom index and CRAM support
+rust-bam	samtools 1.24	coverage:basic -b/--min-depth/-r/-q/-Q/-l/-H/-o/--rf/--ff/-d/-m/-D/-w/-A/multiple inputs	feature	verified	rust-bam/tests/coverage.rs (10 tests) + samtools 1.24 57/57 histogram/depth/region/width differential + 35/35 flag differential	CRAM unsupported; -r is sequential; BTreeMap memory is covered positions	T5: CRAM support or re-scope
+rust-fastqc	FastQC 0.13.0	-h --help	option	verified	docs/EVIDENCE-QC.md; 22/22 fixtures		
+rust-fastqc	FastQC 0.13.0	-v --version	option	verified	docs/EVIDENCE-QC.md; 22/22 fixtures		
+rust-fastqc	FastQC 0.13.0	--outdir	option	verified	docs/EVIDENCE-QC.md; 22/22 fixtures		
+rust-fastqc	FastQC 0.13.0	-c --contaminants	option	verified	FastQC 0.13.0 default-list 22/22 + custom source 7/7 differential	custom name<TAB>sequence lists replace the built-in FastQC 0.13.0 list	
+rust-fastqc	FastQC 0.13.0	-a --adapters	option	unsupported	absent from compat/current/rust-fastqc.help.txt		T6: implement or re-scope
+rust-fastqc	FastQC 0.13.0	-l --limits	option	unsupported	absent from compat/current/rust-fastqc.help.txt		T6: implement or re-scope
+rust-fastqc	FastQC 0.13.0	-d --dir	option	unsupported	absent from compat/current/rust-fastqc.help.txt		T6: implement or re-scope
+rust-fastqc	FastQC 0.13.0	--min_length	option	verified	FastQC 0.13.0 5/5 option differential; rust-fastqc 20 integration tests		
+rust-fastqc	FastQC 0.13.0	--max_length	option	verified	FastQC 0.13.0 5/5 option differential; rust-fastqc 20 integration tests		
+rust-fastqc	FastQC 0.13.0	--dup_length	option	verified	FastQC 0.13.0 5/5 option differential; rust-fastqc 20 integration tests		
+rust-fastqc	FastQC 0.13.0	--memory	option	unsupported	absent from compat/current/rust-fastqc.help.txt		T6: implement or re-scope
+rust-fastqc	FastQC 0.13.0	-t --threads	option	unsupported	absent from compat/current/rust-fastqc.help.txt		T6: implement or re-scope
+rust-fastqc	FastQC 0.13.0	-q --quiet	option	verified	FastQC 0.13.0 quiet/progress behavior and artifact smoke		
+rust-fastqc	FastQC 0.13.0	--fast5	option	unsupported	absent from compat/current/rust-fastqc.help.txt		T6: implement or re-scope
+rust-fastqc	FastQC 0.13.0	--phred64	option	verified	docs/EVIDENCE-QC.md; 22/22 fixtures		
+rust-fastqc	FastQC 0.13.0	-j --java	option	unsupported	absent from compat/current/rust-fastqc.help.txt		T6: implement or re-scope
+rust-fastqc	FastQC 0.13.0	--nogroup	option	verified	FastQC 0.13.0 5/5 option differential; rust-fastqc 20 integration tests		
+rust-fastqc	FastQC 0.13.0	--png	option	unsupported	absent from compat/current/rust-fastqc.help.txt		T6: implement or re-scope
+rust-fastqc	FastQC 0.13.0	--extract	option	verified	FastQC 0.13.0 default/extract/delete layout differential (4/4)		
+rust-fastqc	FastQC 0.13.0	--delete	option	verified	FastQC 0.13.0 default/extract/delete layout differential (4/4)		
+rust-fastqc	FastQC 0.13.0	-f --format	option	unsupported	absent from compat/current/rust-fastqc.help.txt		T6: implement or re-scope
+rust-fastqc	FastQC 0.13.0	--debug	option	unsupported	absent from compat/current/rust-fastqc.help.txt		T6: implement or re-scope
+rust-fastqc	FastQC 0.13.0	report:fastqc_data.txt	report	verified	22/22 QC fixtures; MultiQC parses data		
+rust-fastqc	FastQC 0.13.0	report:HTML	report	experimental	data-table HTML with every module; no plot images or FastQC auxiliary assets		T6: implement plots or retain the documented data-table scope
+rust-fastqc	FastQC 0.13.0	report:ZIP	report	experimental	stored ZIP with data, summary and HTML; no plot images or FastQC auxiliary assets		T6: implement plots or retain the documented data-table scope
+rust-fastqc	FastQC 0.13.0	module:adapter-content	feature	verified	FastQC cumulative 12bp adapter algorithm; rust-fastqc 13/13; T8 1x/10x full fastqc_data exact		
+rust-fastqc	FastQC 0.13.0	module:contaminants	feature	verified	default FastQC 0.13.0 contaminant list plus custom overrides; 22/22 baseline + 7/7 custom source differential		
+rust-fastqc	FastQC 0.13.0	module:custom-contaminants	feature	verified	rust-fastqc/src/contaminants.rs + FastQC 0.13.0 7/7 source differential; forward/reverse/longest/one-mismatch cases		
+rust-fx	SeqKit 2.14.0 / fq 0.12.0	seqkit:faidx	command	experimental	rust-fx/tests/faidx.rs (4 tests) + SeqKit 2.14 region/regex/index differential	regex output follows input order; upstream Go map order is unstable	T7: implement faidx index side effects and regex IDs
+rust-fx	SeqKit 2.14.0 / fq 0.12.0	seqkit:scat	command	unsupported	absent from compat/current/rust-fx.help.txt		T7: implement selected SeqKit command
+rust-fx	SeqKit 2.14.0 / fq 0.12.0	seqkit:seq	command	verified	50/50 W1-3 FASTX differential plus component tests	selected surface; other global flags are not covered	
+rust-fx	SeqKit 2.14.0 / fq 0.12.0	seqkit:sliding	command	verified	rust-fx/tests/sliding.rs (4 tests) + SeqKit 2.14 7/7 circular/greedy/global differential + compression tests		
+rust-fx	SeqKit 2.14.0 / fq 0.12.0	seqkit:stats	command	verified	50/50 W1-3 FASTX differential plus component tests	selected surface; other global flags are not covered	
+rust-fx	SeqKit 2.14.0 / fq 0.12.0	seqkit:subseq	command	experimental	rust-fx/tests/subseq*.rs + SeqKit 2.14 9/9 multi-file BED/GTF/flank differential	records are buffered per input; -U is unsupported	T7: complete subseq BED/GTF/flank semantics
+rust-fx	SeqKit 2.14.0 / fq 0.12.0	seqkit:translate	command	experimental	rust-fx/tests/translate.rs (7 tests) + SeqKit 2.14 55/55 listing differential + translation tables	invalid-base exit/partial-output behavior differs	T7: align invalid-input commit policy
+rust-fx	SeqKit 2.14.0 / fq 0.12.0	seqkit:watch	command	unsupported	absent from compat/current/rust-fx.help.txt		T7: implement selected SeqKit command
+rust-fx	SeqKit 2.14.0 / fq 0.12.0	seqkit:convert	command	unsupported	absent from compat/current/rust-fx.help.txt		T7: implement selected SeqKit command
+rust-fx	SeqKit 2.14.0 / fq 0.12.0	seqkit:fa2fq	command	verified	rust-fx/tests/fa2fq.rs (3 tests) + SeqKit 2.14 forward/reverse subsequence and quality differential + compression tests		
+rust-fx	SeqKit 2.14.0 / fq 0.12.0	seqkit:fq2fa	command	verified	50/50 W1-3 FASTX differential plus component tests	selected surface; other global flags are not covered	
+rust-fx	SeqKit 2.14.0 / fq 0.12.0	seqkit:fx2tab	command	verified	50/50 W1-3 FASTX differential plus component tests	selected surface; other global flags are not covered	
+rust-fx	SeqKit 2.14.0 / fq 0.12.0	seqkit:tab2fx	command	experimental	rust-fx/tests/tab2fx.rs (4 tests) + SeqKit 2.14 comment-prefix and 12 buffer/line-boundary differentials	input is buffered per file; malformed-row and quality-validation behavior differs	T7: align malformed-row policy or re-scope
+rust-fx	SeqKit 2.14.0 / fq 0.12.0	seqkit:amplicon	command	unsupported	absent from compat/current/rust-fx.help.txt		T7: implement selected SeqKit command
+rust-fx	SeqKit 2.14.0 / fq 0.12.0	seqkit:fish	command	unsupported	absent from compat/current/rust-fx.help.txt		T7: implement selected SeqKit command
+rust-fx	SeqKit 2.14.0 / fq 0.12.0	seqkit:grep	command	verified	rust-fx/tests/grep.rs (7 tests) + SeqKit 2.14 33/33 grep differential + compression tests		
+rust-fx	SeqKit 2.14.0 / fq 0.12.0	seqkit:locate	command	unsupported	absent from compat/current/rust-fx.help.txt		T7: implement selected SeqKit command
+rust-fx	SeqKit 2.14.0 / fq 0.12.0	seqkit:common	command	verified	rust-fx/tests/common.rs (8 tests) + 14/14 ID/name/sequence/embedded SeqKit 2.14 diff	none observed on the command-specific surface (-n/-s/-e/-i/-P/-w/-o)	
+rust-fx	SeqKit 2.14.0 / fq 0.12.0	seqkit:duplicate	command	verified	rust-fx/tests/duplicate.rs + 3/3 repeated records SeqKit 2.14 diff		
+rust-fx	SeqKit 2.14.0 / fq 0.12.0	seqkit:head	command	verified	rust-fx/tests/head.rs (5 tests) + SeqKit 2.14 10/10 head differential + compression tests		
+rust-fx	SeqKit 2.14.0 / fq 0.12.0	seqkit:head-genome	command	unsupported	absent from compat/current/rust-fx.help.txt		T7: implement selected SeqKit command
+rust-fx	SeqKit 2.14.0 / fq 0.12.0	seqkit:pair	command	unsupported	absent from compat/current/rust-fx.help.txt		T7: implement selected SeqKit command
+rust-fx	SeqKit 2.14.0 / fq 0.12.0	seqkit:range	command	experimental	rust-fx/tests/range.rs (2 tests) + SeqKit 2.14 5/5 multi-file range differential	mixed-sign stdin buffers records	T7: complete range streaming/multi-file semantics
+rust-fx	SeqKit 2.14.0 / fq 0.12.0	seqkit:rmdup	command	verified	rust-fx/tests/rmdup.rs (3 tests) + SeqKit 2.14 duplicate-report differential + compression tests		
+rust-fx	SeqKit 2.14.0 / fq 0.12.0	seqkit:sample	command	verified	50/50 W1-3 FASTX differential plus component tests	selected surface; other global flags are not covered	
+rust-fx	SeqKit 2.14.0 / fq 0.12.0	seqkit:sample2	command	unsupported	absent from compat/current/rust-fx.help.txt		T7: implement selected SeqKit command
+rust-fx	SeqKit 2.14.0 / fq 0.12.0	seqkit:split	command	verified	50/50 W1-3 FASTX differential plus component tests	selected surface; other global flags are not covered	
+rust-fx	SeqKit 2.14.0 / fq 0.12.0	seqkit:split2	command	unsupported	absent from compat/current/rust-fx.help.txt		T7: implement selected SeqKit command
+rust-fx	SeqKit 2.14.0 / fq 0.12.0	seqkit:concat	command	unsupported	absent from compat/current/rust-fx.help.txt		T7: implement selected SeqKit command
+rust-fx	SeqKit 2.14.0 / fq 0.12.0	seqkit:mutate	command	unsupported	absent from compat/current/rust-fx.help.txt		T7: implement selected SeqKit command
+rust-fx	SeqKit 2.14.0 / fq 0.12.0	seqkit:rename	command	verified	rust-fx/tests/rename.rs (3 tests) + SeqKit 2.14 multiple-outfiles/force differential + compression tests		
+rust-fx	SeqKit 2.14.0 / fq 0.12.0	seqkit:replace	command	experimental	rust-fx/tests/replace.rs (4 tests) + SeqKit 2.14 15/15 special-symbol/filter differential	UUID is checked for shape and uniqueness, not byte equality	T7: complete replace filters and special symbols
+rust-fx	SeqKit 2.14.0 / fq 0.12.0	seqkit:restart	command	verified	rust-fx/tests/restart.rs (2 tests) + SeqKit 2.14 start-with forward/reverse/mismatch differential + compression tests		
+rust-fx	SeqKit 2.14.0 / fq 0.12.0	seqkit:sana	command	unsupported	absent from compat/current/rust-fx.help.txt		T7: implement selected SeqKit command
+rust-fx	SeqKit 2.14.0 / fq 0.12.0	seqkit:shuffle	command	unsupported	absent from compat/current/rust-fx.help.txt		T7: implement selected SeqKit command
+rust-fx	SeqKit 2.14.0 / fq 0.12.0	seqkit:sort	command	experimental	rust-fx/tests/sort.rs (7 tests) + SeqKit 2.14 direct natural/prefix/two-pass/index differential	two-pass by-seq is broken in upstream 2.14; compressed two-pass is unsupported	T7: complete sort options and bounded-memory mode
+rust-fx	SeqKit 2.14.0 / fq 0.12.0	seqkit:bam	command	unsupported	absent from compat/current/rust-fx.help.txt		T7: implement selected SeqKit command
+rust-fx	SeqKit 2.14.0 / fq 0.12.0	seqkit:merge-slides	command	unsupported	absent from compat/current/rust-fx.help.txt		T7: implement selected SeqKit command
+rust-fx	SeqKit 2.14.0 / fq 0.12.0	seqkit:sum	command	unsupported	absent from compat/current/rust-fx.help.txt		T7: implement selected SeqKit command
+rust-fx	SeqKit 2.14.0 / fq 0.12.0	seqkit:genautocomplete	command	unsupported	absent from compat/current/rust-fx.help.txt		T7: implement selected SeqKit command
+rust-fx	SeqKit 2.14.0 / fq 0.12.0	global:--compress-level	feature	verified	rust-fx/tests/compression.rs (3 tests) + SeqKit 2.14 gzip/zstd/bzip2/xz level differential	decompressed records match; compressed bytes use different backends	
+rust-fx	SeqKit 2.14.0 / fq 0.12.0	head:basic -n/-l/-X/global raw-output flags	feature	verified	rust-fx/tests/head.rs (5 tests) + SeqKit 2.14 10/10 head differential + compression tests		
+rust-fx	SeqKit 2.14.0 / fq 0.12.0	head:global -X/--id-regexp/--id-ncbi/--seq-type/--quiet/--skip-file-check	feature	verified	rust-fx/tests/head.rs infile-list/global test + SeqKit 2.14 10/10 head differential		
+rust-fx	SeqKit 2.14.0 / fq 0.12.0	fa2fq:basic -f/-P/subsequence/quality	feature	verified	rust-fx/tests/fa2fq.rs (3 tests) + SeqKit 2.14 forward/reverse subsequence and quality differential + compression tests		
+rust-fx	SeqKit 2.14.0 / fq 0.12.0	faidx:index-and-regexp -r/-f/-U/.fai/.seqkit.fai	feature	verified	rust-fx/tests/faidx.rs (4 tests) + SeqKit 2.14 region/regex/index differential	regex output follows input order; upstream Go map order is unstable	Accepted upstream order limitation; retain selected-surface scope
+rust-fx	SeqKit 2.14.0 / fq 0.12.0	grep:basic -p/-f/-n/-s/-v/-C/-i/-r/-d/-R/-P/-m/-D/-c	feature	verified	rust-fx/tests/grep.rs (7 tests) + SeqKit 2.14 33/33 grep differential + compression tests		
+rust-fx	SeqKit 2.14.0 / fq 0.12.0	grep:advanced --delete-matched/-I/-X/--id-regexp/--quiet	feature	verified	rust-fx/tests/grep.rs + SeqKit 2.14 33/33 grep differential + compression tests		
+rust-fx	SeqKit 2.14.0 / fq 0.12.0	rename:multiple-outfiles -m/-O/-f	feature	verified	rust-fx/tests/rename.rs + SeqKit 2.14 multiple-outfiles/force differential + compression tests		
+rust-fx	SeqKit 2.14.0 / fq 0.12.0	subseq:basic -r/--bed/--gtf/-u/-d/-f/--feature/--chr	feature	verified	rust-fx/tests/subseq*.rs + SeqKit 2.14 9/9 multi-file BED/GTF/flank differential	records are buffered per input; -U is unsupported	T7: use FASTA index or document the memory bound
+rust-fx	SeqKit 2.14.0 / fq 0.12.0	subseq:multi-file BED/GTF/flank/gene-tag	feature	verified	rust-fx/tests/subseq_gtf_flank.rs + SeqKit 2.14 9/9 multi-file differential including gene_id	records are buffered per input; -U is unsupported	
+rust-fx	SeqKit 2.14.0 / fq 0.12.0	translate:basic -f/-F/-s/--clean/-m/-e/-x/-M	feature	verified	rust-fx/tests/translate.rs (7 tests) + SeqKit 2.14 full option differential	invalid-base exit/partial-output behavior differs	T7: align invalid-input commit policy
+rust-fx	SeqKit 2.14.0 / fq 0.12.0	translate:tables 1-6,9-14,16,21-31	feature	verified	Biopython NCBI table generation + SeqKit 2.14 29/29 table differential	unsupported IDs fail before output	
+rust-fx	SeqKit 2.14.0 / fq 0.12.0	translate:listing -l/-L	feature	verified	rust-fx/tests/translate.rs + SeqKit 2.14 55/55 table/listing differential	unknown positive IDs return an empty successful listing	
+rust-fx	SeqKit 2.14.0 / fq 0.12.0	replace:special-and-filters {nr}/{fn}/{fbn}/{fbne}/{kv}/f-*	feature	verified	rust-fx/tests/replace.rs (4 tests) + SeqKit 2.14 15/15 special-symbol/filter differential + UUID shape	--compress-level is covered; UUID is not byte-compared	
+rust-fx	SeqKit 2.14.0 / fq 0.12.0	tab2fx:comment-prefix -p	feature	verified	rust-fx/tests/tab2fx.rs (4 tests) + SeqKit 2.14 custom comment-prefix differential	input is buffered per file; malformed-row and quality-validation behavior differs	T7: align malformed-row policy or re-scope
+rust-fx	SeqKit 2.14.0 / fq 0.12.0	tab2fx:buffer-size -b	feature	verified	rust-fx/tests/tab2fx.rs + SeqKit 2.14 12/12 line-boundary/partial-output differential	invalid units fail before output; negative values retain scanner-error behavior	
+rust-fx	SeqKit 2.14.0 / fq 0.12.0	range:streaming positive/negative/multi-file	feature	verified	rust-fx/tests/range.rs + SeqKit 2.14 5/5 multi-file range differential	mixed-sign stdin buffers records	T7: implement a spool for mixed-sign stdin or re-scope
+rust-fx	SeqKit 2.14.0 / fq 0.12.0	sliding:basic -W/-s/-S/-g/-c/-C/-X	feature	verified	rust-fx/tests/sliding.rs (4 tests) + SeqKit 2.14 7/7 circular/greedy/global differential + compression tests		
+rust-fx	SeqKit 2.14.0 / fq 0.12.0	rmdup:duplicate-reports -D/-d	feature	verified	rust-fx/tests/rmdup.rs duplicate reports + SeqKit 2.14 duplicate-report differential + compression tests		
+rust-fx	SeqKit 2.14.0 / fq 0.12.0	restart:start-with -s/-m/-I	feature	verified	rust-fx/tests/restart.rs (2 tests) + SeqKit 2.14 start-with forward/reverse/mismatch differential + compression tests		
+rust-fx	SeqKit 2.14.0 / fq 0.12.0	sort:basic -l/-n/-s/-b/-r/-i/-G/-N/-L	feature	verified	rust-fx/tests/sort.rs (7 tests) + SeqKit 2.14 natural/prefix/two-pass/index differential	two-pass by-seq is upstream-broken in 2.14; compressed two-pass is unsupported	T7: document upstream defect or add a separate compatibility mode
+rust-fx	SeqKit 2.14.0 / fq 0.12.0	sort:two-pass -2/-U/-k (default/by-name/by-length)	feature	verified	rust-fx/tests/sort.rs + SeqKit 2.14 two-pass/index and multi-input rejection differential	two-pass by-seq is upstream-broken in 2.14; compressed two-pass unsupported	
+rust-fx	SeqKit 2.14.0 / fq 0.12.0	fq:lint	command	verified	50/50 W1-3 differential; fq 0.12.0 validator cases		
+rust-fx	SeqKit 2.14.0 / fq 0.12.0	fq:filter	command	unsupported	absent from compat/current/rust-fx.help.txt		T7: implement or re-scope
+rust-fx	SeqKit 2.14.0 / fq 0.12.0	fq:generate	command	unsupported	absent from compat/current/rust-fx.help.txt		T7: implement or re-scope
+rust-fx	SeqKit 2.14.0 / fq 0.12.0	fq:subsample	command	unsupported	absent from compat/current/rust-fx.help.txt		T7: implement or re-scope

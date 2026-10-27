@@ -1,0 +1,20 @@
+SAM/BAM view, flagstat, idxstats, quickcheck, index, sort, depth, coverage, flags and head (noodles 0.118.0)
+
+Usage: rust-bam <COMMAND>
+
+Commands:
+  view        Print SAM text, BAM, a header or a record count
+  depth       Compute per-position depth (-a/-aa/-s/-f/-g/-G/-H/-q/-Q/-l/-J/-r/-b subset)
+  coverage    Report per-reference coverage summary (-b/--min-depth/-r/-q/-Q/-l/-H/-o subset)
+  head        Display selected SAM header lines and alignment records
+  flags       Convert between textual and numeric flag representation
+  flagstat    Print the 16 flagstat counters
+  idxstats    Print per-reference mapped/unmapped counts
+  quickcheck  Check that files are structurally valid (exit 16 on failure)
+  index       Build a BAI index for a coordinate-sorted BAM
+  sort        Coordinate-sort a SAM or BAM file
+  help        Print this message or the help of the given subcommand(s)
+
+Options:
+  -h, --help     Print help
+  -V, --version  Print version

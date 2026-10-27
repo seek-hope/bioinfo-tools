@@ -1,0 +1,66 @@
+transform sequences (extract ID, filter by length, remove gaps, reverse complement...)
+
+Filtering records to edit:
+  You can use flags similar to those in "seqkit grep" to choose partly records to edit.
+
+Usage:
+  seqkit seq [flags] 
+
+Flags:
+  -k, --color                    colorize sequences - to be piped into "less -R"
+  -p, --complement               complement sequence, flag '-v' is recommended to switch on
+      --dna2rna                  DNA to RNA
+      --f-by-name                [target filter] match by full name instead of just ID
+      --f-by-seq                 [target filter] search subseq on seq, both positive and negative strand
+                                 are searched
+      --f-ignore-case            [target filter] ignore case
+      --f-invert-match           [target filter] invert the sense of matching, to select non-matching records
+      --f-only-positive-strand   [target filter] only search on positive strand
+      --f-pattern strings        [target filter] search pattern (multiple values supported. Attention:
+                                 use double quotation marks for patterns containing comma, e.g., -p
+                                 '"A{2,}"')
+      --f-pattern-file string    [target filter] pattern file (one record per line)
+      --f-use-regexp             [target filter] patterns are regular expression
+  -G, --gap-letters string       gap letters to be removed with -g/--remove-gaps (default "- \t.")
+  -h, --help                     help for seq
+  -l, --lower-case               print sequences in lower case
+  -M, --max-len int              only print sequences shorter than or equal to the maximum length (-1
+                                 for no limit) (default -1)
+  -R, --max-qual float           only print sequences with average quality less than this limit (-1 for
+                                 no limit) (default -1)
+  -m, --min-len int              only print sequences longer than or equal to the minimum length (-1 for
+                                 no limit) (default -1)
+  -Q, --min-qual float           only print sequences with average quality greater or equal than this
+                                 limit (-1 for no limit) (default -1)
+  -n, --name                     only print names/sequence headers
+  -i, --only-id                  print IDs instead of full headers
+  -q, --qual                     only print qualities
+  -b, --qual-ascii-base int      ASCII BASE, 33 for Phred+33 (default 33)
+  -g, --remove-gaps              remove gaps letters seft by -G/--gap-letters, e.g., spaces, tabs, and
+                                 dashes (gaps "-" in aligned sequences)
+  -r, --reverse                  reverse sequence
+      --rna2dna                  RNA to DNA
+  -s, --seq                      only print sequences
+  -u, --upper-case               print sequences in upper case
+  -v, --validate-seq             validate bases according to the alphabet
+
+Global Flags:
+      --alphabet-guess-seq-length int   length of sequence prefix of the first FASTA record based on
+                                        which seqkit guesses the sequence type (0 for whole seq)
+                                        (default 10000)
+      --compress-level int              compression level for gzip, zstd, xz and bzip2. type "seqkit -h"
+                                        for the range and default value for each format (default -1)
+      --id-ncbi                         FASTA head is NCBI-style, e.g. >gi|110645304|ref|NC_002516.2|
+                                        Pseud...
+      --id-regexp string                regular expression for parsing ID (default "^(\\S+)\\s?")
+  -X, --infile-list string              file of input files list (one file per line), if given, they are
+                                        appended to files from cli arguments
+  -w, --line-width int                  line width when outputting FASTA format (0 for no wrap) (default 60)
+  -o, --out-file string                 out file ("-" for stdout, suffix .gz for gzipped out) (default "-")
+      --quiet                           be quiet and do not show extra information
+  -t, --seq-type string                 sequence type (dna|rna|protein|unlimit|auto) (for auto, it
+                                        automatically detect by the first sequence) (default "auto")
+      --skip-file-check                 skip input file checking when given a file list if you believe
+                                        these files do exist
+  -j, --threads int                     number of CPUs. can also set with environment variable
+                                        SEQKIT_THREADS) (default 4)

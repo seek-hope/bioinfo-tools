@@ -249,6 +249,7 @@ fn compressed_report_uses_the_expected_sample_directory() {
     let gz_path = dir.0.join("reads.fastq.gz");
     std::fs::rename(path, &gz_path).unwrap();
     let output = Command::new(env!("CARGO_BIN_EXE_rust-fastqc"))
+        .arg("--extract")
         .arg("-o")
         .arg(&dir.0)
         .arg(&gz_path)
@@ -259,6 +260,91 @@ fn compressed_report_uses_the_expected_sample_directory() {
     let report = std::fs::read_to_string(dir.0.join("reads_fastqc/fastqc_data.txt")).unwrap();
     assert!(report.contains("Filename\treads.fastq.gz\n"));
     assert!(report.contains("Total Sequences\t1\n"));
+}
+
+#[test]
+fn file_output_writes_summary_html_and_zip_bundle() {
+    let dir = Scratch::new();
+    let path = dir.input(RECORD, Format::Plain);
+    let output = Command::new(env!("CARGO_BIN_EXE_rust-fastqc"))
+        .arg("--extract")
+        .arg("-o")
+        .arg(&dir.0)
+        .arg(&path)
+        .output()
+        .unwrap();
+    assert!(output.status.success(), "{output:?}");
+    let base = dir.0.join("reads_fastqc");
+    let summary = std::fs::read_to_string(base.join("summary.txt")).unwrap();
+    assert!(
+        summary.contains("PASS\tBasic Statistics\treads.fastq\n"),
+        "{summary}"
+    );
+    let html = std::fs::read_to_string(base.join("fastqc_report.html")).unwrap();
+    assert!(html.contains("<!DOCTYPE html>"), "{html}");
+    assert!(html.contains("plot images are not emitted"), "{html}");
+    assert!(dir.0.join("reads_fastqc.html").is_file());
+    let zip = std::fs::read(dir.0.join("reads_fastqc.zip")).unwrap();
+    assert_eq!(&zip[0..4], b"PK\x03\x04");
+    for name in [
+        b"reads_fastqc/fastqc_data.txt".as_slice(),
+        b"reads_fastqc/summary.txt".as_slice(),
+        b"reads_fastqc/fastqc_report.html".as_slice(),
+    ] {
+        assert!(
+            zip.windows(name.len()).any(|window| window == name),
+            "missing {name:?}"
+        );
+    }
+}
+
+#[test]
+fn default_output_has_html_and_zip_without_an_extracted_directory() {
+    let dir = Scratch::new();
+    let path = dir.input(RECORD, Format::Plain);
+    let output = Command::new(env!("CARGO_BIN_EXE_rust-fastqc"))
+        .arg("-o")
+        .arg(&dir.0)
+        .arg(&path)
+        .output()
+        .unwrap();
+    assert!(output.status.success(), "{output:?}");
+    assert!(dir.0.join("reads_fastqc.html").is_file());
+    assert!(dir.0.join("reads_fastqc.zip").is_file());
+    assert!(!dir.0.join("reads_fastqc").exists());
+}
+
+#[test]
+fn extract_delete_keeps_the_directory_and_removes_only_the_zip() {
+    let dir = Scratch::new();
+    let path = dir.input(RECORD, Format::Plain);
+    let output = Command::new(env!("CARGO_BIN_EXE_rust-fastqc"))
+        .args(["--extract", "--delete", "-o"])
+        .arg(&dir.0)
+        .arg(&path)
+        .output()
+        .unwrap();
+    assert!(output.status.success(), "{output:?}");
+    assert!(dir.0.join("reads_fastqc/fastqc_data.txt").is_file());
+    assert!(dir.0.join("reads_fastqc/summary.txt").is_file());
+    assert!(dir.0.join("reads_fastqc/fastqc_report.html").is_file());
+    assert!(dir.0.join("reads_fastqc.html").is_file());
+    assert!(!dir.0.join("reads_fastqc.zip").exists());
+}
+
+#[test]
+fn delete_without_extract_keeps_the_zip() {
+    let dir = Scratch::new();
+    let path = dir.input(RECORD, Format::Plain);
+    let output = Command::new(env!("CARGO_BIN_EXE_rust-fastqc"))
+        .args(["--delete", "-o"])
+        .arg(&dir.0)
+        .arg(&path)
+        .output()
+        .unwrap();
+    assert!(output.status.success(), "{output:?}");
+    assert!(dir.0.join("reads_fastqc.zip").is_file());
+    assert!(!dir.0.join("reads_fastqc").exists());
 }
 
 #[test]
@@ -276,20 +362,126 @@ fn adapter_content_reports_a_known_adapter() {
     let report = String::from_utf8_lossy(&output.stdout);
     assert!(report.contains(">>Adapter Content"), "{report}");
     assert!(report.contains("Illumina Universal Adapter"), "{report}");
-    assert!(
-        report
-            .lines()
-            .any(|line| line.starts_with("21\t") && line.contains("100.000000")),
-        "adapter at 1-based position 21 should be 100%: {report}"
+    assert!(report.contains("PolyA"), "{report}");
+    assert!(report.contains("PolyG"), "{report}");
+    let adapter = report
+        .split(">>Adapter Content")
+        .nth(1)
+        .and_then(|section| section.split(">>END_MODULE").next())
+        .expect("Adapter Content section");
+    let line = adapter
+        .lines()
+        .find(|line| line.starts_with("22-23\t"))
+        .expect("adapter group 22-23");
+    let fields: Vec<&str> = line.split('\t').collect();
+    assert_eq!(fields.get(1), Some(&"100.0"), "universal adapter: {line}");
+    assert_eq!(fields.get(5), Some(&"100.0"), "polyA: {line}");
+}
+
+#[test]
+fn nogroup_disables_long_read_position_grouping() {
+    let dir = Scratch::new();
+    let sequence = "ACGT".repeat(20);
+    let data = format!("@long\n{sequence}\n+\n{}\n", "I".repeat(80));
+    let path = dir.input(data.as_bytes(), Format::Plain);
+    let output = run_args(&path, &["--nogroup"]);
+    assert!(output.status.success(), "{output:?}");
+    let report = String::from_utf8_lossy(&output.stdout);
+    let quality = report
+        .split(">>Per base sequence quality")
+        .nth(1)
+        .and_then(|section| section.split(">>END_MODULE").next())
+        .unwrap();
+    assert!(quality.contains("1\t40.0"), "{quality}");
+    assert!(quality.contains("80\t40.0"), "{quality}");
+    assert!(!quality.contains("10-11\t"), "{quality}");
+}
+
+#[test]
+fn min_and_max_length_filter_reads_before_qc_statistics() {
+    let dir = Scratch::new();
+    let short = "ACGT".to_string();
+    let long = "A".repeat(100);
+    let data = format!(
+        "@short\n{short}\n+\nIIII\n@long\n{long}\n+\n{}\n",
+        "I".repeat(100)
+    );
+    let path = dir.input(data.as_bytes(), Format::Plain);
+    let only_long = run_args(&path, &["--min_length", "50"]);
+    assert!(only_long.status.success(), "{only_long:?}");
+    let report = String::from_utf8_lossy(&only_long.stdout);
+    assert!(report.contains("Total Sequences\t1\n"), "{report}");
+    assert!(report.contains("Sequence length\t100\n"), "{report}");
+
+    let only_short = run_args(&path, &["--max_length", "50"]);
+    assert!(only_short.status.success(), "{only_short:?}");
+    let report = String::from_utf8_lossy(&only_short.stdout);
+    assert!(report.contains("Total Sequences\t1\n"), "{report}");
+    assert!(report.contains("Sequence length\t4\n"), "{report}");
+}
+
+#[test]
+fn dup_length_changes_the_duplicate_prefix_without_changing_read_counts() {
+    let dir = Scratch::new();
+    let data = b"@a\nAAAACCCC\n+\nIIIIIIII\n@b\nAAAAGGGG\n+\nIIIIIIII\n";
+    let path = dir.input(data, Format::Plain);
+    let default = run_args(&path, &[]);
+    let truncated = run_args(&path, &["--dup_length", "4"]);
+    assert!(default.status.success(), "{default:?}");
+    assert!(truncated.status.success(), "{truncated:?}");
+    let default_report = String::from_utf8_lossy(&default.stdout);
+    let truncated_report = String::from_utf8_lossy(&truncated.stdout);
+    assert!(default_report.contains("Total Sequences\t2\n"));
+    assert!(truncated_report.contains("Total Sequences\t2\n"));
+    assert_ne!(
+        default_report
+            .split(">>Sequence Duplication Levels")
+            .nth(1)
+            .and_then(|section| section.split(">>END_MODULE").next()),
+        truncated_report
+            .split(">>Sequence Duplication Levels")
+            .nth(1)
+            .and_then(|section| section.split(">>END_MODULE").next())
     );
 }
 
 #[test]
-fn contaminant_source_is_opt_in_and_matches_a_prefix() {
+fn quiet_suppresses_progress_but_keeps_artifacts() {
+    let dir = Scratch::new();
+    let path = dir.input(RECORD, Format::Plain);
+    let output = Command::new(env!("CARGO_BIN_EXE_rust-fastqc"))
+        .args(["--quiet", "-o"])
+        .arg(&dir.0)
+        .arg(&path)
+        .output()
+        .unwrap();
+    assert!(output.status.success(), "{output:?}");
+    assert!(output.stderr.is_empty(), "{output:?}");
+    assert!(dir.0.join("reads_fastqc.zip").is_file());
+}
+
+#[test]
+fn built_in_contaminants_are_used_when_no_custom_list_is_given() {
+    let dir = Scratch::new();
+    let sequence = "GATCGGAAGAGCTCGTATGCCGTCTTCTGCTTG";
+    let data = (0..200)
+        .map(|index| format!("@r{index}\n{sequence}\n+\n{}\n", "I".repeat(sequence.len())))
+        .collect::<String>();
+    let path = dir.input(data.as_bytes(), Format::Plain);
+    let output = run_args(&path, &[]);
+    assert!(output.status.success(), "{output:?}");
+    assert!(
+        String::from_utf8_lossy(&output.stdout).contains("Illumina Single End Adapter 1"),
+        "{output:?}"
+    );
+}
+
+#[test]
+fn custom_contaminant_source_matches_a_tab_separated_list() {
     let dir = Scratch::new();
     let contaminant = "A".repeat(50);
-    let fasta = dir.0.join("contaminants.fa");
-    std::fs::write(&fasta, format!(">contam\n{contaminant}\n")).unwrap();
+    let list = dir.0.join("contaminants.tsv");
+    std::fs::write(&list, format!("contam\t{contaminant}\n")).unwrap();
     let mut data = String::new();
     for index in 0..100 {
         data.push_str(&format!(
@@ -302,7 +494,7 @@ fn contaminant_source_is_opt_in_and_matches_a_prefix() {
     assert!(without.status.success(), "{without:?}");
     assert!(String::from_utf8_lossy(&without.stdout).contains("No Hit"));
 
-    let with = run_args(&path, &["--contaminants", fasta.to_str().unwrap()]);
+    let with = run_args(&path, &["--contaminants", list.to_str().unwrap()]);
     assert!(with.status.success(), "{with:?}");
     let report = String::from_utf8_lossy(&with.stdout);
     assert!(report.contains("contam (100% over 50bp)"), "{report}");

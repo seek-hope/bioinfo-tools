@@ -1,5 +1,9 @@
 # rust-umitools 迭代 roadmap
 
+> 历史迭代记录，分析基线为 `558da69`。文中的 R0–R5 和“当前”描述该快照；
+> 后续功能以 [COMPATIBILITY](COMPATIBILITY.md) 为准，当前批次顺序见
+> [根开发计划](../../docs/DEVELOPMENT-PLAN.md)。
+
 分析基线：`558da69`，版本 `0.2.0`，对照 UMI-tools `1.1.6`。本文是后续迭代建议，不代表功能已经实现，也不承诺发布日期。分析依据为当前源码、兼容矩阵、已有基准，以及本轮新增的双端最小对照实验；未重新运行大型性能基准。
 
 建议顺序：**先修结果正确性和资源约束，再扩大验证与性能覆盖，随后完善单细胞和 FASTQ 工作流。** 当前 15.49× 加速是特定单端输入上的结果，不宜直接推广到双端、统计输出、超高深度或单细胞数据。
@@ -211,4 +215,4 @@ samtools view rust.bam
 
 实验临时文件已清理；最小输入与命令保留于此。该结果不否定此前单端 small.bam 的对照结果，也不表示所有双端输入都会失败；它说明重复 pair 场景必须修复并补入自动回归。
 
-相关文档：[当前兼容矩阵](COMPATIBILITY.md)、[已记录基准](BENCHMARK.md)、[早期实现设计](IMPLEMENTATION_PLAN.md)。后者保留历史设计背景，后续优先级以本文为准。
+相关文档：[当前兼容矩阵](COMPATIBILITY.md)、[已记录基准](BENCHMARK.md)、[早期实现设计](IMPLEMENTATION_PLAN.md)。本文保留历史迭代背景；当前优先级见[根开发计划](../../docs/DEVELOPMENT-PLAN.md)。

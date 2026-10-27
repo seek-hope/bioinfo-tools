@@ -19,7 +19,7 @@ bash tests/ci/check.sh --with-fastx-qc-oracles --isolate-network
 
 | Mode | Checks |
 | --- | --- |
-| Base | `check_docs.py`; workspace `fmt --check`; clippy with warnings denied; rustdoc with warnings denied; release tests; all native binaries; cutadapt visible plain/gzip fixture smoke |
+| Base | `check_docs.py`; compatibility matrix drift check; workspace `fmt --check`; clippy with warnings denied; rustdoc with warnings denied; release tests; all native binaries; cutadapt visible plain/gzip fixture smoke |
 | `--offline` | Base checks with `CARGO_NET_OFFLINE=true` and `--offline` passed to Cargo; a missing pinned toolchain fails instead of being installed |
 | `--with-fastx-qc-oracles` | Base checks plus SeqKit 2.14.0/fq 0.12.0 and FastQC 0.13.0/MultiQC 1.35 differentials, with version probes first |
 | `--isolate-network` | Runs oracle probes and oracle suites under `unshare -Urn`; requires permitted user/network namespaces |

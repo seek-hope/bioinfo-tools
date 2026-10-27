@@ -1,11 +1,11 @@
-//! The six subcommands: `view`, `flagstat`, `idxstats`, `quickcheck`, `index`, `sort`.
+//! The SAM/BAM subcommands.
 //!
 //! Each function is a thin layer: parse options, call into the streaming reader /
 //! writer or the counting types, and emit output in `samtools`'s exact format.
 //! The counting and ordering logic lives in `crate::stats` and
 //! `crate::sort_order` so it can be unit-tested without touching the filesystem.
 
-use std::collections::BinaryHeap;
+use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap};
 use std::fs::File;
 use std::io::{BufReader, BufWriter, Read, Write};
 use std::num::NonZero;
@@ -14,6 +14,8 @@ use std::sync::atomic::{AtomicU64, Ordering as AtomicOrdering};
 
 use noodles::sam;
 use noodles::sam::alignment::io::Write as _;
+use noodles::sam::alignment::record::cigar::op::Kind;
+use noodles::sam::alignment::record::Cigar as _;
 
 use crate::error::{Error, Result};
 use crate::format::{detect_path, Format};
@@ -49,6 +51,169 @@ fn tolerant_reference_id(record: &Record) -> Option<usize> {
 }
 
 // --------------------------------------------------------------------------- //
+// flags
+// --------------------------------------------------------------------------- //
+
+const FLAG_NAMES: [(u32, &str); 12] = [
+    (0x1, "PAIRED"),
+    (0x2, "PROPER_PAIR"),
+    (0x4, "UNMAP"),
+    (0x8, "MUNMAP"),
+    (0x10, "REVERSE"),
+    (0x20, "MREVERSE"),
+    (0x40, "READ1"),
+    (0x80, "READ2"),
+    (0x100, "SECONDARY"),
+    (0x200, "QCFAIL"),
+    (0x400, "DUP"),
+    (0x800, "SUPPLEMENTARY"),
+];
+
+const FLAGS_HELP: &str = concat!(
+    "About: Convert between textual and numeric flag representation\n",
+    "Usage: samtools flags FLAGS...\n",
+    "\n",
+    "Each FLAGS argument is either an INT (in decimal/hexadecimal/octal) representing\n",
+    "a combination of the following numeric flag values, or a comma-separated string\n",
+    "NAME,...,NAME representing a combination of the following flag names:\n",
+    "\n",
+    "   0x1     1  PAIRED         paired-end / multiple-segment sequencing technology\n",
+    "   0x2     2  PROPER_PAIR    each segment properly aligned according to aligner\n",
+    "   0x4     4  UNMAP          segment unmapped\n",
+    "   0x8     8  MUNMAP         next segment in the template unmapped\n",
+    "  0x10    16  REVERSE        SEQ is reverse complemented\n",
+    "  0x20    32  MREVERSE       SEQ of next segment in template is rev.complemented\n",
+    "  0x40    64  READ1          the first segment in the template\n",
+    "  0x80   128  READ2          the last segment in the template\n",
+    " 0x100   256  SECONDARY      secondary alignment\n",
+    " 0x200   512  QCFAIL         not passing quality controls or other filters\n",
+    " 0x400  1024  DUP            PCR or optical duplicate\n",
+    " 0x800  2048  SUPPLEMENTARY  supplementary alignment\n",
+);
+
+fn invalid_flag(value: &str) -> Error {
+    Error::runtime(format!("flags: Could not parse {value:?}"))
+}
+
+fn parse_flag_argument(value: &str) -> Result<u32> {
+    if value.is_empty() {
+        return Ok(0);
+    }
+    if value.as_bytes()[0].is_ascii_digit() {
+        let (digits, radix) = if let Some(rest) = value
+            .strip_prefix("0x")
+            .or_else(|| value.strip_prefix("0X"))
+        {
+            (rest, 16)
+        } else if let Some(rest) = value.strip_prefix('0') {
+            (rest, 8)
+        } else {
+            (value, 10)
+        };
+        let end = digits
+            .find(|character: char| !character.is_digit(radix))
+            .unwrap_or(digits.len());
+        // strtol accepts a numeric prefix. In particular, samtools interprets
+        // "08" and "0b11" as zero and "1,2" as one.
+        let digits = if end == 0 && radix == 8 {
+            "0"
+        } else {
+            &digits[..end]
+        };
+        if digits.is_empty() {
+            return Err(invalid_flag(value));
+        }
+        let parsed = i64::from_str_radix(digits, radix).map_err(|_| invalid_flag(value))?;
+        return u32::try_from(parsed)
+            .ok()
+            .filter(|number| *number <= i32::MAX as u32)
+            .ok_or_else(|| invalid_flag(value));
+    }
+
+    let mut flags = 0u32;
+    for name in value.split(',') {
+        let bit = FLAG_NAMES
+            .iter()
+            .find(|(_, candidate)| name.eq_ignore_ascii_case(candidate))
+            .map(|(bit, _)| *bit)
+            .ok_or_else(|| invalid_flag(value))?;
+        flags |= bit;
+    }
+    Ok(flags)
+}
+
+/// Parse a samtools flag expression for a filter option.
+pub fn parse_flag_value(value: &str) -> Result<u32> {
+    parse_flag_argument(value)
+}
+
+/// Convert numeric or named SAM flags to samtools' tab-separated representation.
+pub fn flags(values: &[String]) -> Result<String> {
+    if values.is_empty() {
+        return Ok(FLAGS_HELP.to_string());
+    }
+    let mut output = String::new();
+    for value in values {
+        let flags = parse_flag_argument(value)?;
+        let names = FLAG_NAMES
+            .iter()
+            .filter(|(bit, _)| flags & bit != 0)
+            .map(|(_, name)| *name)
+            .collect::<Vec<_>>()
+            .join(",");
+        output.push_str(&format!("{flags:#x}\t{flags}\t{names}\n"));
+    }
+    Ok(output)
+}
+
+// --------------------------------------------------------------------------- //
+// head
+// --------------------------------------------------------------------------- //
+
+/// Print selected header lines followed by at most `records` SAM records.
+pub fn head(options: HeadOptions) -> Result<()> {
+    let mut reader = AlignmentReader::open(&options.input)?;
+    let header = reader.read_header()?;
+    let mut header_bytes = Vec::new();
+    {
+        let mut writer = SamWriter::new(&mut header_bytes);
+        writer.write_header(&header)?;
+        writer.finish()?;
+    }
+
+    let mut out = open_writer(None)?;
+    match options.headers {
+        None => out
+            .write_all(&header_bytes)
+            .map_err(|error| Error::io(format!("cannot write header: {error}")))?,
+        Some(limit) => {
+            for line in header_bytes
+                .split_inclusive(|byte| *byte == b'\n')
+                .take(limit)
+            {
+                out.write_all(line)
+                    .map_err(|error| Error::io(format!("cannot write header: {error}")))?;
+            }
+        }
+    }
+
+    if options.records > 0 {
+        let mut writer = SamWriter::new(&mut out);
+        for _ in 0..options.records {
+            let mut record = Record::default();
+            if reader.read_record(&header, &mut record)? == 0 {
+                break;
+            }
+            writer.write_record(&header, &record)?;
+        }
+        writer.finish()?;
+    }
+    out.flush()
+        .map_err(|error| Error::io(format!("cannot flush output: {error}")))?;
+    Ok(())
+}
+
+// --------------------------------------------------------------------------- //
 // view
 // --------------------------------------------------------------------------- //
 
@@ -76,6 +241,95 @@ pub struct ViewOptions {
     pub region: Option<String>,
     /// `-@`: worker threads for BAM output compression; 1 keeps single-threaded.
     pub threads: usize,
+}
+
+/// Options for `depth`.
+///
+/// This implements `-a`, `-aa`, `-s`, `-H`, `-q`, `-Q`, `-l`, `-J`, `-r`,
+/// `-b`, `-o` and multiple inputs. File-list/index and flag-filter options are
+/// tracked in the compatibility matrix rather than silently accepted. `-r`
+/// currently filters a sequential stream instead of using an index.
+pub struct DepthOptions {
+    /// Input SAM/BAM paths; one column per input.
+    pub inputs: Vec<PathBuf>,
+    /// Output path; `None` means standard output.
+    pub output: Option<PathBuf>,
+    /// `-a`: emit zero-depth positions through each declared reference length.
+    pub all_positions: bool,
+    /// `-aa`: also emit references unused by every input.
+    pub absolutely_all: bool,
+    /// `-s`: count only one mate at overlapping template positions.
+    pub remove_overlaps: bool,
+    /// `-H`: emit the `#CHROM POS sample` header.
+    pub header: bool,
+    /// `-q`: minimum base quality; 0 disables the filter.
+    pub min_baseq: u8,
+    /// `-Q`: minimum mapping quality; 0 disables the filter.
+    pub min_mapq: u8,
+    /// `-l`: minimum read length; 0 disables the filter.
+    pub min_read_len: usize,
+    /// `-J`: count CIGAR deletions as covered reference bases.
+    pub include_deletions: bool,
+    /// `-r`: restrict output to a reference region (`chr1` or `chr1:10-20`).
+    pub region: Option<String>,
+    /// `-b`: restrict output to BED intervals (0-based half-open).
+    pub bed: Option<PathBuf>,
+    /// Optional file containing input paths, one per line; overrides `inputs`.
+    pub file_list: Option<PathBuf>,
+    /// `-g`: remove these bits from the default excluded set.
+    pub remove_flags: u32,
+    /// `-G`: add these bits to the default excluded set.
+    pub exclude_flags: u32,
+    /// `--incl-flags`: require at least one of these bits.
+    pub include_flags: u32,
+    /// `--require-flags`: require all of these bits.
+    pub require_flags: u32,
+}
+
+/// Options for `coverage`.
+pub struct CoverageOptions {
+    /// Input SAM/BAM paths, combined by reference position.
+    pub inputs: Vec<PathBuf>,
+    /// Optional file containing input paths, one per line; overrides `inputs`.
+    pub bam_list: Option<PathBuf>,
+    /// Output path; `None` means standard output.
+    pub output: Option<PathBuf>,
+    /// `-H`: suppress the header row.
+    pub no_header: bool,
+    /// `-r`: restrict output to a reference region.
+    pub region: Option<String>,
+    /// `-q`: minimum mapping quality; 0 disables the filter.
+    pub min_mapq: u8,
+    /// `-Q`: minimum base quality; 0 disables the filter.
+    pub min_baseq: u8,
+    /// `-l`: minimum read length; 0 disables the filter.
+    pub min_read_len: usize,
+    /// Minimum per-position depth included in coverage statistics.
+    pub min_depth: u32,
+    /// Maximum reads per alignment start in each input; 0 means unlimited.
+    pub max_depth: usize,
+    /// Show breadth-of-coverage histogram instead of the table.
+    pub histogram: bool,
+    /// Show depth histogram instead of the table.
+    pub plot_depth: bool,
+    /// Use ASCII histogram glyphs.
+    pub ascii: bool,
+    /// Requested histogram bins; `None` uses terminal/default width.
+    pub n_bins: Option<usize>,
+    /// `--rf`: require at least one of these bits.
+    pub required_flags: u32,
+    /// `--ff`: replace the default excluded set when provided.
+    pub filter_flags: Option<u32>,
+}
+
+/// Options for `head`.
+pub struct HeadOptions {
+    /// Input SAM/BAM path; `-` reads standard input.
+    pub input: PathBuf,
+    /// Maximum header lines; `None` emits all header lines.
+    pub headers: Option<usize>,
+    /// Maximum alignment records after the selected headers.
+    pub records: usize,
 }
 
 fn passes_filters(record: &Record, options: &ViewOptions) -> bool {
@@ -338,6 +592,973 @@ fn open_writer(path: Option<&Path>) -> Result<Box<dyn Write>> {
             Ok(Box::new(BufWriter::new(file)))
         }
     }
+}
+
+// --------------------------------------------------------------------------- //
+// depth
+// --------------------------------------------------------------------------- //
+
+type DepthMaps = Vec<BTreeMap<usize, u32>>;
+
+#[derive(Clone, Copy)]
+struct DepthRegion {
+    tid: usize,
+    start: usize,
+    end: usize,
+}
+
+fn position_in_regions(position: usize, tid: usize, regions: Option<&[DepthRegion]>) -> bool {
+    regions
+        .map(|regions| {
+            regions.iter().any(|region| {
+                region.tid == tid && position >= region.start && position <= region.end
+            })
+        })
+        .unwrap_or(true)
+}
+
+fn load_bed(path: &Path, references: &[(String, usize)]) -> Result<Vec<DepthRegion>> {
+    let text = std::fs::read_to_string(path)
+        .map_err(|error| Error::io(format!("{}: {error}", path.display())))?;
+    let mut regions = Vec::new();
+    for (line_number, line) in text.lines().enumerate() {
+        let line = line.trim();
+        if line.is_empty()
+            || line.starts_with('#')
+            || line.starts_with("track ")
+            || line.starts_with("browser ")
+        {
+            continue;
+        }
+        let fields: Vec<&str> = line.split_whitespace().collect();
+        if fields.len() < 3 {
+            return Err(Error::input(format!(
+                "{}:{}: BED line needs at least 3 columns",
+                path.display(),
+                line_number + 1
+            )));
+        }
+        let tid = references
+            .iter()
+            .position(|(name, _)| name == fields[0])
+            .ok_or_else(|| {
+                Error::input(format!(
+                    "{}:{}: unknown reference in BED: {}",
+                    path.display(),
+                    line_number + 1,
+                    fields[0]
+                ))
+            })?;
+        let start: usize = fields[1].parse().map_err(|_| {
+            Error::input(format!(
+                "{}:{}: invalid BED start",
+                path.display(),
+                line_number + 1
+            ))
+        })?;
+        let end: usize = fields[2].parse().map_err(|_| {
+            Error::input(format!(
+                "{}:{}: invalid BED end",
+                path.display(),
+                line_number + 1
+            ))
+        })?;
+        if start >= end {
+            return Err(Error::input(format!(
+                "{}:{}: BED start must be less than end",
+                path.display(),
+                line_number + 1
+            )));
+        }
+        let end = end.min(references[tid].1);
+        regions.push(DepthRegion {
+            tid,
+            start: start + 1,
+            end,
+        });
+    }
+    Ok(regions)
+}
+
+fn position_in_region(position: usize, region: Option<&DepthRegion>) -> bool {
+    region
+        .map(|region| position >= region.start && position <= region.end)
+        .unwrap_or(true)
+}
+
+fn parse_depth_region(text: &str, references: &[(String, usize)]) -> Result<DepthRegion> {
+    let (name, coordinates) = match text.split_once(':') {
+        Some((name, coordinates)) => (name, Some(coordinates)),
+        None => (text, None),
+    };
+    let tid = references
+        .iter()
+        .position(|(reference, _)| reference == name)
+        .ok_or_else(|| Error::usage(format!("depth: unknown reference in -r: {name}")))?;
+    let length = references[tid].1;
+    let (start, end) = match coordinates {
+        None => (1, length),
+        Some(coordinates) => {
+            let (start, end) = coordinates
+                .split_once('-')
+                .ok_or_else(|| Error::usage(format!("depth: -r needs chr:from-to, got {text}")))?;
+            let start: usize = start
+                .replace(',', "")
+                .parse()
+                .map_err(|_| Error::usage(format!("depth: invalid -r start: {text}")))?;
+            let end: usize = end
+                .replace(',', "")
+                .parse()
+                .map_err(|_| Error::usage(format!("depth: invalid -r end: {text}")))?;
+            if start == 0 || start > end {
+                return Err(Error::usage(format!("depth: invalid -r interval: {text}")));
+            }
+            (start, end.min(length))
+        }
+    };
+    Ok(DepthRegion { tid, start, end })
+}
+
+/// `depth`: per-reference, per-position aligned-read depth.
+///
+/// The implementation follows samtools' default flag filter
+/// (`UNMAP,SECONDARY,QCFAIL,DUP`) and counts CIGAR `M`/`=`/`X` bases after
+/// applying `-q` and `-Q`. It uses a `BTreeMap` per reference, so peak memory is
+/// proportional to the number of covered positions, not the reference length.
+/// `-a` fills gaps only on references used by at least one input; `-aa` also
+/// includes unused references. `-r` is the exception: it emits the selected
+/// interval even when no read overlaps it.
+fn collect_depth(
+    input: &Path,
+    references: &[(String, usize)],
+    regions: Option<&[DepthRegion]>,
+    options: &DepthOptions,
+) -> Result<(DepthMaps, Vec<bool>)> {
+    let mut reader = AlignmentReader::open(input)?;
+    let header = reader.read_header()?;
+    let actual: Vec<(String, usize)> = header
+        .reference_sequences()
+        .iter()
+        .map(|(name, sequence)| {
+            (
+                String::from_utf8_lossy(name.as_ref()).into_owned(),
+                sequence.length().get(),
+            )
+        })
+        .collect();
+    if actual != references {
+        return Err(Error::input(
+            "depth inputs must have identical reference names and lengths".to_string(),
+        ));
+    }
+    let mut depths: Vec<BTreeMap<usize, u32>> =
+        (0..references.len()).map(|_| BTreeMap::new()).collect();
+    let mut used = vec![false; references.len()];
+    let mut overlaps: HashMap<Vec<u8>, usize> = HashMap::new();
+    let mut record = Record::default();
+    loop {
+        if reader.read_record(&header, &mut record)? == 0 {
+            break;
+        }
+        let flags = u32::from(record.flags().bits());
+        let excluded = (0x704 & !options.remove_flags) | options.exclude_flags;
+        if flags & excluded != 0 {
+            continue;
+        }
+        if options.include_flags != 0 && flags & options.include_flags == 0 {
+            continue;
+        }
+        if flags & options.require_flags != options.require_flags {
+            continue;
+        }
+        if record
+            .mapping_quality()
+            .map(|quality| quality.get())
+            .unwrap_or(0)
+            < options.min_mapq
+        {
+            continue;
+        }
+        if options.min_read_len > 0 && record.sequence().len() < options.min_read_len {
+            continue;
+        }
+        let Some(tid) = record.reference_sequence_id() else {
+            continue;
+        };
+        let Some(start) = record.alignment_start() else {
+            continue;
+        };
+        if tid >= depths.len() {
+            continue;
+        }
+        if let Some(regions) = regions {
+            if !regions.iter().any(|region| region.tid == tid) {
+                continue;
+            }
+        }
+        used[tid] = true;
+
+        let mut overlap_clip = 0;
+        if options.remove_overlaps
+            && record.flags().bits() & 0x1 != 0
+            && record.flags().bits() & 0x8 == 0
+        {
+            let name: &[u8] = record.name().map(|name| name.as_ref()).unwrap_or(&[]);
+            if let Some(end) = overlaps.remove(name) {
+                overlap_clip = end;
+            } else if let Some(end) = record.alignment_end().map(usize::from) {
+                let mate_can_overlap = match record.mate_alignment_start() {
+                    None => true,
+                    Some(mate_start) => {
+                        record.mate_reference_sequence_id() == Some(tid)
+                            && usize::from(mate_start) <= end + 1
+                    }
+                };
+                if mate_can_overlap {
+                    overlaps.insert(name.to_vec(), end);
+                }
+            }
+        }
+
+        let mut reference_position = usize::from(start);
+        let mut read_position = 0usize;
+        let qualities = record.quality_scores().as_ref();
+        for op in record.cigar().iter() {
+            let op = op.map_err(|error| Error::runtime(format!("invalid CIGAR: {error}")))?;
+            let length = op.len();
+            match op.kind() {
+                Kind::Match | Kind::SequenceMatch | Kind::SequenceMismatch => {
+                    for offset in 0..length {
+                        let position = reference_position + offset;
+                        if overlap_clip > 0 && position <= overlap_clip {
+                            continue;
+                        }
+                        if !position_in_regions(position, tid, regions) {
+                            continue;
+                        }
+                        let entry = depths[tid].entry(position).or_insert(0);
+                        if qualities.get(read_position + offset).copied().unwrap_or(0)
+                            >= options.min_baseq
+                        {
+                            *entry += 1;
+                        }
+                    }
+                    reference_position += length;
+                    read_position += length;
+                }
+                Kind::Insertion | Kind::SoftClip => read_position += length,
+                Kind::Deletion => {
+                    for offset in 0..length {
+                        let position = reference_position + offset;
+                        if overlap_clip > 0 && position <= overlap_clip {
+                            continue;
+                        }
+                        if position_in_regions(position, tid, regions) {
+                            let entry = depths[tid].entry(position).or_insert(0);
+                            if options.include_deletions {
+                                *entry += 1;
+                            }
+                        }
+                    }
+                    reference_position += length;
+                }
+                Kind::Skip => reference_position += length,
+                Kind::HardClip | Kind::Pad => {}
+            }
+        }
+    }
+    Ok((depths, used))
+}
+
+/// `depth`: per-reference, per-position aligned-read depth.
+///
+/// This subset follows samtools' default flag filter (`UNMAP,SECONDARY,QCFAIL,DUP`)
+/// and counts CIGAR `M`/`=`/`X` bases after applying `-q`/`-Q`. Each input gets
+/// its own column; `-a` emits every declared reference position. Memory is
+/// proportional to the union of covered positions, not the reference length.
+pub fn depth(options: DepthOptions) -> Result<()> {
+    let inputs = resolve_inputs(&options.inputs, options.file_list.as_ref(), "depth")?;
+    let first = inputs.first().expect("non-empty inputs were validated");
+    let mut first_reader = AlignmentReader::open(first)?;
+    let first_header = first_reader.read_header()?;
+    let references: Vec<(String, usize)> = first_header
+        .reference_sequences()
+        .iter()
+        .map(|(name, sequence)| {
+            (
+                String::from_utf8_lossy(name.as_ref()).into_owned(),
+                sequence.length().get(),
+            )
+        })
+        .collect();
+    let regions = if let Some(bed) = &options.bed {
+        if options.region.is_some() {
+            return Err(Error::usage(
+                "depth -b and -r are mutually exclusive".to_string(),
+            ));
+        }
+        Some(load_bed(bed, &references)?)
+    } else if let Some(region) = options.region.as_deref() {
+        Some(vec![parse_depth_region(region, &references)?])
+    } else {
+        None
+    };
+    let mut all_depths = Vec::with_capacity(inputs.len());
+    let mut used = vec![false; references.len()];
+    for input in &inputs {
+        let (depths, input_used) = collect_depth(input, &references, regions.as_deref(), &options)?;
+        all_depths.push(depths);
+        for (used, input_used) in used.iter_mut().zip(input_used) {
+            *used |= input_used;
+        }
+    }
+
+    let mut out = open_writer(options.output.as_deref())?;
+    if options.header {
+        write!(out, "#CHROM\tPOS")
+            .map_err(|error| Error::io(format!("cannot write output: {error}")))?;
+        for input in &inputs {
+            write!(out, "\t{}", input.display())
+                .map_err(|error| Error::io(format!("cannot write output: {error}")))?;
+        }
+        writeln!(out).map_err(|error| Error::io(format!("cannot write output: {error}")))?;
+    }
+    for (tid, (name, length)) in references.iter().enumerate() {
+        let mut positions = BTreeSet::new();
+        if let Some(regions) = &regions {
+            if options.all_positions
+                && (options.absolutely_all || options.region.is_some() || used[tid])
+            {
+                for region in regions.iter().filter(|region| region.tid == tid) {
+                    positions.extend(region.start..=region.end);
+                }
+            } else if !options.all_positions {
+                for depths in &all_depths {
+                    for position in depths[tid].keys().copied() {
+                        if position_in_regions(position, tid, Some(regions)) {
+                            positions.insert(position);
+                        }
+                    }
+                }
+            }
+        } else if options.all_positions {
+            if options.absolutely_all || used[tid] {
+                positions.extend(1..=*length);
+            }
+        } else {
+            for depths in &all_depths {
+                positions.extend(depths[tid].keys().copied());
+            }
+        }
+        for position in positions {
+            write!(out, "{name}\t{position}")
+                .map_err(|error| Error::io(format!("cannot write output: {error}")))?;
+            for depths in &all_depths {
+                let value = depths[tid].get(&position).copied().unwrap_or(0);
+                write!(out, "\t{value}")
+                    .map_err(|error| Error::io(format!("cannot write output: {error}")))?;
+            }
+            writeln!(out).map_err(|error| Error::io(format!("cannot write output: {error}")))?;
+        }
+    }
+    out.flush()
+        .map_err(|error| Error::io(format!("cannot flush output: {error}")))?;
+    Ok(())
+}
+
+fn format_significant(value: f64, digits: usize) -> String {
+    if value == 0.0 {
+        return "0".to_string();
+    }
+    if !value.is_finite() {
+        if value.is_nan() {
+            return if value.is_sign_negative() {
+                "-nan".to_string()
+            } else {
+                "nan".to_string()
+            };
+        }
+        return if value.is_sign_negative() {
+            "-inf".to_string()
+        } else {
+            "inf".to_string()
+        };
+    }
+    let exponent = value.abs().log10().floor() as i32;
+    if exponent < -4 || exponent >= digits as i32 {
+        let decimals = digits.saturating_sub(1);
+        let text = format!("{value:.decimals$e}");
+        let (mantissa, exponent) = text.split_once('e').expect("scientific format");
+        let mantissa = mantissa.trim_end_matches('0').trim_end_matches('.');
+        let exponent: i32 = exponent.parse().expect("formatted exponent");
+        return format!("{mantissa}e{exponent:+03}");
+    }
+    let decimals = (digits as i32 - exponent - 1).max(0) as usize;
+    let mut text = format!("{value:.decimals$}");
+    if text.contains('.') {
+        text = text.trim_end_matches('0').trim_end_matches('.').to_string();
+    }
+    text
+}
+
+#[derive(Clone, Copy, Default)]
+struct CoveragePosition {
+    depth: u32,
+    baseq_sum: u64,
+    baseq_count: u64,
+}
+
+struct CoverageStats {
+    positions: Vec<BTreeMap<usize, CoveragePosition>>,
+    reads: Vec<u64>,
+    all_reads: Vec<u64>,
+    seen: Vec<bool>,
+    mapq_sum: Vec<u64>,
+}
+
+impl CoverageStats {
+    fn new(references: usize) -> Self {
+        Self {
+            positions: (0..references).map(|_| BTreeMap::new()).collect(),
+            reads: vec![0; references],
+            all_reads: vec![0; references],
+            seen: vec![false; references],
+            mapq_sum: vec![0; references],
+        }
+    }
+}
+
+fn resolve_inputs(
+    inputs: &[PathBuf],
+    list: Option<&PathBuf>,
+    command: &str,
+) -> Result<Vec<PathBuf>> {
+    let inputs = if let Some(path) = list {
+        let text = std::fs::read_to_string(path)
+            .map_err(|error| Error::io(format!("{}: {error}", path.display())))?;
+        text.lines()
+            .map(str::trim)
+            .filter(|line| !line.is_empty())
+            .map(PathBuf::from)
+            .collect()
+    } else {
+        inputs.to_vec()
+    };
+    if inputs.is_empty() {
+        return Err(Error::usage(format!(
+            "{command} needs at least one input file or a file list"
+        )));
+    }
+    Ok(inputs)
+}
+
+fn coverage_inputs(options: &CoverageOptions) -> Result<Vec<PathBuf>> {
+    resolve_inputs(&options.inputs, options.bam_list.as_ref(), "coverage")
+}
+
+fn accumulate_coverage(
+    input: &Path,
+    references: &[(String, usize)],
+    region: Option<&DepthRegion>,
+    options: &CoverageOptions,
+    stats: &mut CoverageStats,
+) -> Result<()> {
+    let mut reader = AlignmentReader::open(input)?;
+    let header = reader.read_header()?;
+    let actual: Vec<(String, usize)> = header
+        .reference_sequences()
+        .iter()
+        .map(|(name, sequence)| {
+            (
+                String::from_utf8_lossy(name.as_ref()).into_owned(),
+                sequence.length().get(),
+            )
+        })
+        .collect();
+    if actual != references {
+        return Err(Error::input(
+            "coverage inputs must have identical reference names and lengths".to_string(),
+        ));
+    }
+
+    let mut start_counts: HashMap<(usize, usize), usize> = HashMap::new();
+    let mut record = Record::default();
+    loop {
+        if reader.read_record(&header, &mut record)? == 0 {
+            break;
+        }
+        let Some(tid) = record.reference_sequence_id() else {
+            continue;
+        };
+        if tid >= references.len() {
+            continue;
+        }
+        let region_match = match region {
+            None => true,
+            Some(region) if tid != region.tid => false,
+            Some(region) => match record.alignment_start() {
+                None => false,
+                Some(start) => {
+                    let end = record
+                        .alignment_end()
+                        .map(usize::from)
+                        .unwrap_or(usize::from(start));
+                    usize::from(start) <= region.end && end >= region.start
+                }
+            },
+        };
+        if !region_match {
+            continue;
+        }
+        // samtools reports filtered reads in histogram mode. This counter is
+        // before flag/MAPQ/length filtering but after the region iterator.
+        stats.all_reads[tid] += 1;
+        let flags = u32::from(record.flags().bits());
+        let excluded = options.filter_flags.unwrap_or(0x704);
+        if flags & excluded != 0 {
+            continue;
+        }
+        if options.required_flags != 0 && flags & options.required_flags == 0 {
+            continue;
+        }
+        if record
+            .mapping_quality()
+            .map(|quality| quality.get())
+            .unwrap_or(0)
+            < options.min_mapq
+        {
+            continue;
+        }
+        if options.min_read_len > 0 && record.sequence().len() < options.min_read_len {
+            continue;
+        }
+        let Some(start) = record.alignment_start() else {
+            continue;
+        };
+        if let Some(region) = region {
+            if tid != region.tid {
+                continue;
+            }
+            let end = record
+                .alignment_end()
+                .map(usize::from)
+                .unwrap_or(usize::from(start));
+            if usize::from(start) > region.end || end < region.start {
+                continue;
+            }
+        }
+
+        stats.reads[tid] += 1;
+        stats.mapq_sum[tid] += u64::from(record.mapping_quality().map(|q| q.get()).unwrap_or(0));
+        stats.seen[tid] = true;
+
+        // htslib's pileup cap limits reads at an alignment start per input.
+        // It does not cap the final merged depth, and it does not reduce the
+        // read/MAPQ counters above.
+        let start_key = (tid, usize::from(start));
+        let start_count = start_counts.entry(start_key).or_insert(0);
+        let skip_for_depth = options.max_depth > 0 && *start_count >= options.max_depth;
+        *start_count += 1;
+        if skip_for_depth {
+            continue;
+        }
+
+        let mut reference_position = usize::from(start);
+        let mut read_position = 0usize;
+        let qualities = record.quality_scores().as_ref();
+        for op in record.cigar().iter() {
+            let op = op.map_err(|error| Error::runtime(format!("invalid CIGAR: {error}")))?;
+            let length = op.len();
+            match op.kind() {
+                Kind::Match | Kind::SequenceMatch | Kind::SequenceMismatch => {
+                    for offset in 0..length {
+                        let position = reference_position + offset;
+                        if !position_in_region(position, region) {
+                            continue;
+                        }
+                        let quality = qualities.get(read_position + offset).copied().unwrap_or(0);
+                        if quality >= options.min_baseq {
+                            let entry = stats.positions[tid].entry(position).or_default();
+                            entry.depth += 1;
+                            entry.baseq_sum += u64::from(quality);
+                            entry.baseq_count += 1;
+                        }
+                    }
+                    reference_position += length;
+                    read_position += length;
+                }
+                Kind::Insertion | Kind::SoftClip => read_position += length,
+                Kind::Deletion | Kind::Skip => reference_position += length,
+                Kind::HardClip | Kind::Pad => {}
+            }
+        }
+    }
+    Ok(())
+}
+
+/// `coverage`: per-reference summary of aligned-read depth.
+///
+/// Multiple inputs are merged by position. `--min-depth` filters coverage,
+/// mean-depth and base-quality statistics after that merge; read counts and
+/// mapQ remain read-level statistics. Memory grows with covered positions.
+pub fn coverage(options: CoverageOptions) -> Result<()> {
+    let inputs = coverage_inputs(&options)?;
+    let first = inputs.first().expect("non-empty inputs were validated");
+    let mut first_reader = AlignmentReader::open(first)?;
+    let first_header = first_reader.read_header()?;
+    let references: Vec<(String, usize)> = first_header
+        .reference_sequences()
+        .iter()
+        .map(|(name, sequence)| {
+            (
+                String::from_utf8_lossy(name.as_ref()).into_owned(),
+                sequence.length().get(),
+            )
+        })
+        .collect();
+    let region = options
+        .region
+        .as_deref()
+        .map(|text| parse_depth_region(text, &references))
+        .transpose()?;
+    let mut stats = CoverageStats::new(references.len());
+    for input in &inputs {
+        accumulate_coverage(input, &references, region.as_ref(), &options, &mut stats)?;
+    }
+
+    let min_depth = options.min_depth.max(1);
+    if options.histogram || options.plot_depth || options.n_bins.is_some() || options.ascii {
+        return write_coverage_histogram(&options, &references, region.as_ref(), &stats);
+    }
+    let mut out = open_writer(options.output.as_deref())?;
+    if !options.no_header {
+        writeln!(
+            out,
+            "#rname\tstartpos\tendpos\tnumreads\tcovbases\tcoverage\tmeandepth\tmeanbaseq\tmeanmapq"
+        )
+        .map_err(|error| Error::io(format!("cannot write output: {error}")))?;
+    }
+    for (tid, (name, length)) in references.iter().enumerate() {
+        let (span_start, span_end) = match &region {
+            Some(region) => {
+                if tid != region.tid {
+                    continue;
+                }
+                (region.start, region.end)
+            }
+            None => (1, *length),
+        };
+        let span = span_end.saturating_sub(span_start).saturating_add(1);
+        if span == 0 {
+            continue;
+        }
+        let mut covbases = 0u64;
+        let mut depth_sum = 0u64;
+        let mut baseq_sum = 0u64;
+        let mut baseq_count = 0u64;
+        for (position, value) in &stats.positions[tid] {
+            if *position >= span_start && *position <= span_end && value.depth >= min_depth {
+                covbases += 1;
+                depth_sum += u64::from(value.depth);
+                baseq_sum += value.baseq_sum;
+                baseq_count += value.baseq_count;
+            }
+        }
+        let coverage = (covbases as f64) / (span as f64) * 100.0;
+        let mean_depth = (depth_sum as f64) / (span as f64);
+        let mean_baseq = if baseq_count > 0 {
+            (baseq_sum as f64) / (baseq_count as f64)
+        } else {
+            0.0
+        };
+        let mean_mapq = if stats.reads[tid] > 0 {
+            (stats.mapq_sum[tid] as f64) / (stats.reads[tid] as f64)
+        } else {
+            0.0
+        };
+        writeln!(
+            out,
+            "{name}\t{span_start}\t{span_end}\t{}\t{covbases}\t{}\t{}\t{}\t{}",
+            stats.reads[tid],
+            format_significant(coverage, 6),
+            format_significant(mean_depth, 6),
+            format_significant(mean_baseq, 3),
+            format_significant(mean_mapq, 3)
+        )
+        .map_err(|error| Error::io(format!("cannot write output: {error}")))?;
+    }
+    out.flush()
+        .map_err(|error| Error::io(format!("cannot flush output: {error}")))?;
+    Ok(())
+}
+
+// --------------------------------------------------------------------------- //
+// coverage histogram
+// --------------------------------------------------------------------------- //
+
+fn readable_bps(value: f64) -> String {
+    const UNITS: [&str; 5] = ["", "K", "M", "G", "T"];
+    let mut value = value;
+    let mut unit = 0;
+    while value >= 1000.0 && unit < UNITS.len() - 1 {
+        value /= 1000.0;
+        unit += 1;
+    }
+    format!("{value:.unit$}{}", UNITS[unit])
+}
+
+fn centered_text(text: &str, width: usize) -> String {
+    let length = text.len();
+    if length >= width {
+        return text.to_string();
+    }
+    let padding = (width - length) / 2;
+    let extra = (width - length) % 2;
+    if padding >= 1 {
+        format!(
+            " {:>width$}{}",
+            text,
+            " ".repeat(padding - 1 + extra),
+            width = length + padding
+        )
+    } else {
+        text.to_string()
+    }
+}
+
+fn histogram_bin_count(options: &CoverageOptions) -> usize {
+    let requested = options.n_bins.unwrap_or(50);
+    let full_width = options.n_bins.is_none() && options.output.is_none();
+    if requested == 0 || full_width {
+        let columns = std::env::var("COLUMNS")
+            .ok()
+            .and_then(|value| value.parse::<usize>().ok())
+            .unwrap_or(0);
+        if columns > 60 {
+            columns - 40
+        } else {
+            40
+        }
+    } else {
+        requested
+    }
+}
+
+fn histogram_glyph(ascii: bool, value: f64, current: f64, row_size: f64) -> char {
+    if row_size == 0.0 {
+        return ' ';
+    }
+    let length = if ascii { 2 } else { 8 };
+    let difference = (length as f64 * (value - current) / row_size).round() as i32 - 1;
+    if difference < 0 {
+        return ' ';
+    }
+    if ascii {
+        ['.', ':'][difference.min(length - 1) as usize]
+    } else {
+        ['▁', '▂', '▃', '▄', '▅', '▆', '▇', '█'][difference.min(length - 1) as usize]
+    }
+}
+
+#[allow(clippy::too_many_arguments)]
+fn render_coverage_histogram(
+    name: &str,
+    reference_length: usize,
+    beg: usize,
+    end: usize,
+    bins: usize,
+    bin_width: usize,
+    histogram: &[u64],
+    plot_depth: bool,
+    ascii: bool,
+    reads: u64,
+    all_reads: u64,
+    covered_bases: u64,
+    depth_sum: u64,
+    baseq_sum: u64,
+    baseq_count: u64,
+    mapq_sum: u64,
+) -> String {
+    let span = (end - beg) as f64;
+    let factor = if plot_depth { 1.0 } else { 100.0 };
+    let values: Vec<f64> = histogram
+        .iter()
+        .map(|value| factor * (*value as f64) / bin_width as f64)
+        .collect();
+    let maximum = values.iter().copied().fold(0.0_f64, f64::max);
+    let row_size = maximum / 10.0;
+    let vertical = if ascii { '|' } else { '│' };
+    let mut output = format!("{name} ({}bp)\n", readable_bps(reference_length as f64));
+    let coverage = 100.0 * covered_bases as f64 / span;
+    let mean_depth = depth_sum as f64 / span;
+    let mean_baseq = if baseq_count > 0 {
+        baseq_sum as f64 / baseq_count as f64
+    } else {
+        0.0
+    };
+    let mean_mapq = if reads > 0 {
+        mapq_sum as f64 / reads as f64
+    } else {
+        -f64::NAN
+    };
+
+    for row in (0..10).rev() {
+        let current = row_size * row as f64;
+        if plot_depth {
+            output.push_str(&format!(">{current:>8.1} "));
+        } else {
+            output.push_str(&format!(">{current:>7.2}% "));
+        }
+        output.push(vertical);
+        for value in &values {
+            output.push(histogram_glyph(ascii, *value, current, row_size));
+        }
+        output.push(vertical);
+        output.push(' ');
+        match row {
+            9 => output.push_str(&format!("Number of reads: {reads}")),
+            8 if all_reads > reads => {
+                output.push_str(&format!("    ({} filtered)", all_reads - reads))
+            }
+            7 => output.push_str(&format!(
+                "Covered bases:   {}bp",
+                readable_bps(covered_bases as f64)
+            )),
+            6 => output.push_str(&format!(
+                "Percent covered: {}%",
+                format_significant(coverage, 4)
+            )),
+            5 => output.push_str(&format!(
+                "Mean coverage:   {}x",
+                format_significant(mean_depth, 3)
+            )),
+            4 => output.push_str(&format!(
+                "Mean baseQ:      {}",
+                format_significant(mean_baseq, 3)
+            )),
+            3 => output.push_str(&format!(
+                "Mean mapQ:       {}",
+                format_significant(mean_mapq, 3)
+            )),
+            1 => output.push_str(&format!(
+                "Histo bin width: {}bp",
+                readable_bps(bin_width as f64)
+            )),
+            0 if plot_depth => output.push_str(&format!(
+                "Histo max cov:   {}",
+                format_significant(maximum, 5)
+            )),
+            0 => output.push_str(&format!(
+                "Histo max bin:   {}%",
+                format_significant(maximum, 5)
+            )),
+            _ => {}
+        }
+        output.push('\n');
+    }
+
+    output.push_str("     ");
+    output.push_str(&centered_text(&readable_bps((beg + 1) as f64), 10));
+    let mut rest = 10;
+    while rest < 10 * (bins / 10) {
+        output.push_str(&centered_text(
+            &readable_bps((beg + bin_width * rest) as f64),
+            10,
+        ));
+        rest += 10;
+    }
+    // The upstream `%*s` receives a one-space string, so width zero still
+    // emits one space before the final tick label.
+    output.push_str(&" ".repeat((bins % 10).max(1)));
+    output.push_str(&centered_text(&readable_bps(end as f64), 10));
+    output.push('\n');
+    output
+}
+
+fn write_coverage_histogram(
+    options: &CoverageOptions,
+    references: &[(String, usize)],
+    region: Option<&DepthRegion>,
+    stats: &CoverageStats,
+) -> Result<()> {
+    let requested_bins = histogram_bin_count(options);
+    let min_depth = options.min_depth.max(1);
+    let mut out = open_writer(options.output.as_deref())?;
+    let mut wrote = false;
+
+    for (tid, (name, length)) in references.iter().enumerate() {
+        if let Some(region) = region {
+            if tid != region.tid {
+                continue;
+            }
+        } else if !stats.seen[tid] {
+            continue;
+        }
+        let (beg, end) = match region {
+            Some(region) => (region.start - 1, region.end),
+            None => (0, *length),
+        };
+        let span = end.saturating_sub(beg);
+        if span == 0 {
+            continue;
+        }
+        let bins = requested_bins.min(span);
+        let bin_width = span / bins;
+        let mut histogram = vec![0u64; bins];
+        let mut covered_bases = 0u64;
+        let mut depth_sum = 0u64;
+        let mut baseq_sum = 0u64;
+        let mut baseq_count = 0u64;
+        for (position, value) in &stats.positions[tid] {
+            let position0 = position - 1;
+            if position0 < beg || position0 >= end {
+                continue;
+            }
+            if value.depth >= min_depth {
+                covered_bases += 1;
+                depth_sum += u64::from(value.depth);
+                baseq_sum += value.baseq_sum;
+                baseq_count += value.baseq_count;
+            }
+            let bin = (position0 - beg) / bin_width;
+            if bin >= bins {
+                continue;
+            }
+            if options.plot_depth {
+                histogram[bin] += u64::from(value.depth);
+            } else if value.depth >= min_depth {
+                histogram[bin] += 1;
+            }
+        }
+        if wrote {
+            out.write_all(b"\n")
+                .map_err(|error| Error::io(format!("cannot write output: {error}")))?;
+        }
+        let text = render_coverage_histogram(
+            name,
+            *length,
+            beg,
+            end,
+            bins,
+            bin_width,
+            &histogram,
+            options.plot_depth,
+            options.ascii,
+            stats.reads[tid],
+            stats.all_reads[tid],
+            covered_bases,
+            depth_sum,
+            baseq_sum,
+            baseq_count,
+            stats.mapq_sum[tid],
+        );
+        out.write_all(text.as_bytes())
+            .map_err(|error| Error::io(format!("cannot write output: {error}")))?;
+        wrote = true;
+    }
+    out.flush()
+        .map_err(|error| Error::io(format!("cannot flush output: {error}")))?;
+    Ok(())
 }
 
 // --------------------------------------------------------------------------- //

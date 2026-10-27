@@ -7,7 +7,7 @@ all	CRAM input/output with --reference	verified		formats suite	core fields	deriv
 count	--gene-transcript-map	verified	1.1.6	edge cases	tsv bytes	requires --per-contig
 count	--partition-genes	verified		spill suite	TSV bytes	automatic gene partition fallback
 count	--per-cell	verified	1.1.6	edge cases	tsv bytes	sparse triplet form
-count	--per-contig	experimental	1.1.6	unit tests	tsv bytes
+count	--per-contig	verified	1.1.6	per-contig	tsv bytes
 count	--per-gene --gene-tag	verified	1.1.6	tagged	tsv bytes
 count	--wide	verified	1.1.6	edge cases	tsv bytes	dense gene x cell matrix
 count_tab	--per-cell	verified	1.1.6	cell table	tsv bytes
@@ -19,15 +19,15 @@ dedup	--compresslevel 0-9	verified	1.1.6	edge cases	decompressed bytes	0 stores 
 dedup	--edit-distance-threshold=0|1|2|at-length	verified	1.1.6	edge cases	decompressed bytes
 dedup	--extract-umi-method=read_id	verified	1.1.6	families	decompressed bytes
 dedup	--extract-umi-method=tag	verified	1.1.6	tagged	decompressed bytes
-dedup	--extract-umi-method=umis	experimental	1.1.6	unit tests	member sets
+dedup	--extract-umi-method=umis	verified	1.1.6	umis source	decompressed bytes	UMI_ fields in query name
 dedup	--filter-umi [--umi-whitelist|--umi-whitelist-paired]	verified	1.1.6	edge cases	decompressed bytes	single and paired whitelists
-dedup	--gene-transcript-map	unsupported		n/a	rejected	count implements the map
+dedup	--gene-transcript-map	experimental	1.1.6	five PYTHONHASHSEED probes; fixed-seed repeats	BAM bytes	accepted upstream set-order nondeterminism; representative may differ
 dedup	--ignore-tlen	verified	1.1.6	edge cases	decompressed bytes
 dedup	--mapping-quality	verified	1.1.6	edge cases	decompressed bytes
 dedup	--method=unique|percentile|cluster|adjacency|directional	verified	1.1.6	families, paired-repeat	decompressed bytes	five methods
 dedup	--multimapping-detection-method=NH|X0|XT	verified	1.1.6	edge cases	decompressed bytes	tie draw consumes the same RNG values as upstream
 dedup	--no-sort-output	verified	1.1.6	single-nosort, paired-nosort	decompressed bytes
-dedup	--output-stats	unsupported		n/a	rejected	null model not implemented
+dedup	--output-stats	verified	1.1.6	unique/directional/cluster/adjacency/percentile and multi-bundle	TSV bytes	NumPy RandomState null model; unique duplicate-key overwrite
 dedup	--paired	verified	1.1.6	paired, paired-repeat	decompressed bytes	includes repeated pairs and mate recovery
 dedup	--per-cell --cell-tag	verified	1.1.6	edge cases	decompressed bytes
 dedup	--per-gene --gene-tag	verified	1.1.6	edge cases	decompressed bytes
@@ -41,11 +41,12 @@ dedup	bounded paths: window, mate join, disk bundle	verified		spill suite	decomp
 dedup	default coordinate sort	verified	1.1.6	exact cases + oracle B04	decompressed bytes
 extract	--extract-method=regex	verified	1.1.6	extract cases	FASTQ bytes	named umi_* and discard_* groups
 extract	--extract-method=string with -p	verified	1.1.6	extract cases	FASTQ bytes	single/paired, 3prime, gzip, quality filter/mask
-extract	other methods, phred64	unsupported		n/a	rejected
+extract	--quality-encoding phred64/solexa	verified	1.1.6	extract cases	FASTQ bytes	quality filter/mask offset
+extract	invalid methods rejected	verified	1.1.6	extract cases	exit before output	upstream accepts string/regex only
 group	--group-out	verified	1.1.6	families x five methods	bam bytes + tsv bytes
 group	--output-bam	verified	1.1.6	families x five methods	bam bytes
 group	--per-gene [--per-cell]	verified	1.1.6	edge cases	bam bytes + tsv bytes
 group	UG and BX tags	verified	1.1.6	families x five methods	bam bytes	UG uses C/S/I
 whitelist	--ed-above-threshold=discard|correct	verified	1.1.6	whitelist cases	TSV bytes
 whitelist	--knee-method=distance|density, --set-cell-number	verified	1.1.6	whitelist cases	TSV bytes
-whitelist	--method=umis, --read2-in	unsupported		n/a	rejected
+whitelist	--method=umis, --read2-in [--bc-pattern2]	verified	1.1.6	whitelist cases	TSV bytes	unique UMI counts and paired pattern2

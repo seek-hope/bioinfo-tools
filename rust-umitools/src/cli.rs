@@ -66,7 +66,7 @@ EXAMPLES:
 NOTES:
   N marks UMI bases and C marks cell bases in the pattern.
   The output is barcode, corrected barcodes, count, corrected counts.
-  --method umis and paired input are rejected in this build.";
+  --method umis and paired input are supported.";
 
 const EXTRACT_HELP: &str = "\
 EXAMPLES:
@@ -246,7 +246,7 @@ pub struct DedupArgs {
     /// Write the output in processing order instead of coordinate order
     #[arg(long = "no-sort-output")]
     pub no_sort_output: bool,
-    /// Write per run statistics into this prefix (rejected: null model not implemented)
+    /// Write per-run statistics tables with this prefix
     #[arg(long = "output-stats")]
     pub output_stats: Option<String>,
     /// Do not cluster: emit the best read of every UMI
@@ -261,9 +261,12 @@ pub struct DedupArgs {
     /// What to do with chimeric pairs: use, discard, output
     #[arg(long = "chimeric-pairs", default_value = "use")]
     pub chimeric_pairs: String,
-    /// Group by gene instead of by position (requires --gene-tag)
+    /// Group by gene instead of by position
     #[arg(long = "per-gene")]
     pub per_gene: bool,
+    /// Treat each contig as a gene (requires --per-gene)
+    #[arg(long = "per-contig")]
+    pub per_contig: bool,
     /// Gene tag when --per-gene is used
     #[arg(long = "gene-tag")]
     pub gene_tag: Option<String>,
@@ -285,8 +288,8 @@ pub struct DedupArgs {
     /// Read2 whitelist; combined with --umi-whitelist as a cartesian product
     #[arg(long = "umi-whitelist-paired", value_name = "FILE")]
     pub umi_whitelist_paired: Option<PathBuf>,
-    /// Gene to transcript map (count --per-contig only; dedup rejects it)
-    #[arg(long = "gene-transcript-map")]
+    /// Tab-separated gene/transcript map (requires --per-contig)
+    #[arg(long = "gene-transcript-map", value_name = "FILE")]
     pub gene_transcript_map: Option<PathBuf>,
 }
 
@@ -435,7 +438,7 @@ pub struct ExtractArgs {
     /// Mask UMI bases below this quality with N
     #[arg(long = "quality-filter-mask")]
     pub quality_filter_mask: Option<u8>,
-    /// Quality encoding: phred33 (other encodings are rejected)
+    /// Quality score encoding: phred33, phred64 or solexa
     #[arg(
         long = "quality-encoding",
         default_value = "phred33",
@@ -475,10 +478,13 @@ pub struct WhitelistArgs {
     /// Barcode pattern; N marks UMI bases, C marks cell bases
     #[arg(short = 'p', long = "bc-pattern", value_name = "PATTERN")]
     pub bc_pattern: Option<String>,
-    /// Paired read 2 input (not implemented)
+    /// Barcode pattern for read 2
+    #[arg(long = "bc-pattern2", value_name = "PATTERN")]
+    pub bc_pattern2: Option<String>,
+    /// Paired read 2 input
     #[arg(long = "read2-in", value_name = "FILE")]
     pub read2_in: Option<PathBuf>,
-    /// Count method: reads
+    /// Count method: reads or umis
     #[arg(long = "method", default_value = "reads", value_name = "METHOD")]
     pub method: String,
     /// Knee method: distance or density
@@ -565,7 +571,9 @@ pub struct DedupConfig {
     pub reference: Option<PathBuf>,
     pub chrom: Option<String>,
     pub per_gene: bool,
+    pub per_contig: bool,
     pub gene_tag: Option<[u8; 2]>,
+    pub gene_transcript_map: Option<PathBuf>,
     pub per_cell: bool,
     pub cell_tag: [u8; 2],
     pub subset: Option<f64>,
@@ -658,10 +666,6 @@ fn build_source(common: &CommonArgs) -> Result<UmiSource> {
     }
 }
 
-fn reject(option: &str, detail: &str) -> Error {
-    Error::unsupported(option, detail)
-}
-
 fn load_whitelist(path: &Path) -> Result<Vec<Vec<u8>>> {
     let text = std::fs::read_to_string(path).map_err(|e| Error::io(path, e))?;
     let mut umis = Vec::new();
@@ -683,18 +687,10 @@ impl DedupConfig {
                 "0 stores uncompressed BGZF blocks; the default is 1",
             ));
         }
-        if args.output_stats.is_some() {
-            return Err(reject(
-                "--output-stats",
-                "the UMI-tools null model is not implemented, so this build will not emit \
-                 statistics whose null columns would only repeat the observed values; drop the \
-                 option and see docs/ROADMAP.md (R0-2)",
-            ));
-        }
-        if args.per_gene && args.gene_tag.is_none() {
+        if args.per_gene && args.gene_tag.is_none() && !args.per_contig {
             return Err(Error::usage_with_hint(
-                "--per-gene needs --gene-tag",
-                "for example: --per-gene --gene-tag GX",
+                "--per-gene needs --gene-tag or --per-contig",
+                "for example: --per-gene --gene-tag GX, or --per-gene --per-contig",
             ));
         }
         if args.gene_tag.is_some() && !args.per_gene {
@@ -703,16 +699,22 @@ impl DedupConfig {
                 "add --per-gene to key bundles by gene",
             ));
         }
+        if args.per_contig && !args.per_gene {
+            return Err(Error::usage_with_hint(
+                "--per-contig requires --per-gene",
+                "add --per-gene to group by gene",
+            ));
+        }
         if args.filter_umi && args.umi_whitelist.is_none() {
             return Err(Error::usage_with_hint(
                 "--filter-umi needs --umi-whitelist",
                 "supply a file with one accepted UMI in the first column of each line",
             ));
         }
-        if args.gene_transcript_map.is_some() {
-            return Err(reject(
-                "--gene-transcript-map",
-                "this map is only supported by count --per-contig; dedup has no --per-contig",
+        if args.gene_transcript_map.is_some() && !args.per_contig {
+            return Err(Error::usage_with_hint(
+                "--gene-transcript-map needs --per-contig",
+                "add --per-contig so transcripts are grouped by their mapped gene",
             ));
         }
         if let Some(probability) = args.subset {
@@ -796,10 +798,12 @@ impl DedupConfig {
             reference: common.reference.clone(),
             chrom: args.chrom.clone(),
             per_gene: args.per_gene,
+            per_contig: args.per_contig,
             gene_tag: match &args.gene_tag {
                 Some(name) => Some(parse_tag(name)?),
                 None => None,
             },
+            gene_transcript_map: args.gene_transcript_map.clone(),
             per_cell: common.per_cell,
             cell_tag: parse_tag(&common.cell_tag)?,
             subset: args.subset,
@@ -841,7 +845,9 @@ impl DedupConfig {
             reference: None,
             chrom: None,
             per_gene: false,
+            per_contig: false,
             gene_tag: None,
+            gene_transcript_map: None,
             per_cell: false,
             cell_tag: *b"CB",
             subset: None,

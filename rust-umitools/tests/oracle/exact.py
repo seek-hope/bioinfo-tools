@@ -738,6 +738,50 @@ def new_option_cases(work: Path) -> None:
         suffix=".tsv",
     )
 
+    # --per-contig directly: two UMIs on each of two contigs must be counted
+    # independently, with no gene-tag dependency.
+    body = (
+        rec("pc1", "AAAAAAAA", pos=100, rname="chr1")
+        + rec("pc2", "AAAAAAAA", pos=110, rname="chr1")
+        + rec("pc3", "CCCCCCCC", pos=100, rname="chr2")
+        + rec("pc4", "CCCCCCCC", pos=110, rname="chr2")
+    )
+    bam = write_bam(work, "per_contig", body)
+    run_bam_case(
+        "count --per-contig",
+        work,
+        bam,
+        lambda out: [
+            "count", "-I", str(bam), "-S", out, "--per-contig",
+        ],
+        suffix=".tsv",
+    )
+
+    # --extract-umi-method=umis reads UMI_ fields from the query name (the
+    # format emitted by umis), rather than using the final read-id field.
+    def umis_rec(name: str, umi: str, pos: int) -> str:
+        return (
+            f"{name}:UMI_{umi}\t0\tchr1\t{pos}\t60\t10M\t*\t0\t0\t"
+            "AAAAAAAAAA\tIIIIIIIIII\n"
+        )
+
+    body = "".join(
+        umis_rec(f"u{index}", umi, pos)
+        for index, (umi, pos) in enumerate(
+            [("AAAAAAAA", 100), ("AAAAAAAA", 110), ("CCCCCCCC", 120)]
+        )
+    )
+    bam = write_bam(work, "umis_source", body)
+    run_bam_case(
+        "dedup --extract-umi-method=umis",
+        work,
+        bam,
+        lambda out: [
+            "dedup", "-I", str(bam), "-S", out, "--random-seed", "1",
+            "--extract-umi-method=umis",
+        ],
+    )
+
 
 def main() -> int:
     if shutil.which("umi_tools") is None or shutil.which("samtools") is None:

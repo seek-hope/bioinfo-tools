@@ -9,6 +9,7 @@ use std::process::ExitCode;
 use clap::{Arg, ArgAction, Command};
 
 use rust_fastqc::absent;
+use rust_fastqc::contaminants::Contaminant;
 use rust_fastqc::error::{Error, EXIT_CLASSES};
 use rust_fastqc::limits::{check_read, QcLimits};
 use rust_fastqc::stats::QcStats;
@@ -57,7 +58,7 @@ fn provenance() -> bioinfo_common::Provenance {
     bioinfo_common::Provenance::new(PROGRAM, VERSION)
         .with_field(
             "reference",
-            format!("FastQC {FASTQC_VERSION} (fastqc_data.txt only; no HTML or plots)"),
+            format!("FastQC {FASTQC_VERSION} (data, summary, HTML and stored ZIP; plot images are not emitted)"),
         )
         .with_field("parser", "bioinfo-fastx (shared strict FASTX reader)")
         .with_field("modules", COMPUTED_MODULES.join(", "))
@@ -68,7 +69,7 @@ fn provenance() -> bioinfo_common::Provenance {
 fn cli() -> Command {
     Command::new(PROGRAM)
         .version(VERSION)
-        .about("FastQC-compatible QC: emits fastqc_data.txt")
+        .about("FastQC-compatible QC: emits fastqc_data.txt, summary, HTML and ZIP")
         .arg_required_else_help(true)
         .arg(
             Arg::new("inputs")
@@ -82,7 +83,7 @@ fn cli() -> Command {
                 .short('o')
                 .long("outdir")
                 .value_name("DIR")
-                .help("write <sample>_fastqc/fastqc_data.txt under DIR"),
+                .help("write <sample>_fastqc.html and .zip under DIR; --extract also writes the report directory"),
         )
         .arg(
             Arg::new("stdout")
@@ -113,10 +114,58 @@ fn cli() -> Command {
                 .help("reject a new distinct 50-base prefix beyond this many before inserting it"),
         )
         .arg(
+            Arg::new("nogroup")
+                .long("nogroup")
+                .action(ArgAction::SetTrue)
+                .help("disable grouping of base positions for long reads"),
+        )
+        .arg(
+            Arg::new("min_length")
+                .long("min_length")
+                .value_name("BASES")
+                .value_parser(clap::value_parser!(usize))
+                .help("ignore reads shorter than this length"),
+        )
+        .arg(
+            Arg::new("max_length")
+                .long("max_length")
+                .value_name("BASES")
+                .value_parser(clap::value_parser!(usize))
+                .help("ignore reads longer than this length"),
+        )
+        .arg(
+            Arg::new("dup_length")
+                .long("dup_length")
+                .value_name("BASES")
+                .value_parser(clap::value_parser!(usize))
+                .default_value("50")
+                .help("truncate sequences to this length for duplication statistics"),
+        )
+        .arg(
+            Arg::new("extract")
+                .long("extract")
+                .action(ArgAction::SetTrue)
+                .help("extract the report directory after writing the ZIP"),
+        )
+        .arg(
+            Arg::new("delete")
+                .long("delete")
+                .action(ArgAction::SetTrue)
+                .help("with --extract, delete the ZIP after extraction"),
+        )
+        .arg(
+            Arg::new("quiet")
+                .short('q')
+                .long("quiet")
+                .action(ArgAction::SetTrue)
+                .help("suppress progress messages"),
+        )
+        .arg(
             Arg::new("contaminants")
+                .short('c')
                 .long("contaminants")
-                .value_name("FASTA")
-                .help("optional contaminant FASTA for overrepresented-sequence source matching"),
+                .value_name("TSV")
+                .help("contaminant list in name<TAB>sequence format"),
         )
 }
 
@@ -139,11 +188,11 @@ fn run(matches: &clap::ArgMatches) -> Result<(), Error> {
     };
     let to_stdout = matches.get_flag("stdout");
     let outdir = matches.get_one::<String>("outdir").map(PathBuf::from);
-    let contaminants = matches
-        .get_one::<String>("contaminants")
-        .map(|path| read_contaminants(Path::new(path)))
-        .transpose()?
-        .unwrap_or_default();
+    let contaminants = match matches.get_one::<String>("contaminants") {
+        Some(path) => read_contaminants(Path::new(path))?,
+        None => rust_fastqc::contaminants::default_contaminants()
+            .map_err(|error| Error::runtime(format!("built-in contaminant list: {error}")))?,
+    };
 
     if let Some(dir) = &outdir {
         if !dir.is_dir() {
@@ -155,40 +204,49 @@ fn run(matches: &clap::ArgMatches) -> Result<(), Error> {
     }
 
     for input in &inputs {
-        let stats = accumulate(input, offset, limits, &contaminants)?;
+        let stats = accumulate_with_options(
+            input,
+            AccumulateOptions {
+                quality_offset: offset,
+                limits,
+                contaminants: &contaminants,
+                min_length: matches.get_one::<usize>("min_length").copied(),
+                max_length: matches.get_one::<usize>("max_length").copied(),
+                dup_length: *matches
+                    .get_one::<usize>("dup_length")
+                    .expect("clap supplies a default"),
+                nogroup: matches.get_flag("nogroup"),
+            },
+        )?;
         let report = Report::from_stats(&stats);
         if to_stdout {
             print!("{}", report.render());
         } else {
             let path = report_path(input, outdir.as_deref());
-            ReportWriter::write(&report, &path)?;
-            eprintln!("wrote {}", path.display());
+            let filename = input
+                .file_name()
+                .map(|value| value.to_string_lossy().into_owned())
+                .unwrap_or_else(|| input.to_string_lossy().into_owned());
+            ReportWriter::write_bundle(
+                &report,
+                &path,
+                &filename,
+                matches.get_flag("extract"),
+                matches.get_flag("delete"),
+            )?;
+            if !matches.get_flag("quiet") {
+                eprintln!("wrote {}", path.display());
+            }
         }
     }
     Ok(())
 }
 
-fn read_contaminants(path: &Path) -> Result<Vec<(String, Vec<u8>)>, Error> {
+fn read_contaminants(path: &Path) -> Result<Vec<Contaminant>, Error> {
     let text = std::fs::read_to_string(path)
         .map_err(|error| Error::io(format!("{}: {error}", path.display())))?;
-    let mut entries: Vec<(String, Vec<u8>)> = Vec::new();
-    let mut name: Option<String> = None;
-    let mut sequence: Vec<u8> = Vec::new();
-    for line in text.lines() {
-        if let Some(header) = line.strip_prefix('>') {
-            if let Some(previous) = name.take() {
-                entries.push((previous, std::mem::take(&mut sequence)));
-            }
-            name = Some(header.trim().to_string());
-            sequence.clear();
-        } else if name.is_some() {
-            sequence.extend(line.trim().as_bytes());
-        }
-    }
-    if let Some(previous) = name {
-        entries.push((previous, sequence));
-    }
-    Ok(entries)
+    rust_fastqc::contaminants::parse(&text)
+        .map_err(|error| Error::input(format!("{}: {error}", path.display())))
 }
 
 /// Where a report goes: `<outdir|input-dir>/<sample>_fastqc/fastqc_data.txt`.
@@ -233,12 +291,39 @@ fn strip_fastq_extension(name: &str) -> String {
 /// loaded in full. Input buffers scale with the chunk size and longest record.
 /// This is not a bound on total QC memory: per-position counters grow with the
 /// longest sequence, and duplication counts grow with distinct sequence prefixes.
+#[derive(Clone, Copy)]
+struct AccumulateOptions<'a> {
+    quality_offset: u8,
+    limits: QcLimits,
+    contaminants: &'a [Contaminant],
+    min_length: Option<usize>,
+    max_length: Option<usize>,
+    dup_length: usize,
+    nogroup: bool,
+}
+
+#[cfg(test)]
 fn accumulate(
     input: &Path,
     quality_offset: u8,
     limits: QcLimits,
-    contaminants: &[(String, Vec<u8>)],
+    contaminants: &[Contaminant],
 ) -> Result<QcStats, Error> {
+    accumulate_with_options(
+        input,
+        AccumulateOptions {
+            quality_offset,
+            limits,
+            contaminants,
+            min_length: None,
+            max_length: None,
+            dup_length: 50,
+            nogroup: false,
+        },
+    )
+}
+
+fn accumulate_with_options(input: &Path, options: AccumulateOptions) -> Result<QcStats, Error> {
     use bioinfo_fastx::{Mode, Parser, Reader, DEFAULT_CHUNK_SIZE};
 
     let input_error = |error: std::io::Error| {
@@ -260,7 +345,9 @@ fn accumulate(
         .map(|value| value.to_string_lossy().into_owned())
         .unwrap_or_else(|| input.to_string_lossy().into_owned());
     let mut stats = QcStats::new(filename);
-    stats.set_contaminants(contaminants.to_vec());
+    stats.set_contaminants(options.contaminants.to_vec());
+    stats.set_dup_length(options.dup_length);
+    stats.set_nogroup(options.nogroup);
     let mut buffer = Vec::new();
     while let Some(chunk) = reader
         .next_chunk(&mut buffer, DEFAULT_CHUNK_SIZE)
@@ -276,20 +363,32 @@ fn accumulate(
                             input.display()
                         )));
                     }
+                    if options
+                        .min_length
+                        .is_some_and(|minimum| record.sequence.len() < minimum)
+                    {
+                        continue;
+                    }
+                    if options
+                        .max_length
+                        .is_some_and(|maximum| record.sequence.len() > maximum)
+                    {
+                        continue;
+                    }
                     let prefix: Vec<u8> = record
                         .sequence
                         .iter()
-                        .take(50)
+                        .take(options.dup_length)
                         .map(|byte| byte.to_ascii_uppercase())
                         .collect();
                     check_read(
                         record.sequence.len(),
                         !stats.sequences.contains_key(&prefix),
                         stats.sequences.len(),
-                        limits,
+                        options.limits,
                     )
                     .map_err(|message| Error::input(format!("{}: {message}", input.display())))?;
-                    stats.add_read(record.sequence, record.qualities, quality_offset);
+                    stats.add_read(record.sequence, record.qualities, options.quality_offset);
                 }
                 Ok(None) => break,
                 Err(error) => {

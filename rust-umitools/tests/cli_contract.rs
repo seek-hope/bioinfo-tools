@@ -29,10 +29,13 @@ fn stdout(args: &[&str]) -> String {
 #[test]
 fn dedup_help_matches_implemented_features() {
     let help = stdout(&["dedup", "--help"]);
-    assert!(help.contains("Group by gene instead of by position (requires --gene-tag)"));
+    assert!(help.contains("Group by gene instead of by position"));
     assert!(help.contains("Cell barcode tag (used with --per-cell)"));
-    assert!(help.contains("count --per-contig only; dedup rejects it"));
-    assert!(help.contains("(rejected: null model not implemented)"));
+    assert!(help.contains("--per-contig"));
+    assert!(help.contains("Tab-separated gene/transcript map (requires --per-contig)"));
+    assert!(help.contains("Write per-run statistics tables with this prefix"));
+    assert!(!help.contains("dedup rejects it"));
+    assert!(!help.contains("rejected: null model not implemented"));
     assert!(help.contains("--umi-whitelist"));
     assert!(help.contains("--buffer-whole-contig"));
     assert!(help.contains("--compresslevel"));

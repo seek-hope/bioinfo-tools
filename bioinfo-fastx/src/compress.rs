@@ -135,6 +135,22 @@ impl Default for Levels {
     }
 }
 
+/// Per-format overrides for callers whose upstream exposes a numeric level.
+///
+/// `None` keeps the corresponding [`Levels`] default. This is separate from
+/// [`Levels`] so the cutadapt `-Z` API remains source- and behaviour-compatible.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub struct CompressionLevels {
+    /// Optional gzip/zlib level.
+    pub gzip: Option<u32>,
+    /// Optional bzip2 level.
+    pub bzip2: Option<u32>,
+    /// Optional xz preset.
+    pub xz: Option<u32>,
+    /// Optional zstd level.
+    pub zstd: Option<i32>,
+}
+
 /// A compressor that can be finished explicitly.
 ///
 /// `finish` must be called (or the value dropped) for the trailing compressed
@@ -160,7 +176,12 @@ pub struct InnerCompressor {
 }
 
 impl InnerCompressor {
-    fn new(format: Format, sink: Box<dyn Write + Send>, levels: Levels) -> io::Result<Self> {
+    fn new(
+        format: Format,
+        sink: Box<dyn Write + Send>,
+        levels: Levels,
+        overrides: CompressionLevels,
+    ) -> io::Result<Self> {
         let buffered = BufWriter::with_capacity(BUFFER_SIZE, sink);
         let sink = match format {
             Format::Plain => Sink::Plain(buffered),
@@ -171,15 +192,26 @@ impl InnerCompressor {
                 // `bgzf::BgzfWriter`.
                 Sink::Gzip(flate2::write::GzEncoder::new(
                     buffered,
-                    flate2::Compression::new(levels.gzip()),
+                    flate2::Compression::new(overrides.gzip.unwrap_or_else(|| levels.gzip())),
                 ))
             }
             Format::Bzip2 => Sink::Bzip2(bzip2::write::BzEncoder::new(
                 buffered,
-                bzip2::Compression::new(levels.bzip2().clamp(1, 9)),
+                bzip2::Compression::new(
+                    overrides
+                        .bzip2
+                        .unwrap_or_else(|| levels.bzip2())
+                        .clamp(1, 9),
+                ),
             )),
-            Format::Xz => Sink::Xz(xz2::write::XzEncoder::new(buffered, levels.xz())),
-            Format::Zstd => Sink::Zstd(zstd::stream::write::Encoder::new(buffered, levels.zstd())?),
+            Format::Xz => Sink::Xz(xz2::write::XzEncoder::new(
+                buffered,
+                overrides.xz.unwrap_or_else(|| levels.xz()),
+            )),
+            Format::Zstd => Sink::Zstd(zstd::stream::write::Encoder::new(
+                buffered,
+                overrides.zstd.unwrap_or_else(|| levels.zstd()),
+            )?),
         };
         Ok(InnerCompressor { sink: Some(sink) })
     }
@@ -239,6 +271,7 @@ pub fn compressor(path: &Path, levels: Levels) -> io::Result<Box<dyn Compressor>
         format,
         Box::new(file),
         levels,
+        CompressionLevels::default(),
     )?))
 }
 
@@ -248,7 +281,44 @@ pub fn compressor_for(
     format: Format,
     levels: Levels,
 ) -> io::Result<Box<dyn Compressor>> {
-    Ok(Box::new(InnerCompressor::new(format, sink, levels)?))
+    Ok(Box::new(InnerCompressor::new(
+        format,
+        sink,
+        levels,
+        CompressionLevels::default(),
+    )?))
+}
+
+/// Open `path` with explicit per-format compression overrides.
+///
+/// Missing overrides use the ordinary [`Levels::DEFAULT`] values. Callers that
+/// need an upstream-specific default should set it explicitly.
+pub fn compressor_with_levels(
+    path: &Path,
+    overrides: CompressionLevels,
+) -> io::Result<Box<dyn Compressor>> {
+    let format = format_from_extension(path);
+    let file = File::create(path)?;
+    Ok(Box::new(InnerCompressor::new(
+        format,
+        Box::new(file),
+        Levels::DEFAULT,
+        overrides,
+    )?))
+}
+
+/// Compress a sink with explicit per-format compression overrides.
+pub fn compressor_for_with_levels(
+    sink: Box<dyn Write + Send>,
+    format: Format,
+    overrides: CompressionLevels,
+) -> io::Result<Box<dyn Compressor>> {
+    Ok(Box::new(InnerCompressor::new(
+        format,
+        sink,
+        Levels::DEFAULT,
+        overrides,
+    )?))
 }
 
 /// A raw-deflate encoder, used by the BGZF writer for each block's payload.
@@ -381,6 +451,57 @@ mod tests {
             Format::Zstd,
         ] {
             round_trip(format, Levels::FAST);
+        }
+    }
+
+    #[test]
+    fn explicit_levels_round_trip_without_changing_default_levels() {
+        let cases = [
+            (
+                Format::Gzip,
+                CompressionLevels {
+                    gzip: Some(1),
+                    ..CompressionLevels::default()
+                },
+            ),
+            (
+                Format::Bzip2,
+                CompressionLevels {
+                    bzip2: Some(1),
+                    ..CompressionLevels::default()
+                },
+            ),
+            (
+                Format::Xz,
+                CompressionLevels {
+                    xz: Some(0),
+                    ..CompressionLevels::default()
+                },
+            ),
+            (
+                Format::Zstd,
+                CompressionLevels {
+                    zstd: Some(11),
+                    ..CompressionLevels::default()
+                },
+            ),
+        ];
+        for (format, overrides) in cases {
+            let path = std::env::temp_dir().join(format!(
+                "bioinfo-fastx-explicit-{}-{:?}.{}",
+                std::process::id(),
+                std::thread::current().id(),
+                format.extension()
+            ));
+            let data = payload();
+            let mut writer = compressor_with_levels(&path, overrides).unwrap();
+            writer.write_all(&data).unwrap();
+            writer.finish().unwrap();
+            let mut reader = decompress(Box::new(File::open(&path).unwrap())).unwrap();
+            let mut back = Vec::new();
+            reader.read_to_end(&mut back).unwrap();
+            assert_eq!(back, data, "round trip failed for {format:?}");
+            let _ = std::fs::remove_file(path);
         }
     }
 

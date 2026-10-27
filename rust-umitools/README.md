@@ -2,14 +2,16 @@
 
 **简体中文** | [English](README.en.md)
 
-**UMI-tools 的 Rust 高性能实现。** 在已验证的输入与参数组合下，解压后的 BAM、TSV 与 FASTQ 输出与 UMI-tools 1.1.6 **逐字节一致**；在 4,428,466 reads 的真实单端 BAM 上快 **15.5 倍**，峰值内存更低。大规模数据可走有界内存路径，结果与内存路径一致。
+核心 UMI-tools 1.1.6 工作流的 Rust 实现。支持的输入与参数组合见
+[docs/COMPATIBILITY.md](docs/COMPATIBILITY.md)。标记为 `experimental` 的功能仍有已知差异，
+不能视为可直接替换上游。
 
-## 为什么可信
+## 验证范围
 
 - **逐字节对照**：`run_exact.sh` 有 **77 个用例**（5 种归并方法 × 单端/双端 × read_id/tag × 排序开关、双端重复 pair、MAPQ、NH/X0/XT、spliced、read-length、ignore-tlen、UMI 长度 1–40、阈值 0/1/2、长 soft clip/intron、大 UG、已有 UG/BX、per-gene/per-cell、subset、`--chrom`、`count --wide`），解压后的头部与记录流完全一致。
 - **语义对照**：`run_oracle.sh` 39 项；另有随机差分（生成器 + 暴力参考 + 上游）、确定性套件（线程 × spill × 多轮归并）、格式/管道套件与基准 smoke。
-- **随机性对齐**：复现 CPython MT19937（含多重比对替换后的那次 RNG 消耗），固定 `--random-seed` 时代表 read 与上游一致。
-- **单一核心**：dedup/group/count 共用同一套 UMI 编码、邻居查询、聚类与磁盘后备实现。
+- **随机数对齐**：已验证的 dedup 路径复现 CPython MT19937，包括多重比对替换后的 RNG 消耗。gene-map 代表 read 是例外：上游 contig 顺序受 `PYTHONHASHSEED` 影响。
+- **共用实现**：dedup、group、count 共用 UMI 编码、邻居查询、聚类和磁盘后备代码。
 
 ## 安装
 
@@ -51,8 +53,8 @@ cargo install --git https://github.com/seek-hope/bioinfo-tools --package rust-um
 需要 Rust 1.91+；本地 checkout 开发仍推荐：
 
 ```bash
-cargo build --release      # 产物 target/release/rust-umitools
-cargo install --path .     # 或安装到 ~/.cargo/bin
+cargo build --release --locked  # 产物 target/release/rust-umitools
+cargo install --path . --locked # 或安装到 ~/.cargo/bin
 ```
 
 ## 快速上手（5 分钟）
@@ -141,12 +143,13 @@ cat in.bam | rust-umitools dedup -I - -S - | samtools view -c -
 
 - 默认使用 `mimalloc` 全局分配器（启动时 `purge_delay=0`）；count 使用紧凑 `CountBundle`，高 UMI 输入的峰值 RSS 从约 444 MiB 降到约 255 MiB（早期排序版曾到 203 MiB，最终采用保持插入顺序的版本）。
 - 默认 `--compresslevel 1`（更快，体积略大）；需要更小输出时用 `--compresslevel 6`（接近上游默认）。
-- `--output-stats`：null model 未实现，参数验证阶段拒绝（exit 2，不产生输出）。
-- `--gene-transcript-map` 仅在 `count --per-contig` 下支持；`dedup` 没有 `--per-contig`，该组合仍在写前拒绝。
-- `--memory-limit` 先预留 8–32 MiB 给 HTSlib、分配器与线程栈，剩余部分才是 bundle/排序预算；实测 64/128/256 MiB 预算对应峰值 RSS 57/103/187 MiB，仍不是硬性进程上限。
+- `--output-stats` 已输出 per-position/per-UMI 观测表及与 NumPy 对齐的 null 模型；`unique` 方法重复 dict key 覆盖行为也已通过逐字节对照。
+- `dedup --per-gene --per-contig --gene-transcript-map` 会写入 gene `MC` 标签。上游代表 read 受 Python `set` 顺序和 `PYTHONHASHSEED` 影响，不保证跨 hash seed 逐字节一致。
+- `--representative=stable` 是本项目的扩展，不是上游随机策略。
+- `--memory-limit` 先为 noodles、分配器和线程栈预留 8–32 MiB，剩余部分用于 bundle/排序。历史测量中，64/128/256 MiB 预算对应约 57/103/187 MiB 峰值 RSS；它不是硬性进程上限。
 - dedup 默认使用可用内存的一半；高重复 2M-read 输入实测 auto 约 2.47 GiB。需要更低 RSS 时用 `--memory-limit 1GiB`（实测约 1.30 GiB，wall 约 +17%）；`--sort-strategy low-memory` 不改变该峰值。
 - 单个超大 position 或 gene 若超过扣除预留后的预算，会在写输出前 exit 4，并提示提高 `--memory-limit` 或拆分输入。
-- CRAM 解码可能由 noodles/htslib 设置补出派生 `MD/NM` 标签，故 BAM↔CRAM 按核心字段比较。
+- noodles 解码 CRAM 时可能补出派生 `MD/NM` 标签，因此 BAM/CRAM 按核心字段比较。
 - 压缩后的 BAM 字节可能与上游不同（压缩级别/BGZF 布局）；解压后的内容逐字节一致。
 - 上游未固定 `--random-seed` 时使用 `os.urandom`，不可复现；本实现默认 seed=0。
 
@@ -154,8 +157,8 @@ cat in.bam | rust-umitools dedup -I - -S - | samtools view -c -
 
 ```bash
 cargo fmt --all -- --check
-cargo clippy --all-targets -- -D warnings
-cargo test --release
+cargo clippy --all-targets --locked -- -D warnings
+cargo test --release --locked
 bash tests/oracle/run_oracle.sh      # 39 项语义对照
 bash tests/oracle/run_exact.sh       # 77 项逐字节对照
 bash tests/ci/check_manifest.sh      # 兼容矩阵同步
@@ -166,4 +169,6 @@ bash tests/oracle/run_formats.sh     # stdin/stdout、CRAM、摘要
 bash tests/bench/run_bench_smoke.sh  # 基准 smoke
 ```
 
-兼容性细节见 [docs/COMPATIBILITY.md](docs/COMPATIBILITY.md)；迭代计划与完成状态见 [docs/ROADMAP.md](docs/ROADMAP.md)。
+兼容性细节见 [docs/COMPATIBILITY.md](docs/COMPATIBILITY.md)。当前开发顺序见
+[根开发计划](../docs/DEVELOPMENT-PLAN.md)；[docs/ROADMAP.md](docs/ROADMAP.md)
+保留组件的历史迭代记录。

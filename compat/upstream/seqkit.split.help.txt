@@ -1,0 +1,91 @@
+split sequences into files by name ID, subsequence of given region,
+part size or number of parts.
+
+If you just want to split by parts or sizes, please use "seqkit split2",
+which can apply to paired- and single-end FASTQ.
+
+If you want to split sequences by ID, please use "seqkit split2 -s 1 -N".
+
+If you want to cut a sequence into multiple segments.
+  1. For cutting into even chunks, please use 'kmcp utils split-genomes'
+     (https://bioinf.shenwei.me/kmcp/usage/#split-genomes).
+     E.g., cutting into 4 segments of equal size, with no overlap between adjacent segments:
+        kmcp utils split-genomes -m 1 -k 1 --split-number 4 --split-overlap 0 input.fasta -O out
+  2. For cutting into multiple chunks of fixed size, please using 'seqkit sliding'.
+     E.g., cutting into segments of 40 bp and keeping the last segment which can be shorter than 40 bp.
+        seqkit sliding -g -s 40 -W 40 input.fasta -o out.fasta
+
+Attention:
+  1. For the two-pass mode (-2/--two-pass), The flag -U/--update-faidx is recommended to
+     ensure the .fai file matches the FASTA file.
+  2. For splitting by sequence IDs in Windows/MacOS, where the file systems might be case-insensitive,
+     output files might be overwritten if they are only different in cases, like Abc and ABC.
+     To avoid this, please switch one -I/--ignore-case.
+
+The definition of region is 1-based and with some custom design.
+
+Examples:
+
+ 1-based index    1 2 3 4 5 6 7 8 9 10
+negative index    0-9-8-7-6-5-4-3-2-1
+           seq    A C G T N a c g t n
+           1:1    A
+           2:4      C G T
+         -4:-2                c g t
+         -4:-1                c g t n
+         -1:-1                      n
+          2:-2      C G T N a c g t
+          1:-1    A C G T N a c g t n
+          1:12    A C G T N a c g t n
+        -12:-1    A C G T N a c g t n
+
+Usage:
+  seqkit split [flags] 
+
+Flags:
+  -i, --by-id                     split squences according to sequence ID
+      --by-id-prefix string       file prefix for --by-id
+  -p, --by-part int               split sequences into N parts
+      --by-part-prefix string     file prefix for --by-part
+  -r, --by-region string          split squences according to subsequence of given region. e.g 1:12 for
+                                  first 12 bases, -12:-1 for last 12 bases. type "seqkit split -h" for
+                                  more examples
+      --by-region-prefix string   file prefix for --by-region
+  -s, --by-size int               split sequences into multi parts with N sequences
+      --by-size-prefix string     file prefix for --by-size
+  -d, --dry-run                   dry run, just print message and no files will be created.
+  -e, --extension string          set output file extension, e.g., ".gz", ".xz", or ".zst"
+  -f, --force                     overwrite output directory
+  -h, --help                      help for split
+  -I, --ignore-case               ignore case when using -i/--by-id
+  -k, --keep-temp                 keep temporary FASTA and .fai file when using 2-pass mode
+  -O, --out-dir string            output directory (default value is $infile.split)
+  -P, --out-prefix string         file prefix (it overrides --by-*-prefix). The placeholder "{read}" is
+                                  needed for paired-end files.
+  -W, --part-width int            number of digits used for output file part numbering (zero-padded),
+                                  e.g., 001, 002 (default 3)
+  -2, --two-pass                  two-pass mode read files twice to lower memory usage. (only for FASTA
+                                  format)
+  -U, --update-faidx              update the fasta index file if it exists. Use this if you are not sure
+                                  whether the fasta file changed
+
+Global Flags:
+      --alphabet-guess-seq-length int   length of sequence prefix of the first FASTA record based on
+                                        which seqkit guesses the sequence type (0 for whole seq)
+                                        (default 10000)
+      --compress-level int              compression level for gzip, zstd, xz and bzip2. type "seqkit -h"
+                                        for the range and default value for each format (default -1)
+      --id-ncbi                         FASTA head is NCBI-style, e.g. >gi|110645304|ref|NC_002516.2|
+                                        Pseud...
+      --id-regexp string                regular expression for parsing ID (default "^(\\S+)\\s?")
+  -X, --infile-list string              file of input files list (one file per line), if given, they are
+                                        appended to files from cli arguments
+  -w, --line-width int                  line width when outputting FASTA format (0 for no wrap) (default 60)
+  -o, --out-file string                 out file ("-" for stdout, suffix .gz for gzipped out) (default "-")
+      --quiet                           be quiet and do not show extra information
+  -t, --seq-type string                 sequence type (dna|rna|protein|unlimit|auto) (for auto, it
+                                        automatically detect by the first sequence) (default "auto")
+      --skip-file-check                 skip input file checking when given a file list if you believe
+                                        these files do exist
+  -j, --threads int                     number of CPUs. can also set with environment variable
+                                        SEQKIT_THREADS) (default 4)

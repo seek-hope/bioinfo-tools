@@ -25,7 +25,7 @@ pub fn output_format(path: &Path) -> bam::Format {
     }
 }
 
-/// Translate `--compresslevel` into an htslib compression level.
+/// Translate `--compresslevel` into a BAM compression level.
 pub fn compression_level(level: u32) -> Result<bam::CompressionLevel> {
     match level {
         0 => Ok(bam::CompressionLevel::Uncompressed),

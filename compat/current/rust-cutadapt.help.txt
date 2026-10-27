@@ -1,0 +1,129 @@
+Trim adapters from FASTQ reads (cutadapt 4.6 compatible)
+
+Usage: rust-cutadapt [OPTIONS] [INPUT] [INPUT2]
+
+Arguments:
+  [INPUT]   Input file or - for stdin
+  [INPUT2]  R2 input for paired-end data
+
+Options:
+      --debug...
+          Print debug log
+  -j, --cores <cores>
+          Number of CPU cores to use (0 = auto; default 4)
+  -a, --adapter <adapter>
+          3' adapter; '$' anchors to the end
+  -g, --front <front>
+          5' adapter; '^' anchors to the start
+  -b, --anywhere <anywhere>
+          5'/3' adapter
+  -A, --adapter2 <adapter2>
+          3' adapter for R2
+  -G, --front2 <front2>
+          5' adapter for R2
+  -B, --anywhere2 <anywhere2>
+          5'/3' adapter for R2
+  -e, --error-rate <error_rate>
+          Maximum error rate or absolute count [alias: --errors]
+      --no-indels
+          Only mismatches, no indels
+  -n, --times <times>
+          Remove up to COUNT adapters per read
+  -O, --overlap <overlap>
+          Minimum overlap
+      --match-read-wildcards
+          IUPAC wildcards in reads
+  -N, --no-match-adapter-wildcards
+          Do not interpret IUPAC wildcards in adapters
+      --action <action>
+          trim|retain|mask|lowercase|none
+      --revcomp
+          Check the reverse complement too [alias: --rc]
+  -u, --cut <cut>
+          Remove LEN bases (signed)
+  -U, --cut2 <cut2>
+          Remove LEN bases from R2
+      --nextseq-trim <nextseq_trim>
+          NextSeq quality trimming
+  -q, --quality-cutoff <quality_cutoff>
+          [5'CUTOFF,]3'CUTOFF
+  -Q, --quality-cutoff2 <quality_cutoff2>
+          Quality cutoff for R2
+      --quality-base <quality_base>
+          Quality base (default 33)
+      --poly-a
+          Trim poly-A tails
+  -l, --length <length>
+          Shorten reads to LENGTH
+      --trim-n
+          Trim Ns at both ends
+      --length-tag <length_tag>
+          Correct a length in the read name
+      --strip-suffix <strip_suffix>
+          Remove suffix from read names
+  -x, --prefix <prefix>
+          Add prefix to read names
+  -y, --suffix <suffix>
+          Add suffix to read names
+      --rename <rename>
+          Rename reads using TEMPLATE
+  -z, --zero-cap
+          Change negative qualities to zero
+  -m, --minimum-length <minimum_length>
+          Discard reads shorter than LEN
+  -M, --maximum-length <maximum_length>
+          Discard reads longer than LEN
+      --max-n <max_n>
+          Discard reads with more than COUNT Ns
+      --max-expected-errors <max_expected_errors>
+          Expected-error filter [alias: --max-ee]
+      --max-average-error-rate <max_average_error_rate>
+          Average error rate filter [alias: --max-aer]
+      --discard-trimmed
+          Discard reads with an adapter [alias: --discard]
+      --discard-untrimmed
+          Discard reads without an adapter [alias: --trimmed-only]
+      --discard-casava
+          Discard reads failing CASAVA filter
+      --quiet
+          Print only error messages
+      --report <report>
+          full|minimal
+      --json <json>
+          Write a JSON report to FILE
+  -o, --output <output>
+          Output file (default stdout)
+  -p, --paired-output <paired_output>
+          Write R2 to FILE
+      --interleaved
+          Interleaved paired-end input/output
+      --fasta
+          Output FASTA
+  -Z, --compression-z
+          Use compression level 1
+      --info-file <info_file>
+          Write per-read info to FILE
+  -r, --rest-file <rest_file>
+          Write the rest after the adapter to FILE
+      --wildcard-file <wildcard_file>
+          Write wildcard bases to FILE
+      --too-short-output <too_short_output>
+          Write too-short reads to FILE
+      --too-long-output <too_long_output>
+          Write too-long reads to FILE
+      --untrimmed-output <untrimmed_output>
+          Write untrimmed reads to FILE
+      --too-short-paired-output <too_short_paired_output>
+          R2 of too-short pairs
+      --too-long-paired-output <too_long_paired_output>
+          R2 of too-long pairs
+      --untrimmed-paired-output <untrimmed_paired_output>
+          R2 of untrimmed pairs
+      --pair-adapters
+          Treat -a/-A as adapter pairs
+      --pair-filter <pair_filter>
+          any|both|first
+  -h, --help
+          Print help
+  -V, --version
+          Print version

@@ -231,15 +231,16 @@ is deliberately **not** flagged: its first line contains the program name as
 ```
 rust-umitools 0.2.0
 reference        : UMI-tools 1.1.6 (3f2cb4f41e07fe4a6cea3b3389f534bee957176b)
-htslib           : via rust-htslib, libdeflate compression
-parallel         : rayon worker pool, bounded BGZF threads
-commands         : dedup, group, count, count_tab
+library          : noodles 0.118.0 (pure Rust; BAM/SAM/CRAM)
+parallel         : rayon worker pool, single-threaded BGZF output
+commands         : whitelist, extract, dedup, group, count, count_tab
 exit codes       : 0 ok, 2 usage, 3 input, 4 io/resource
 ```
 
-This is the block being moved into `bioinfo-common/src/provenance.rs`, so every
+This block is assembled by `bioinfo-common/src/provenance.rs`, so every
 character is contractual: the version, the reference hash, the column alignment,
-the field order and the line count. The case is recorded at **L1** with an empty
+the field order and the line count. The noodles/provenance refresh was approved
+on 2026-10-26 and the corresponding contract was updated explicitly. The case is recorded at **L1** with an empty
 rule list, and `rules_fired` is empty for it. The `mirror:` and `<TMP>` rules
 cannot fire because none of that text contains a path.
 

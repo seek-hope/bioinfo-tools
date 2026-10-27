@@ -3,6 +3,7 @@
 pub mod count;
 pub mod count_tab;
 pub mod dedup;
+pub mod dedup_stats;
 pub mod extract;
 pub mod group;
 pub mod whitelist;

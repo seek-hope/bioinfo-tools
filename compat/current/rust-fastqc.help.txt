@@ -1,0 +1,23 @@
+FastQC-compatible QC: emits fastqc_data.txt, summary, HTML and ZIP
+
+Usage: rust-fastqc [OPTIONS] <FASTQ>...
+
+Arguments:
+  <FASTQ>...  FASTQ files to analyse
+
+Options:
+  -o, --outdir <DIR>                write <sample>_fastqc.html and .zip under DIR; --extract also writes the report directory
+      --stdout                      write to standard output instead of a file
+      --phred64                     qualities are Phred+64 rather than Phred+33
+      --max-read-length <BASES>     reject a read longer than this before growing per-position statistics [default: 1000000]
+      --max-distinct-sequences <N>  reject a new distinct 50-base prefix beyond this many before inserting it [default: 10000000]
+      --nogroup                     disable grouping of base positions for long reads
+      --min_length <BASES>          ignore reads shorter than this length
+      --max_length <BASES>          ignore reads longer than this length
+      --dup_length <BASES>          truncate sequences to this length for duplication statistics [default: 50]
+      --extract                     extract the report directory after writing the ZIP
+      --delete                      with --extract, delete the ZIP after extraction
+  -q, --quiet                       suppress progress messages
+  -c, --contaminants <TSV>          contaminant list in name<TAB>sequence format
+  -h, --help                        Print help
+  -V, --version                     Print version

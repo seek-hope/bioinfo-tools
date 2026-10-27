@@ -22,7 +22,7 @@
 //! output stays byte-identical. [`Reader::read_to_end`] exists for inputs known
 //! to be small.
 
-use crate::compress::{self, compressor, Levels};
+use crate::compress::{self, compressor, CompressionLevels, Levels};
 use crate::format::{format_from_extension, Format};
 use crate::writer::Layout;
 use std::fs::File;
@@ -208,6 +208,35 @@ impl Writer {
     ) -> io::Result<Writer> {
         Ok(Writer {
             inner: compress::compressor_for(sink, format, levels)?,
+            format,
+        })
+    }
+
+    /// Create `path` with explicit per-format compression overrides.
+    ///
+    /// This is the numeric-level counterpart to [`Writer::create`]. Missing
+    /// overrides use the shared defaults; callers should validate upstream
+    /// ranges before opening the destination.
+    pub fn create_with_levels(path: &str, overrides: CompressionLevels) -> io::Result<Writer> {
+        if path == "-" {
+            let sink: Box<dyn Write + Send> = Box::new(io::stdout());
+            return Writer::from_sink_with_levels(sink, Format::Plain, overrides);
+        }
+        let target = Path::new(path);
+        Ok(Writer {
+            inner: compress::compressor_with_levels(target, overrides)?,
+            format: format_from_extension(target),
+        })
+    }
+
+    /// Compress an arbitrary sink with explicit per-format overrides.
+    pub fn from_sink_with_levels(
+        sink: Box<dyn Write + Send>,
+        format: Format,
+        overrides: CompressionLevels,
+    ) -> io::Result<Writer> {
+        Ok(Writer {
+            inner: compress::compressor_for_with_levels(sink, format, overrides)?,
             format,
         })
     }

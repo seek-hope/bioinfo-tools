@@ -6,15 +6,18 @@
 //!
 //! Exit codes follow the workspace contract (`bioinfo_common::exit`):
 //! 0 success, 2 usage error, 3 input precondition violated, 4 I/O or resource
-//! failure. `rust-fx` does not use 1: a data problem is an input or I/O failure.
+//! failure. A few upstream-specific validation paths carry an explicit override,
+//! such as SeqKit head's exit 255 for `-n 0`.
 
 use bioinfo_common::diagnostic::error_line;
 use bioinfo_common::exit::ExitClass;
 use bioinfo_common::provenance::Provenance;
 use clap::ArgMatches;
 use rust_fx::commands::{
-    self, Fq2faOptions, Fx2tabOptions, LintOptions, SampleOptions, SeqOptions, SplitOptions,
-    StatsOptions,
+    self, CommonOptions, DuplicateOptions, Fa2fqOptions, FaidxOptions, Fq2faOptions, Fx2tabOptions,
+    GrepOptions, HeadOptions, LintOptions, RangeOptions, RenameOptions, ReplaceOptions,
+    RestartOptions, RmdupOptions, SampleOptions, SeqOptions, SlidingOptions, SortOptions,
+    SplitOptions, StatsOptions, SubseqOptions, Tab2fxOptions, TranslateOptions,
 };
 use rust_fx::io::CommandError;
 use rust_fx::lint::Level;
@@ -73,10 +76,26 @@ fn dispatch(matches: &ArgMatches) -> Result<(), CommandError> {
     match name {
         "stats" => commands::stats(stats_options(sub)?),
         "seq" => commands::seq(seq_options(sub)?),
-        "fq2fa" => commands::fq2fa(fq2fa_options(sub)),
+        "fq2fa" => commands::fq2fa(fq2fa_options(sub)?),
         "fx2tab" => commands::fx2tab(fx2tab_options(sub)?),
         "sample" => commands::sample(sample_options(sub)?),
         "split" => commands::split(split_options(sub)?),
+        "head" => commands::head(head_options(sub)?),
+        "subseq" => commands::subseq(subseq_options(sub)?),
+        "range" => commands::range(range_options(sub)?),
+        "sliding" => commands::sliding(sliding_options(sub)?),
+        "duplicate" => commands::duplicate(duplicate_options(sub)?),
+        "rmdup" => commands::rmdup(rmdup_options(sub)?),
+        "faidx" => commands::faidx(faidx_options(sub)?),
+        "rename" => commands::rename(rename_options(sub)?),
+        "replace" => commands::replace(replace_options(sub)?),
+        "tab2fx" => commands::tab2fx(tab2fx_options(sub)?),
+        "restart" => commands::restart(restart_options(sub)?),
+        "fa2fq" => commands::fa2fq(fa2fq_options(sub)?),
+        "translate" => commands::translate(translate_options(sub)?),
+        "common" => commands::common(common_options(sub)?),
+        "grep" => commands::grep(grep_options(sub)?),
+        "sort" => commands::sort(sort_options(sub)?),
         "lint" => commands::lint(lint_options(sub)?),
         other => Err(CommandError::usage(format!("unknown subcommand '{other}'"))),
     }
@@ -90,6 +109,19 @@ fn inputs(sub: &ArgMatches) -> Vec<String> {
 
 fn out_file(sub: &ArgMatches) -> Option<String> {
     sub.get_one::<String>("out_file").cloned()
+}
+
+fn compression_level(sub: &ArgMatches) -> Result<Option<i32>, CommandError> {
+    let raw = sub
+        .get_one::<String>("compress_level")
+        .map(String::as_str)
+        .unwrap_or("-1");
+    let level = raw.parse::<i32>().map_err(|_| {
+        CommandError::usage(format!(
+            "invalid --compress-level '{raw}'; expected an integer"
+        ))
+    })?;
+    Ok((level != -1).then_some(level))
 }
 
 fn line_width(sub: &ArgMatches) -> usize {
@@ -155,6 +187,7 @@ fn stats_options(sub: &ArgMatches) -> Result<StatsOptions, CommandError> {
         skip_err: sub.get_flag("skip_err"),
         quality_base: quality_base(encoding)?,
         out_file: out_file(sub),
+        compress_level: compression_level(sub)?,
     })
 }
 
@@ -188,15 +221,486 @@ fn seq_options(sub: &ArgMatches) -> Result<SeqOptions, CommandError> {
             .unwrap_or(33),
         line_width: line_width(sub),
         out_file: out_file(sub),
+        compress_level: compression_level(sub)?,
     })
 }
 
-fn fq2fa_options(sub: &ArgMatches) -> Fq2faOptions {
-    Fq2faOptions {
+fn fq2fa_options(sub: &ArgMatches) -> Result<Fq2faOptions, CommandError> {
+    Ok(Fq2faOptions {
         inputs: inputs(sub),
         line_width: line_width(sub),
         out_file: out_file(sub),
+        compress_level: compression_level(sub)?,
+    })
+}
+
+fn parse_length(text: &str) -> Result<u64, CommandError> {
+    let text = text.trim();
+    if text.is_empty() {
+        return Err(CommandError::usage("--length requires a number"));
     }
+    let split = text
+        .find(|ch: char| !ch.is_ascii_digit())
+        .unwrap_or(text.len());
+    let (digits, suffix) = text.split_at(split);
+    let value: u64 = digits
+        .parse()
+        .map_err(|_| CommandError::usage(format!("invalid --length value: {text}")))?;
+    let multiplier = match suffix.trim().to_ascii_lowercase().as_str() {
+        "" | "b" => 1,
+        "k" | "kb" | "kib" => 1024,
+        "m" | "mb" | "mib" => 1024 * 1024,
+        "g" | "gb" | "gib" => 1024 * 1024 * 1024,
+        _ => {
+            return Err(CommandError::usage(format!(
+                "invalid --length suffix: {text}"
+            )))
+        }
+    };
+    value
+        .checked_mul(multiplier)
+        .ok_or_else(|| CommandError::usage(format!("--length overflows: {text}")))
+}
+
+fn parse_buffer_size(text: &str) -> Result<i64, CommandError> {
+    let invalid = || {
+        CommandError::runtime("invalid value of buffer size. supported unit: K, M, G")
+            .with_code(255)
+    };
+    let (digits, multiplier) = match text.as_bytes().last() {
+        Some(b'K') => (&text[..text.len() - 1], 1024_i64),
+        Some(b'M') => (&text[..text.len() - 1], 1024_i64 * 1024),
+        Some(b'G') => (&text[..text.len() - 1], 1024_i64 * 1024 * 1024),
+        _ => (text, 1),
+    };
+    let unsigned = digits.strip_prefix('-').unwrap_or(digits);
+    if unsigned.is_empty() || !unsigned.bytes().all(|byte| byte.is_ascii_digit()) {
+        return Err(invalid());
+    }
+    digits
+        .parse::<i64>()
+        .ok()
+        .and_then(|value| value.checked_mul(multiplier))
+        .ok_or_else(invalid)
+}
+
+fn head_options(sub: &ArgMatches) -> Result<HeadOptions, CommandError> {
+    let number = sub
+        .get_one::<String>("number")
+        .map(|value| value.parse::<u64>())
+        .transpose()
+        .map_err(|_| CommandError::usage("--number must be a non-negative integer"))?
+        .unwrap_or(10);
+    if number == 0 {
+        return Err(
+            CommandError::usage("value of flag --number should be greater than 0").with_code(255),
+        );
+    }
+    Ok(HeadOptions {
+        inputs: inputs(sub),
+        number,
+        length: sub
+            .get_one::<String>("length")
+            .map(|value| parse_length(value))
+            .transpose()?,
+        infile_list: sub.get_one::<String>("infile_list").cloned(),
+        skip_file_check: sub.get_flag("skip_file_check"),
+        line_width: line_width(sub),
+        out_file: out_file(sub),
+        compress_level: compression_level(sub)?,
+    })
+}
+
+fn common_options(sub: &ArgMatches) -> Result<CommonOptions, CommandError> {
+    Ok(CommonOptions {
+        inputs: inputs(sub),
+        by_name: sub.get_flag("by_name"),
+        by_seq: sub.get_flag("by_seq"),
+        embedded: sub.get_flag("embedded"),
+        ignore_case: sub.get_flag("ignore_case"),
+        only_positive: sub.get_flag("only_positive"),
+        line_width: line_width(sub),
+        out_file: out_file(sub),
+        compress_level: compression_level(sub)?,
+    })
+}
+
+fn translate_options(sub: &ArgMatches) -> Result<TranslateOptions, CommandError> {
+    let frames = sub
+        .get_many::<String>("frame")
+        .map(|values| {
+            values
+                .map(|value| value.parse::<i32>())
+                .collect::<Result<Vec<_>, _>>()
+        })
+        .transpose()
+        .map_err(|_| CommandError::usage("--frame must be an integer"))?
+        .unwrap_or_else(|| vec![1]);
+    let table = sub
+        .get_one::<String>("transl_table")
+        .and_then(|value| value.parse::<i32>().ok())
+        .unwrap_or(1);
+    let list_table = sub
+        .get_one::<String>("list_table")
+        .map(|value| value.parse::<i32>())
+        .transpose()
+        .map_err(|_| CommandError::usage("--list-transl-table must be an integer"))?
+        .unwrap_or(-1);
+    let list_ambiguous = sub
+        .get_one::<String>("list_ambiguous")
+        .map(|value| value.parse::<i32>())
+        .transpose()
+        .map_err(|_| CommandError::usage("--list-transl-table-with-amb-codons must be an integer"))?
+        .unwrap_or(-1);
+    Ok(TranslateOptions {
+        inputs: inputs(sub),
+        frames,
+        table,
+        list_table,
+        list_ambiguous,
+        allow_unknown: sub.get_flag("allow_unknown"),
+        init_m: sub.get_flag("init_m"),
+        append_frame: sub.get_flag("append_frame"),
+        out_subseqs: sub.get_flag("out_subseqs"),
+        clean: sub.get_flag("clean"),
+        min_len: sub
+            .get_one::<String>("min_len")
+            .map(|value| value.parse::<usize>())
+            .transpose()
+            .map_err(|_| CommandError::usage("--min-len must be a non-negative integer"))?
+            .unwrap_or(0),
+        skip_errors: sub.get_flag("skip_errors"),
+        trim: sub.get_flag("trim"),
+        line_width: line_width(sub),
+        out_file: out_file(sub),
+        compress_level: compression_level(sub)?,
+    })
+}
+
+fn fa2fq_options(sub: &ArgMatches) -> Result<Fa2fqOptions, CommandError> {
+    Ok(Fa2fqOptions {
+        fasta: sub.get_one::<String>("fasta").cloned().unwrap_or_default(),
+        inputs: inputs(sub),
+        only_positive: sub.get_flag("only_positive"),
+        line_width: line_width(sub),
+        out_file: out_file(sub),
+        compress_level: compression_level(sub)?,
+    })
+}
+
+fn restart_options(sub: &ArgMatches) -> Result<RestartOptions, CommandError> {
+    let new_start = sub
+        .get_one::<String>("new_start")
+        .and_then(|value| value.parse::<i64>().ok())
+        .unwrap_or(1);
+    if new_start == 0 {
+        return Err(CommandError::usage("--new-start must not be 0"));
+    }
+    let max_mismatch = sub
+        .get_one::<String>("max_mismatch")
+        .map(|value| value.parse::<usize>())
+        .transpose()
+        .map_err(|_| CommandError::usage("--max-mismatch must be a non-negative integer"))?
+        .unwrap_or(0);
+    Ok(RestartOptions {
+        inputs: inputs(sub),
+        new_start,
+        start_with: sub.get_one::<String>("start_with").cloned(),
+        ignore_case: sub.get_flag("ignore_case"),
+        max_mismatch,
+        line_width: line_width(sub),
+        out_file: out_file(sub),
+        compress_level: compression_level(sub)?,
+    })
+}
+
+fn tab2fx_options(sub: &ArgMatches) -> Result<Tab2fxOptions, CommandError> {
+    Ok(Tab2fxOptions {
+        inputs: inputs(sub),
+        comment_prefixes: sub
+            .get_many::<String>("comment_prefix")
+            .map(|values| values.cloned().collect())
+            .unwrap_or_else(|| vec!["#".to_string(), "//".to_string()]),
+        buffer_size: parse_buffer_size(
+            sub.get_one::<String>("buffer_size")
+                .map(String::as_str)
+                .unwrap_or("1G"),
+        )?,
+        line_width: line_width(sub),
+        out_file: out_file(sub),
+        compress_level: compression_level(sub)?,
+    })
+}
+
+fn replace_options(sub: &ArgMatches) -> Result<ReplaceOptions, CommandError> {
+    let key_capt_idx = sub
+        .get_one::<String>("key_capt_idx")
+        .map(|value| value.parse::<usize>())
+        .transpose()
+        .map_err(|_| CommandError::usage("--key-capt-idx must be a positive integer"))?
+        .unwrap_or(1);
+    if key_capt_idx == 0 {
+        return Err(CommandError::usage(
+            "--key-capt-idx must be greater than zero",
+        ));
+    }
+    Ok(ReplaceOptions {
+        inputs: inputs(sub),
+        pattern: sub
+            .get_one::<String>("pattern")
+            .cloned()
+            .ok_or_else(|| CommandError::usage("replace needs -p/--pattern"))?,
+        replacement: sub
+            .get_one::<String>("replacement")
+            .cloned()
+            .ok_or_else(|| CommandError::usage("replace needs -r/--replacement"))?,
+        by_seq: sub.get_flag("by_seq"),
+        ignore_case: sub.get_flag("ignore_case"),
+        nr_width: sub
+            .get_one::<String>("nr_width")
+            .map(|value| value.parse::<usize>())
+            .transpose()
+            .map_err(|_| CommandError::usage("--nr-width must be a positive integer"))?
+            .unwrap_or(1),
+        kv_file: sub.get_one::<String>("kv_file").cloned(),
+        keep_key: sub.get_flag("keep_key"),
+        keep_untouch: sub.get_flag("keep_untouch"),
+        key_capt_idx,
+        key_miss_repl: sub.get_one::<String>("key_miss_repl").cloned(),
+        f_by_name: sub.get_flag("f_by_name"),
+        f_by_seq: sub.get_flag("f_by_seq"),
+        f_ignore_case: sub.get_flag("f_ignore_case"),
+        f_invert_match: sub.get_flag("f_invert_match"),
+        f_only_positive: sub.get_flag("f_only_positive"),
+        f_patterns: sub
+            .get_many::<String>("f_patterns")
+            .map(|values| values.cloned().collect())
+            .unwrap_or_default(),
+        f_pattern_file: sub.get_one::<String>("f_pattern_file").cloned(),
+        f_use_regexp: sub.get_flag("f_use_regexp"),
+        line_width: line_width(sub),
+        out_file: out_file(sub),
+        compress_level: compression_level(sub)?,
+    })
+}
+
+fn rename_options(sub: &ArgMatches) -> Result<RenameOptions, CommandError> {
+    let start_num = sub
+        .get_one::<String>("start_num")
+        .and_then(|value| value.parse::<u64>().ok())
+        .unwrap_or(2);
+    if start_num == 0 {
+        return Err(CommandError::usage("--start-num must be greater than zero"));
+    }
+    Ok(RenameOptions {
+        inputs: inputs(sub),
+        by_name: sub.get_flag("by_name"),
+        rename_first: sub.get_flag("rename_first"),
+        separator: sub
+            .get_one::<String>("separator")
+            .cloned()
+            .unwrap_or_else(|| "_".to_string()),
+        start_num,
+        multiple_outfiles: sub.get_flag("multiple_outfiles"),
+        out_dir: sub.get_one::<String>("out_dir").cloned(),
+        force: sub.get_flag("force"),
+        line_width: line_width(sub),
+        out_file: out_file(sub),
+        compress_level: compression_level(sub)?,
+    })
+}
+
+fn faidx_options(sub: &ArgMatches) -> Result<FaidxOptions, CommandError> {
+    Ok(FaidxOptions {
+        fasta: sub
+            .get_one::<String>("fasta")
+            .cloned()
+            .ok_or_else(|| CommandError::usage("faidx needs FASTA"))?,
+        regions: sub
+            .get_many::<String>("regions")
+            .map(|values| values.cloned().collect())
+            .unwrap_or_default(),
+        full_head: sub.get_flag("full_head"),
+        ignore_case: sub.get_flag("ignore_case"),
+        region_file: sub.get_one::<String>("region_file").cloned(),
+        regexp: sub.get_flag("regexp"),
+        update_faidx: sub.get_flag("update_faidx"),
+        line_width: line_width(sub),
+        out_file: out_file(sub),
+        compress_level: compression_level(sub)?,
+    })
+}
+
+fn rmdup_options(sub: &ArgMatches) -> Result<RmdupOptions, CommandError> {
+    Ok(RmdupOptions {
+        inputs: inputs(sub),
+        by_name: sub.get_flag("by_name"),
+        by_seq: sub.get_flag("by_seq"),
+        ignore_case: sub.get_flag("ignore_case"),
+        only_positive: sub.get_flag("only_positive"),
+        dup_num_file: sub.get_one::<String>("dup_num_file").cloned(),
+        dup_seqs_file: sub.get_one::<String>("dup_seqs_file").cloned(),
+        line_width: line_width(sub),
+        out_file: out_file(sub),
+        compress_level: compression_level(sub)?,
+    })
+}
+
+fn duplicate_options(sub: &ArgMatches) -> Result<DuplicateOptions, CommandError> {
+    let times = sub
+        .get_one::<String>("times")
+        .and_then(|value| value.parse::<usize>().ok())
+        .unwrap_or(1);
+    Ok(DuplicateOptions {
+        inputs: inputs(sub),
+        times,
+        line_width: line_width(sub),
+        out_file: out_file(sub),
+        compress_level: compression_level(sub)?,
+    })
+}
+
+fn sliding_options(sub: &ArgMatches) -> Result<SlidingOptions, CommandError> {
+    let window = sub
+        .get_one::<String>("window")
+        .and_then(|value| value.parse::<usize>().ok())
+        .unwrap_or(0);
+    let step = sub
+        .get_one::<String>("step")
+        .and_then(|value| value.parse::<usize>().ok())
+        .unwrap_or(0);
+    if window == 0 || step == 0 {
+        return Err(CommandError::usage(
+            "sliding needs positive -W/--window and -s/--step",
+        ));
+    }
+    Ok(SlidingOptions {
+        inputs: inputs(sub),
+        window,
+        step,
+        suffix: sub
+            .get_one::<String>("suffix")
+            .cloned()
+            .unwrap_or_else(|| "_sliding".to_string()),
+        greedy: sub.get_flag("greedy"),
+        circular: sub.get_flag("circular") || sub.get_flag("circular_genome"),
+        infile_list: sub.get_one::<String>("infile_list").cloned(),
+        skip_file_check: sub.get_flag("skip_file_check"),
+        line_width: line_width(sub),
+        out_file: out_file(sub),
+        compress_level: compression_level(sub)?,
+    })
+}
+
+fn range_options(sub: &ArgMatches) -> Result<RangeOptions, CommandError> {
+    Ok(RangeOptions {
+        inputs: inputs(sub),
+        region: sub
+            .get_one::<String>("region")
+            .cloned()
+            .ok_or_else(|| CommandError::usage("range needs -r/--range"))?,
+        line_width: line_width(sub),
+        out_file: out_file(sub),
+        compress_level: compression_level(sub)?,
+    })
+}
+
+fn subseq_options(sub: &ArgMatches) -> Result<SubseqOptions, CommandError> {
+    Ok(SubseqOptions {
+        inputs: inputs(sub),
+        region: sub.get_one::<String>("region").cloned(),
+        bed: sub.get_one::<String>("bed").cloned(),
+        gtf: sub.get_one::<String>("gtf").cloned(),
+        features: sub
+            .get_many::<String>("feature")
+            .map(|values| values.cloned().collect())
+            .unwrap_or_default(),
+        gtf_tag: sub
+            .get_one::<String>("gtf_tag")
+            .cloned()
+            .unwrap_or_else(|| "gene_id".to_string()),
+        chr: sub
+            .get_many::<String>("chr")
+            .map(|values| values.cloned().collect())
+            .unwrap_or_default(),
+        up_stream: sub
+            .get_one::<String>("up_stream")
+            .and_then(|value| value.parse().ok())
+            .unwrap_or(0),
+        down_stream: sub
+            .get_one::<String>("down_stream")
+            .and_then(|value| value.parse().ok())
+            .unwrap_or(0),
+        only_flank: sub.get_flag("only_flank"),
+        region_coord: sub.get_flag("region_coord"),
+        line_width: line_width(sub),
+        out_file: out_file(sub),
+        compress_level: compression_level(sub)?,
+    })
+}
+
+fn grep_options(sub: &ArgMatches) -> Result<GrepOptions, CommandError> {
+    Ok(GrepOptions {
+        inputs: inputs(sub),
+        patterns: sub
+            .get_many::<String>("pattern")
+            .map(|values| values.cloned().collect())
+            .unwrap_or_default(),
+        pattern_file: sub.get_one::<String>("pattern_file").cloned(),
+        by_name: sub.get_flag("by_name"),
+        by_seq: sub.get_flag("by_seq"),
+        invert: sub.get_flag("invert"),
+        count: sub.get_flag("count"),
+        ignore_case: sub.get_flag("ignore_case"),
+        allow_duplicated: sub.get_flag("allow_duplicated"),
+        circular: sub.get_flag("circular"),
+        delete_matched: sub.get_flag("delete_matched"),
+        max_mismatch: sub
+            .get_one::<String>("max_mismatch")
+            .map(|value| value.parse::<usize>())
+            .transpose()
+            .map_err(|_| CommandError::usage("--max-mismatch must be a non-negative integer"))?
+            .unwrap_or(0),
+        only_positive: sub.get_flag("only_positive"),
+        region: sub.get_one::<String>("region").cloned(),
+        use_regexp: sub.get_flag("use_regexp"),
+        degenerate: sub.get_flag("degenerate"),
+        infile_list: sub.get_one::<String>("infile_list").cloned(),
+        skip_file_check: sub.get_flag("skip_file_check"),
+        id_regexp: sub.get_one::<String>("id_regexp").cloned(),
+        line_width: line_width(sub),
+        out_file: out_file(sub),
+        compress_level: compression_level(sub)?,
+    })
+}
+
+fn sort_options(sub: &ArgMatches) -> Result<SortOptions, CommandError> {
+    Ok(SortOptions {
+        inputs: inputs(sub),
+        by_length: sub.get_flag("by_length"),
+        by_name: sub.get_flag("by_name"),
+        by_seq: sub.get_flag("by_seq"),
+        by_bases: sub.get_flag("by_bases"),
+        ignore_case: sub.get_flag("ignore_case"),
+        reverse: sub.get_flag("reverse"),
+        gap_letters: sub
+            .get_one::<String>("gap_letters")
+            .map(|value| value.as_bytes().to_vec())
+            .unwrap_or_else(|| b"- \t.".to_vec()),
+        seq_prefix_length: sub
+            .get_one::<String>("seq_prefix_length")
+            .map(|value| value.parse::<usize>())
+            .transpose()
+            .map_err(|_| CommandError::usage("--seq-prefix-length must be a non-negative integer"))?
+            .unwrap_or(10_000),
+        natural_order: sub.get_flag("natural_order"),
+        two_pass: sub.get_flag("two_pass"),
+        update_faidx: sub.get_flag("update_faidx"),
+        keep_temp: sub.get_flag("keep_temp"),
+        line_width: line_width(sub),
+        out_file: out_file(sub),
+        compress_level: compression_level(sub)?,
+    })
 }
 
 fn fx2tab_options(sub: &ArgMatches) -> Result<Fx2tabOptions, CommandError> {
@@ -232,6 +736,7 @@ fn fx2tab_options(sub: &ArgMatches) -> Result<Fx2tabOptions, CommandError> {
             .cloned()
             .unwrap_or_else(|| "-".to_string()),
         out_file: out_file(sub),
+        compress_level: compression_level(sub)?,
     })
 }
 
@@ -251,6 +756,7 @@ fn sample_options(sub: &ArgMatches) -> Result<SampleOptions, CommandError> {
         non_deterministic: sub.get_flag("non_deterministic"),
         line_width: line_width(sub),
         out_file: out_file(sub),
+        compress_level: compression_level(sub)?,
     })
 }
 
@@ -287,10 +793,14 @@ fn split_options(sub: &ArgMatches) -> Result<SplitOptions, CommandError> {
         extension: sub.get_one::<String>("extension").cloned(),
         dry_run: sub.get_flag("dry_run"),
         force: sub.get_flag("force"),
+        compress_level: compression_level(sub)?,
     })
 }
 
 fn lint_options(sub: &ArgMatches) -> Result<LintOptions, CommandError> {
+    // lint has no compressed output, but the shared global option still must
+    // reject malformed numeric values rather than being silently ignored.
+    let _ = compression_level(sub)?;
     let parse_level = |name: &str, default: Level| -> Result<Level, CommandError> {
         match sub.get_one::<String>(name) {
             Some(value) => Level::parse(value)
@@ -341,7 +851,10 @@ fn provenance() -> Provenance {
         )
         .with_field("status", "experimental")
         .with_field("fastx", "bioinfo-fastx (strict parser, gzip/bzip2/xz/zstd)")
-        .with_field("commands", "stats, seq, fq2fa, fx2tab, sample, split, lint")
+        .with_field(
+            "commands",
+            "stats, seq, fq2fa, fx2tab, sample, split, head, grep, sort, subseq, range, sliding, duplicate, rmdup, faidx, rename, replace, tab2fx, restart, fa2fq, translate, common, lint",
+        )
         .with_exit_codes(&DECLARED_EXIT_CLASSES)
 }
 
@@ -363,7 +876,10 @@ mod tests {
     #[test]
     fn provenance_lists_every_command() {
         let text = provenance().render();
-        for command in ["stats", "seq", "fq2fa", "fx2tab", "sample", "split", "lint"] {
+        for command in [
+            "stats", "seq", "fq2fa", "fx2tab", "sample", "split", "head", "grep", "sort", "subseq",
+            "lint",
+        ] {
             assert!(text.contains(command), "{command} missing from {text}");
         }
     }

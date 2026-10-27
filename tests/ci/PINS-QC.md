@@ -74,8 +74,9 @@ if the version changed:
   mean uses the "either walk survived" rule. Both are 0.13.0-specific.
 * **`%GC` truncates** (`(int)` cast) while the overrepresented percentage
   **rounds to two decimals**.
-* **Adapter Content** is computed from `Configuration/adapter_list.txt`, which this
-  prototype does not implement; see `docs/EVIDENCE-QC.md`.
+* **Adapter Content** uses `Configuration/adapter_list.txt`. This implementation
+  covers an experimental exact-match subset; see the
+  [compatibility matrix](../../compat/README.md).
 
 ## How to install (network access allowed)
 

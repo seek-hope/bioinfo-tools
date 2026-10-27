@@ -1,15 +1,17 @@
 # rust-umitools
 
-**A high-performance Rust implementation of UMI-tools workflows.** For the verified inputs and option combinations, decompressed BAM, TSV and FASTQ outputs are **byte-identical** to UMI-tools 1.1.6. On a real single-end BAM with 4,428,466 reads it is **15.5x faster** with lower peak memory. Large datasets can use bounded-memory paths that produce the same results as the in-memory path.
+A Rust implementation of core UMI-tools 1.1.6 workflows. Supported inputs and
+option combinations are listed in [docs/COMPATIBILITY.md](docs/COMPATIBILITY.md);
+experimental behavior and known differences are not drop-in compatibility claims.
 
 **English** | [简体中文](README.md)
 
-## Why it is trustworthy
+## Verification
 
 - **Byte-exact comparison:** `run_exact.sh` contains **77 cases** (5 clustering methods x single/paired x read_id/tag x sort switches, duplicate pairs, MAPQ, NH/X0/XT, spliced, read-length, ignore-tlen, UMI lengths 1-40, thresholds 0/1/2, long soft clips/introns, large UG, existing UG/BX, per-gene/per-cell, subset, `--chrom`, `count --wide`). The decompressed header and record stream match UMI-tools exactly.
 - **Semantic comparison:** `run_oracle.sh` covers 39 checks; additional suites cover randomized differential tests (generator + brute-force reference + upstream), determinism (threads x spill x multiple merge passes), formats/pipes and benchmark smoke.
-- **RNG alignment:** reproduces CPython MT19937, including the extra RNG draw after multimapping replacement. With a fixed `--random-seed`, representative reads match upstream.
-- **Single core:** dedup/group/count share one UMI encoding, neighbour lookup, clustering and disk-backed implementation.
+- **RNG alignment:** reproduces CPython MT19937 for the verified dedup paths, including the extra draw after multimapping replacement. Gene-map representative ties are an exception: upstream contig order depends on `PYTHONHASHSEED`.
+- **Shared implementation:** dedup/group/count use the same UMI encoding, neighbour lookup, clustering and disk-backed code.
 
 ## Installation
 
@@ -51,8 +53,8 @@ cargo install --git https://github.com/seek-hope/bioinfo-tools --package rust-um
 Rust 1.91+ is required. For local development from a checkout:
 
 ```bash
-cargo build --release      # target/release/rust-umitools
-cargo install --path .     # or install to ~/.cargo/bin
+cargo build --release --locked  # target/release/rust-umitools
+cargo install --path . --locked # or install to ~/.cargo/bin
 ```
 
 ## Quick start (5 minutes)
@@ -141,12 +143,13 @@ The workspace provides `.github/workflows/quality.yml` (x86_64 fmt/clippy/test/r
 
 - Uses mimalloc as the global allocator (`purge_delay=0` at startup); count uses a compact `CountBundle`, reducing peak RSS on high-UMI input from about 444 MiB to about 255 MiB (an earlier sorted variant reached 203 MiB, but insertion order is retained in the final version).
 - Default `--compresslevel 1` (faster, slightly larger); use `--compresslevel 6` for smaller output close to the upstream default.
-- `--output-stats`: the null model is not implemented; rejected during validation (exit 2, no output).
-- `--gene-transcript-map` is supported only by `count --per-contig`; dedup has no `--per-contig`, so that combination is rejected before output.
-- `--memory-limit` reserves 8-32 MiB for HTSlib, the allocator and thread stacks; the rest is the bundle/sort budget. Measured 64/128/256 MiB budgets correspond to about 57/103/187 MiB peak RSS; it is not a hard whole-process limit.
+- `--output-stats` writes observed per-position/per-UMI tables and a NumPy-compatible null model. The `unique` method's duplicate-dict-key overwrite is covered by exact TSV comparisons.
+- `dedup --per-gene --per-contig --gene-transcript-map` writes the gene `MC` tag. Upstream representative ties depend on Python `set` order and `PYTHONHASHSEED`, so exact representative parity is not a stable target.
+- `--representative=stable` is a project extension, not an upstream RNG mode.
+- `--memory-limit` reserves 8-32 MiB for noodles, the allocator and thread stacks; the rest is the bundle/sort budget. Recorded 64/128/256 MiB budgets had about 57/103/187 MiB peak RSS; it is not a hard whole-process limit.
 - dedup defaults to half of available memory; a high-duplication 2M-read input measured about 2.47 GiB RSS with auto. Use `--memory-limit 1GiB` for about 1.30 GiB at roughly +17% wall; `--sort-strategy low-memory` does not change that peak.
 - A single oversized position or gene that exceeds the post-reservation budget exits 4 before writing output and suggests raising `--memory-limit` or splitting the input.
-- CRAM decoding may add derived `MD/NM` tags according to htslib settings; compare BAM/CRAM by core fields.
+- CRAM decoding by noodles may add derived `MD/NM` tags; compare BAM/CRAM by core fields.
 - Compressed BAM bytes may differ from upstream (compression level/BGZF layout); decompressed content is byte-identical.
 - When `--random-seed` is not fixed, upstream uses `os.urandom` and is not reproducible; this implementation defaults to seed 0.
 
@@ -154,8 +157,8 @@ The workspace provides `.github/workflows/quality.yml` (x86_64 fmt/clippy/test/r
 
 ```bash
 cargo fmt --all -- --check
-cargo clippy --all-targets -- -D warnings
-cargo test --release
+cargo clippy --all-targets --locked -- -D warnings
+cargo test --release --locked
 bash tests/oracle/run_oracle.sh      # 39 semantic checks
 bash tests/oracle/run_exact.sh       # 77 byte-exact checks
 bash tests/ci/check_manifest.sh      # compatibility matrix sync
@@ -166,4 +169,7 @@ bash tests/oracle/run_formats.sh     # stdin/stdout, CRAM, summary
 bash tests/bench/run_bench_smoke.sh  # benchmark smoke
 ```
 
-Compatibility details are in [docs/COMPATIBILITY.md](docs/COMPATIBILITY.md); iteration status is in [docs/ROADMAP.md](docs/ROADMAP.md).
+Compatibility details are in [docs/COMPATIBILITY.md](docs/COMPATIBILITY.md).
+Current development priorities are in the
+[workspace development plan](../docs/DEVELOPMENT-PLAN.md);
+[docs/ROADMAP.md](docs/ROADMAP.md) is the historical component roadmap.

@@ -155,13 +155,20 @@ def main() -> int:
               result.returncode != 0 and not target.exists(),
               f"exit={result.returncode}")
 
-        # unsupported quality encoding is refused before writing
-        target = work / "enc.fastq"
+        # phred64 is a real quality offset: the single fixture's 'I' qualities
+        # are Q9, so a Q20 filter must discard every read under phred64.
+        ref_target = work / "enc_umi.fastq"
+        target = work / "enc_rust.fastq"
+        ref = umi(["-I", str(single), "-S", str(ref_target), "-p", "NNNN",
+                   "--quality-encoding", "phred64",
+                   "--quality-filter-threshold", "20"])
         result = rust(["-I", str(single), "-S", str(target), "-p", "NNNN",
-                       "--quality-encoding", "phred64", "--quiet"])
-        check("phred64 rejected",
-              result.returncode == 2 and not target.exists(),
-              f"exit={result.returncode}")
+                       "--quality-encoding", "phred64",
+                       "--quality-filter-threshold", "20", "--quiet"])
+        check("phred64 quality filter",
+              ref.returncode == 0 and result.returncode == 0
+              and same(ref_target, target),
+              f"exit umi={ref.returncode} rust={result.returncode}")
 
     print(f"\n{len(PASSED)} passed, {len(FAILED)} failed")
     return 1 if FAILED else 0
