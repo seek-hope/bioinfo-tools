@@ -20,7 +20,7 @@ bzip2 = "0.6.1"
 crc32fast = "1"
 flate2 = "1"
 xz2 = { version = "0.1.7", features = ["static"] }
-zstd = "0.13.3"
+zstd = "0.14.3"
 
 [lib]
 name = "bioinfo_fastx"
