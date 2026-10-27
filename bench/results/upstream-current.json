@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
   "kind": "upstream-correctness-benchmark",
-  "generated_at_utc": "2026-10-27T02:52:34.231394+00:00",
+  "generated_at_utc": "2026-10-27T03:13:35.091706+00:00",
   "git": {
-    "commit": "0433c8e2f57ca64b637ac669342761dd859d4ef9",
+    "commit": "3b9bea4bada13afc85f7c2dc2e31c363bfc64f39",
     "dirty": false,
     "dirty_paths": []
   },
@@ -23,17 +23,17 @@
     "rust": {
       "cutadapt": {
         "path": "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/release/rust-cutadapt",
-        "sha256": "4b9f27d0839501b5622d933f2185a2159a4673d6b4c18a555e1be7f57fd4a58c",
+        "sha256": "1d764006aedfdf3a9efff03f7f632a842f857185adbd09915c133264253e615f",
         "version": "rust-cutadapt 0.1.0"
       },
       "fastqc": {
         "path": "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/release/rust-fastqc",
-        "sha256": "65158d6c5b26b174b3141bff990ce65ec1aee9f0d394090ee75c0bbc4d833804",
+        "sha256": "b18f384fa62b12dfba18e19691cb49aa3806e308b9330092a06b8186c3314a2b",
         "version": "rust-fastqc 0.1.0"
       },
       "fx": {
         "path": "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/release/rust-fx",
-        "sha256": "919a7bc987e715d2242b33d8e62d9a36cfaceda07e41fda96e002a1f16170d8a",
+        "sha256": "92d96d065d0412771daa83cd619599d9f4679c882eabeb88a60b0c2a56beb5c3",
         "version": "rust-fx 0.1.0"
       },
       "bam": {
@@ -43,7 +43,7 @@
       },
       "umi": {
         "path": "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/release/rust-umitools",
-        "sha256": "13c51685c162867cdb5e3e81a70cb569b10612b0aff98678c691f6ba1d25a5e1",
+        "sha256": "8ae59b6732ac93d69dd19bde403ebc9198e8cf8a3c9330f8cb5ef0672ca169c0",
         "version": "rust-umitools 0.2.0"
       }
     },
@@ -98,8 +98,8 @@
         "-j",
         "4",
         "-o",
-        "/tmp/bioinfo-upstream-bench-w6mr0ala/size-1/cutadapt/rust/out.fastq.gz",
-        "/tmp/bioinfo-upstream-bench-w6mr0ala/size-1/reads.fastq"
+        "/tmp/bioinfo-upstream-bench-b3mn6qeo/size-1/cutadapt/rust/out.fastq.gz",
+        "/tmp/bioinfo-upstream-bench-b3mn6qeo/size-1/reads.fastq"
       ],
       "upstream_command": [
         "/home/rimuru/.conda/envs/ta-cutadapt/bin/cutadapt",
@@ -111,8 +111,8 @@
         "-j",
         "4",
         "-o",
-        "/tmp/bioinfo-upstream-bench-w6mr0ala/size-1/cutadapt/upstream/out.fastq.gz",
-        "/tmp/bioinfo-upstream-bench-w6mr0ala/size-1/reads.fastq"
+        "/tmp/bioinfo-upstream-bench-b3mn6qeo/size-1/cutadapt/upstream/out.fastq.gz",
+        "/tmp/bioinfo-upstream-bench-b3mn6qeo/size-1/reads.fastq"
       ],
       "threads": 4,
       "compression": "gzip",
@@ -123,9 +123,9 @@
             "wall_s": 0.0,
             "user_s": 0.0,
             "sys_s": 0.0,
-            "max_rss_kb": 4696,
+            "max_rss_kb": 4680,
             "exit_code": 0,
-            "runner_wall_s": 0.00667786001577042,
+            "runner_wall_s": 0.007187223003711551,
             "temp_peak_bytes": 0,
             "stdout_bytes": 0,
             "stderr_bytes": 0
@@ -134,9 +134,9 @@
             "wall_s": 0.0,
             "user_s": 0.0,
             "sys_s": 0.0,
-            "max_rss_kb": 4636,
+            "max_rss_kb": 4720,
             "exit_code": 0,
-            "runner_wall_s": 0.006854364997707307,
+            "runner_wall_s": 0.007072537991916761,
             "temp_peak_bytes": 0,
             "stdout_bytes": 0,
             "stderr_bytes": 0
@@ -147,7 +147,7 @@
           "wall_median_s": 0.0,
           "wall_min_s": 0.0,
           "wall_max_s": 0.0,
-          "max_rss_kb": 4696,
+          "max_rss_kb": 4720,
           "temp_peak_bytes": 0,
           "exit_codes": [
             0,
@@ -161,31 +161,31 @@
             "wall_s": 0.15,
             "user_s": 0.09,
             "sys_s": 0.02,
-            "max_rss_kb": 23880,
+            "max_rss_kb": 23776,
             "exit_code": 0,
-            "runner_wall_s": 0.1572584109962918,
+            "runner_wall_s": 0.15662117701140232,
             "temp_peak_bytes": 0,
             "stdout_bytes": 0,
             "stderr_bytes": 0
           },
           {
-            "wall_s": 0.16,
-            "user_s": 0.1,
-            "sys_s": 0.03,
-            "max_rss_kb": 24212,
+            "wall_s": 0.15,
+            "user_s": 0.09,
+            "sys_s": 0.02,
+            "max_rss_kb": 24188,
             "exit_code": 0,
-            "runner_wall_s": 0.1705797939794138,
+            "runner_wall_s": 0.15320127297309227,
             "temp_peak_bytes": 0,
             "stdout_bytes": 0,
             "stderr_bytes": 0
           }
         ],
         "summary": {
-          "wall_mean_s": 0.155,
-          "wall_median_s": 0.155,
+          "wall_mean_s": 0.15,
+          "wall_median_s": 0.15,
           "wall_min_s": 0.15,
-          "wall_max_s": 0.16,
-          "max_rss_kb": 24212,
+          "wall_max_s": 0.15,
+          "max_rss_kb": 24188,
           "temp_peak_bytes": 0,
           "exit_codes": [
             0,
@@ -222,16 +222,16 @@
         "--extract",
         "--quiet",
         "-o",
-        "/tmp/bioinfo-upstream-bench-w6mr0ala/size-1/fastqc/rust",
-        "/tmp/bioinfo-upstream-bench-w6mr0ala/size-1/reads.fastq"
+        "/tmp/bioinfo-upstream-bench-b3mn6qeo/size-1/fastqc/rust",
+        "/tmp/bioinfo-upstream-bench-b3mn6qeo/size-1/reads.fastq"
       ],
       "upstream_command": [
         "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/tests/ci/env/bin/fastqc",
         "--extract",
         "--quiet",
         "--outdir",
-        "/tmp/bioinfo-upstream-bench-w6mr0ala/size-1/fastqc/upstream",
-        "/tmp/bioinfo-upstream-bench-w6mr0ala/size-1/reads.fastq"
+        "/tmp/bioinfo-upstream-bench-b3mn6qeo/size-1/fastqc/upstream",
+        "/tmp/bioinfo-upstream-bench-b3mn6qeo/size-1/reads.fastq"
       ],
       "threads": null,
       "compression": "none",
@@ -242,9 +242,9 @@
             "wall_s": 0.01,
             "user_s": 0.01,
             "sys_s": 0.0,
-            "max_rss_kb": 3984,
+            "max_rss_kb": 3956,
             "exit_code": 0,
-            "runner_wall_s": 0.013034447008976713,
+            "runner_wall_s": 0.013514703983673826,
             "temp_peak_bytes": 0,
             "stdout_bytes": 0,
             "stderr_bytes": 0
@@ -253,9 +253,9 @@
             "wall_s": 0.01,
             "user_s": 0.01,
             "sys_s": 0.0,
-            "max_rss_kb": 4156,
+            "max_rss_kb": 3864,
             "exit_code": 0,
-            "runner_wall_s": 0.012514896981883794,
+            "runner_wall_s": 0.012499820993980393,
             "temp_peak_bytes": 0,
             "stdout_bytes": 0,
             "stderr_bytes": 0
@@ -266,7 +266,7 @@
           "wall_median_s": 0.01,
           "wall_min_s": 0.01,
           "wall_max_s": 0.01,
-          "max_rss_kb": 4156,
+          "max_rss_kb": 3956,
           "temp_peak_bytes": 0,
           "exit_codes": [
             0,
@@ -277,34 +277,34 @@
       "upstream": {
         "samples": [
           {
-            "wall_s": 2.17,
+            "wall_s": 2.15,
             "user_s": 1.79,
-            "sys_s": 0.14,
-            "max_rss_kb": 154368,
+            "sys_s": 0.13,
+            "max_rss_kb": 155776,
             "exit_code": 0,
-            "runner_wall_s": 2.171438777993899,
+            "runner_wall_s": 2.158738151018042,
             "temp_peak_bytes": 0,
             "stdout_bytes": 0,
             "stderr_bytes": 340
           },
           {
-            "wall_s": 2.16,
-            "user_s": 1.82,
-            "sys_s": 0.12,
-            "max_rss_kb": 154408,
+            "wall_s": 2.15,
+            "user_s": 1.77,
+            "sys_s": 0.14,
+            "max_rss_kb": 157136,
             "exit_code": 0,
-            "runner_wall_s": 2.168299004988512,
+            "runner_wall_s": 2.1578616079932544,
             "temp_peak_bytes": 0,
             "stdout_bytes": 0,
             "stderr_bytes": 340
           }
         ],
         "summary": {
-          "wall_mean_s": 2.165,
-          "wall_median_s": 2.165,
-          "wall_min_s": 2.16,
-          "wall_max_s": 2.17,
-          "max_rss_kb": 154408,
+          "wall_mean_s": 2.15,
+          "wall_median_s": 2.15,
+          "wall_min_s": 2.15,
+          "wall_max_s": 2.15,
+          "max_rss_kb": 157136,
           "temp_peak_bytes": 0,
           "exit_codes": [
             0,
@@ -342,8 +342,8 @@
         "-a",
         "-T",
         "-o",
-        "/tmp/bioinfo-upstream-bench-w6mr0ala/size-1/fx_stats/rust/stats.tsv",
-        "/tmp/bioinfo-upstream-bench-w6mr0ala/size-1/reads.fastq"
+        "/tmp/bioinfo-upstream-bench-b3mn6qeo/size-1/fx_stats/rust/stats.tsv",
+        "/tmp/bioinfo-upstream-bench-b3mn6qeo/size-1/reads.fastq"
       ],
       "upstream_command": [
         "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/tests/ci/env/bin/seqkit",
@@ -351,8 +351,8 @@
         "-a",
         "-T",
         "-o",
-        "/tmp/bioinfo-upstream-bench-w6mr0ala/size-1/fx_stats/upstream/stats.tsv",
-        "/tmp/bioinfo-upstream-bench-w6mr0ala/size-1/reads.fastq"
+        "/tmp/bioinfo-upstream-bench-b3mn6qeo/size-1/fx_stats/upstream/stats.tsv",
+        "/tmp/bioinfo-upstream-bench-b3mn6qeo/size-1/reads.fastq"
       ],
       "threads": null,
       "compression": "none",
@@ -363,9 +363,9 @@
             "wall_s": 0.0,
             "user_s": 0.0,
             "sys_s": 0.0,
-            "max_rss_kb": 5664,
+            "max_rss_kb": 5620,
             "exit_code": 0,
-            "runner_wall_s": 0.005043084005592391,
+            "runner_wall_s": 0.0050029749982059,
             "temp_peak_bytes": 0,
             "stdout_bytes": 0,
             "stderr_bytes": 0
@@ -374,9 +374,9 @@
             "wall_s": 0.0,
             "user_s": 0.0,
             "sys_s": 0.0,
-            "max_rss_kb": 5492,
+            "max_rss_kb": 5684,
             "exit_code": 0,
-            "runner_wall_s": 0.004912805976346135,
+            "runner_wall_s": 0.005826289008837193,
             "temp_peak_bytes": 0,
             "stdout_bytes": 0,
             "stderr_bytes": 0
@@ -387,7 +387,7 @@
           "wall_median_s": 0.0,
           "wall_min_s": 0.0,
           "wall_max_s": 0.0,
-          "max_rss_kb": 5664,
+          "max_rss_kb": 5684,
           "temp_peak_bytes": 0,
           "exit_codes": [
             0,
@@ -401,9 +401,9 @@
             "wall_s": 0.01,
             "user_s": 0.01,
             "sys_s": 0.0,
-            "max_rss_kb": 26608,
+            "max_rss_kb": 35192,
             "exit_code": 0,
-            "runner_wall_s": 0.014498979988275096,
+            "runner_wall_s": 0.015304077009204775,
             "temp_peak_bytes": 0,
             "stdout_bytes": 0,
             "stderr_bytes": 0
@@ -412,9 +412,9 @@
             "wall_s": 0.01,
             "user_s": 0.01,
             "sys_s": 0.0,
-            "max_rss_kb": 36312,
+            "max_rss_kb": 29572,
             "exit_code": 0,
-            "runner_wall_s": 0.016057070984970778,
+            "runner_wall_s": 0.014658539992524311,
             "temp_peak_bytes": 0,
             "stdout_bytes": 0,
             "stderr_bytes": 0
@@ -425,7 +425,7 @@
           "wall_median_s": 0.01,
           "wall_min_s": 0.01,
           "wall_max_s": 0.01,
-          "max_rss_kb": 36312,
+          "max_rss_kb": 35192,
           "temp_peak_bytes": 0,
           "exit_codes": [
             0,
@@ -437,8 +437,8 @@
         "passed": true,
         "note": "stats TSV bytes (257 vs 257)",
         "sha256": {
-          "rust": "c8402440bead1a4e6a53a35364e3ae44fda4437389c6f9543ba0d44f4ecc7784",
-          "upstream": "c8402440bead1a4e6a53a35364e3ae44fda4437389c6f9543ba0d44f4ecc7784"
+          "rust": "068c8a3603ab35e10e8b1a6ee3064e25feca8257b1bd6490fd19d6ca523310cc",
+          "upstream": "068c8a3603ab35e10e8b1a6ee3064e25feca8257b1bd6490fd19d6ca523310cc"
         }
       },
       "correctness": {
@@ -461,15 +461,15 @@
         "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/release/rust-bam",
         "sort",
         "-o",
-        "/tmp/bioinfo-upstream-bench-w6mr0ala/size-1/bam_sort/rust/out.bam",
-        "/tmp/bioinfo-upstream-bench-w6mr0ala/size-1/unsorted.bam"
+        "/tmp/bioinfo-upstream-bench-b3mn6qeo/size-1/bam_sort/rust/out.bam",
+        "/tmp/bioinfo-upstream-bench-b3mn6qeo/size-1/unsorted.bam"
       ],
       "upstream_command": [
         "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/tests/ci/env/bin/samtools",
         "sort",
         "-o",
-        "/tmp/bioinfo-upstream-bench-w6mr0ala/size-1/bam_sort/upstream/out.bam",
-        "/tmp/bioinfo-upstream-bench-w6mr0ala/size-1/unsorted.bam"
+        "/tmp/bioinfo-upstream-bench-b3mn6qeo/size-1/bam_sort/upstream/out.bam",
+        "/tmp/bioinfo-upstream-bench-b3mn6qeo/size-1/unsorted.bam"
       ],
       "threads": null,
       "compression": "bgzf",
@@ -480,9 +480,9 @@
             "wall_s": 0.0,
             "user_s": 0.0,
             "sys_s": 0.0,
-            "max_rss_kb": 4972,
+            "max_rss_kb": 5080,
             "exit_code": 0,
-            "runner_wall_s": 0.0049446370103396475,
+            "runner_wall_s": 0.004929189977701753,
             "temp_peak_bytes": 0,
             "stdout_bytes": 0,
             "stderr_bytes": 20
@@ -491,9 +491,9 @@
             "wall_s": 0.0,
             "user_s": 0.0,
             "sys_s": 0.0,
-            "max_rss_kb": 4964,
+            "max_rss_kb": 5080,
             "exit_code": 0,
-            "runner_wall_s": 0.005686024000169709,
+            "runner_wall_s": 0.006731281988322735,
             "temp_peak_bytes": 0,
             "stdout_bytes": 0,
             "stderr_bytes": 20
@@ -504,7 +504,7 @@
           "wall_median_s": 0.0,
           "wall_min_s": 0.0,
           "wall_max_s": 0.0,
-          "max_rss_kb": 4972,
+          "max_rss_kb": 5080,
           "temp_peak_bytes": 0,
           "exit_codes": [
             0,
@@ -515,12 +515,12 @@
       "upstream": {
         "samples": [
           {
-            "wall_s": 0.01,
+            "wall_s": 0.0,
             "user_s": 0.0,
             "sys_s": 0.0,
-            "max_rss_kb": 7932,
+            "max_rss_kb": 8156,
             "exit_code": 0,
-            "runner_wall_s": 0.011528529023053125,
+            "runner_wall_s": 0.009701574977952987,
             "temp_peak_bytes": 0,
             "stdout_bytes": 0,
             "stderr_bytes": 0
@@ -529,20 +529,20 @@
             "wall_s": 0.0,
             "user_s": 0.0,
             "sys_s": 0.0,
-            "max_rss_kb": 7904,
+            "max_rss_kb": 8084,
             "exit_code": 0,
-            "runner_wall_s": 0.01011942300829105,
+            "runner_wall_s": 0.009322757017798722,
             "temp_peak_bytes": 0,
             "stdout_bytes": 0,
             "stderr_bytes": 0
           }
         ],
         "summary": {
-          "wall_mean_s": 0.005,
-          "wall_median_s": 0.005,
+          "wall_mean_s": 0.0,
+          "wall_median_s": 0.0,
           "wall_min_s": 0.0,
-          "wall_max_s": 0.01,
-          "max_rss_kb": 7932,
+          "wall_max_s": 0.0,
+          "max_rss_kb": 8156,
           "temp_peak_bytes": 0,
           "exit_codes": [
             0,
@@ -578,9 +578,9 @@
         "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/release/rust-umitools",
         "dedup",
         "-I",
-        "/tmp/bioinfo-upstream-bench-w6mr0ala/size-1/sorted.bam",
+        "/tmp/bioinfo-upstream-bench-b3mn6qeo/size-1/sorted.bam",
         "-S",
-        "/tmp/bioinfo-upstream-bench-w6mr0ala/size-1/umi_dedup/rust/out.bam",
+        "/tmp/bioinfo-upstream-bench-b3mn6qeo/size-1/umi_dedup/rust/out.bam",
         "--random-seed",
         "1",
         "--extract-umi-method=tag",
@@ -590,9 +590,9 @@
         "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/tests/ci/env/bin/umi_tools",
         "dedup",
         "-I",
-        "/tmp/bioinfo-upstream-bench-w6mr0ala/size-1/sorted.bam",
+        "/tmp/bioinfo-upstream-bench-b3mn6qeo/size-1/sorted.bam",
         "-S",
-        "/tmp/bioinfo-upstream-bench-w6mr0ala/size-1/umi_dedup/upstream/out.bam",
+        "/tmp/bioinfo-upstream-bench-b3mn6qeo/size-1/umi_dedup/upstream/out.bam",
         "--random-seed",
         "1",
         "--extract-umi-method=tag",
@@ -607,31 +607,31 @@
             "wall_s": 0.0,
             "user_s": 0.0,
             "sys_s": 0.01,
-            "max_rss_kb": 25544,
+            "max_rss_kb": 24032,
             "exit_code": 0,
-            "runner_wall_s": 0.010445948981214315,
+            "runner_wall_s": 0.008596102008596063,
             "temp_peak_bytes": 0,
             "stdout_bytes": 0,
             "stderr_bytes": 690
           },
           {
-            "wall_s": 0.01,
+            "wall_s": 0.0,
             "user_s": 0.0,
-            "sys_s": 0.02,
-            "max_rss_kb": 25816,
+            "sys_s": 0.01,
+            "max_rss_kb": 25088,
             "exit_code": 0,
-            "runner_wall_s": 0.011405132012441754,
+            "runner_wall_s": 0.008296621992485598,
             "temp_peak_bytes": 0,
             "stdout_bytes": 0,
             "stderr_bytes": 690
           }
         ],
         "summary": {
-          "wall_mean_s": 0.005,
-          "wall_median_s": 0.005,
+          "wall_mean_s": 0.0,
+          "wall_median_s": 0.0,
           "wall_min_s": 0.0,
-          "wall_max_s": 0.01,
-          "max_rss_kb": 25816,
+          "wall_max_s": 0.0,
+          "max_rss_kb": 25088,
           "temp_peak_bytes": 0,
           "exit_codes": [
             0,
@@ -642,35 +642,35 @@
       "upstream": {
         "samples": [
           {
-            "wall_s": 1.64,
-            "user_s": 2.6,
-            "sys_s": 0.11,
-            "max_rss_kb": 148052,
+            "wall_s": 1.37,
+            "user_s": 2.53,
+            "sys_s": 0.08,
+            "max_rss_kb": 148236,
             "exit_code": 0,
-            "runner_wall_s": 1.646372123999754,
-            "temp_peak_bytes": 0,
+            "runner_wall_s": 1.3808210779970977,
+            "temp_peak_bytes": 10380,
             "stdout_bytes": 4016,
             "stderr_bytes": 0
           },
           {
-            "wall_s": 1.49,
-            "user_s": 2.33,
-            "sys_s": 0.1,
-            "max_rss_kb": 147020,
+            "wall_s": 1.32,
+            "user_s": 2.49,
+            "sys_s": 0.09,
+            "max_rss_kb": 147508,
             "exit_code": 0,
-            "runner_wall_s": 1.4976588140125386,
-            "temp_peak_bytes": 23340,
+            "runner_wall_s": 1.3248138769995421,
+            "temp_peak_bytes": 10380,
             "stdout_bytes": 4016,
             "stderr_bytes": 0
           }
         ],
         "summary": {
-          "wall_mean_s": 1.565,
-          "wall_median_s": 1.565,
-          "wall_min_s": 1.49,
-          "wall_max_s": 1.64,
-          "max_rss_kb": 148052,
-          "temp_peak_bytes": 23340,
+          "wall_mean_s": 1.3450000000000002,
+          "wall_median_s": 1.3450000000000002,
+          "wall_min_s": 1.32,
+          "wall_max_s": 1.37,
+          "max_rss_kb": 148236,
+          "temp_peak_bytes": 10380,
           "exit_codes": [
             0,
             0
@@ -711,8 +711,8 @@
         "-j",
         "4",
         "-o",
-        "/tmp/bioinfo-upstream-bench-w6mr0ala/size-10/cutadapt/rust/out.fastq.gz",
-        "/tmp/bioinfo-upstream-bench-w6mr0ala/size-10/reads.fastq"
+        "/tmp/bioinfo-upstream-bench-b3mn6qeo/size-10/cutadapt/rust/out.fastq.gz",
+        "/tmp/bioinfo-upstream-bench-b3mn6qeo/size-10/reads.fastq"
       ],
       "upstream_command": [
         "/home/rimuru/.conda/envs/ta-cutadapt/bin/cutadapt",
@@ -724,8 +724,8 @@
         "-j",
         "4",
         "-o",
-        "/tmp/bioinfo-upstream-bench-w6mr0ala/size-10/cutadapt/upstream/out.fastq.gz",
-        "/tmp/bioinfo-upstream-bench-w6mr0ala/size-10/reads.fastq"
+        "/tmp/bioinfo-upstream-bench-b3mn6qeo/size-10/cutadapt/upstream/out.fastq.gz",
+        "/tmp/bioinfo-upstream-bench-b3mn6qeo/size-10/reads.fastq"
       ],
       "threads": 4,
       "compression": "gzip",
@@ -736,20 +736,20 @@
             "wall_s": 0.01,
             "user_s": 0.03,
             "sys_s": 0.0,
-            "max_rss_kb": 8664,
+            "max_rss_kb": 8648,
             "exit_code": 0,
-            "runner_wall_s": 0.01304984898888506,
+            "runner_wall_s": 0.012163901003077626,
             "temp_peak_bytes": 0,
             "stdout_bytes": 0,
             "stderr_bytes": 0
           },
           {
             "wall_s": 0.01,
-            "user_s": 0.03,
+            "user_s": 0.04,
             "sys_s": 0.0,
-            "max_rss_kb": 8304,
+            "max_rss_kb": 8228,
             "exit_code": 0,
-            "runner_wall_s": 0.012482131976867095,
+            "runner_wall_s": 0.012437344004865736,
             "temp_peak_bytes": 0,
             "stdout_bytes": 0,
             "stderr_bytes": 0
@@ -760,7 +760,7 @@
           "wall_median_s": 0.01,
           "wall_min_s": 0.01,
           "wall_max_s": 0.01,
-          "max_rss_kb": 8664,
+          "max_rss_kb": 8648,
           "temp_peak_bytes": 0,
           "exit_codes": [
             0,
@@ -771,34 +771,34 @@
       "upstream": {
         "samples": [
           {
-            "wall_s": 0.21,
-            "user_s": 0.16,
+            "wall_s": 0.19,
+            "user_s": 0.14,
             "sys_s": 0.03,
-            "max_rss_kb": 27924,
+            "max_rss_kb": 27532,
             "exit_code": 0,
-            "runner_wall_s": 0.21610246499767527,
+            "runner_wall_s": 0.19626179401529953,
             "temp_peak_bytes": 0,
             "stdout_bytes": 0,
             "stderr_bytes": 0
           },
           {
-            "wall_s": 0.2,
+            "wall_s": 0.19,
             "user_s": 0.14,
-            "sys_s": 0.04,
-            "max_rss_kb": 27864,
+            "sys_s": 0.03,
+            "max_rss_kb": 27964,
             "exit_code": 0,
-            "runner_wall_s": 0.20523088399204426,
+            "runner_wall_s": 0.19339698902331293,
             "temp_peak_bytes": 0,
             "stdout_bytes": 0,
             "stderr_bytes": 0
           }
         ],
         "summary": {
-          "wall_mean_s": 0.20500000000000002,
-          "wall_median_s": 0.20500000000000002,
-          "wall_min_s": 0.2,
-          "wall_max_s": 0.21,
-          "max_rss_kb": 27924,
+          "wall_mean_s": 0.19,
+          "wall_median_s": 0.19,
+          "wall_min_s": 0.19,
+          "wall_max_s": 0.19,
+          "max_rss_kb": 27964,
           "temp_peak_bytes": 0,
           "exit_codes": [
             0,
@@ -835,16 +835,16 @@
         "--extract",
         "--quiet",
         "-o",
-        "/tmp/bioinfo-upstream-bench-w6mr0ala/size-10/fastqc/rust",
-        "/tmp/bioinfo-upstream-bench-w6mr0ala/size-10/reads.fastq"
+        "/tmp/bioinfo-upstream-bench-b3mn6qeo/size-10/fastqc/rust",
+        "/tmp/bioinfo-upstream-bench-b3mn6qeo/size-10/reads.fastq"
       ],
       "upstream_command": [
         "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/tests/ci/env/bin/fastqc",
         "--extract",
         "--quiet",
         "--outdir",
-        "/tmp/bioinfo-upstream-bench-w6mr0ala/size-10/fastqc/upstream",
-        "/tmp/bioinfo-upstream-bench-w6mr0ala/size-10/reads.fastq"
+        "/tmp/bioinfo-upstream-bench-b3mn6qeo/size-10/fastqc/upstream",
+        "/tmp/bioinfo-upstream-bench-b3mn6qeo/size-10/reads.fastq"
       ],
       "threads": null,
       "compression": "none",
@@ -853,11 +853,11 @@
         "samples": [
           {
             "wall_s": 0.1,
-            "user_s": 0.1,
+            "user_s": 0.09,
             "sys_s": 0.0,
-            "max_rss_kb": 4944,
+            "max_rss_kb": 5260,
             "exit_code": 0,
-            "runner_wall_s": 0.10368341699359007,
+            "runner_wall_s": 0.10370403301203623,
             "temp_peak_bytes": 0,
             "stdout_bytes": 0,
             "stderr_bytes": 0
@@ -866,9 +866,9 @@
             "wall_s": 0.1,
             "user_s": 0.09,
             "sys_s": 0.0,
-            "max_rss_kb": 5128,
+            "max_rss_kb": 5244,
             "exit_code": 0,
-            "runner_wall_s": 0.10723085000063293,
+            "runner_wall_s": 0.10481033299583942,
             "temp_peak_bytes": 0,
             "stdout_bytes": 0,
             "stderr_bytes": 0
@@ -879,7 +879,7 @@
           "wall_median_s": 0.1,
           "wall_min_s": 0.1,
           "wall_max_s": 0.1,
-          "max_rss_kb": 5128,
+          "max_rss_kb": 5260,
           "temp_peak_bytes": 0,
           "exit_codes": [
             0,
@@ -891,33 +891,33 @@
         "samples": [
           {
             "wall_s": 2.15,
-            "user_s": 2.13,
-            "sys_s": 0.15,
-            "max_rss_kb": 184568,
+            "user_s": 2.09,
+            "sys_s": 0.16,
+            "max_rss_kb": 185512,
             "exit_code": 0,
-            "runner_wall_s": 2.1601928530144505,
+            "runner_wall_s": 2.158331605984131,
             "temp_peak_bytes": 0,
             "stdout_bytes": 0,
             "stderr_bytes": 340
           },
           {
-            "wall_s": 2.15,
-            "user_s": 2.1,
-            "sys_s": 0.15,
-            "max_rss_kb": 186196,
+            "wall_s": 2.16,
+            "user_s": 2.01,
+            "sys_s": 0.16,
+            "max_rss_kb": 183120,
             "exit_code": 0,
-            "runner_wall_s": 2.158251849003136,
+            "runner_wall_s": 2.1654356780054513,
             "temp_peak_bytes": 0,
             "stdout_bytes": 0,
             "stderr_bytes": 340
           }
         ],
         "summary": {
-          "wall_mean_s": 2.15,
-          "wall_median_s": 2.15,
+          "wall_mean_s": 2.1550000000000002,
+          "wall_median_s": 2.1550000000000002,
           "wall_min_s": 2.15,
-          "wall_max_s": 2.15,
-          "max_rss_kb": 186196,
+          "wall_max_s": 2.16,
+          "max_rss_kb": 185512,
           "temp_peak_bytes": 0,
           "exit_codes": [
             0,
@@ -955,8 +955,8 @@
         "-a",
         "-T",
         "-o",
-        "/tmp/bioinfo-upstream-bench-w6mr0ala/size-10/fx_stats/rust/stats.tsv",
-        "/tmp/bioinfo-upstream-bench-w6mr0ala/size-10/reads.fastq"
+        "/tmp/bioinfo-upstream-bench-b3mn6qeo/size-10/fx_stats/rust/stats.tsv",
+        "/tmp/bioinfo-upstream-bench-b3mn6qeo/size-10/reads.fastq"
       ],
       "upstream_command": [
         "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/tests/ci/env/bin/seqkit",
@@ -964,8 +964,8 @@
         "-a",
         "-T",
         "-o",
-        "/tmp/bioinfo-upstream-bench-w6mr0ala/size-10/fx_stats/upstream/stats.tsv",
-        "/tmp/bioinfo-upstream-bench-w6mr0ala/size-10/reads.fastq"
+        "/tmp/bioinfo-upstream-bench-b3mn6qeo/size-10/fx_stats/upstream/stats.tsv",
+        "/tmp/bioinfo-upstream-bench-b3mn6qeo/size-10/reads.fastq"
       ],
       "threads": null,
       "compression": "none",
@@ -973,12 +973,12 @@
       "rust": {
         "samples": [
           {
-            "wall_s": 0.03,
+            "wall_s": 0.02,
             "user_s": 0.02,
             "sys_s": 0.0,
-            "max_rss_kb": 5272,
+            "max_rss_kb": 5648,
             "exit_code": 0,
-            "runner_wall_s": 0.03235100401798263,
+            "runner_wall_s": 0.021767728991108015,
             "temp_peak_bytes": 0,
             "stdout_bytes": 0,
             "stderr_bytes": 0
@@ -987,20 +987,20 @@
             "wall_s": 0.02,
             "user_s": 0.02,
             "sys_s": 0.0,
-            "max_rss_kb": 5136,
+            "max_rss_kb": 5748,
             "exit_code": 0,
-            "runner_wall_s": 0.03005490399664268,
+            "runner_wall_s": 0.03011948399944231,
             "temp_peak_bytes": 0,
             "stdout_bytes": 0,
             "stderr_bytes": 0
           }
         ],
         "summary": {
-          "wall_mean_s": 0.025,
-          "wall_median_s": 0.025,
+          "wall_mean_s": 0.02,
+          "wall_median_s": 0.02,
           "wall_min_s": 0.02,
-          "wall_max_s": 0.03,
-          "max_rss_kb": 5272,
+          "wall_max_s": 0.02,
+          "max_rss_kb": 5748,
           "temp_peak_bytes": 0,
           "exit_codes": [
             0,
@@ -1014,31 +1014,31 @@
             "wall_s": 0.01,
             "user_s": 0.01,
             "sys_s": 0.0,
-            "max_rss_kb": 36284,
+            "max_rss_kb": 28360,
             "exit_code": 0,
-            "runner_wall_s": 0.019792131992289796,
+            "runner_wall_s": 0.01842853901325725,
             "temp_peak_bytes": 0,
             "stdout_bytes": 0,
             "stderr_bytes": 0
           },
           {
-            "wall_s": 0.01,
+            "wall_s": 0.02,
             "user_s": 0.01,
-            "sys_s": 0.01,
-            "max_rss_kb": 27028,
+            "sys_s": 0.0,
+            "max_rss_kb": 35396,
             "exit_code": 0,
-            "runner_wall_s": 0.018691620003664866,
+            "runner_wall_s": 0.020888223021756858,
             "temp_peak_bytes": 0,
             "stdout_bytes": 0,
             "stderr_bytes": 0
           }
         ],
         "summary": {
-          "wall_mean_s": 0.01,
-          "wall_median_s": 0.01,
+          "wall_mean_s": 0.015,
+          "wall_median_s": 0.015,
           "wall_min_s": 0.01,
-          "wall_max_s": 0.01,
-          "max_rss_kb": 36284,
+          "wall_max_s": 0.02,
+          "max_rss_kb": 35396,
           "temp_peak_bytes": 0,
           "exit_codes": [
             0,
@@ -1050,8 +1050,8 @@
         "passed": true,
         "note": "stats TSV bytes (261 vs 261)",
         "sha256": {
-          "rust": "5ec7b9faf0b579a700c12bfd20c825a8c0d0a326e9a8997fbb0892d02b8e6d71",
-          "upstream": "5ec7b9faf0b579a700c12bfd20c825a8c0d0a326e9a8997fbb0892d02b8e6d71"
+          "rust": "e641b8988b0cb9b202ad45fc4345080714a2e1ff3d7b500bd3a3031c7f754c84",
+          "upstream": "e641b8988b0cb9b202ad45fc4345080714a2e1ff3d7b500bd3a3031c7f754c84"
         }
       },
       "correctness": {
@@ -1074,15 +1074,15 @@
         "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/release/rust-bam",
         "sort",
         "-o",
-        "/tmp/bioinfo-upstream-bench-w6mr0ala/size-10/bam_sort/rust/out.bam",
-        "/tmp/bioinfo-upstream-bench-w6mr0ala/size-10/unsorted.bam"
+        "/tmp/bioinfo-upstream-bench-b3mn6qeo/size-10/bam_sort/rust/out.bam",
+        "/tmp/bioinfo-upstream-bench-b3mn6qeo/size-10/unsorted.bam"
       ],
       "upstream_command": [
         "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/tests/ci/env/bin/samtools",
         "sort",
         "-o",
-        "/tmp/bioinfo-upstream-bench-w6mr0ala/size-10/bam_sort/upstream/out.bam",
-        "/tmp/bioinfo-upstream-bench-w6mr0ala/size-10/unsorted.bam"
+        "/tmp/bioinfo-upstream-bench-b3mn6qeo/size-10/bam_sort/upstream/out.bam",
+        "/tmp/bioinfo-upstream-bench-b3mn6qeo/size-10/unsorted.bam"
       ],
       "threads": null,
       "compression": "bgzf",
@@ -1093,9 +1093,9 @@
             "wall_s": 0.02,
             "user_s": 0.02,
             "sys_s": 0.0,
-            "max_rss_kb": 11316,
+            "max_rss_kb": 11472,
             "exit_code": 0,
-            "runner_wall_s": 0.030247720977058634,
+            "runner_wall_s": 0.030254429002525285,
             "temp_peak_bytes": 0,
             "stdout_bytes": 0,
             "stderr_bytes": 21
@@ -1104,9 +1104,9 @@
             "wall_s": 0.02,
             "user_s": 0.02,
             "sys_s": 0.0,
-            "max_rss_kb": 11540,
+            "max_rss_kb": 11476,
             "exit_code": 0,
-            "runner_wall_s": 0.029854784021154046,
+            "runner_wall_s": 0.029777268995530903,
             "temp_peak_bytes": 0,
             "stdout_bytes": 0,
             "stderr_bytes": 21
@@ -1117,7 +1117,7 @@
           "wall_median_s": 0.02,
           "wall_min_s": 0.02,
           "wall_max_s": 0.02,
-          "max_rss_kb": 11540,
+          "max_rss_kb": 11476,
           "temp_peak_bytes": 0,
           "exit_codes": [
             0,
@@ -1128,12 +1128,12 @@
       "upstream": {
         "samples": [
           {
-            "wall_s": 0.01,
+            "wall_s": 0.02,
             "user_s": 0.01,
             "sys_s": 0.0,
-            "max_rss_kb": 8120,
+            "max_rss_kb": 8456,
             "exit_code": 0,
-            "runner_wall_s": 0.01834168899222277,
+            "runner_wall_s": 0.025042019988177344,
             "temp_peak_bytes": 0,
             "stdout_bytes": 0,
             "stderr_bytes": 0
@@ -1142,20 +1142,20 @@
             "wall_s": 0.02,
             "user_s": 0.01,
             "sys_s": 0.0,
-            "max_rss_kb": 8424,
+            "max_rss_kb": 8248,
             "exit_code": 0,
-            "runner_wall_s": 0.02388524799607694,
+            "runner_wall_s": 0.024014383991016075,
             "temp_peak_bytes": 0,
             "stdout_bytes": 0,
             "stderr_bytes": 0
           }
         ],
         "summary": {
-          "wall_mean_s": 0.015,
-          "wall_median_s": 0.015,
-          "wall_min_s": 0.01,
+          "wall_mean_s": 0.02,
+          "wall_median_s": 0.02,
+          "wall_min_s": 0.02,
           "wall_max_s": 0.02,
-          "max_rss_kb": 8424,
+          "max_rss_kb": 8456,
           "temp_peak_bytes": 0,
           "exit_codes": [
             0,
@@ -1191,9 +1191,9 @@
         "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/release/rust-umitools",
         "dedup",
         "-I",
-        "/tmp/bioinfo-upstream-bench-w6mr0ala/size-10/sorted.bam",
+        "/tmp/bioinfo-upstream-bench-b3mn6qeo/size-10/sorted.bam",
         "-S",
-        "/tmp/bioinfo-upstream-bench-w6mr0ala/size-10/umi_dedup/rust/out.bam",
+        "/tmp/bioinfo-upstream-bench-b3mn6qeo/size-10/umi_dedup/rust/out.bam",
         "--random-seed",
         "1",
         "--extract-umi-method=tag",
@@ -1203,9 +1203,9 @@
         "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/tests/ci/env/bin/umi_tools",
         "dedup",
         "-I",
-        "/tmp/bioinfo-upstream-bench-w6mr0ala/size-10/sorted.bam",
+        "/tmp/bioinfo-upstream-bench-b3mn6qeo/size-10/sorted.bam",
         "-S",
-        "/tmp/bioinfo-upstream-bench-w6mr0ala/size-10/umi_dedup/upstream/out.bam",
+        "/tmp/bioinfo-upstream-bench-b3mn6qeo/size-10/umi_dedup/upstream/out.bam",
         "--random-seed",
         "1",
         "--extract-umi-method=tag",
@@ -1220,31 +1220,31 @@
             "wall_s": 0.03,
             "user_s": 0.02,
             "sys_s": 0.02,
-            "max_rss_kb": 35468,
+            "max_rss_kb": 34916,
             "exit_code": 0,
-            "runner_wall_s": 0.034025542001472786,
+            "runner_wall_s": 0.03595604500151239,
             "temp_peak_bytes": 0,
             "stdout_bytes": 0,
             "stderr_bytes": 694
           },
           {
-            "wall_s": 0.02,
+            "wall_s": 0.03,
             "user_s": 0.03,
             "sys_s": 0.01,
-            "max_rss_kb": 35380,
+            "max_rss_kb": 35148,
             "exit_code": 0,
-            "runner_wall_s": 0.030442136980127543,
+            "runner_wall_s": 0.03200884399120696,
             "temp_peak_bytes": 0,
             "stdout_bytes": 0,
             "stderr_bytes": 694
           }
         ],
         "summary": {
-          "wall_mean_s": 0.025,
-          "wall_median_s": 0.025,
-          "wall_min_s": 0.02,
+          "wall_mean_s": 0.03,
+          "wall_median_s": 0.03,
+          "wall_min_s": 0.03,
           "wall_max_s": 0.03,
-          "max_rss_kb": 35468,
+          "max_rss_kb": 35148,
           "temp_peak_bytes": 0,
           "exit_codes": [
             0,
@@ -1255,34 +1255,34 @@
       "upstream": {
         "samples": [
           {
-            "wall_s": 1.59,
-            "user_s": 2.8,
-            "sys_s": 0.08,
-            "max_rss_kb": 157836,
+            "wall_s": 1.61,
+            "user_s": 2.59,
+            "sys_s": 0.1,
+            "max_rss_kb": 159036,
             "exit_code": 0,
-            "runner_wall_s": 1.5952437809901312,
+            "runner_wall_s": 1.6115301660029218,
             "temp_peak_bytes": 230437,
             "stdout_bytes": 4025,
             "stderr_bytes": 0
           },
           {
-            "wall_s": 1.64,
-            "user_s": 2.59,
-            "sys_s": 0.09,
-            "max_rss_kb": 159036,
+            "wall_s": 1.59,
+            "user_s": 2.68,
+            "sys_s": 0.08,
+            "max_rss_kb": 160252,
             "exit_code": 0,
-            "runner_wall_s": 1.6438753019901924,
+            "runner_wall_s": 1.5967819409852382,
             "temp_peak_bytes": 230437,
             "stdout_bytes": 4025,
             "stderr_bytes": 0
           }
         ],
         "summary": {
-          "wall_mean_s": 1.615,
-          "wall_median_s": 1.615,
+          "wall_mean_s": 1.6,
+          "wall_median_s": 1.6,
           "wall_min_s": 1.59,
-          "wall_max_s": 1.64,
-          "max_rss_kb": 159036,
+          "wall_max_s": 1.61,
+          "max_rss_kb": 160252,
           "temp_peak_bytes": 230437,
           "exit_codes": [
             0,
