@@ -139,10 +139,25 @@ listing 结果。输入采用单遍读取，内存 O(最长记录和输出编码
 不能作为该模块证据；本批新增专用验证，不改写旧比较。见
 [接头配置证据](EVIDENCE-FASTQC-ADAPTERS.md)。
 
-Kmer/tile 原先只在组件缺口说明中列出，本批补入矩阵，未删除任何原行。当前共 266 行：
-189 verified、9 experimental、60 unsupported、8 exception。`--limits` 需连同这两个
-模块的真实计算一起关闭：验收包括配置解析、ignore 开关、所有警告/失败阈值及模块数据，
-不能仅接收参数而不执行。完整 HTML/ZIP 资源继续保持 experimental。
+Kmer 原先只在组件缺口说明中列出，本批补入矩阵，未删除任何原行。当前共 266 行：
+189 verified、9 experimental、59 unsupported、9 exception。`--limits` 需连同 Kmer 的真实
+计算一起关闭：验收包括配置解析、ignore 开关、所有警告/失败阈值及模块数据，不能仅接收
+参数而不执行。完整 HTML/ZIP 资源继续保持 experimental。
+
+按用户后续要求，以上批次已提交并推送为 `c3c7477`，对应远端 quality 运行
+`41186678371` 通过。继续新增矩阵 `unachievable` 原因列（schema 3），仅 JVM 启动
+相关的两个例外填写已批准的运行时约束；其余未完成工作和已修正的上游错误不填写。
+
+原生 tile 模块已实现：保留样本抽取、header 识别、均值、排序和报告行为，同时修正
+上游把缺失观测当作 Q0 的错误。专用 53 项对照包含 48 项完全一致、4 项缺失值修正和
+1 项非法 Phred64 拒绝。独立有理数模型、负向控制与工件检查验证数据正确性。
+并修复共享分组在 75 bp 和较大区间上的错误，以及科学计数法格式。
+详见 [tile 与约束列证据](EVIDENCE-FASTQC-TILES.md)。当前 266 行为：189 verified、
+9 experimental、59 unsupported、9 exception；其中 2 行具有非空 unachievable 原因。
+
+下一批 `--limits` 还需完整 Kmer 实现。源码核查识别了抽样计数缩放、二项分布尾部和
+位置机会数的可疑行为；须先用固定版本执行与数学反例确认，再实现并验证。它们属于
+可实现但尚未完成的计算功能，不能归为 unachievable。
 
 ## 5. 后续方向需要单独选择
 

@@ -28,8 +28,9 @@
 //!
 //! ## Modules emitted
 //!
-//! Present: Basic Statistics, Per base sequence quality, Per sequence quality
-//! scores, Per base sequence content, Per base N content, Per sequence GC content,
+//! Present: Basic Statistics, Per base sequence quality, Per tile sequence quality
+//! (when sampled headers contain tile IDs), Per sequence quality scores, Per base sequence content,
+//! Per base N content, Per sequence GC content,
 //! Sequence Length Distribution, Sequence Duplication Levels, Overrepresented
 //! sequences, Adapter Content (default or custom literal adapters).
 //!
@@ -47,6 +48,7 @@ pub mod limits;
 pub mod modules;
 pub mod report;
 pub mod stats;
+pub mod tile;
 mod zip;
 
 pub use error::{Error, Result};
@@ -60,9 +62,10 @@ pub const FASTQC_VERSION: &str = "0.13.0";
 pub const HEADER: &str = "##FastQC\t0.13.0";
 
 /// The QC modules this implementation computes.
-pub const COMPUTED_MODULES: [&str; 10] = [
+pub const COMPUTED_MODULES: [&str; 11] = [
     "Basic Statistics",
     "Per base sequence quality",
+    "Per tile sequence quality",
     "Per sequence quality scores",
     "Per base sequence content",
     "Per base N content",

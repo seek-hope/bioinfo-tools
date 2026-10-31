@@ -1,15 +1,15 @@
-//! FastQC's base grouping for reads longer than 50bp.
+//! FastQC's base grouping for reads longer than 75bp.
 //!
 //! For a long read FastQC does not print one row per base position; it prints one
-//! row per *group* of positions, labelled `10-11`, `12-14` and so on. Reproducing
+//! row per *group* of positions, labelled `10-11`, `12-13` and so on. Reproducing
 //! the grouping is required for the report to match on long reads: without it the
 //! tables are longer and every position row disagrees.
 //!
 //! ## The interval rule
 //!
-//! `getLinearInterval(length)` picks the first candidate from a widening ladder
-//! (`1` first, then `2, 5, 10` at multiplier 1; then `20, 50, 100` at 10; then
-//! `200, 500, 1000`, and so on) whose resulting group count is under 75:
+//! Up to 75 positions remain ungrouped. Above that, `getLinearInterval(length)`
+//! picks the first candidate from `2, 5, 10`, then `20, 50, 100`, and so on,
+//! whose resulting group count is under 75:
 //!
 //! ```text
 //! interval = candidate * multiplier
@@ -22,12 +22,13 @@
 //!
 //! Positions 1..=9 are always their own single-base groups (the first 9 bases are
 //! never merged, because quality is most variable there). From position 10 the
-//! remaining positions are chunked by `interval`, with the final group truncated
-//! at the read length.
+//! remaining positions use `interval`, with the final group truncated at the
+//! read length. For intervals above ten, the first merged group is 10..interval-1
+//! so all subsequent groups start at interval multiples.
 //!
-//! Both rules are transcribed from `BaseGroup.class` (`javap -c`) and verified
-//! against FastQC 0.13.0 on an 80bp fixture, which produces `10-11`, `12-14`,
-//! `15-19`, ...
+//! Pinned FastQC 0.13.0 execution confirms 75 individual rows at length 75,
+//! and `10-11`, `12-13`, `14-15`, ... at lengths 76 and 80.
+//! See `tests/oracle/fastqc_tile_diff.py` for direct boundary checks.
 
 /// A group of base positions, 1-based and inclusive.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -51,22 +52,12 @@ impl BaseGroup {
 
 /// FastQC's `getLinearInterval`.
 pub fn linear_interval(read_length: usize) -> usize {
-    // Groups = 9 + ceil((length - 9) / interval). The ladder starts at interval
-    // **1**, then 2, 5, 10 at multiplier 1; 20, 50, 100 at 10; and so on. The
-    // FIRST candidate whose group count is under 75 wins.
-    //
-    // Starting at 1 is what makes the threshold fall at 75bp, which the oracle
-    // pins exactly:
-    //
-    //   reads of 74bp -> every position its own row (interval 1, 74 groups)
-    //   reads of 75bp -> interval 2 stops qualifying at 75 groups, so it picks 2
-    //   reads of 76bp -> interval 2 (43 groups), rows `10-11, 12-13, ...`
-    //
-    // Omitting the interval-1 candidate made every read from 10bp up group, which
-    // broke the short-read fixtures.
+    if read_length <= 75 {
+        return 1;
+    }
     let mut multiplier: usize = 1;
     loop {
-        for candidate in [1usize, 2, 5, 10] {
+        for candidate in [2usize, 5, 10] {
             let interval = candidate * multiplier;
             let span = read_length.saturating_sub(9);
             let mut groups = 9 + span / interval;
@@ -101,7 +92,11 @@ pub fn base_groups(read_length: usize, nogroup: bool) -> Vec<BaseGroup> {
     while start <= read_length {
         // Positions 1..=9 stay unmerged.
         let width = if start <= 9 { 1 } else { interval };
-        let end = (start + width - 1).min(read_length);
+        let end = if start == 10 && interval > 10 {
+            interval - 1
+        } else {
+            (start + width - 1).min(read_length)
+        };
         groups.push(BaseGroup { start, end });
         start = end + 1;
     }
@@ -113,10 +108,8 @@ mod tests {
     use super::*;
 
     #[test]
-    fn reads_up_to_74_bases_are_never_grouped() {
-        // Interval 1 qualifies while the read is short enough, so every position
-        // gets its own row. The oracle switches to grouping at 75bp.
-        for length in [1usize, 9, 20, 50, 74] {
+    fn reads_up_to_75_bases_are_never_grouped() {
+        for length in [1usize, 9, 20, 50, 74, 75] {
             let groups = base_groups(length, false);
             assert!(
                 groups.iter().all(|group| group.start == group.end),
@@ -127,19 +120,18 @@ mod tests {
     }
 
     #[test]
-    fn grouping_starts_at_75_bases() {
-        // Measured: FastQC prints one row per position at 74bp and grouped rows
-        // from 75bp.
-        assert_eq!(linear_interval(74), 1);
-        assert_eq!(linear_interval(75), 2);
-        let groups = base_groups(75, false);
-        assert!(groups.len() < 75, "75bp should be grouped");
+    fn grouping_starts_after_75_bases() {
+        // Direct pinned executable comparison corrects the former test's
+        // mistaken claim that 75 positions were already grouped.
+        assert_eq!(linear_interval(75), 1);
+        assert_eq!(base_groups(75, false).len(), 75);
+        assert_eq!(linear_interval(76), 2);
+        assert!(base_groups(76, false).len() < 75);
     }
 
     #[test]
     fn an_eighty_base_read_matches_fastqc() {
-        // Measured from FastQC 0.13.0 output: 9 single positions, then 10-11,
-        // 12-14, 15-19, ...
+        // 9 individual positions followed by 10-11, 12-13, 14-15, ...
         let groups = base_groups(80, false);
         let labels: Vec<String> = groups.iter().map(|group| group.label()).collect();
         assert_eq!(labels[0], "1");
@@ -152,6 +144,28 @@ mod tests {
         assert_eq!(groups.last().unwrap().end, 80);
         for pair in groups.windows(2) {
             assert_eq!(pair[0].end + 1, pair[1].start, "gap between groups");
+        }
+    }
+
+    #[test]
+    fn large_intervals_align_to_round_position_boundaries() {
+        for (length, interval) in [(660, 20), (1400, 50), (4000, 100)] {
+            let groups = base_groups(length, false);
+            assert_eq!(
+                groups[9],
+                BaseGroup {
+                    start: 10,
+                    end: interval - 1
+                }
+            );
+            assert_eq!(
+                groups[10],
+                BaseGroup {
+                    start: interval,
+                    end: 2 * interval - 1
+                }
+            );
+            assert_eq!(groups.last().unwrap().end, length);
         }
     }
 

@@ -6,6 +6,7 @@
 //! | --- | --- | --- |
 //! | Basic Statistics | **yes** | all nine fields |
 //! | Per base sequence quality | **yes** | all six numeric columns |
+//! | Per tile sequence quality | **yes** | Sampled Illumina headers; missing groups remain NaN |
 //! | Per sequence quality scores | **yes** | |
 //! | Per base sequence content | **yes** | |
 //! | Per base N content | **yes** | |
@@ -870,9 +871,14 @@ pub fn adapter_content(stats: &QcStats) -> ModuleResult {
 /// Build every module result, in FastQC's order.
 pub fn all_modules(stats: &QcStats) -> Vec<ModuleResult> {
     let thresholds = Thresholds::default();
-    vec![
+    let mut modules = vec![
         basic_statistics(stats),
         per_base_quality(stats, &thresholds),
+    ];
+    if let Some(tile) = stats.tiles.report(stats.nogroup, 5.0, 10.0) {
+        modules.push(tile);
+    }
+    modules.extend([
         per_sequence_quality(stats, &thresholds),
         per_base_sequence_content(stats),
         per_sequence_gc_content(stats, &thresholds),
@@ -881,7 +887,8 @@ pub fn all_modules(stats: &QcStats) -> Vec<ModuleResult> {
         sequence_duplication(stats, &thresholds),
         overrepresented_sequences(stats, &thresholds),
         adapter_content(stats),
-    ]
+    ]);
+    modules
 }
 
 /// The base order used by [`per_base_sequence_content`], exposed for tests.

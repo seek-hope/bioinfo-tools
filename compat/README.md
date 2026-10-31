@@ -29,7 +29,13 @@ snapshot hashes.
 
 Run `python3 tests/ci/check_compat.py` for the current row counts. Regenerate the
 matrix after a behavior change; do not mark a row verified without new evidence.
-Matrix schema 2 adds `exception`. The finite `approved-exceptions.json` registry
+Matrix schema 3 adds the `unachievable` text column; schema 2 introduced `exception`.
+The column contains a reason only where an approved constraint prevents an
+upstream-equivalent capability. Empty means no such determination, including
+unfinished work. Currently only `-j/--java` and `--debug` have values, referring
+to the approved pure-Rust runtime. They remain exception rows; this column is
+not an additional status or a way to remove unsupported/experimental work.
+The finite `approved-exceptions.json` registry
 requires explicit approval, a behavior rule, proof and a verifier for each such
 row. Native-only JVM exclusions and proven upstream defects are recorded separately
 from implemented equivalence and unfinished functionality. No missing scientific
@@ -59,9 +65,12 @@ command can become an exception merely to reduce the unsupported count.
   source comparisons. `--extract/--delete` have 4/4 artifact-layout comparisons.
   `--nogroup`, `--min_length`, `--max_length` and `--dup_length` have 5/5
   option-group comparisons. HTML and stored ZIP artifacts remain experimental
-  because plot images and FastQC auxiliary assets are not emitted; Kmer/tile
-  modules and `--limits` remain open; both missing modules are explicit matrix
-  rows rather than narrative-only gaps. The JVM launcher options `-j/--java` and `--debug` are
+  because plot images and FastQC auxiliary assets are not emitted. Native tile
+  statistics now have 53 cases (48 exact, four independently proven missing-data
+  corrections, one invalid Phred64 rejection). Missing observations remain `NaN`
+  and are excluded from the reference mean; observed Q0 is retained. See
+  [tile evidence and grouping fixes](../docs/EVIDENCE-FASTQC-TILES.md).
+  Kmer and `--limits` remain open. The JVM launcher options `-j/--java` and `--debug` are
   explicit native-runtime exceptions: they fail before input/output access with
   exit 2, while ordinary QC requires no JVM or upstream executable.
 - **SeqKit/fq**: `common`, `head`, `grep`, `sort`, `fa2fq`, `faidx`, `rmdup`,

@@ -2,6 +2,7 @@
   "schema_version": 1,
   "decision": "The maintainer explicitly chose not to reproduce erroneous upstream behavior, provided reproducible proof shows the upstream is wrong and the Rust behavior is correct; and chose a pure Rust FastQC implementation with explicit JVM launcher exceptions.",
   "decision_quote": "1. 错误行为不复现，但需给出确凿的证据说明上游行为有误而我们的实现是正确的；2.A。",
+  "unachievable_decision_quote": "我建议在矩阵中加一列，命名为unachievable",
   "exceptions": [
     {
       "id": "SEQKIT-RANGE-QUALITY",
@@ -28,6 +29,7 @@
     {
       "id": "FASTQC-NATIVE-LAUNCHER",
       "category": "native-runtime",
+      "unachievable": "Under the approved pure-Rust runtime, JVM executable selection and Java-launch diagnostics have no equivalent; Java/upstream delegation is excluded. See FASTQC-NATIVE-LAUNCHER proof.",
       "surfaces": [
         ["rust-fastqc", "-j --java"],
         ["rust-fastqc", "--debug"]
@@ -46,6 +48,14 @@
       "rule": "Count full adapter matches independently of read order, including equal-length reads and later expansion of the reported position range. Reject configurations containing no usable adapter before processing input or creating reports, rather than crashing mid-report.",
       "proof": "docs/EVIDENCE-FASTQC-ADAPTERS.md",
       "verifier": "tests/oracle/fastqc_adapters_diff.py"
+    },
+    {
+      "id": "FASTQC-TILE-MISSING-QUALITY",
+      "category": "upstream-defect",
+      "surfaces": [["rust-fastqc", "module:per-tile-quality"]],
+      "rule": "Do not invent zero quality for an unobserved tile/group. Report NaN and exclude absent observations from the reference mean, while retaining actual measured Q0. Preserve the pinned sampling, grouping and header-detection contract.",
+      "proof": "docs/EVIDENCE-FASTQC-TILES.md",
+      "verifier": "tests/oracle/fastqc_tile_diff.py"
     }
   ]
 }

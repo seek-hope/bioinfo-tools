@@ -29,6 +29,7 @@ FIELDS = [
     "surface",
     "kind",
     "status",
+    "unachievable",
     "evidence",
     "deviation",
     "next_action",
@@ -124,6 +125,7 @@ def check_exceptions(rows: list[dict[str, str]]) -> list[str]:
         errors.append("approved-exceptions.json: missing schema or explicit decision")
     declared: set[tuple[str, str]] = set()
     ids: set[str] = set()
+    constrained: dict[tuple[str, str], str] = {}
     for entry in policy.get("exceptions", []):
         identifier = entry.get("id", "")
         if not identifier or identifier in ids:
@@ -135,8 +137,17 @@ def check_exceptions(rows: list[dict[str, str]]) -> list[str]:
             path = entry.get(field, "")
             if not path or not (ROOT / path).is_file():
                 errors.append(f"{identifier}: missing {field}: {path}")
+        reason = entry.get("unachievable", "")
+        if not isinstance(reason, str) or (reason and entry.get("category") != "native-runtime"):
+            errors.append(f"{identifier}: unachievable needs an approved native-runtime constraint, not a bug or missing implementation")
+        if entry.get("category") == "native-runtime" and (not isinstance(reason, str) or not reason.strip()):
+            errors.append(f"{identifier}: native-runtime exception must state its unachievable constraint")
+        if not entry.get("surfaces"):
+            errors.append(f"{identifier}: exception must name at least one surface")
         for tool, surface in entry.get("surfaces", []):
             key = (tool, surface)
+            if isinstance(reason, str) and reason:
+                constrained[key] = reason
             if key in declared:
                 errors.append(f"duplicate exception surface: {key}")
             declared.add(key)
@@ -146,6 +157,11 @@ def check_exceptions(rows: list[dict[str, str]]) -> list[str]:
     for key in sorted(declared - actual):
         errors.append(f"{key}: approved deviation must remain visible as an exception")
     for row in rows:
+        key = (row["tool"], row["surface"])
+        if row.get("unachievable", "") != constrained.get(key, ""):
+            errors.append(f"{key}: unachievable must match its registered constraint; unfinished work is not unachievable")
+        if row.get("unachievable") and row["status"] != "exception":
+            errors.append(f"{key}: unachievable must remain an explicit exception")
         if row["status"] == "exception" and not row["deviation"].strip():
             errors.append(f"{(row['tool'], row['surface'])}: exception needs an explicit deviation")
     return errors
@@ -250,7 +266,7 @@ def snapshot_hashes() -> dict[str, str]:
 
 def document(rows: list[dict[str, str]]) -> dict:
     return {
-        "schema_version": 2,
+        "schema_version": 3,
         "targets": {tool: target[0] for tool, target in TARGETS.items()},
         "snapshots": snapshot_hashes(),
         "rows": rows,
@@ -273,8 +289,8 @@ def check_json(rows: list[dict[str, str]]) -> list[str]:
         return [f"{JSON_PATH.relative_to(ROOT)}: invalid JSON: {error}"]
     expected = document(rows)
     errors: list[str] = []
-    if saved.get("schema_version") != 2:
-        errors.append("matrix.json: schema_version must be 2 (explicit approved exceptions)")
+    if saved.get("schema_version") != 3:
+        errors.append("matrix.json: schema_version must be 3 (unachievable constraint column)")
     if saved.get("targets") != expected["targets"]:
         errors.append("matrix.json: targets are stale")
     if saved.get("snapshots") != expected["snapshots"]:

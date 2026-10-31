@@ -145,9 +145,8 @@ adapters, longest read length L, and S bytes of adapter definitions. Existing
 QC position and distinct-sequence structures still contribute to total memory;
 this does not claim constant-memory QC or a measured performance improvement.
 
-`--limits` remains unsupported. Its module enablement can request Kmer Content
-and Per tile sequence quality, which are not implemented. Those two pre-existing
-gaps are now explicit matrix rows; they were previously only listed in
-`rust-fastqc/src/absent.rs` and the compatibility narrative. Configuration,
-thresholds and real module computations must be validated together before
-closing that option. HTML/ZIP plot completeness also remains experimental.
+`--limits` remains unsupported because Kmer Content configuration and statistics are
+not implemented. Per tile sequence quality is now implemented natively; its
+observed-only missing-data correction and grouping evidence are recorded in
+[EVIDENCE-FASTQC-TILES.md](EVIDENCE-FASTQC-TILES.md). HTML/ZIP plot completeness
+remains experimental.

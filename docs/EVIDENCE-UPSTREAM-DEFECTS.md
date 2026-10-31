@@ -221,6 +221,19 @@ list causes an upstream array-index exception during report creation; native
 validation fails before reading input or producing artifacts. These are explicit
 `FASTQC-ADAPTER-CORRECTNESS` differences, not byte-equivalence passes.
 
+## 8. FastQC tile statistics and configuration constraints
+
+The native tile module now has a separate [53-case evidence set](EVIDENCE-FASTQC-TILES.md):
+48 exact comparisons, four independently proven missing-data corrections and one
+invalid-Phred64 rejection. It retains observed Q0 and reports `NaN` for missing
+observations. The grouping boundary and large-interval alignment are compared
+against the pinned executable.
+
+These tile results and the matrix `unachievable` column are independent of the
+adapter exceptions above. The column is nonempty only for the two approved
+native-runtime JVM launcher surfaces; the tile correction is an upstream-defect
+exception with an empty `unachievable` value.
+
 ## Negative controls and validation boundary
 
 The independent suite was run against the preceding release binary that copied
@@ -258,20 +271,22 @@ and the cutadapt visible-fixture smoke. The fresh release oracle run reported
 
 ```text
 PASS FastQC adapters: 44 cases; {'exact': 35, 'approved-counting-difference': 6, 'approved-config-rejection': 3}
+PASS FastQC tiles: 53 cases; {'exact': 48, 'corrected-missing-observation': 4, 'invalid-quality-rejected': 1}
 SELFTEST PASS
 ```
 
-Release regressions include 17 translation tests, six adapter tests and two
-native-runtime tests. The separately run CI harness tests passed 12/12.
-The full unrelated UMI, samtools and cutadapt differential suites were not rerun
-for this batch; their older evidence is not presented as a current run.
+Release regressions include 17 translation tests, six adapter tests, four tile
+process tests and two native-runtime tests. The separately run CI harness tests
+passed 12/12. The full unrelated UMI, samtools and cutadapt differential suites
+were not rerun for this batch; their older evidence is not presented as a current run.
 
 Logs: `/tmp/bioinfo-policy-adapters-final-base.log` and
 `/tmp/bioinfo-policy-adapters-final-oracles.log`, with matching `.status` files
-containing 0. These results apply to the uncommitted working tree based on
-`5b71fae`, not a new remote CI run or release. The matrix has 266 rows: 189
-verified, 9 experimental, 60 unsupported, 8 exception. The two added Kmer/tile
-rows expose previously narrative-only gaps; no prior matrix row was removed.
+containing 0. Those logs apply to the earlier adapter batch; the current tile
+batch has not yet completed the two full workspace gates. The matrix has 266 rows:
+189 verified, 9 experimental, 59 unsupported, 9 exception. The two nonempty
+`unachievable` values are the JVM launcher constraints; no unfinished biological
+capability is classified that way.
 
 No performance improvement is claimed. Memory remains O(longest record) plus
 codec/output buffers for translation and positive range; negative ranges retain

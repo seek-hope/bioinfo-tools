@@ -258,20 +258,21 @@ attempt guessed and got the semantics backwards:
 ## 6. Modules intentionally absent
 
 Recorded in `rust-fastqc/src/absent.rs` as data, so the omission is checkable rather
-than prose. None of these is compared by the differential.
+than prose. Kmer Content remains the only absent FastQC analysis module; Adapter
+Content and Per tile sequence quality are implemented and covered by dedicated
+oracles. Plot images and auxiliary FastQC resources remain separate report gaps.
 
 | Module | Why absent |
 | --- | --- |
-| **Adapter Content** | Requires FastQC's `Configuration/adapter_list.txt` plus undocumented per-position k-mer tolerance rules. Emitted as an **empty block** (FastQC always writes the block) and **excluded from comparison by name** — a module that was not computed carries no honest verdict. |
-| **Kmer Content** | Position-specific k-mer enrichment with a binomial test and its own multiple-testing correction; the binning and correction are undocumented. |
-| **Per tile sequence quality** | Needs Illumina tile coordinates from the CASAVA header plus a flow-cell layout; meaningless for non-Illumina data. |
+| **Kmer Content** | Position-specific k-mer enrichment with a binomial test, sampling, grouping and multiple-testing correction; the native implementation and independent mathematical proof are still pending. |
 
 Notes on the two remaining differences from FastQC's default output:
 
-* **Long-read grouping exists but the module list still matches.** Grouping is
-  implemented (§5.6) and matches at 80bp.
-* **`--nogroup` is not exposed as a flag.** `grouping::base_groups(len, true)` exists
-  and is unit-tested, but the CLI does not surface it yet.
+* **Long-read grouping exists and includes the tile module.** Grouping follows the
+  pinned 75 bp boundary and large-interval alignment; dedicated 660/1400/4000 bp
+  cases cover it.
+* **`--nogroup` is exposed and tested.** It disables grouping for all applicable
+  modules.
 
 ## 7. Verification results
 
@@ -337,12 +338,13 @@ itself evidence the comparison has teeth.
 
 ## 9. What is explicitly not claimed
 
-* **HTML reports, plots and the zip archive.** Only `fastqc_data.txt` is produced.
-  MultiQC reads the data file directly, which is what this prototype targets, but
-  `fastqc_report.html` and `Images/` do not exist.
-* **Adapter Content, Kmer Content, Per tile sequence quality.** Absent; see §6.
-* **`-t/--threads`, `-f/--format`, `--limits`, `--adapters`, `-c/--contaminants`,
-  `--fast5`, `--nogroup` as CLI flags.** Not implemented.
+* **HTML reports, plots and the zip archive.** Data-table HTML and stored ZIP
+  artifacts are produced and the tile oracle checks their data propagation, but
+  FastQC plot images and auxiliary assets are not emitted.
+* **Kmer Content and custom `--limits`.** The Kmer module and limits-file
+  configuration remain unsupported. Adapter Content, Per tile sequence quality,
+  `--adapters`, contaminant sources and `--nogroup` are implemented with their
+  dedicated evidence.
 * **Contaminant matching.** One fixture surfaced a real difference: FastQC labelled
   a read `RNA PCR Primer, Index 14 (100% over 10bp)` because it matched its
   contaminant list; `rust-fastqc` prints `No Hit` for every sequence. That is a

@@ -125,6 +125,7 @@ run python3 tests/ci/check_docs.py
 run python3 tests/ci/check_compat.py
 run python3 tests/ci/test_compat_exceptions.py
 run python3 tests/ci/test_seqkit_exception_gate.py
+run python3 tests/ci/test_tile_proof.py
 run python3 tests/gate/test_acceptance.py
 run "${CARGO[@]}" fmt --all -- --check
 run "${CARGO[@]}" clippy --workspace --all-targets --locked "${cargo_offline[@]}" -- -D warnings
@@ -145,6 +146,7 @@ if [ "$with_oracles" -eq 1 ]; then
     run "${oracle_prefix[@]}" python3 tests/oracle/check_seqkit_exceptions.py --seqkit "$SEQKIT_ORACLE" --fq "$FQ_ORACLE" --rust "$bin_dir/rust-fx"
     run "${oracle_prefix[@]}" bash tests/oracle/run_qc_oracle.sh --rust "$bin_dir/rust-fastqc"
     run "${oracle_prefix[@]}" python3 tests/oracle/fastqc_adapters_diff.py --fastqc "$FASTQC_ORACLE" --rust "$bin_dir/rust-fastqc"
+    run "${oracle_prefix[@]}" python3 tests/oracle/fastqc_tile_diff.py --fastqc "$FASTQC_ORACLE" --rust "$bin_dir/rust-fastqc"
     run "${oracle_prefix[@]}" bash tests/oracle/run_qc_oracle.sh --self-test
     printf '\nQUALITY PASS (base + FASTX/QC oracles)\n'
 else

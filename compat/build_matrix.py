@@ -9,6 +9,7 @@ kept as `unsupported` rows rather than being silently omitted.
 from __future__ import annotations
 
 import csv
+import json
 import re
 from collections import Counter
 from pathlib import Path
@@ -31,6 +32,7 @@ FIELDS = [
     "surface",
     "kind",
     "status",
+    "unachievable",
     "evidence",
     "deviation",
     "next_action",
@@ -65,6 +67,12 @@ def option_groups(path: Path) -> list[list[str]]:
 def main() -> int:
     rows: list[dict[str, str]] = []
     keys: set[tuple[str, str]] = set()
+    policy = json.loads((ROOT / "compat" / "approved-exceptions.json").read_text())
+    constrained = {
+        tuple(surface): entry["unachievable"]
+        for entry in policy["exceptions"] if entry.get("unachievable") and entry.get("category") == "native-runtime"
+        for surface in entry["surfaces"]
+    }
 
     def add(
         tool: str,
@@ -86,6 +94,7 @@ def main() -> int:
                 "surface": surface,
                 "kind": kind,
                 "status": status,
+                "unachievable": constrained.get(key, ""),
                 "evidence": evidence,
                 "deviation": deviation,
                 "next_action": next_action,
@@ -356,9 +365,9 @@ def main() -> int:
         ),
         (
             "module:per-tile-quality",
-            "unsupported",
-            "rust-fastqc/src/absent.rs; FastQC 0.13.0 PerTileQualityScores module is not implemented",
-            "T6: implement header/tile aggregation before enabling via --limits",
+            "exception",
+            "tests/oracle/fastqc_tile_diff.py: 53 cases (48 exact, 4 missing-data corrections, 1 invalid Phred64 rejection); rational mean proof and artifact checks",
+            "Maintain observed-only quality proof; custom limits and complete plots retain their separate rows",
         ),
         (
             "module:contaminants",
@@ -379,7 +388,10 @@ def main() -> int:
             "report" if surface.startswith("report:") else "feature",
             status,
             evidence,
-            "FASTQC-ADAPTER-CORRECTNESS: correct equal-length/read-order defect and reject empty config before report creation" if surface == "module:adapter-content" else "",
+            {
+                "module:adapter-content": "FASTQC-ADAPTER-CORRECTNESS: correct equal-length/read-order defect and reject empty config before report creation",
+                "module:per-tile-quality": "FASTQC-TILE-MISSING-QUALITY: unobserved tile/groups remain NaN and are excluded from the reference mean; measured Q0 is retained",
+            }.get(surface, ""),
             next_action,
         )
 

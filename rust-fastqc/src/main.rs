@@ -416,6 +416,14 @@ fn accumulate_with_options(input: &Path, options: AccumulateOptions) -> Result<Q
                     {
                         continue;
                     }
+                    if options.quality_offset == 64
+                        && record.qualities.iter().any(|byte| *byte < 64)
+                    {
+                        return Err(Error::runtime(format!(
+                            "{}: Phred64 quality byte is below ASCII 64",
+                            input.display()
+                        )));
+                    }
                     let prefix: Vec<u8> = record
                         .sequence
                         .iter()
@@ -429,6 +437,13 @@ fn accumulate_with_options(input: &Path, options: AccumulateOptions) -> Result<Q
                         options.limits,
                     )
                     .map_err(|message| Error::input(format!("{}: {message}", input.display())))?;
+                    if let Some(warning) = stats.tiles.add_read(
+                        record.header,
+                        record.qualities,
+                        options.quality_offset,
+                    ) {
+                        eprintln!("{warning}");
+                    }
                     stats.add_read(record.sequence, record.qualities, options.quality_offset);
                 }
                 Ok(None) => break,

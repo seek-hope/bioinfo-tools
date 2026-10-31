@@ -49,6 +49,14 @@ pub fn java_double(value: f64) -> String {
     if value.is_infinite() {
         return if value > 0.0 { "Infinity" } else { "-Infinity" }.to_string();
     }
+    if value != 0.0 && !(1e-3..1e7).contains(&value.abs()) {
+        let scientific = format!("{value:e}");
+        let (mantissa, exponent) = scientific.split_once('e').expect("scientific format");
+        return format!(
+            "{mantissa}{}E{exponent}",
+            if mantissa.contains('.') { "" } else { ".0" }
+        );
+    }
     let text = format!("{value}");
     if text.contains('.') || text.contains('e') || text.contains('E') {
         text
@@ -249,6 +257,8 @@ pub struct QcStats {
     pub quality_distribution: BTreeMap<u8, u64>,
     /// Duplication: sequence (truncated) → count.
     pub sequences: BTreeMap<Vec<u8>, u64>,
+    /// Optional sampled quality statistics from Illumina tile headers.
+    pub tiles: crate::tile::TileQuality,
     /// Configured adapters, in report column order.
     pub adapters: Vec<Adapter>,
     /// First-occurrence counts by position, one vector per configured adapter.
@@ -279,6 +289,7 @@ impl QcStats {
             gc_distribution: vec![0.0; 101],
             quality_distribution: BTreeMap::new(),
             sequences: BTreeMap::new(),
+            tiles: crate::tile::TileQuality::default(),
             adapters: crate::adapters::defaults(),
             adapter_hits: vec![Vec::new(); ADAPTERS.len()],
             contaminants: Vec::new(),
@@ -558,6 +569,18 @@ mod tests {
         assert_eq!(java_double(0.5), "0.5");
         assert_eq!(java_double(19.066666666666666), "19.066666666666666");
         assert_eq!(java_double(f64::NAN), "NaN");
+    }
+
+    #[test]
+    fn java_double_uses_scientific_notation_at_java_boundaries() {
+        assert_eq!(java_double(0.001), "0.001");
+        assert_eq!(java_double(0.0001), "1.0E-4");
+        assert_eq!(java_double(10_000_000.0), "1.0E7");
+        assert_eq!(
+            java_double(-1.3877787807814457e-17),
+            "-1.3877787807814457E-17"
+        );
+        assert_eq!(java_double(-0.0), "-0.0");
     }
 
     #[test]
