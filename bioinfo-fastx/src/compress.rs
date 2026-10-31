@@ -255,10 +255,12 @@ impl Compressor for InnerCompressor {
             .ok_or_else(|| io::Error::other("compressor already finished"))?;
         match sink {
             Sink::Plain(mut w) => w.flush(),
-            Sink::Gzip(w) => w.finish().map(|_| ()),
-            Sink::Bzip2(w) => w.finish().map(|_| ()),
-            Sink::Xz(w) => w.finish().map(|_| ()),
-            Sink::Zstd(w) => w.finish().map(|_| ()),
+            // Encoder completion returns a still-buffered sink. Its destructor
+            // cannot report write/flush failures, so finish that layer explicitly.
+            Sink::Gzip(w) => w.finish()?.flush(),
+            Sink::Bzip2(w) => w.finish()?.flush(),
+            Sink::Xz(w) => w.finish()?.flush(),
+            Sink::Zstd(w) => w.finish()?.flush(),
         }
     }
 }
@@ -502,6 +504,46 @@ mod tests {
             reader.read_to_end(&mut back).unwrap();
             assert_eq!(back, data, "round trip failed for {format:?}");
             let _ = std::fs::remove_file(path);
+        }
+    }
+
+    #[test]
+    fn finish_propagates_buffered_sink_write_and_flush_failures() {
+        struct FailingSink {
+            fail_write: bool,
+        }
+        impl Write for FailingSink {
+            fn write(&mut self, data: &[u8]) -> io::Result<usize> {
+                if self.fail_write {
+                    Err(io::Error::other("injected sink write failure"))
+                } else {
+                    Ok(data.len())
+                }
+            }
+            fn flush(&mut self) -> io::Result<()> {
+                Err(io::Error::other("injected sink flush failure"))
+            }
+        }
+        for format in [
+            Format::Plain,
+            Format::Gzip,
+            Format::Bzip2,
+            Format::Xz,
+            Format::Zstd,
+        ] {
+            for fail_write in [false, true] {
+                let mut writer = compressor_for(
+                    Box::new(FailingSink { fail_write }),
+                    format,
+                    Levels::DEFAULT,
+                )
+                .unwrap();
+                writer.write_all(b">read\nACGT\n").unwrap();
+                assert!(
+                    writer.finish().is_err(),
+                    "lost sink error for {format:?}, write={fail_write}"
+                );
+            }
         }
     }
 

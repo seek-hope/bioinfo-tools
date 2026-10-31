@@ -926,7 +926,6 @@ fn range_command() -> Command {
                 .short('r')
                 .long("range")
                 .value_name("RANGE")
-                .required(true)
                 .allow_hyphen_values(true)
                 .help("record range, e.g. 1:12 or -12:-1"),
         )

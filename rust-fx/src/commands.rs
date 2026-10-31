@@ -908,174 +908,19 @@ pub struct RangeOptions {
     pub inputs: Vec<String>,
     /// `-r`: 1-based record range, negative indices allowed.
     pub region: String,
+    /// Whether `-w` was explicitly supplied (also wraps FASTQ in SeqKit).
+    pub line_width_explicit: bool,
     /// `-w`: FASTA line width.
     pub line_width: usize,
     /// `-o`: output file.
     pub out_file: Option<String>,
 }
 
-struct IndexRange {
-    start: i64,
-    end: i64,
-}
-
-impl IndexRange {
-    fn parse(text: &str) -> Result<IndexRange, CommandError> {
-        let (start, end) = text.split_once(':').ok_or_else(|| {
-            CommandError::usage("--range must be START:END, for example 1:12 or -12:-1")
-        })?;
-        let start = start
-            .parse::<i64>()
-            .map_err(|_| CommandError::usage(format!("invalid range start '{start}'")))?;
-        let end = end
-            .parse::<i64>()
-            .map_err(|_| CommandError::usage(format!("invalid range end '{end}'")))?;
-        if start == 0 || end == 0 {
-            return Err(CommandError::usage(
-                "range indices are 1-based and must not be 0",
-            ));
-        }
-        Ok(IndexRange { start, end })
-    }
-
-    fn bounds(&self, length: usize) -> (usize, usize) {
-        let resolve = |index: i64| -> i64 {
-            if index > 0 {
-                index - 1
-            } else {
-                length as i64 + index
-            }
-        };
-        let start = resolve(self.start).clamp(0, length as i64);
-        let end = resolve(self.end).clamp(0, length as i64);
-        if end < start {
-            (start as usize, start as usize)
-        } else {
-            (start as usize, (end + 1).min(length as i64) as usize)
-        }
-    }
-}
-
 /// Run `range -r` independently for each input file.
 pub fn range(options: RangeOptions) -> Result<(), CommandError> {
-    let region = IndexRange::parse(&options.region)?;
-    let inputs = if options.inputs.is_empty() {
-        vec!["-".to_string()]
-    } else {
-        options.inputs.clone()
-    };
-    let mut out = Output::create_with_level(options.out_file.as_deref(), options.compress_level)?;
-    for input in &inputs {
-        let both_negative = region.start < 0 && region.end < 0;
-        let needs_total = region.start < 0 || region.end < 0;
-        if both_negative {
-            let keep = region.start.unsigned_abs().max(region.end.unsigned_abs()) as usize;
-            let mut tail: std::collections::VecDeque<(OwnedRecord, Layout)> =
-                std::collections::VecDeque::with_capacity(keep);
-            let mut total = 0usize;
-            let mut reader = RecordReader::open(input)?;
-            let layout = match reader.format() {
-                InputFormat::Fastq => Layout::Fastq,
-                InputFormat::Fasta => Layout::Fasta,
-            };
-            while let Some(record) = reader.next_record() {
-                let record = record?;
-                if tail.len() == keep {
-                    tail.pop_front();
-                }
-                tail.push_back((record, layout));
-                total += 1;
-            }
-            let (start, end) = region.bounds(total);
-            let first = total.saturating_sub(tail.len());
-            for (offset, (record, layout)) in tail.into_iter().enumerate() {
-                let index = first + offset;
-                if index >= start && index < end {
-                    record.write_to(&mut out, layout, options.line_width)?;
-                }
-            }
-            continue;
-        }
-
-        if needs_total && input != "-" {
-            let total = count_range_records(input)?;
-            let (start, end) = region.bounds(total);
-            write_range_from_reader(input, start, end, &mut out, options.line_width)?;
-            continue;
-        }
-        if needs_total {
-            let mut reader = RecordReader::open(input)?;
-            let layout = match reader.format() {
-                InputFormat::Fastq => Layout::Fastq,
-                InputFormat::Fasta => Layout::Fasta,
-            };
-            let mut records = Vec::new();
-            while let Some(record) = reader.next_record() {
-                records.push(record?);
-            }
-            let (start, end) = region.bounds(records.len());
-            for (index, record) in records.into_iter().enumerate() {
-                if index >= start && index < end {
-                    record.write_to(&mut out, layout, options.line_width)?;
-                }
-            }
-            continue;
-        }
-
-        let start = region.start.max(1) as usize - 1;
-        let end = region.end.max(0) as usize;
-        let mut index = 0usize;
-        let mut reader = RecordReader::open(input)?;
-        let layout = match reader.format() {
-            InputFormat::Fastq => Layout::Fastq,
-            InputFormat::Fasta => Layout::Fasta,
-        };
-        while let Some(record) = reader.next_record() {
-            let record = record?;
-            if index >= end {
-                break;
-            }
-            if index >= start && index < end {
-                record.write_to(&mut out, layout, options.line_width)?;
-            }
-            index += 1;
-        }
-    }
-    out.finish()
+    crate::range::run(options)
 }
 
-fn write_range_from_reader(
-    input: &str,
-    start: usize,
-    end: usize,
-    out: &mut Output,
-    line_width: usize,
-) -> Result<(), CommandError> {
-    let mut reader = RecordReader::open(input)?;
-    let layout = match reader.format() {
-        InputFormat::Fastq => Layout::Fastq,
-        InputFormat::Fasta => Layout::Fasta,
-    };
-    let mut index = 0usize;
-    while let Some(record) = reader.next_record() {
-        let record = record?;
-        if index >= start && index < end {
-            record.write_to(out, layout, line_width)?;
-        }
-        index += 1;
-    }
-    Ok(())
-}
-
-fn count_range_records(input: &str) -> Result<usize, CommandError> {
-    let mut reader = RecordReader::open(input)?;
-    let mut total = 0usize;
-    while let Some(record) = reader.next_record() {
-        record?;
-        total += 1;
-    }
-    Ok(total)
-}
 // --------------------------------------------------------------------------- //
 // sliding
 // --------------------------------------------------------------------------- //
@@ -1666,90 +1511,7 @@ pub struct Tab2fxOptions {
 
 /// Run `tab2fx`.
 pub fn tab2fx(options: Tab2fxOptions) -> Result<(), CommandError> {
-    let inputs = if options.inputs.is_empty() {
-        vec!["-".to_string()]
-    } else {
-        options.inputs.clone()
-    };
-    let mut out = Output::create_with_level(options.out_file.as_deref(), options.compress_level)?;
-    for input in &inputs {
-        let text = if input == "-" {
-            let mut text = String::new();
-            std::io::Read::read_to_string(&mut std::io::stdin(), &mut text)
-                .map_err(|e| CommandError::io(format!("stdin: {e}")))?;
-            text
-        } else {
-            std::fs::read_to_string(input).map_err(|e| CommandError::io(format!("{input}: {e}")))?
-        };
-        if text
-            .split_inclusive('\n')
-            .any(|line| options.buffer_size < 0 || line.len() as i64 > options.buffer_size)
-        {
-            return Err(CommandError::runtime("bufio.Scanner: token too long").with_code(255));
-        }
-        for (line_no, raw_line) in text.split_inclusive('\n').enumerate() {
-            let line = raw_line.strip_suffix('\n').unwrap_or(raw_line);
-            let line = line.trim_end_matches('\r');
-            if line.is_empty()
-                || options
-                    .comment_prefixes
-                    .iter()
-                    .any(|prefix| !prefix.is_empty() && line.starts_with(prefix))
-            {
-                continue;
-            }
-            let fields: Vec<&str> = line.split('\t').collect();
-            if fields.len() < 2 || fields.len() > 3 {
-                return Err(CommandError::input(format!(
-                    "{input}:{}: expected 2 or 3 tab-separated columns",
-                    line_no + 1
-                )));
-            }
-            if fields.len() == 2 {
-                out.write_all(b">")
-                    .map_err(|e| CommandError::io(format!("stdout: {e}")))?;
-                out.write_all(fields[0].as_bytes())
-                    .map_err(|e| CommandError::io(format!("stdout: {e}")))?;
-                out.write_all(b"\n")
-                    .map_err(|e| CommandError::io(format!("stdout: {e}")))?;
-                if options.line_width == 0 {
-                    out.write_all(fields[1].as_bytes())
-                        .map_err(|e| CommandError::io(format!("stdout: {e}")))?;
-                    out.write_all(b"\n")
-                        .map_err(|e| CommandError::io(format!("stdout: {e}")))?;
-                } else {
-                    for chunk in fields[1].as_bytes().chunks(options.line_width) {
-                        out.write_all(chunk)
-                            .map_err(|e| CommandError::io(format!("stdout: {e}")))?;
-                        out.write_all(b"\n")
-                            .map_err(|e| CommandError::io(format!("stdout: {e}")))?;
-                    }
-                }
-            } else {
-                if fields[1].len() != fields[2].len() {
-                    return Err(CommandError::input(format!(
-                        "{input}:{}: sequence and quality lengths differ",
-                        line_no + 1
-                    )));
-                }
-                out.write_all(b"@")
-                    .map_err(|e| CommandError::io(format!("stdout: {e}")))?;
-                out.write_all(fields[0].as_bytes())
-                    .map_err(|e| CommandError::io(format!("stdout: {e}")))?;
-                out.write_all(b"\n")
-                    .map_err(|e| CommandError::io(format!("stdout: {e}")))?;
-                out.write_all(fields[1].as_bytes())
-                    .map_err(|e| CommandError::io(format!("stdout: {e}")))?;
-                out.write_all(b"\n+\n")
-                    .map_err(|e| CommandError::io(format!("stdout: {e}")))?;
-                out.write_all(fields[2].as_bytes())
-                    .map_err(|e| CommandError::io(format!("stdout: {e}")))?;
-                out.write_all(b"\n")
-                    .map_err(|e| CommandError::io(format!("stdout: {e}")))?;
-            }
-        }
-    }
-    out.finish()
+    crate::tab2fx::run(options)
 }
 
 // --------------------------------------------------------------------------- //

@@ -267,21 +267,29 @@ fn parse_buffer_size(text: &str) -> Result<i64, CommandError> {
         CommandError::runtime("invalid value of buffer size. supported unit: K, M, G")
             .with_code(255)
     };
-    let (digits, multiplier) = match text.as_bytes().last() {
-        Some(b'K') => (&text[..text.len() - 1], 1024_i64),
-        Some(b'M') => (&text[..text.len() - 1], 1024_i64 * 1024),
-        Some(b'G') => (&text[..text.len() - 1], 1024_i64 * 1024 * 1024),
-        _ => (text, 1),
+    if text.is_empty() {
+        return Err(
+            CommandError::usage("value of buffer size. supported unit: K, M, G").with_code(255),
+        );
+    }
+    let text = text.trim_matches([' ', '\t', '\r', '\n']);
+    let (digits, multiplier) = match text.as_bytes().last().map(u8::to_ascii_uppercase) {
+        Some(b'B') => (&text[..text.len() - 1], 1.0),
+        Some(b'K') => (&text[..text.len() - 1], 1024.0),
+        Some(b'M') => (&text[..text.len() - 1], 1024.0 * 1024.0),
+        Some(b'G') => (&text[..text.len() - 1], 1024.0 * 1024.0 * 1024.0),
+        Some(b'T') => (&text[..text.len() - 1], 1024.0 * 1024.0 * 1024.0 * 1024.0),
+        _ => (text, 1.0),
     };
-    let unsigned = digits.strip_prefix('-').unwrap_or(digits);
-    if unsigned.is_empty() || !unsigned.bytes().all(|byte| byte.is_ascii_digit()) {
+    let digits = digits.trim_matches([' ', '\t', '\r', '\n']);
+    if digits.is_empty() {
+        return Ok(0);
+    }
+    let size = digits.parse::<f64>().map_err(|_| invalid())?;
+    if !size.is_finite() || size * multiplier >= i64::MAX as f64 {
         return Err(invalid());
     }
-    digits
-        .parse::<i64>()
-        .ok()
-        .and_then(|value| value.checked_mul(multiplier))
-        .ok_or_else(invalid)
+    Ok((size.max(0.0) * multiplier) as i64)
 }
 
 fn head_options(sub: &ArgMatches) -> Result<HeadOptions, CommandError> {
@@ -414,13 +422,79 @@ fn restart_options(sub: &ArgMatches) -> Result<RestartOptions, CommandError> {
     })
 }
 
+// pflag's StringSlice accepts one CSV record per occurrence, not a literal
+// comma-containing string. An empty argument means no prefixes; an empty field
+// within a nonempty CSV record is a prefix that matches every line.
+fn comment_prefixes(sub: &ArgMatches) -> Result<Vec<String>, CommandError> {
+    let Some(values) = sub.get_many::<String>("comment_prefix") else {
+        return Ok(vec!["#".into(), "//".into()]);
+    };
+    let mut result = Vec::new();
+    for value in values {
+        if value.is_empty() {
+            continue;
+        }
+        // encoding/csv reads the first nonblank record, normalizes CRLF,
+        // and ignores subsequent records in this individual flag value.
+        let normalized = value.replace("\r\n", "\n");
+        let value = normalized
+            .strip_suffix('\r')
+            .unwrap_or(&normalized)
+            .trim_start_matches('\n');
+        if value.is_empty() {
+            return Err(CommandError::usage("invalid comment-line-prefix CSV: EOF").with_code(255));
+        }
+        let mut chars = value.chars().peekable();
+        loop {
+            let mut field = String::new();
+            if chars.peek() == Some(&'"') {
+                chars.next();
+                loop {
+                    match chars.next() {
+                        Some('"') if chars.peek() == Some(&'"') => {
+                            chars.next();
+                            field.push('"');
+                        }
+                        Some('"') => break,
+                        Some(ch) => field.push(ch),
+                        None => {
+                            return Err(CommandError::usage(
+                                "invalid comment-line-prefix CSV: missing closing quote",
+                            )
+                            .with_code(255))
+                        }
+                    }
+                }
+                if !matches!(chars.peek(), None | Some(',' | '\n')) {
+                    return Err(CommandError::usage(
+                        "invalid comment-line-prefix CSV: characters after closing quote",
+                    )
+                    .with_code(255));
+                }
+            } else {
+                while let Some(ch) = chars.next_if(|ch| !matches!(ch, ',' | '\n')) {
+                    if ch == '"' {
+                        return Err(CommandError::usage(
+                            "invalid comment-line-prefix CSV: quote in unquoted field",
+                        )
+                        .with_code(255));
+                    }
+                    field.push(ch);
+                }
+            }
+            result.push(field);
+            if chars.next() != Some(',') {
+                break;
+            }
+        }
+    }
+    Ok(result)
+}
+
 fn tab2fx_options(sub: &ArgMatches) -> Result<Tab2fxOptions, CommandError> {
     Ok(Tab2fxOptions {
         inputs: inputs(sub),
-        comment_prefixes: sub
-            .get_many::<String>("comment_prefix")
-            .map(|values| values.cloned().collect())
-            .unwrap_or_else(|| vec!["#".to_string(), "//".to_string()]),
+        comment_prefixes: comment_prefixes(sub)?,
         buffer_size: parse_buffer_size(
             sub.get_one::<String>("buffer_size")
                 .map(String::as_str)
@@ -595,10 +669,9 @@ fn sliding_options(sub: &ArgMatches) -> Result<SlidingOptions, CommandError> {
 fn range_options(sub: &ArgMatches) -> Result<RangeOptions, CommandError> {
     Ok(RangeOptions {
         inputs: inputs(sub),
-        region: sub
-            .get_one::<String>("region")
-            .cloned()
-            .ok_or_else(|| CommandError::usage("range needs -r/--range"))?,
+        region: sub.get_one::<String>("region").cloned().unwrap_or_default(),
+        line_width_explicit: sub.value_source("line_width")
+            == Some(clap::parser::ValueSource::CommandLine),
         line_width: line_width(sub),
         out_file: out_file(sub),
         compress_level: compression_level(sub)?,

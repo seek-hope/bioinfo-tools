@@ -2151,10 +2151,10 @@
       "upstream": "SeqKit 2.14.0 / fq 0.12.0",
       "surface": "seqkit:tab2fx",
       "kind": "command",
-      "status": "experimental",
-      "evidence": "rust-fx/tests/tab2fx.rs (4 tests) + SeqKit 2.14 comment-prefix and 12 buffer/line-boundary differentials",
-      "deviation": "input is buffered per file; malformed-row and quality-validation behavior differs",
-      "next_action": "T7: align malformed-row policy or re-scope"
+      "status": "verified",
+      "evidence": "rust-fx/tests/tab2fx.rs + seqkit_streaming.rs; tests/oracle/seqkit_streaming_diff.py --command tab2fx: 99/99",
+      "deviation": "diagnostic prefix normalized; successful compressed output compared decoded; incomplete compressed byte prefixes are backend-dependent",
+      "next_action": ""
     },
     {
       "tool": "rust-fx",
@@ -2252,9 +2252,9 @@
       "surface": "seqkit:range",
       "kind": "command",
       "status": "experimental",
-      "evidence": "rust-fx/tests/range.rs (2 tests) + SeqKit 2.14 5/5 multi-file range differential",
-      "deviation": "mixed-sign stdin buffers records",
-      "next_action": "T7: complete range streaming/multi-file semantics"
+      "evidence": "rust-fx/tests/range.rs + seqkit_streaming.rs; tests/oracle/seqkit_streaming_diff.py: 203/206",
+      "deviation": "FASTQ-to-FASTA file mixing preserves per-file format instead of upstream pooled-quality carryover (3 mismatches)",
+      "next_action": "T7: retain mixed-format deviation; interval selection and stdin streaming are aligned"
     },
     {
       "tool": "rust-fx",
@@ -2572,9 +2572,9 @@
       "surface": "tab2fx:comment-prefix -p",
       "kind": "feature",
       "status": "verified",
-      "evidence": "rust-fx/tests/tab2fx.rs (4 tests) + SeqKit 2.14 custom comment-prefix differential",
-      "deviation": "input is buffered per file; malformed-row and quality-validation behavior differs",
-      "next_action": "T7: align malformed-row policy or re-scope"
+      "evidence": "rust-fx/tests/tab2fx.rs + SeqKit 2.14 CSV/repeated/empty/CRLF prefix differential in seqkit_streaming_diff.py",
+      "deviation": "invalid CSV option diagnostics use the Rust CLI format",
+      "next_action": ""
     },
     {
       "tool": "rust-fx",
@@ -2582,8 +2582,8 @@
       "surface": "tab2fx:buffer-size -b",
       "kind": "feature",
       "status": "verified",
-      "evidence": "rust-fx/tests/tab2fx.rs + SeqKit 2.14 12/12 line-boundary/partial-output differential",
-      "deviation": "invalid units fail before output; negative values retain scanner-error behavior",
+      "evidence": "rust-fx/tests/tab2fx.rs + seqkit_streaming_diff.py: fractional/lowercase units, EOF/newline boundaries, early/late failure",
+      "deviation": "64 KiB pending output is discarded on failure, not a whole-file pre-scan; non-finite/overflow buffer sizes are rejected",
       "next_action": ""
     },
     {
@@ -2592,9 +2592,9 @@
       "surface": "range:streaming positive/negative/multi-file",
       "kind": "feature",
       "status": "verified",
-      "evidence": "rust-fx/tests/range.rs + SeqKit 2.14 5/5 multi-file range differential",
-      "deviation": "mixed-sign stdin buffers records",
-      "next_action": "T7: implement a spool for mixed-sign stdin or re-scope"
+      "evidence": "rust-fx/tests/range.rs + seqkit_streaming.rs + seqkit_streaming_diff.py interval/file/stdin cases",
+      "deviation": "START:-1 streams; other mixed signs rejected as upstream; mixed FASTQ-to-FASTA inputs remain a command-level deviation",
+      "next_action": ""
     },
     {
       "tool": "rust-fx",

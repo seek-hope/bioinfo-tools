@@ -224,6 +224,7 @@ impl From<ParseError> for CommandError {
 pub struct RecordReader {
     lines: LineReader,
     format: InputFormat,
+    wrapped_fastq: bool,
     /// A line already read but not yet consumed.
     peeked: Option<Vec<u8>>,
     /// Records handed out so far.
@@ -258,6 +259,7 @@ impl RecordReader {
         Ok(RecordReader {
             lines,
             format,
+            wrapped_fastq: false,
             peeked: first,
             index: 0,
             label: if path == "-" {
@@ -266,6 +268,20 @@ impl RecordReader {
                 path.to_string()
             },
         })
+    }
+
+    /// Opt into SeqKit's wrapped FASTQ reader without changing strict readers
+    /// used by other commands and by `fq lint`.
+    pub(crate) fn seqkit(path: &str) -> Result<RecordReader, CommandError> {
+        let mut reader = Self::open(path).map_err(|error| {
+            if error.message.contains("invalid FASTA/Q format") {
+                CommandError::input("fastx: invalid FASTA/Q format").with_code(255)
+            } else {
+                error.with_code(255)
+            }
+        })?;
+        reader.wrapped_fastq = true;
+        Ok(reader)
     }
 
     /// The detected input format.
@@ -281,6 +297,7 @@ impl RecordReader {
     /// The next record, or `None` at end of input.
     pub fn next_record(&mut self) -> Option<Result<OwnedRecord, CommandError>> {
         let result = match self.format {
+            InputFormat::Fastq if self.wrapped_fastq => self.next_wrapped_fastq(),
             InputFormat::Fastq => self.next_fastq(),
             InputFormat::Fasta => self.next_fasta(),
         };
@@ -368,6 +385,51 @@ impl RecordReader {
             raw_header,
             sequence,
             plus,
+            qualities,
+            has_quality_line: true,
+        }))
+    }
+
+    fn next_wrapped_fastq(&mut self) -> Result<Option<RecordParts>, CommandError> {
+        let invalid = || CommandError::input("fastx: unequal sequence and quality").with_code(255);
+        let raw_header = loop {
+            match self.next_line()? {
+                None => return Ok(None),
+                Some(line) if line.is_empty() => continue,
+                Some(line) => break line,
+            }
+        };
+        if !raw_header.starts_with(b"@") {
+            return Err(invalid());
+        }
+        let mut sequence = Vec::new();
+        loop {
+            let line = self.next_line()?.ok_or_else(invalid)?;
+            if line.starts_with(b"+") {
+                break;
+            }
+            sequence.extend_from_slice(&line);
+        }
+        let mut qualities = Vec::new();
+        // Even an empty sequence consumes its empty quality line, when present.
+        loop {
+            match self.next_line()? {
+                Some(line) => qualities.extend_from_slice(&line),
+                None if sequence.is_empty() => break,
+                None => return Err(invalid()),
+            }
+            if qualities.len() >= sequence.len() {
+                break;
+            }
+        }
+        if qualities.len() != sequence.len() {
+            return Err(invalid());
+        }
+        Ok(Some(RecordParts {
+            name: raw_header[1..].to_vec(),
+            raw_header,
+            sequence,
+            plus: b"+".to_vec(),
             qualities,
             has_quality_line: true,
         }))
@@ -580,6 +642,31 @@ fn check_compression_level(
     }
 }
 
+pub(crate) fn compression_levels(
+    format: Format,
+    level: Option<i32>,
+) -> Result<CompressionLevels, CommandError> {
+    let mut overrides = CompressionLevels::default();
+    if let Some(level) = level {
+        match format {
+            Format::Gzip | Format::Bgzf => {
+                check_compression_level(level, 1, 9, "gzip")?;
+                overrides.gzip = Some(level as u32);
+            }
+            Format::Bzip2 => {
+                check_compression_level(level, 1, 9, "bzip2")?;
+                overrides.bzip2 = Some(level as u32);
+            }
+            Format::Zstd => {
+                check_compression_level(level, 1, 4, "zstd")?;
+                overrides.zstd = Some([1, 3, 7, 11][(level - 1) as usize]);
+            }
+            Format::Xz | Format::Plain => {}
+        }
+    }
+    Ok(overrides)
+}
+
 impl Output {
     /// Create the sink for `path` (`-` or absent means stdout).
     pub fn create(path: Option<&str>) -> Result<Output, CommandError> {
@@ -613,22 +700,7 @@ impl Output {
             return Self::create(path);
         };
         let format = format_from_extension(Path::new(path));
-        let mut overrides = CompressionLevels::default();
-        match format {
-            Format::Gzip | Format::Bgzf => {
-                check_compression_level(level, 1, 9, "gzip")?;
-                overrides.gzip = Some(level as u32);
-            }
-            Format::Bzip2 => {
-                check_compression_level(level, 1, 9, "bzip2")?;
-                overrides.bzip2 = Some(level as u32);
-            }
-            Format::Zstd => {
-                check_compression_level(level, 1, 4, "zstd")?;
-                overrides.zstd = Some([1, 3, 7, 11][(level - 1) as usize]);
-            }
-            Format::Xz | Format::Plain => return Self::create(Some(path)),
-        }
+        let overrides = compression_levels(format, Some(level))?;
         let writer = Writer::create_with_levels(path, overrides)
             .map_err(|error| CommandError::io(format!("cannot create {path}: {error}")))?;
         Ok(Output {

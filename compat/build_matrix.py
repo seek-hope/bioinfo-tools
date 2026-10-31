@@ -418,9 +418,9 @@ def main() -> int:
                 "seqkit:range",
                 "command",
                 "experimental",
-                "rust-fx/tests/range.rs (2 tests) + SeqKit 2.14 5/5 multi-file range differential",
-                "mixed-sign stdin buffers records",
-                "T7: complete range streaming/multi-file semantics",
+                "rust-fx/tests/range.rs + seqkit_streaming.rs; tests/oracle/seqkit_streaming_diff.py: 203/206",
+                "FASTQ-to-FASTA file mixing preserves per-file format instead of upstream pooled-quality carryover (3 mismatches)",
+                "T7: retain mixed-format deviation; interval selection and stdin streaming are aligned",
             )
         elif command == "sliding":
             add(
@@ -487,10 +487,10 @@ def main() -> int:
                 "rust-fx",
                 "seqkit:tab2fx",
                 "command",
-                "experimental",
-                "rust-fx/tests/tab2fx.rs (4 tests) + SeqKit 2.14 comment-prefix and 12 buffer/line-boundary differentials",
-                "input is buffered per file; malformed-row and quality-validation behavior differs",
-                "T7: align malformed-row policy or re-scope",
+                "verified",
+                "rust-fx/tests/tab2fx.rs + seqkit_streaming.rs; tests/oracle/seqkit_streaming_diff.py --command tab2fx: 99/99",
+                "diagnostic prefix normalized; successful compressed output compared decoded; incomplete compressed byte prefixes are backend-dependent",
+                "",
             )
         elif command == "restart":
             add(
@@ -682,17 +682,17 @@ def main() -> int:
         "tab2fx:comment-prefix -p",
         "feature",
         "verified",
-        "rust-fx/tests/tab2fx.rs (4 tests) + SeqKit 2.14 custom comment-prefix differential",
-        "input is buffered per file; malformed-row and quality-validation behavior differs",
-        "T7: align malformed-row policy or re-scope",
+        "rust-fx/tests/tab2fx.rs + SeqKit 2.14 CSV/repeated/empty/CRLF prefix differential in seqkit_streaming_diff.py",
+        "invalid CSV option diagnostics use the Rust CLI format",
+        "",
     )
     add(
         "rust-fx",
         "tab2fx:buffer-size -b",
         "feature",
         "verified",
-        "rust-fx/tests/tab2fx.rs + SeqKit 2.14 12/12 line-boundary/partial-output differential",
-        "invalid units fail before output; negative values retain scanner-error behavior",
+        "rust-fx/tests/tab2fx.rs + seqkit_streaming_diff.py: fractional/lowercase units, EOF/newline boundaries, early/late failure",
+        "64 KiB pending output is discarded on failure, not a whole-file pre-scan; non-finite/overflow buffer sizes are rejected",
         "",
     )
     add(
@@ -700,9 +700,9 @@ def main() -> int:
         "range:streaming positive/negative/multi-file",
         "feature",
         "verified",
-        "rust-fx/tests/range.rs + SeqKit 2.14 5/5 multi-file range differential",
-        "mixed-sign stdin buffers records",
-        "T7: implement a spool for mixed-sign stdin or re-scope",
+        "rust-fx/tests/range.rs + seqkit_streaming.rs + seqkit_streaming_diff.py interval/file/stdin cases",
+        "START:-1 streams; other mixed signs rejected as upstream; mixed FASTQ-to-FASTA inputs remain a command-level deviation",
+        "",
     )
     add(
         "rust-fx",

@@ -56,11 +56,55 @@ matrix after a behavior change; do not mark a row verified without new evidence.
   `translate` have direct per-command differential evidence. The existing 50/50
   FASTX suite also covers `stats`, `seq`, `fq2fa`, `fx2tab`, `sample`, `split`
   and `fq lint`; those are selected-surface verified, not claims of complete
-  SeqKit replacement. `translate -l/-L` has 55/55 listing comparisons and
-  `tab2fx -b` has line-boundary/partial-output comparisons. Their remaining
-  malformed-input policy differences stay experimental. The shared
+  SeqKit replacement. `translate -l/-L` has 55/55 listing comparisons; its
+  invalid-base output policy remains experimental. `tab2fx` has 99/99 direct
+  comparisons for conversion, byte fields, CSV comment prefixes, scanner limits,
+  compressed input/output and fatal plain-output commit boundaries. `range`
+  has 203/206 comparisons: interval selection and stdin streaming align, but
+  three mixed-format cases remain different (see below). The shared
   `--compress-level` path has gzip/zstd/bzip2/xz differential coverage;
   compressed bytes are backend-dependent and compared after decompression.
+
+## SeqKit streaming evidence and remaining boundaries
+
+```bash
+python3 tests/oracle/seqkit_streaming_diff.py --command tab2fx
+python3 tests/oracle/seqkit_streaming_diff.py --command range
+cargo test -p rust-fx --test range --test tab2fx --test seqkit_streaming --locked
+```
+
+The new differential creates inputs only in a temporary directory. It compares
+exit codes and exact stdout/plain output files, stripping only ANSI color and
+`ERROR:`/`[ERRO]` diagnostic prefixes. gzip/bzip2/xz success output is compared
+after decoding; Rust process tests also round-trip zstd. Compressed bytes and
+the physical prefix of an aborted compressed stream depend on the backend.
+Invalid CSV flag syntax uses the Rust CLI diagnostic format; NaN, infinity and
+overflowing buffer sizes are rejected rather than attempting an allocation.
+These are not claims about all SeqKit global options or platform I/O diagnostics.
+
+`tab2fx` now reads raw byte lines, including compressed input. As upstream does,
+it accepts unequal sequence/quality lengths, treats more than three columns as
+FASTA, and remembers FASTQ mode within each file. It is a converter, not a FASTQ
+validator. The scanner needs O(longest line) memory (bounded by `-b`), with
+wrapping/header scratch space of the same order, codec buffers and a 64 KiB
+output buffer. A fatal input error discards that pending output but retains
+already committed blocks. The previous whole-file pre-scan matched small errors
+only and has been removed. Tests verify progress before stdin reaches EOF.
+
+`range START:-1` is single-pass for files and stdin; other mixed-sign ranges are
+rejected like SeqKit. Positive ranges retain O(longest record) bytes, while
+negative ranges retain at most `abs(START)` records plus the current record and
+formatting/codec buffers. Short-input negative ranges reproduce the upstream
+circular-tail selection, not a clamped mathematical interval. Wrapped FASTQ,
+explicit FASTQ output width and discarded `+` descriptions are also covered.
+
+The `range` differential intentionally still exits nonzero: three cases append
+FASTA after FASTQ. SeqKit 2.14 can force the FASTA records to FASTQ and reuse the
+previous file's quality bytes from a pooled reader; Rust keeps each file's own
+format and never invents qualities. This is recorded as a migration difference,
+not normalized away or counted as a pass. Source inspection of the pinned
+`bio v0.15.2` reader shows that its reset/FASTA assignment does not clear the
+pooled record's quality field. No upstream pool-reuse behavior is simulated.
 
 ## Regeneration
 
