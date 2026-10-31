@@ -1,0 +1,48 @@
+{
+  "scope": "instrumented aggregate counters, excluded from timed results",
+  "observations": {
+    "before": {
+      "exit": 0,
+      "command": [
+        "perf",
+        "stat",
+        "-e",
+        "task-clock:u,cycles:u,instructions:u,branches:u,branch-misses:u",
+        "-o",
+        "/tmp/bioinfo-perf-e125519/stats-counters-before.txt",
+        "taskset",
+        "-c",
+        "4",
+        "/tmp/bioinfo-perf-e125519/rust-fx",
+        "stats",
+        "-a",
+        "-T",
+        "/tmp/bioinfo-readme-benchmark/synthetic-100000.fastq"
+      ],
+      "stdout_sha256": "d82bee04202a2845f3451e0ad8a2de3128a962c5db3ebdfd7a6c2268fe85f8a0",
+      "stderr": ""
+    },
+    "after": {
+      "exit": 0,
+      "command": [
+        "perf",
+        "stat",
+        "-e",
+        "task-clock:u,cycles:u,instructions:u,branches:u,branch-misses:u",
+        "-o",
+        "/tmp/bioinfo-perf-e125519/stats-counters-after.txt",
+        "taskset",
+        "-c",
+        "4",
+        "/tmp/bioinfo-perf-e125519/optimized-current/rust-fx",
+        "stats",
+        "-a",
+        "-T",
+        "/tmp/bioinfo-readme-benchmark/synthetic-100000.fastq"
+      ],
+      "stdout_sha256": "d82bee04202a2845f3451e0ad8a2de3128a962c5db3ebdfd7a6c2268fe85f8a0",
+      "stderr": ""
+    }
+  },
+  "passed": true
+}

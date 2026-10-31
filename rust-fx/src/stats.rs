@@ -19,6 +19,14 @@
 //! * **Q1/Q2/Q3** — quartiles of sequence length. The interpolation method is
 //!   not documented; DR-3 records the choice made here.
 
+use std::sync::LazyLock;
+
+// Scores are bytes after saturating offset subtraction. Cache the exact same
+// powf result for all 256 possibilities; keep additions in input order so the
+// mean-error round trip retains its original floating-point rounding.
+static ERROR_PROBABILITIES: LazyLock<[f64; 256]> =
+    LazyLock::new(|| std::array::from_fn(|score| 10f64.powf(-(score as f64) / 10.0)));
+
 /// Characters SeqKit counts as gaps by default (`-G` default `"- \t."`).
 pub const DEFAULT_GAP_LETTERS: &[u8] = b"- \t.";
 
@@ -56,18 +64,18 @@ impl SeqStats {
             length: sequence.len() as u64,
             ..SeqStats::default()
         };
+        let mut gaps = [false; 256];
+        for &byte in gap_letters {
+            gaps[byte as usize] = true;
+        }
         for &byte in sequence {
-            if gap_letters.contains(&byte) {
-                stats.gap_count += 1;
-            }
-            if AMBIGUOUS_LETTERS.contains(&byte) {
-                stats.n_count += 1;
-            }
-            if is_gc_base(byte) {
-                stats.gc += 1;
-            } else if is_at_base(byte) {
-                stats.at += 1;
-            }
+            // Boolean counters avoid unpredictable branches on mixed bases.
+            // The byte table keeps arbitrary (including repeated) gap symbols
+            // exact without searching the configured slice for every base.
+            stats.gap_count += u64::from(gaps[byte as usize]);
+            stats.n_count += u64::from(matches!(byte, b'N' | b'n' | b'X' | b'x'));
+            stats.gc += u64::from(is_gc_base(byte));
+            stats.at += u64::from(is_at_base(byte));
         }
         stats
     }
@@ -165,10 +173,13 @@ impl QualStats {
     /// Accumulate one quality string. `base` is the ASCII offset (33 for
     /// Phred+33).
     pub fn from_qualities(qualities: &[u8], base: u8) -> QualStats {
-        let mut stats = QualStats::default();
+        let probabilities = &*ERROR_PROBABILITIES;
+        let mut stats = QualStats {
+            bases: qualities.len() as u64,
+            ..QualStats::default()
+        };
         for &byte in qualities {
             let score = byte.saturating_sub(base);
-            stats.bases += 1;
             if score >= 20 {
                 stats.q20 += 1;
             }
@@ -177,7 +188,7 @@ impl QualStats {
             }
             // Convert the score back to an error probability, as SeqKit's
             // documented AvgQual procedure requires.
-            stats.error_sum += 10f64.powf(-(score as f64) / 10.0);
+            stats.error_sum += probabilities[score as usize];
         }
         stats
     }
@@ -241,6 +252,41 @@ impl Merge for QualStats {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn sequence_counts_cover_all_bytes_and_overlapping_gap_symbols() {
+        let sequence: Vec<u8> = (0..=255).collect();
+        for gaps in [DEFAULT_GAP_LETTERS, b"", b"AACCGNnx", &sequence[..]] {
+            let stats = SeqStats::from_sequence(&sequence, gaps);
+            assert_eq!(stats.length, 256);
+            assert_eq!(stats.gc, 4);
+            assert_eq!(stats.at, 6);
+            assert_eq!(stats.n_count, 4);
+            let distinct: std::collections::BTreeSet<u8> = gaps.iter().copied().collect();
+            assert_eq!(stats.gap_count, distinct.len() as u64);
+        }
+    }
+
+    #[test]
+    fn cached_error_probabilities_preserve_every_score_and_sum_bitwise() {
+        let ascending: Vec<u8> = (0..=255).collect();
+        let descending: Vec<u8> = ascending.iter().copied().rev().collect();
+        for base in [0, 33, 64, 255] {
+            for qualities in [&ascending, &descending] {
+                let expected: f64 = qualities
+                    .iter()
+                    .map(|byte| 10f64.powf(-(byte.saturating_sub(base) as f64) / 10.0))
+                    .sum();
+                let stats = QualStats::from_qualities(qualities, base);
+                assert_eq!(stats.error_sum.to_bits(), expected.to_bits());
+            }
+            for byte in 0u8..=255 {
+                let expected = 10f64.powf(-(byte.saturating_sub(base) as f64) / 10.0);
+                let stats = QualStats::from_qualities(&[byte], base);
+                assert_eq!(stats.error_sum.to_bits(), expected.to_bits());
+            }
+        }
+    }
 
     #[test]
     fn stats_gc_uses_the_length_denominator() {

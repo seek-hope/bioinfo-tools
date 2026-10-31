@@ -40,7 +40,7 @@ impl InputFormat {
 }
 
 /// One record, owned.
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct OwnedRecord {
     /// The header with its `@`/`>` marker stripped.
     pub name: Vec<u8>,
@@ -218,8 +218,8 @@ impl From<ParseError> for CommandError {
 /// buffers one line at a time over the already-decompressed stream: FASTQ takes
 /// four lines, FASTA takes a header plus every line up to the next header.
 ///
-/// Memory is bounded by the longest single line, not by the file, so this stays
-/// streaming. The parser and the decompressor are still `bioinfo-fastx`'s; only
+/// Memory is bounded by the record and look-ahead line lengths plus the read
+/// buffer. The parser and the decompressor are still `bioinfo-fastx`'s; only
 /// the record assembly lives here.
 pub struct RecordReader {
     lines: LineReader,
@@ -296,27 +296,47 @@ impl RecordReader {
 
     /// The next record, or `None` at end of input.
     pub fn next_record(&mut self) -> Option<Result<OwnedRecord, CommandError>> {
-        let result = match self.format {
-            InputFormat::Fastq if self.wrapped_fastq => self.next_wrapped_fastq(),
-            InputFormat::Fastq => self.next_fastq(),
-            InputFormat::Fasta => self.next_fasta(),
-        };
-        match result {
-            Ok(Some(parts)) => {
-                self.index += 1;
-                Some(Ok(OwnedRecord {
-                    name: parts.name,
-                    raw_header: parts.raw_header,
-                    sequence: parts.sequence,
-                    plus: parts.plus,
-                    qualities: parts.qualities,
-                    has_quality_line: parts.has_quality_line,
-                    index: self.index,
-                }))
-            }
-            Ok(None) => None,
+        let mut record = OwnedRecord::default();
+        match self.read_record(&mut record) {
+            Ok(true) => Some(Ok(record)),
+            Ok(false) => None,
             Err(error) => Some(Err(error)),
         }
+    }
+
+    /// Read a complete record, reusing the supplied buffers for four-line FASTQ.
+    /// Returns false at EOF. A failed read must not be emitted by the caller.
+    pub fn read_record(&mut self, record: &mut OwnedRecord) -> Result<bool, CommandError> {
+        if self.format == InputFormat::Fastq && !self.wrapped_fastq {
+            if !self.next_fastq_into(record)? {
+                return Ok(false);
+            }
+        } else {
+            // These assembly paths return owned parts rather than filling the
+            // supplied buffers. Drop the previous record before assembling the
+            // next one, so two large FASTA records are never retained together.
+            *record = OwnedRecord::default();
+            let parts = if self.format == InputFormat::Fastq {
+                self.next_wrapped_fastq()?
+            } else {
+                self.next_fasta()?
+            };
+            let Some(parts) = parts else {
+                return Ok(false);
+            };
+            *record = OwnedRecord {
+                name: parts.name,
+                raw_header: parts.raw_header,
+                sequence: parts.sequence,
+                plus: parts.plus,
+                qualities: parts.qualities,
+                has_quality_line: parts.has_quality_line,
+                index: 0,
+            };
+        }
+        self.index += 1;
+        record.index = self.index;
+        Ok(true)
     }
 
     /// The next line, using the look-ahead when one is buffered.
@@ -338,56 +358,61 @@ impl RecordReader {
         Ok(self.peeked.as_deref())
     }
 
-    fn next_fastq(&mut self) -> Result<Option<RecordParts>, CommandError> {
-        let Some(raw_header) = self.next_line()? else {
-            return Ok(None);
-        };
+    /// Read a line into a reusable field, consuming look-ahead when present.
+    fn next_line_into(&mut self, buffer: &mut Vec<u8>) -> Result<bool, CommandError> {
+        if let Some(line) = self.peeked.take() {
+            *buffer = line;
+            Ok(true)
+        } else {
+            self.lines.next_into(buffer)
+        }
+    }
+
+    fn next_fastq_into(&mut self, record: &mut OwnedRecord) -> Result<bool, CommandError> {
+        if !self.next_line_into(&mut record.raw_header)? {
+            return Ok(false);
+        }
         let at = self.lines.line_number();
         // Preserve tolerated trailing padding, but only after proving it is
         // actually EOF. Treating any blank as EOF silently drops later records.
-        if raw_header.is_empty() {
-            while let Some(line) = self.next_line()? {
-                if !line.is_empty() {
+        if record.raw_header.is_empty() {
+            while self.next_line_into(&mut record.raw_header)? {
+                if !record.raw_header.is_empty() {
                     return Err(CommandError::input(format!(
                         "malformed FASTQ at line {at}: unexpected blank line before more input"
                     )));
                 }
             }
-            return Ok(None);
+            return Ok(false);
         }
-        if !raw_header.starts_with(b"@") {
+        if !record.raw_header.starts_with(b"@") {
             return Err(CommandError::input(format!(
                 "malformed FASTQ at line {at}: expected a header line starting with '@', found {:?}",
-                String::from_utf8_lossy(&raw_header[..raw_header.len().min(40)])
+                String::from_utf8_lossy(&record.raw_header[..record.raw_header.len().min(40)])
             )));
         }
-        let sequence = self.required_line("sequence", at)?;
-        let plus = self.required_line("separator ('+')", at)?;
-        if !plus.starts_with(b"+") {
+        self.required_line_into(&mut record.sequence, "sequence", at)?;
+        self.required_line_into(&mut record.plus, "separator ('+')", at)?;
+        if !record.plus.starts_with(b"+") {
             return Err(CommandError::input(format!(
                 "malformed FASTQ at line {}: expected a separator line starting with '+', found {:?}",
                 self.lines.line_number(),
-                String::from_utf8_lossy(&plus[..plus.len().min(40)])
+                String::from_utf8_lossy(&record.plus[..record.plus.len().min(40)])
             )));
         }
-        let qualities = self.required_line("quality", at)?;
-        if sequence.len() != qualities.len() {
+        self.required_line_into(&mut record.qualities, "quality", at)?;
+        if record.sequence.len() != record.qualities.len() {
             return Err(CommandError::input(format!(
                 "malformed FASTQ at line {}: sequence and quality lengths differ ({} != {})",
                 self.lines.line_number(),
-                sequence.len(),
-                qualities.len()
+                record.sequence.len(),
+                record.qualities.len()
             )));
         }
-        let name = raw_header[1..].to_vec();
-        Ok(Some(RecordParts {
-            name,
-            raw_header,
-            sequence,
-            plus,
-            qualities,
-            has_quality_line: true,
-        }))
+        record.name.clear();
+        record.name.extend_from_slice(&record.raw_header[1..]);
+        record.has_quality_line = true;
+        Ok(true)
     }
 
     fn next_wrapped_fastq(&mut self) -> Result<Option<RecordParts>, CommandError> {
@@ -447,14 +472,20 @@ impl RecordReader {
         }))
     }
 
-    fn required_line(&mut self, what: &str, record_line: u64) -> Result<Vec<u8>, CommandError> {
-        match self.next_line()? {
-            Some(line) => Ok(line),
-            None => Err(CommandError::input(format!(
+    fn required_line_into(
+        &mut self,
+        buffer: &mut Vec<u8>,
+        what: &str,
+        record_line: u64,
+    ) -> Result<(), CommandError> {
+        if self.next_line_into(buffer)? {
+            Ok(())
+        } else {
+            Err(CommandError::input(format!(
                 "malformed FASTQ at line {}: truncated record started at line {record_line}: \
                  expected a {what} line, found end of input",
                 self.lines.line_number()
-            ))),
+            )))
         }
     }
 
@@ -506,7 +537,6 @@ impl RecordReader {
 struct LineReader {
     inner: Box<dyn std::io::BufRead + Send>,
     line: u64,
-    buffer: Vec<u8>,
     label: String,
 }
 
@@ -528,7 +558,6 @@ impl LineReader {
         Ok(LineReader {
             inner,
             line: 0,
-            buffer: Vec::new(),
             label: if path == "-" {
                 "-".to_string()
             } else {
@@ -544,24 +573,30 @@ impl LineReader {
 
     /// The next line without its terminator.
     fn next(&mut self) -> Result<Option<Vec<u8>>, CommandError> {
+        let mut buffer = Vec::new();
+        self.next_into(&mut buffer)
+            .map(|present| present.then_some(buffer))
+    }
+
+    fn next_into(&mut self, buffer: &mut Vec<u8>) -> Result<bool, CommandError> {
         use std::io::BufRead;
-        self.buffer.clear();
+        buffer.clear();
         let read = self
             .inner
-            .read_until(b'\n', &mut self.buffer)
+            .read_until(b'\n', buffer)
             .map_err(|error| CommandError::io(format!("cannot read {}: {error}", self.label)))?;
         if read == 0 {
-            return Ok(None);
+            return Ok(false);
         }
         self.line += 1;
         // Strip the terminator, and one CR so CRLF input is handled.
-        if self.buffer.last() == Some(&b'\n') {
-            self.buffer.pop();
+        if buffer.last() == Some(&b'\n') {
+            buffer.pop();
         }
-        if self.buffer.last() == Some(&b'\r') {
-            self.buffer.pop();
+        if buffer.last() == Some(&b'\r') {
+            buffer.pop();
         }
-        Ok(Some(std::mem::take(&mut self.buffer)))
+        Ok(true)
     }
 }
 
@@ -589,32 +624,45 @@ impl LintReader {
 
     /// The next record-shaped group of up to four lines.
     pub fn next_record(&mut self) -> Option<Result<OwnedRecord, CommandError>> {
-        let mut lines: Vec<Vec<u8>> = Vec::with_capacity(4);
-        for _ in 0..4 {
-            match self.lines.next() {
-                Ok(Some(line)) => lines.push(line),
-                Ok(None) => break,
-                Err(error) => return Some(Err(error)),
-            }
+        let mut record = OwnedRecord::default();
+        match self.read_record(&mut record) {
+            Ok(true) => Some(Ok(record)),
+            Ok(false) => None,
+            Err(error) => Some(Err(error)),
         }
-        if lines.is_empty() {
-            return None;
+    }
+
+    /// Reuse record storage while retaining incomplete groups for validation.
+    pub fn read_record(&mut self, record: &mut OwnedRecord) -> Result<bool, CommandError> {
+        record.raw_header.clear();
+        record.sequence.clear();
+        record.plus.clear();
+        record.qualities.clear();
+        let mut count = 0;
+        for field in [
+            &mut record.raw_header,
+            &mut record.sequence,
+            &mut record.plus,
+            &mut record.qualities,
+        ] {
+            if !self.lines.next_into(field)? {
+                break;
+            }
+            count += 1;
+        }
+        if count == 0 {
+            return Ok(false);
         }
         self.index += 1;
-        let raw_header = lines[0].clone();
-        let name = match raw_header.first() {
-            Some(b'@') | Some(b'>') => raw_header[1..].to_vec(),
-            _ => raw_header.clone(),
+        record.name.clear();
+        let name = match record.raw_header.first() {
+            Some(b'@') | Some(b'>') => &record.raw_header[1..],
+            _ => &record.raw_header,
         };
-        Some(Ok(OwnedRecord {
-            name,
-            raw_header,
-            sequence: lines.get(1).cloned().unwrap_or_default(),
-            plus: lines.get(2).cloned().unwrap_or_default(),
-            qualities: lines.get(3).cloned().unwrap_or_default(),
-            has_quality_line: lines.len() == 4,
-            index: self.index,
-        }))
+        record.name.extend_from_slice(name);
+        record.has_quality_line = count == 4;
+        record.index = self.index;
+        Ok(true)
     }
 }
 
@@ -929,6 +977,100 @@ mod tests {
         };
         assert_eq!(error.exit_code(), 3);
         let _ = std::fs::remove_file(&path);
+    }
+
+    #[test]
+    fn owned_fallback_releases_previous_record_before_reading_next() {
+        struct ErrorAtEof(std::io::Cursor<Vec<u8>>);
+        impl Read for ErrorAtEof {
+            fn read(&mut self, buffer: &mut [u8]) -> io::Result<usize> {
+                match self.0.read(buffer)? {
+                    0 => Err(io::Error::other("broken stream")),
+                    count => Ok(count),
+                }
+            }
+        }
+        let mut reader = RecordReader {
+            lines: LineReader {
+                inner: Box::new(io::BufReader::new(ErrorAtEof(io::Cursor::new(
+                    b"AA\n>second\n".to_vec(),
+                )))),
+                line: 1,
+                label: "broken.fa".to_string(),
+            },
+            format: InputFormat::Fasta,
+            wrapped_fastq: false,
+            peeked: Some(b">first".to_vec()),
+            index: 0,
+            label: "broken.fa".to_string(),
+        };
+        let mut record = OwnedRecord::default();
+        assert!(reader.read_record(&mut record).unwrap());
+        assert_eq!(record.sequence, b"AA");
+        assert_eq!(reader.read_record(&mut record).unwrap_err().exit_code(), 4);
+        // The second record fails during assembly. Retaining the first here
+        // would also keep its entire allocation live while reading a large
+        // second record, doubling the record memory requirement.
+        assert_eq!(record, OwnedRecord::default());
+    }
+
+    #[test]
+    fn reusable_reader_keeps_long_empty_and_short_records_separate() {
+        let path = temp("reuse.fastq");
+        let long = vec![b'A'; 70_000];
+        let mut input = b"@long description\r\n".to_vec();
+        input.extend_from_slice(&long);
+        input.extend_from_slice(b"\r\n+long\r\n");
+        input.extend_from_slice(&vec![b'I'; long.len()]);
+        input.extend_from_slice(b"\r\n@empty\r\n\r\n+\r\n\r\n@short\nC\n+short\n!\n\n");
+        std::fs::write(&path, input).unwrap();
+        let mut reader = RecordReader::open(path.to_str().unwrap()).unwrap();
+        let mut record = OwnedRecord::default();
+        assert!(reader.read_record(&mut record).unwrap());
+        assert_eq!(record.sequence, long);
+        assert_eq!(record.name, b"long description");
+        assert!(reader.read_record(&mut record).unwrap());
+        assert_eq!(record.raw_header, b"@empty");
+        assert_eq!(record.plus, b"+");
+        assert!(record.sequence.is_empty());
+        assert!(record.qualities.is_empty());
+        assert!(record.has_quality_line);
+        assert!(reader.read_record(&mut record).unwrap());
+        assert_eq!(record.name, b"short");
+        assert_eq!(record.sequence, b"C");
+        assert_eq!(record.plus, b"+short");
+        assert_eq!(record.qualities, b"!");
+        assert_eq!(record.index, 3);
+        assert!(!reader.read_record(&mut record).unwrap());
+        std::fs::remove_file(path).unwrap();
+    }
+
+    #[test]
+    fn reusable_lint_reader_does_not_fill_truncated_records_from_previous_read() {
+        let path = temp("reuse-lint.fastq");
+        for (tail, sequence, plus, complete) in [
+            (&b"@tail"[..], &b""[..], &b""[..], false),
+            (&b"@tail\nA"[..], &b"A"[..], &b""[..], false),
+            (&b"@tail\nA\n+"[..], &b"A"[..], &b"+"[..], false),
+            (&b"@tail\n\n+\n\n"[..], &b""[..], &b"+"[..], true),
+        ] {
+            let mut input = b"@first\nACGT\n+first\nIIII\n".to_vec();
+            input.extend_from_slice(tail);
+            std::fs::write(&path, input).unwrap();
+            let mut reader = LintReader::open(path.to_str().unwrap()).unwrap();
+            let mut record = OwnedRecord::default();
+            assert!(reader.read_record(&mut record).unwrap());
+            assert!(reader.read_record(&mut record).unwrap());
+            assert_eq!(record.index, 2);
+            assert_eq!(record.raw_header, b"@tail");
+            assert_eq!(record.name, b"tail");
+            assert_eq!(record.sequence, sequence);
+            assert_eq!(record.plus, plus);
+            assert!(record.qualities.is_empty());
+            assert_eq!(record.has_quality_line, complete);
+            assert!(!reader.read_record(&mut record).unwrap());
+        }
+        std::fs::remove_file(path).unwrap();
     }
 
     #[test]

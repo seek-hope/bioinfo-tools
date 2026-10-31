@@ -1,5 +1,9 @@
 # README performance measurements — 2026-10-31
 
+These measurements describe the initial build before the
+[optimization after e125519](OPTIMIZATION.md). The original observations and
+interpretation below remain the record for that build.
+
 The complete run contains **33 conditions and 330 timed process executions**, plus
 66 warm-up executions. There are **29 conditions with output or validation-verdict
 checks** and **4 descriptive FastQC conditions** with independently checked basic

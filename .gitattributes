@@ -1,2 +1,6 @@
 # Unified-diff snapshots use a single space on empty context lines.
 bench/results/readme-2026-10-31/native-source.patch -whitespace
+bench/results/optimization-e125519/*.patch -whitespace
+# Preserve alignment padding in the raw performance-counter output.
+bench/results/optimization-e125519/profiling/*.txt -whitespace
+bench/results/optimization-e125519/validation/fx-tests.log -whitespace

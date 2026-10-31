@@ -1,0 +1,7 @@
+{
+  "reason": "ENOSPC in tmpfs during the first 10M conversion warm-up; report persistence and the parent status write also failed.",
+  "complete_core_conditions": 10,
+  "retry_scope": "all three 10M conditions, same frozen binaries and command/verification functions",
+  "status_file": "empty because the parent could not write it",
+  "retained_outputs_manifest": "retained-outputs.json"
+}

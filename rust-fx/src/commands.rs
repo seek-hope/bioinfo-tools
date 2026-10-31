@@ -174,8 +174,8 @@ fn collect_stats(
     // "guessed from the leading subsequences of the first sequences".
     let mut seq_type = "Unlimit";
     let mut first = true;
-    while let Some(record) = reader.next_record() {
-        let record = record?;
+    let mut record = OwnedRecord::default();
+    while reader.read_record(&mut record)? {
         if first {
             seq_type = transform::guess_seq_type(&record.sequence);
             first = false;
@@ -1921,8 +1921,9 @@ pub fn fq2fa(options: Fq2faOptions) -> Result<(), CommandError> {
     let mut out = Output::create_with_level(options.out_file.as_deref(), options.compress_level)?;
     for input in &inputs {
         let mut reader = RecordReader::open(input)?;
-        while let Some(record) = reader.next_record() {
-            record?.write_to(&mut out, Layout::Fasta, options.line_width)?;
+        let mut record = OwnedRecord::default();
+        while reader.read_record(&mut record)? {
+            record.write_to(&mut out, Layout::Fasta, options.line_width)?;
         }
     }
     out.finish()
@@ -2699,8 +2700,8 @@ pub fn lint(options: LintOptions) -> Result<(), CommandError> {
     // validators decide.
     {
         let mut reader = LintReader::open(&options.r1)?;
-        while let Some(record) = reader.next_record() {
-            let record = record?;
+        let mut record = OwnedRecord::default();
+        while reader.read_record(&mut record)? {
             if !record.is_fastq() {
                 return Err(CommandError::input(format!(
                     "{}: fq lint validates FASTQ, but this input is FASTA",
@@ -2741,8 +2742,8 @@ pub fn lint(options: LintOptions) -> Result<(), CommandError> {
     if let Some(r2) = &options.r2 {
         let mut reader = LintReader::open(r2)?;
         let mut index = 0usize;
-        while let Some(record) = reader.next_record() {
-            let record = record?;
+        let mut record = OwnedRecord::default();
+        while reader.read_record(&mut record)? {
             if !record.is_fastq() {
                 return Err(CommandError::input(format!(
                     "{r2}: fq lint validates FASTQ, but this input is FASTA"

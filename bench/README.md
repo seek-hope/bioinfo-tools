@@ -1,6 +1,19 @@
 # Benchmarks
 
-## Current README measurements
+## Optimization after e125519
+
+The [same-input before/after report](OPTIMIZATION.md) covers six optimized
+commands under 13 real/synthetic conditions, including the 10M streaming cases.
+It preserves the original binaries and compares before, after and upstream in
+matched blocks, with output checks on every execution. FastQC native bundles
+must remain byte-identical; its upstream equivalence remains limited.
+
+Use [the protocol](OPTIMIZATION-PROTOCOL.md),
+[`optimization_benchmark.py`](optimization_benchmark.py) and
+[`summarize_optimization.py`](summarize_optimization.py). Pilot and superseded
+candidate observations are retained separately from the final population.
+
+## Initial README measurements
 
 The [2026-10-31 report](RESULTS-README.md) covers 33 conditions and 330 timed
 executions, with real/synthetic inputs, five paired repetitions, CPU affinity,

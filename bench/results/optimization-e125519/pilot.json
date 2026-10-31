@@ -1,0 +1,5084 @@
+{
+  "schema": 1,
+  "kind": "optimization-pilot",
+  "started_utc": "2026-10-31T20:01:35.512622+00:00",
+  "source": {
+    "commit": "e1255197285329e0c184293ef36868de30694ee0",
+    "dirty": true,
+    "dirty_paths": [
+      " M rust-bam/src/commands.rs",
+      " M rust-fastqc/src/stats.rs",
+      " M rust-fx/src/commands.rs",
+      " M rust-fx/src/io.rs",
+      " M rust-fx/src/lint.rs",
+      " M rust-fx/src/stats.rs",
+      "?? bench/OPTIMIZATION-PROTOCOL.md",
+      "?? bench/check_optimization.py",
+      "?? bench/optimization_benchmark.py",
+      "?? bench/test_optimization_benchmark.py"
+    ]
+  },
+  "hardware": {
+    "platform": "Linux-7.3.0-4-cachyos-x86_64-with-glibc2.44",
+    "machine": "x86_64",
+    "processor": "",
+    "cpu_model": "13th Gen Intel(R) Core(TM) i7-13700H",
+    "logical_cpus": 20,
+    "memory_kb": 32638876
+  },
+  "topology": "CPU CORE SOCKET    MAXMHZ ONLINE\n  0    0      0 4800.0000    yes\n  1    0      0 4800.0000    yes\n  2    1      0 4800.0000    yes\n  3    1      0 4800.0000    yes\n  4    2      0 5000.0000    yes\n  5    2      0 5000.0000    yes\n  6    3      0 5000.0000    yes\n  7    3      0 5000.0000    yes\n  8    4      0 4800.0000    yes\n  9    4      0 4800.0000    yes\n 10    5      0 4800.0000    yes\n 11    5      0 4800.0000    yes\n 12    6      0 3700.0000    yes\n 13    7      0 3700.0000    yes\n 14    8      0 3700.0000    yes\n 15    9      0 3700.0000    yes\n 16   10      0 3700.0000    yes\n 17   11      0 3700.0000    yes\n 18   12      0 3700.0000    yes\n 19   13      0 3700.0000    yes\n",
+  "versions": {
+    "seqkit": {
+      "banner": "seqkit v2.14.0",
+      "executable": "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/tests/ci/env/bin/seqkit",
+      "sha256": "88aa8a539b1e9097220a47811367b7ef826eff8637e5284fdd32a372770d6f7d"
+    },
+    "fq": {
+      "banner": "fq v0.12.0 (51779f50e 2024-07-08)",
+      "executable": "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/tests/ci/env/bin/fq",
+      "sha256": "600e8b204086bc0d3e225b0021fd234fc452bf72414af80ad8a115a327b5fcb2"
+    },
+    "samtools": {
+      "banner": "samtools 1.24",
+      "executable": "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/tests/ci/env/bin/samtools",
+      "sha256": "884541a13ebd12bed53c1fbdc14b2320f0ee76e8f410a364f10e56c4773df937"
+    },
+    "fastqc": {
+      "banner": "FastQC v0.13.0",
+      "executable": "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/tests/ci/env/bin/fastqc",
+      "sha256": "f9273e9b66066102306f854e89ecd68c99664cdfdee3ba4b595616bc47cd9e47"
+    },
+    "before_fx": {
+      "banner": "rust-fx 0.1.0",
+      "executable": "/tmp/bioinfo-perf-e125519/rust-fx",
+      "sha256": "f9c17835b6c3e8e4a37475f21e27f84fc5068492a4dceff36fa7a1a42641e50a"
+    },
+    "before_bam": {
+      "banner": "rust-bam 0.1.0",
+      "executable": "/tmp/bioinfo-perf-e125519/rust-bam",
+      "sha256": "9f05eb49e043fcdb1ad163711e934920c45cc2e242f4ed6804c479576c42a17a"
+    },
+    "before_fastqc": {
+      "banner": "rust-fastqc 0.1.0",
+      "executable": "/tmp/bioinfo-perf-e125519/rust-fastqc",
+      "sha256": "8f45261c8647d33a1680fd246df19c0270764dcbc76026b5e1b23d92b2ee654c"
+    },
+    "after_fx": {
+      "banner": "rust-fx 0.1.0",
+      "executable": "/tmp/bioinfo-perf-e125519/optimized/rust-fx",
+      "sha256": "53dcbbbe060220815fdf25af29dde0ea92e39beee3d09af35e715a197691e7ba"
+    },
+    "after_bam": {
+      "banner": "rust-bam 0.1.0",
+      "executable": "/tmp/bioinfo-perf-e125519/optimized/rust-bam",
+      "sha256": "bc1300432371e80ede2cef8e225c89b4bf923197ec3873fa22f62d4c5aef28c2"
+    },
+    "after_fastqc": {
+      "banner": "rust-fastqc 0.1.0",
+      "executable": "/tmp/bioinfo-perf-e125519/optimized/rust-fastqc",
+      "sha256": "b618708f0f5ce7b70794bfcc7688d78ec97743f43901db48fff10b317725bba7"
+    }
+  },
+  "inputs": [
+    {
+      "schema_version": 1,
+      "seed": 20261031,
+      "real_source": {
+        "run": "SRR2584863",
+        "organism": "Escherichia coli B str. REL606",
+        "instrument": "Illumina HiSeq 2500",
+        "mate": 1,
+        "url": "https://ftp.sra.ebi.ac.uk/vol1/fastq/SRR258/003/SRR2584863/SRR2584863_1.fastq.gz",
+        "md5": "4a1529a4165970302d6d8cb50b6e7a43",
+        "bytes": 183292913,
+        "records": 1553259,
+        "sha256": "c2b69fdbe3423a8ab9fb185cb57cff574874e32deb3cebd3396a0deb3eb2dcf9"
+      },
+      "generator_sha256": "ab13d23ffdc1f4df3c46b121b08566dd1a9adf846e60d5422750281e0417e7df",
+      "datasets": [
+        {
+          "id": "synthetic-100000",
+          "kind": "fastq",
+          "path": "/tmp/bioinfo-readme-benchmark/synthetic-100000.fastq",
+          "source": "synthetic",
+          "seed": 20261031,
+          "records": 100000,
+          "bases": 15000000,
+          "gc_bases": 7509641,
+          "min_length": 150,
+          "max_length": 150,
+          "sha256": "5b5567c37911fbb90eeeee9ee4cf055a06ca37ada4f5752ac9e2f082e091cd5e",
+          "bytes": 32400000,
+          "independent_fastq_validation": true
+        },
+        {
+          "id": "synthetic-1000000",
+          "kind": "fastq",
+          "path": "/tmp/bioinfo-readme-benchmark/synthetic-1000000.fastq",
+          "source": "synthetic",
+          "seed": 20261031,
+          "records": 1000000,
+          "bases": 150000000,
+          "gc_bases": 75077905,
+          "min_length": 150,
+          "max_length": 150,
+          "sha256": "cf79538d0b08dd95b659bf1ca7d284c66a2cf9635e250cb975859ccdcb2f4b1f",
+          "bytes": 324000000,
+          "independent_fastq_validation": true
+        },
+        {
+          "id": "real-100000",
+          "kind": "fastq",
+          "path": "/tmp/bioinfo-readme-benchmark/real-100000.fastq",
+          "source": "SRR2584863",
+          "sampling": "seeded uniform record indices without replacement; retained source order",
+          "seed": 20261031,
+          "records": 100000,
+          "bases": 15000000,
+          "gc_bases": 7607375,
+          "min_length": 150,
+          "max_length": 150,
+          "sha256": "75c18153184ba1574b498a362cbdd3add53baf201a85afdd1022bf3e732bb03e",
+          "bytes": 36777761,
+          "independent_fastq_validation": true
+        },
+        {
+          "id": "real-1000000",
+          "kind": "fastq",
+          "path": "/tmp/bioinfo-readme-benchmark/real-1000000.fastq",
+          "source": "SRR2584863",
+          "sampling": "seeded uniform record indices without replacement; retained source order",
+          "seed": 20261031,
+          "records": 1000000,
+          "bases": 150000000,
+          "gc_bases": 76097573,
+          "min_length": 150,
+          "max_length": 150,
+          "sha256": "e118285a9688a73f43fb420237f5d236886cb8430a265176e4ffd6a132233d04",
+          "bytes": 367775653,
+          "independent_fastq_validation": true
+        },
+        {
+          "id": "synthetic-bam-100000",
+          "kind": "bam",
+          "records": 100000,
+          "bundles": 3556,
+          "expected_dedup_records": 7112,
+          "unsorted": "/tmp/bioinfo-readme-benchmark/bam-100000/unsorted.bam",
+          "sorted": "/tmp/bioinfo-readme-benchmark/bam-100000/sorted.bam",
+          "expected_qnames": "/tmp/bioinfo-readme-benchmark/bam-100000/dedup-qnames.txt",
+          "sha256": {
+            "unsorted.bam": "1f8aac0545db0eb0f65e94eaf2d7d165160216a467bc1317ff7bf439f969cadb",
+            "sorted.bam": "023e59bd0d27178c62861ae042ad4d67fded1a0364da0a3456eb01ead57bac6c",
+            "sorted.bam.bai": "e4626890fde03c32ab095b924b8473e2ae2dcdc3ffcb0355cdfac051e63aa461",
+            "dedup-qnames.txt": "5f1084092aa979ab0153920cceea2fffeb6f0c521498080d503fa764a4510c67"
+          },
+          "generator": {
+            "seed": 20261031,
+            "bundle_scales": [
+              1,
+              10,
+              100
+            ],
+            "umi_counts_per_scale": [
+              6,
+              2,
+              1,
+              1
+            ],
+            "umi_distance_from_major": [
+              0,
+              1,
+              2,
+              10
+            ],
+            "independent_representative": "unique highest MAPQ"
+          }
+        },
+        {
+          "id": "synthetic-bam-1000000",
+          "kind": "bam",
+          "records": 1000000,
+          "bundles": 35701,
+          "expected_dedup_records": 71402,
+          "unsorted": "/tmp/bioinfo-readme-benchmark/bam-1000000/unsorted.bam",
+          "sorted": "/tmp/bioinfo-readme-benchmark/bam-1000000/sorted.bam",
+          "expected_qnames": "/tmp/bioinfo-readme-benchmark/bam-1000000/dedup-qnames.txt",
+          "sha256": {
+            "unsorted.bam": "eaa0524018871f25422bba4faa9bef377483d7a8f8fcb8618a229e9fd842cc95",
+            "sorted.bam": "f321c734856a2f4adab1e4e2aa4dd99639eaa3cf6efc8e08cd77a4305e78695c",
+            "sorted.bam.bai": "6478d0044f84f3ca38c26ad83d6923a54f1a4b490e5d323e1e5f94396267b677",
+            "dedup-qnames.txt": "7165e621e4aa7950c30772062331447f0b46efbde834372d724542f28d790f11"
+          },
+          "generator": {
+            "seed": 20261031,
+            "bundle_scales": [
+              1,
+              10,
+              100
+            ],
+            "umi_counts_per_scale": [
+              6,
+              2,
+              1,
+              1
+            ],
+            "umi_distance_from_major": [
+              0,
+              1,
+              2,
+              10
+            ],
+            "independent_representative": "unique highest MAPQ"
+          }
+        }
+      ]
+    }
+  ],
+  "input_manifest_sha256": {
+    "/tmp/bioinfo-readme-benchmark/inputs.json": "c41fdcff7b6f48fcbb63137189e2240e5645eb49570a84a3dada4a48962dd112"
+  },
+  "source_sha256": {
+    "Cargo.lock": "7352864e1c3a0e2693ae7d2ad688f66959a3f0d5b6c73bb729cdec6d1720d20a",
+    "Cargo.toml": "4b57857f58c9d83b08f0142f0aeb67a643b79f14acc4b7f89b2b93fb4db4b896",
+    "rust-bam/src/commands.rs": "fbeb490deb1153727b4dce8e3240e7830c7ab57673f29f17502e944507f1b9fe",
+    "rust-bam/src/error.rs": "f6c590e3832227555dbb708a46a189be8dc778d68a6873ab681dc8f7065fa688",
+    "rust-bam/src/format.rs": "3d4fcff9163f1f9967ebe8033a5d79e167ff1292f4cbce782d75958a4b9a269e",
+    "rust-bam/src/index_util.rs": "b5f5eff6e3915563d484aeaa5934f3ab23c2f69f8aa8e12073fe5829cec11a77",
+    "rust-bam/src/io_util.rs": "8039c9dfab770693a2cb748210bfb4f358b23f67352e517725806de336cb4c57",
+    "rust-bam/src/lib.rs": "cb1c502119f8e94d5e7773186c574b00f6dfab911380b0bebab6e3da41264e04",
+    "rust-bam/src/main.rs": "6743c7d60adff7434d802df659762dca0fc645748f0c925bca2bd4b6b40a1dc7",
+    "rust-bam/src/sort_order.rs": "aafa6a1360d57a3af76c837b3df05819d423c3d61ee6c58c21cb6cdf8c54c542",
+    "rust-bam/src/stats.rs": "bd3515e87e05761ef39ec027c97ea45467ff48d124aaf638dcbaddd517e73fc0",
+    "rust-cutadapt/src/adapter/matcher.rs": "a2ff465bbaeb743b32eddd3313a41f0a5a210bcd176401765250e6e1a6674cf0",
+    "rust-cutadapt/src/adapter/mod.rs": "d48c03c1ff521dd61f6c616e24b19c057d1ae4b019fb1c3f81274f59db53a354",
+    "rust-cutadapt/src/align.rs": "af4deae7062c562a4d29b17e50d5767d923694d078928bdea0b0067b988afbad",
+    "rust-cutadapt/src/auxout.rs": "517410281584ea8cd8c0b699291a4000b48f4fd9ce909cee4569bf2ea6b78cd4",
+    "rust-cutadapt/src/cli.rs": "632adafebe1f50143693698edd5567c48b956dc7cb6f8021319b98bb5f6eb566",
+    "rust-cutadapt/src/compress.rs": "74b0a9cd685bba68aec0656974d3252c202bd4d4d51c3023e97a3a48eceb6ae7",
+    "rust-cutadapt/src/engine.rs": "6baf89a5c40e84440f09099c0184ca936a6bd28b926dbe3f81ef92b59781ac44",
+    "rust-cutadapt/src/fastq.rs": "c6062afa0ca98d78f28998b7b6316abf190ad1cff82461d96364379d2cd8d8a4",
+    "rust-cutadapt/src/filter.rs": "cb4d1606b2af6fb381f767abcee8cedbfa8da4bd3083f193d293fd2fee15221a",
+    "rust-cutadapt/src/lib.rs": "19548e9694b04091405163f12b85b77d20e378e05e9be3cc0b74fede2b838a68",
+    "rust-cutadapt/src/main.rs": "2f184a2f6274dec836b1ecb15bea612e1e97e91af13caa9f729232335ee9b246",
+    "rust-cutadapt/src/modify.rs": "1d9490f039ca4ddd334d011b18f595fc27a5d545ac0027f7d4b5ee86f551929d",
+    "rust-cutadapt/src/pair.rs": "9a91a5f51d09d255ec9d0f20f19131dbb942cfa2451b5989e6baec674da153ba",
+    "rust-cutadapt/src/pipeline.rs": "86eb53bf4bdda70e87f73833a13b729b8ec2d89940de89b52c6775aa65a709e7",
+    "rust-cutadapt/src/report/fmt.rs": "afdbc57c74ddd47462d02bd7a9069de0c86ce1ced0a57fca8b762043fa3010f0",
+    "rust-cutadapt/src/report/json.rs": "f5d775220c4f9d2a93968076c8e1f6308d748741bc038636f9ec0fced4985608",
+    "rust-cutadapt/src/report/mod.rs": "f7cb4e0e84faca55cabfd85e4bde05415072d95633c1ae1258476fe33fe38b3b",
+    "rust-cutadapt/src/report/stats.rs": "2034803c7e53361cfbd8c5b13e186e8d77cbb1a8e0631c6a81f83a9b79db893a",
+    "rust-cutadapt/src/report/text.rs": "cae5852c50456e840c904f555b21931410fc001d07a56528c92db2f52443a297",
+    "rust-cutadapt/src/runreport.rs": "d37b4d7a7e9c8906a132d23e341fc83e0826e92a38116ae47a40a1063a693830",
+    "rust-cutadapt/src/trim.rs": "4d2f2d0802def8006ff494a7dbb3b564a5409c41cd98fba5c8c06fecf8f40fbe",
+    "rust-fastqc/src/absent.rs": "feb5ff1397ab60df7ea50d3136725909bf119a4832696e2adec01fc7bea92cc2",
+    "rust-fastqc/src/adapters.rs": "3bbfa509656cb3ce88933dc4ad0456268f65e1908d4699ef08cdcf312b83683f",
+    "rust-fastqc/src/config.rs": "711f0396ac6133c5b024c43da6c32e08191a03069ead72fb2613c941ebb84730",
+    "rust-fastqc/src/contaminants.rs": "fb3ced4f57563a10d0cde3151ddcf293af45800284adcd6d65592ead91a176ad",
+    "rust-fastqc/src/error.rs": "b57bec3376398ae1b80e07615add154f9c602d56d04a9dc00e66788d50c2b972",
+    "rust-fastqc/src/grouping.rs": "5a3922fa2cf703631b44e44833f6fb7944eaf465e5321108437c3f1e5ccb8222",
+    "rust-fastqc/src/kmer.rs": "6e8fe53a2f5032df365e2bb5891891d5212c415bb2f680f9824b15335c4ed48d",
+    "rust-fastqc/src/lib.rs": "ff346db4a57dd35fc1a914a915367799251d41c3554c8e6df4f7602a6d2c6d5b",
+    "rust-fastqc/src/limits.rs": "d0ad1b1e33a0fd5dfc3167858e5a60e17ee7e20adc1e920b0333961eb65b66cc",
+    "rust-fastqc/src/main.rs": "ca605410335e334bafbeac3d461d0740b5a3a5c3ce01fa77501d2ab7c52c98f8",
+    "rust-fastqc/src/modules.rs": "62e705badd03809c30f9e212a1941110ec49832320c05d0243a44f2321891b98",
+    "rust-fastqc/src/report.rs": "bac5bbc215b1346273a51bd665ade243b8d1ec8a99f6cb307b9ad086a48f98b7",
+    "rust-fastqc/src/stats.rs": "2691892e359dcbd6286add0f19519e8f46f029ad6e0871ab804b6f54b4182782",
+    "rust-fastqc/src/tile.rs": "e18be7a43b6acbe3b843012c7e174253d26a37e7616a7ef204c0443a552369f1",
+    "rust-fastqc/src/zip.rs": "80c672b205e18ee66dc251721360f5ea56293828e1cfa7829d1595cf9e1b3814",
+    "rust-fx/src/cli.rs": "ee328d308038fcd9073fcbaf3bd0361a8fec94b5bb3927a1ceda1b5f5e3502bf",
+    "rust-fx/src/commands.rs": "d7e52533c2571fed910d85a3f722176811e4fca0324c6eb60537667f670aa2f7",
+    "rust-fx/src/grep.rs": "cba35cb9fac6503cc4885c22322b95ae113a24a460ee5bb6adb54969d96d5934",
+    "rust-fx/src/io.rs": "23b029fd75c0cb24dc6abc619f8b4b978a1e32eae7aec861451bf1b2661b145b",
+    "rust-fx/src/lib.rs": "569ce65959d7fc7b5f07517fa26a23eb82b2da1c09e5735169e76251c6900090",
+    "rust-fx/src/lint.rs": "79a864545ee137b111ddcf038f1f585874e695000ec8df42c8253ec29a660b3e",
+    "rust-fx/src/main.rs": "e8c4c8d2215537b801a44883df3e0e62ac9541f9be30bf0551aca80b1f25e900",
+    "rust-fx/src/md5.rs": "e83b33de9ab61cfadffb2fcfd745bd6f28e9a2191b617cd29bcf51523c28bd1c",
+    "rust-fx/src/range.rs": "f6df9ac4a3fd5cbda26037e58aedead9a39fe633f1068db9af29ce11bf4b9818",
+    "rust-fx/src/replace.rs": "97a35593dc4eff71806139d3494c67d3940c4403f776a2cce1d0a3d279992210",
+    "rust-fx/src/sample.rs": "74107a82e355326bf0ecb7c9c09478c0d2177b9227d3cb05a93323ad0313ec8b",
+    "rust-fx/src/seqkit_io.rs": "d6c0a23a2d20d8f5b675986a024b18af29459cb3df42ce576a1c592c17d2c407",
+    "rust-fx/src/sort.rs": "ea4d43024af2379e48440fc7358c5d96b1e85a310ff2e2777212fe479cbb97c6",
+    "rust-fx/src/split.rs": "54de5860e8a472831c2281b39125480e7d2edec4a923dedd89887c6142b7e7c4",
+    "rust-fx/src/stats.rs": "b3bbe7dfc0f1070085b2ad8f7df39fa1cb7d1b100cfd0b90b53b6875dd6cc7eb",
+    "rust-fx/src/tab2fx.rs": "68a7ba03fe2e2cbdeb32d1daf0e31c7dc2fe819651cb31be1f4a30ea4704dea8",
+    "rust-fx/src/table.rs": "6eb364210d687140e4621f6e6b58aa0831e81e8d759e45eb36a598fbf2169372",
+    "rust-fx/src/transform.rs": "12714bccb09091c29065185a91516df91a345b021fc34f452839d149b574d7d7",
+    "rust-fx/src/translate.rs": "f67224a05e06ec7d81f40f56c75cbe01365de46c35061723e5dca62878bb6b79",
+    "rust-umitools/src/cli.rs": "310027d9768448e347e49bcb8770cd50be77e5e1d6b475d76a901b83e2b30583",
+    "rust-umitools/src/commands/count.rs": "a620ede0df8219836cac159822afcb5de198d82c3288425b4bc6848fc1a9932e",
+    "rust-umitools/src/commands/count_tab.rs": "2d3c40afe97cff01d89bc4be2d5405dbf320a5756bebdd2f828c4163d38173c3",
+    "rust-umitools/src/commands/dedup.rs": "560cf67369aa1cbd285a7d0af8aca2ea792fd3217feb04d5fec2ff85e9923e9a",
+    "rust-umitools/src/commands/dedup_stats.rs": "5bfe4b1aabd53da9865384d32e14fde069a23f1ed6e34cfa12352c451087cb7c",
+    "rust-umitools/src/commands/extract.rs": "364af5dd89ef730489677ad8f903c8a536458c9301fdb3b27bd601b9754206df",
+    "rust-umitools/src/commands/group.rs": "2ef90b0ad95cb6642693346a6ef0a43ff23885145e21b17948613cb84b6d59e4",
+    "rust-umitools/src/commands/mod.rs": "fbac353802b46a9fadbce6fb13237831341b9132b458b13ec3e9c9e4eb9f6574",
+    "rust-umitools/src/commands/whitelist.rs": "6bb57902c631e4188e4ab06d9df6cc3499d2c03b86cbd3110c05c89f6a4f8edd",
+    "rust-umitools/src/compat/mod.rs": "f59d9e3ef036061731b34802a9b48e5f90f89f93bd3981c91a38419695106483",
+    "rust-umitools/src/compat/pyrng.rs": "c039c3e34d59cefd778adc7e659d40a3d7a6278cbef5586990176af78f628bf0",
+    "rust-umitools/src/core/barcode.rs": "8b045f11eb8bf245cddae68a74d832af6538628dae897a7ef9d9d1ccfb2ad836",
+    "rust-umitools/src/core/bundle.rs": "ed4ca63f4c1147981dc5ce7c016360619056ee6e2ca4461ac75653ccaab833cb",
+    "rust-umitools/src/core/cluster.rs": "1e3ed9fe735635135b6eb27cbba79f189dc5581b3cc8678124d64580dcfc229a",
+    "rust-umitools/src/core/disk_bundle.rs": "5ffb51ada6cd6c1b97b8b04943794f210ef0e4e29b1cb8927b05bee913f1ccb0",
+    "rust-umitools/src/core/distance.rs": "7fab20d1e5b4bedb3602f92fe2d42d74e756bd2fd32f7ca9e9365dbe052f0bf4",
+    "rust-umitools/src/core/mod.rs": "3d543d40318e641195691c7fd916217f746ed8b2f94a2285c82b2d4eb8339e25",
+    "rust-umitools/src/core/neighbors.rs": "dadb225b74c4275ccc0ec4ee3a0dd5af367f2a184e923bbfad8b2c3d1cd7d52e",
+    "rust-umitools/src/core/rng.rs": "072c5bd6849b7ee0fdf7c9df47ea9f10c1b7c41fc3ba6ccc50ade54bba3cdfbd",
+    "rust-umitools/src/core/umi.rs": "13e3a6928a682c84deea4a1c4a57f0fd12e5eac34f4237b0c44189a2447d7402",
+    "rust-umitools/src/error.rs": "3eacc719f249169e3a6128f794133888bb01ace7ba92ea167cdc27eba1cf6743",
+    "rust-umitools/src/io/alignment.rs": "005f1ba97fcc86c5862ca79c3eaad5e7ae94e9ed6ae0c32f7dc233399e2334e0",
+    "rust-umitools/src/io/bam.rs": "6f8c652b401c32e486c8b24251e36ce0b04161f7bfc1f8db58a4447baf55b0e1",
+    "rust-umitools/src/io/fastq.rs": "ecae200fbfd8ea988c744832e2e897e9b233bd8b50e2b347dd800283eb31694a",
+    "rust-umitools/src/io/mod.rs": "aa0e976ed4c38e485191d4b5610984566ee2abcf7f2c012c01cbfe3b56af9cdd",
+    "rust-umitools/src/io/paired.rs": "a6a0c91271bfbd49b88a64f202c5e737f1bcb7f3ccb8999ae6030b2916b45564",
+    "rust-umitools/src/io/sort.rs": "3c08cdfde9e4fa3e95310d70e1e39b73573aa0f0ce3774b5d4714578638a6970",
+    "rust-umitools/src/io/spill.rs": "719f6050d83167ad6ff606f69870d55bae4b4f00830d2bd644580240b897f6d1",
+    "rust-umitools/src/lib.rs": "a82a2065344b1b1126ce51f9edde8bb6fdb74bc18305d5a8305d72198720edd4",
+    "rust-umitools/src/main.rs": "7d7b9da15b560ebda5ab86a2ace333d684bc87b8ff45081f17c4cfc55d0da8e0",
+    "rust-umitools/src/runtime/budget.rs": "154c3c69b48cfc29b2358848a758525bff0170e0d7a0ef43995b9cabdd9bf7ed",
+    "rust-umitools/src/runtime/mod.rs": "a2adc8ee29ccde53880f74fa3bc30e20ddc4bd75c17bdfaaecea4bedc2248f52",
+    "rust-umitools/src/runtime/pipeline.rs": "780c273c7d6ba3442594ccf48bf8f6077db2970a872daaba2ad4bfadc141fe2b",
+    "rust-umitools/src/runtime/summary.rs": "56b2601fbc4ca4e4e643b6def8476c82fc1b4d57889ee1665214dd1e491d32c1",
+    "bioinfo-common/src/diagnostic.rs": "d9283c193000559ce2781e7c1224dd43ac515fe1f1024e5b3fb35740131fbaf5",
+    "bioinfo-common/src/exit.rs": "25655be39bdb8aca9771738aa7e1e64a955ec5b10da30a0769c2c461cf2e9c2b",
+    "bioinfo-common/src/lib.rs": "eed83a850d1fe44670768426f4791cd4dd256fc412a4705403518f227ef85fb5",
+    "bioinfo-common/src/provenance.rs": "570f333aa038a344e36769763560b65d57d25eba063d3f8d6404701338102dd3",
+    "bioinfo-common/src/summary.rs": "52c4d9a5bdf8fd1d4b7feee31b8c04d719917de37e19117e5711fa5109f7b329",
+    "bioinfo-fastx/src/bgzf.rs": "08ffb05b4bd102b4b2d9e668824c75778d4490a1a404ecffb182b53b3ebd9b82",
+    "bioinfo-fastx/src/bin/fastx-fuzz.rs": "d3384d328b6bda05b78956277f52efb41eb945438521eb6ddb084e3aa886c590",
+    "bioinfo-fastx/src/chunker.rs": "e5ec74a6a113f174e6b15c13c145897e1f8f98ffeb877b736057e8d29fea7588",
+    "bioinfo-fastx/src/compress.rs": "a8c29f48f23699675529061bd6b69a372d63d1c4ab35063a244cb0615de7edb6",
+    "bioinfo-fastx/src/format.rs": "1f4737aef16254c464e916aa3959308f08408a32b12af1894ed405200beca7f0",
+    "bioinfo-fastx/src/lib.rs": "3333ebd30be0774c3fe2b9e68cb4e73806df92911f9f5edf8f9f1a81c61605ea",
+    "bioinfo-fastx/src/parser.rs": "9b398b72cc318673b5fecce83cf5e7c61134503c34bd2f50411a300d46293af7",
+    "bioinfo-fastx/src/reader.rs": "390a31584949784f8c3fb4557b67e170efde1f389426d068042db4994b050920",
+    "bioinfo-fastx/src/writer.rs": "286e128778652191de2e683d29118cd8bec4039d4c18e0b8b185dd072c5a42c9"
+  },
+  "script_sha256": {
+    "optimization_benchmark.py": "cb8c53a36f6f29e9dc90473b1ae4c4b6dd75b90f21f0c633d329a8197048e7a0",
+    "readme_benchmark.py": "1f9b88fcf4c72e7976e6d7be60ed0771d2c88cc1296b04c93cc22fa7e7e378ff",
+    "readme_inputs.py": "4d0c3adbf82802235a451c52db8c621082a06893d659bc3b03faf036670f7544",
+    "run.py": "2f0eedb5961b9e2e179fc498a0369ac01ef294de37dd0e75c5beaf28428c287d",
+    "upstream.py": "dbc63a0f109a4a977fb365dfbe5d31075b8cfd31d0645f192bc938bbf40317bc"
+  },
+  "parameters": {
+    "inputs": [
+      "/tmp/bioinfo-readme-benchmark/inputs.json"
+    ],
+    "baseline_dir": "/tmp/bioinfo-perf-e125519",
+    "native_dir": "/tmp/bioinfo-perf-e125519/optimized",
+    "outdir": "/tmp/bioinfo-perf-e125519/pilot",
+    "oracle_dir": "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/tests/ci/env/bin",
+    "toolchain_cache": "/tmp/bioinfo-ci-toolchain",
+    "cpu": 4,
+    "pilot": true,
+    "repeats": 1,
+    "warmups": 1,
+    "cooldown": 2,
+    "seed": 20261101
+  },
+  "planned_conditions": [
+    {
+      "dataset": "synthetic-100000",
+      "case": "fx_stats"
+    },
+    {
+      "dataset": "synthetic-100000",
+      "case": "fx_fq2fa"
+    },
+    {
+      "dataset": "synthetic-100000",
+      "case": "fq_lint"
+    },
+    {
+      "dataset": "synthetic-100000",
+      "case": "fastqc"
+    },
+    {
+      "dataset": "synthetic-bam-100000",
+      "case": "bam_flagstat"
+    },
+    {
+      "dataset": "synthetic-bam-100000",
+      "case": "bam_sort"
+    }
+  ],
+  "results": [
+    {
+      "dataset": "synthetic-100000",
+      "records": 100000,
+      "case": "fx_stats",
+      "samples": {
+        "before": [
+          {
+            "wall_s": 0.2,
+            "user_s": 0.19,
+            "sys_s": 0.0,
+            "max_rss_kb": 5284,
+            "elapsed_s": 0.20133847299439367,
+            "exit_code": 0,
+            "temp_peak_bytes_sampled": 0,
+            "before": {
+              "load_average": [
+                0.41650390625,
+                1.44677734375,
+                1.259765625
+              ],
+              "temperature_c": {
+                "Core 28": 44.0,
+                "Core 12": 39.0,
+                "Core 16": 41.0,
+                "Core 26": 42.0,
+                "Core 29": 44.0,
+                "Package id 0": 44.0,
+                "Core 27": 42.0,
+                "Core 20": 40.0,
+                "Core 30": 44.0,
+                "Core 0": 42.0,
+                "Core 24": 42.0,
+                "Core 4": 38.0,
+                "Core 31": 44.0,
+                "Core 25": 42.0,
+                "Core 8": 39.0
+              },
+              "cpu_frequency_khz": 5000000
+            },
+            "after": {
+              "load_average": [
+                0.41650390625,
+                1.44677734375,
+                1.259765625
+              ],
+              "temperature_c": {
+                "Core 28": 44.0,
+                "Core 12": 39.0,
+                "Core 16": 41.0,
+                "Core 26": 42.0,
+                "Core 29": 44.0,
+                "Package id 0": 44.0,
+                "Core 27": 42.0,
+                "Core 20": 40.0,
+                "Core 30": 44.0,
+                "Core 0": 42.0,
+                "Core 24": 42.0,
+                "Core 4": 38.0,
+                "Core 31": 44.0,
+                "Core 25": 42.0,
+                "Core 8": 39.0
+              },
+              "cpu_frequency_khz": 400371
+            },
+            "command": [
+              "taskset",
+              "-c",
+              "4",
+              "/tmp/bioinfo-perf-e125519/rust-fx",
+              "stats",
+              "-a",
+              "-T",
+              "-j",
+              "1",
+              "-o",
+              "/tmp/bioinfo-perf-e125519/pilot/synthetic-100000/fx_stats/0-before/out/stats.tsv",
+              "/tmp/bioinfo-readme-benchmark/synthetic-100000.fastq"
+            ],
+            "output_bytes": 259,
+            "stderr": "",
+            "block": 0,
+            "order_in_block": 2,
+            "payload_bytes": 259
+          }
+        ],
+        "after": [
+          {
+            "wall_s": 0.1,
+            "user_s": 0.09,
+            "sys_s": 0.0,
+            "max_rss_kb": 5184,
+            "elapsed_s": 0.1051057090080576,
+            "exit_code": 0,
+            "temp_peak_bytes_sampled": 0,
+            "before": {
+              "load_average": [
+                0.453125,
+                1.4716796875,
+                1.2666015625
+              ],
+              "temperature_c": {
+                "Core 28": 45.0,
+                "Core 12": 41.0,
+                "Core 16": 41.0,
+                "Core 26": 42.0,
+                "Core 29": 45.0,
+                "Package id 0": 45.0,
+                "Core 27": 42.0,
+                "Core 20": 40.0,
+                "Core 30": 45.0,
+                "Core 0": 40.0,
+                "Core 24": 42.0,
+                "Core 4": 40.0,
+                "Core 31": 45.0,
+                "Core 25": 42.0,
+                "Core 8": 38.0
+              },
+              "cpu_frequency_khz": 5000000
+            },
+            "after": {
+              "load_average": [
+                0.453125,
+                1.4716796875,
+                1.2666015625
+              ],
+              "temperature_c": {
+                "Core 28": 45.0,
+                "Core 12": 41.0,
+                "Core 16": 41.0,
+                "Core 26": 42.0,
+                "Core 29": 45.0,
+                "Package id 0": 45.0,
+                "Core 27": 42.0,
+                "Core 20": 40.0,
+                "Core 30": 45.0,
+                "Core 0": 40.0,
+                "Core 24": 42.0,
+                "Core 4": 40.0,
+                "Core 31": 45.0,
+                "Core 25": 42.0,
+                "Core 8": 38.0
+              },
+              "cpu_frequency_khz": 400099
+            },
+            "command": [
+              "taskset",
+              "-c",
+              "4",
+              "/tmp/bioinfo-perf-e125519/optimized/rust-fx",
+              "stats",
+              "-a",
+              "-T",
+              "-j",
+              "1",
+              "-o",
+              "/tmp/bioinfo-perf-e125519/pilot/synthetic-100000/fx_stats/0-after/out/stats.tsv",
+              "/tmp/bioinfo-readme-benchmark/synthetic-100000.fastq"
+            ],
+            "output_bytes": 259,
+            "stderr": "",
+            "block": 0,
+            "order_in_block": 0,
+            "payload_bytes": 259
+          }
+        ],
+        "upstream": [
+          {
+            "wall_s": 0.04,
+            "user_s": 0.04,
+            "sys_s": 0.0,
+            "max_rss_kb": 29260,
+            "elapsed_s": 0.046135831988067366,
+            "exit_code": 0,
+            "temp_peak_bytes_sampled": 0,
+            "before": {
+              "load_average": [
+                0.41650390625,
+                1.44677734375,
+                1.259765625
+              ],
+              "temperature_c": {
+                "Core 28": 45.0,
+                "Core 12": 38.0,
+                "Core 16": 41.0,
+                "Core 26": 43.0,
+                "Core 29": 45.0,
+                "Package id 0": 45.0,
+                "Core 27": 43.0,
+                "Core 20": 42.0,
+                "Core 30": 45.0,
+                "Core 0": 40.0,
+                "Core 24": 43.0,
+                "Core 4": 39.0,
+                "Core 31": 45.0,
+                "Core 25": 43.0,
+                "Core 8": 38.0
+              },
+              "cpu_frequency_khz": 5000000
+            },
+            "after": {
+              "load_average": [
+                0.41650390625,
+                1.44677734375,
+                1.259765625
+              ],
+              "temperature_c": {
+                "Core 28": 45.0,
+                "Core 12": 38.0,
+                "Core 16": 41.0,
+                "Core 26": 43.0,
+                "Core 29": 45.0,
+                "Package id 0": 45.0,
+                "Core 27": 43.0,
+                "Core 20": 42.0,
+                "Core 30": 45.0,
+                "Core 0": 40.0,
+                "Core 24": 43.0,
+                "Core 4": 39.0,
+                "Core 31": 45.0,
+                "Core 25": 43.0,
+                "Core 8": 38.0
+              },
+              "cpu_frequency_khz": 456515
+            },
+            "command": [
+              "taskset",
+              "-c",
+              "4",
+              "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/tests/ci/env/bin/seqkit",
+              "stats",
+              "-a",
+              "-T",
+              "-j",
+              "1",
+              "-o",
+              "/tmp/bioinfo-perf-e125519/pilot/synthetic-100000/fx_stats/0-upstream/out/stats.tsv",
+              "/tmp/bioinfo-readme-benchmark/synthetic-100000.fastq"
+            ],
+            "output_bytes": 259,
+            "stderr": "",
+            "block": 0,
+            "order_in_block": 1,
+            "payload_bytes": 259
+          }
+        ]
+      },
+      "warmups": [
+        {
+          "after": {
+            "wall_s": 0.1,
+            "user_s": 0.09,
+            "sys_s": 0.0,
+            "max_rss_kb": 5136,
+            "elapsed_s": 0.10422616900177673,
+            "exit_code": 0,
+            "temp_peak_bytes_sampled": 0,
+            "before": {
+              "load_average": [
+                0.49267578125,
+                1.49658203125,
+                1.27392578125
+              ],
+              "temperature_c": {
+                "Core 28": 43.0,
+                "Core 12": 38.0,
+                "Core 16": 41.0,
+                "Core 26": 42.0,
+                "Core 29": 43.0,
+                "Package id 0": 43.0,
+                "Core 27": 42.0,
+                "Core 20": 40.0,
+                "Core 30": 43.0,
+                "Core 0": 40.0,
+                "Core 24": 42.0,
+                "Core 4": 38.0,
+                "Core 31": 43.0,
+                "Core 25": 42.0,
+                "Core 8": 38.0
+              },
+              "cpu_frequency_khz": 5000000
+            },
+            "after": {
+              "load_average": [
+                0.49267578125,
+                1.49658203125,
+                1.27392578125
+              ],
+              "temperature_c": {
+                "Core 28": 43.0,
+                "Core 12": 38.0,
+                "Core 16": 41.0,
+                "Core 26": 42.0,
+                "Core 29": 43.0,
+                "Package id 0": 43.0,
+                "Core 27": 42.0,
+                "Core 20": 40.0,
+                "Core 30": 43.0,
+                "Core 0": 40.0,
+                "Core 24": 42.0,
+                "Core 4": 38.0,
+                "Core 31": 43.0,
+                "Core 25": 42.0,
+                "Core 8": 38.0
+              },
+              "cpu_frequency_khz": 400219
+            },
+            "command": [
+              "taskset",
+              "-c",
+              "4",
+              "/tmp/bioinfo-perf-e125519/optimized/rust-fx",
+              "stats",
+              "-a",
+              "-T",
+              "-j",
+              "1",
+              "-o",
+              "/tmp/bioinfo-perf-e125519/pilot/synthetic-100000/fx_stats/-1-after/out/stats.tsv",
+              "/tmp/bioinfo-readme-benchmark/synthetic-100000.fastq"
+            ],
+            "output_bytes": 259,
+            "stderr": "",
+            "block": -1,
+            "order_in_block": 0,
+            "payload_bytes": 259
+          },
+          "before": {
+            "wall_s": 0.19,
+            "user_s": 0.19,
+            "sys_s": 0.0,
+            "max_rss_kb": 5044,
+            "elapsed_s": 0.1988664009986678,
+            "exit_code": 0,
+            "temp_peak_bytes_sampled": 0,
+            "before": {
+              "load_average": [
+                0.453125,
+                1.4716796875,
+                1.2666015625
+              ],
+              "temperature_c": {
+                "Core 28": 43.0,
+                "Core 12": 38.0,
+                "Core 16": 41.0,
+                "Core 26": 43.0,
+                "Core 29": 43.0,
+                "Package id 0": 44.0,
+                "Core 27": 43.0,
+                "Core 20": 40.0,
+                "Core 30": 43.0,
+                "Core 0": 38.0,
+                "Core 24": 43.0,
+                "Core 4": 39.0,
+                "Core 31": 43.0,
+                "Core 25": 43.0,
+                "Core 8": 38.0
+              },
+              "cpu_frequency_khz": 5000000
+            },
+            "after": {
+              "load_average": [
+                0.453125,
+                1.4716796875,
+                1.2666015625
+              ],
+              "temperature_c": {
+                "Core 28": 43.0,
+                "Core 12": 38.0,
+                "Core 16": 41.0,
+                "Core 26": 43.0,
+                "Core 29": 43.0,
+                "Package id 0": 44.0,
+                "Core 27": 43.0,
+                "Core 20": 40.0,
+                "Core 30": 43.0,
+                "Core 0": 38.0,
+                "Core 24": 43.0,
+                "Core 4": 39.0,
+                "Core 31": 43.0,
+                "Core 25": 43.0,
+                "Core 8": 38.0
+              },
+              "cpu_frequency_khz": 400234
+            },
+            "command": [
+              "taskset",
+              "-c",
+              "4",
+              "/tmp/bioinfo-perf-e125519/rust-fx",
+              "stats",
+              "-a",
+              "-T",
+              "-j",
+              "1",
+              "-o",
+              "/tmp/bioinfo-perf-e125519/pilot/synthetic-100000/fx_stats/-1-before/out/stats.tsv",
+              "/tmp/bioinfo-readme-benchmark/synthetic-100000.fastq"
+            ],
+            "output_bytes": 259,
+            "stderr": "",
+            "block": -1,
+            "order_in_block": 1,
+            "payload_bytes": 259
+          },
+          "upstream": {
+            "wall_s": 0.04,
+            "user_s": 0.04,
+            "sys_s": 0.0,
+            "max_rss_kb": 35480,
+            "elapsed_s": 0.04735879600048065,
+            "exit_code": 0,
+            "temp_peak_bytes_sampled": 0,
+            "before": {
+              "load_average": [
+                0.453125,
+                1.4716796875,
+                1.2666015625
+              ],
+              "temperature_c": {
+                "Core 28": 43.0,
+                "Core 12": 39.0,
+                "Core 16": 42.0,
+                "Core 26": 43.0,
+                "Core 29": 43.0,
+                "Package id 0": 44.0,
+                "Core 27": 43.0,
+                "Core 20": 40.0,
+                "Core 30": 43.0,
+                "Core 0": 40.0,
+                "Core 24": 43.0,
+                "Core 4": 41.0,
+                "Core 31": 43.0,
+                "Core 25": 43.0,
+                "Core 8": 38.0
+              },
+              "cpu_frequency_khz": 400570
+            },
+            "after": {
+              "load_average": [
+                0.453125,
+                1.4716796875,
+                1.2666015625
+              ],
+              "temperature_c": {
+                "Core 28": 43.0,
+                "Core 12": 39.0,
+                "Core 16": 42.0,
+                "Core 26": 43.0,
+                "Core 29": 43.0,
+                "Package id 0": 44.0,
+                "Core 27": 43.0,
+                "Core 20": 40.0,
+                "Core 30": 43.0,
+                "Core 0": 40.0,
+                "Core 24": 43.0,
+                "Core 4": 41.0,
+                "Core 31": 43.0,
+                "Core 25": 43.0,
+                "Core 8": 38.0
+              },
+              "cpu_frequency_khz": 400551
+            },
+            "command": [
+              "taskset",
+              "-c",
+              "4",
+              "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/tests/ci/env/bin/seqkit",
+              "stats",
+              "-a",
+              "-T",
+              "-j",
+              "1",
+              "-o",
+              "/tmp/bioinfo-perf-e125519/pilot/synthetic-100000/fx_stats/-1-upstream/out/stats.tsv",
+              "/tmp/bioinfo-readme-benchmark/synthetic-100000.fastq"
+            ],
+            "output_bytes": 259,
+            "stderr": "",
+            "block": -1,
+            "order_in_block": 2,
+            "payload_bytes": 259
+          }
+        }
+      ],
+      "checks": [
+        {
+          "passed": true,
+          "checks": {
+            "before": {
+              "passed": true,
+              "rule": "decoded output bytes",
+              "sha256": {
+                "rust": "d82bee04202a2845f3451e0ad8a2de3128a962c5db3ebdfd7a6c2268fe85f8a0",
+                "upstream": "d82bee04202a2845f3451e0ad8a2de3128a962c5db3ebdfd7a6c2268fe85f8a0"
+              }
+            },
+            "after": {
+              "passed": true,
+              "rule": "decoded output bytes",
+              "sha256": {
+                "rust": "d82bee04202a2845f3451e0ad8a2de3128a962c5db3ebdfd7a6c2268fe85f8a0",
+                "upstream": "d82bee04202a2845f3451e0ad8a2de3128a962c5db3ebdfd7a6c2268fe85f8a0"
+              }
+            },
+            "native_preservation": {
+              "passed": true,
+              "rule": "native output bytes (including BAM encoding for sort)",
+              "observations": {
+                "before": "d82bee04202a2845f3451e0ad8a2de3128a962c5db3ebdfd7a6c2268fe85f8a0",
+                "after": "d82bee04202a2845f3451e0ad8a2de3128a962c5db3ebdfd7a6c2268fe85f8a0"
+              }
+            }
+          },
+          "block": -1
+        },
+        {
+          "passed": true,
+          "checks": {
+            "before": {
+              "passed": true,
+              "rule": "decoded output bytes",
+              "sha256": {
+                "rust": "d82bee04202a2845f3451e0ad8a2de3128a962c5db3ebdfd7a6c2268fe85f8a0",
+                "upstream": "d82bee04202a2845f3451e0ad8a2de3128a962c5db3ebdfd7a6c2268fe85f8a0"
+              }
+            },
+            "after": {
+              "passed": true,
+              "rule": "decoded output bytes",
+              "sha256": {
+                "rust": "d82bee04202a2845f3451e0ad8a2de3128a962c5db3ebdfd7a6c2268fe85f8a0",
+                "upstream": "d82bee04202a2845f3451e0ad8a2de3128a962c5db3ebdfd7a6c2268fe85f8a0"
+              }
+            },
+            "native_preservation": {
+              "passed": true,
+              "rule": "native output bytes (including BAM encoding for sort)",
+              "observations": {
+                "before": "d82bee04202a2845f3451e0ad8a2de3128a962c5db3ebdfd7a6c2268fe85f8a0",
+                "after": "d82bee04202a2845f3451e0ad8a2de3128a962c5db3ebdfd7a6c2268fe85f8a0"
+              }
+            }
+          },
+          "block": 0
+        }
+      ],
+      "passed": true,
+      "compression": "none",
+      "summary": {
+        "before": {
+          "median_s": 0.20133847299439367,
+          "min_s": 0.20133847299439367,
+          "max_s": 0.20133847299439367,
+          "records_per_s": 496676.06251679745,
+          "max_rss_kib": 5284,
+          "cpu_median_s": 0.19,
+          "temp_peak_bytes_sampled": 0,
+          "output_bytes": [
+            259
+          ],
+          "payload_bytes": [
+            259
+          ]
+        },
+        "after": {
+          "median_s": 0.1051057090080576,
+          "min_s": 0.1051057090080576,
+          "max_s": 0.1051057090080576,
+          "records_per_s": 951423.1048318585,
+          "max_rss_kib": 5184,
+          "cpu_median_s": 0.09,
+          "temp_peak_bytes_sampled": 0,
+          "output_bytes": [
+            259
+          ],
+          "payload_bytes": [
+            259
+          ]
+        },
+        "upstream": {
+          "median_s": 0.046135831988067366,
+          "min_s": 0.046135831988067366,
+          "max_s": 0.046135831988067366,
+          "records_per_s": 2167512.661869068,
+          "max_rss_kib": 29260,
+          "cpu_median_s": 0.04,
+          "temp_peak_bytes_sampled": 0,
+          "output_bytes": [
+            259
+          ],
+          "payload_bytes": [
+            259
+          ]
+        }
+      },
+      "paired_before_after_ratio": {
+        "samples": [
+          1.9155807509843132
+        ],
+        "median": 1.9155807509843132,
+        "min": 1.9155807509843132,
+        "max": 1.9155807509843132
+      }
+    },
+    {
+      "dataset": "synthetic-100000",
+      "records": 100000,
+      "case": "fx_fq2fa",
+      "samples": {
+        "before": [
+          {
+            "wall_s": 0.01,
+            "user_s": 0.01,
+            "sys_s": 0.0,
+            "max_rss_kb": 4904,
+            "elapsed_s": 0.020661350994487293,
+            "exit_code": 0,
+            "temp_peak_bytes_sampled": 0,
+            "before": {
+              "load_average": [
+                0.47119140625,
+                1.408203125,
+                1.25048828125
+              ],
+              "temperature_c": {
+                "Core 28": 43.0,
+                "Core 12": 38.0,
+                "Core 16": 39.0,
+                "Core 26": 41.0,
+                "Core 29": 43.0,
+                "Package id 0": 43.0,
+                "Core 27": 41.0,
+                "Core 20": 40.0,
+                "Core 30": 43.0,
+                "Core 0": 40.0,
+                "Core 24": 41.0,
+                "Core 4": 38.0,
+                "Core 31": 43.0,
+                "Core 25": 41.0,
+                "Core 8": 37.0
+              },
+              "cpu_frequency_khz": 503507
+            },
+            "after": {
+              "load_average": [
+                0.47119140625,
+                1.408203125,
+                1.25048828125
+              ],
+              "temperature_c": {
+                "Core 28": 43.0,
+                "Core 12": 38.0,
+                "Core 16": 39.0,
+                "Core 26": 41.0,
+                "Core 29": 43.0,
+                "Package id 0": 43.0,
+                "Core 27": 41.0,
+                "Core 20": 40.0,
+                "Core 30": 43.0,
+                "Core 0": 40.0,
+                "Core 24": 41.0,
+                "Core 4": 38.0,
+                "Core 31": 43.0,
+                "Core 25": 41.0,
+                "Core 8": 37.0
+              },
+              "cpu_frequency_khz": 399812
+            },
+            "command": [
+              "taskset",
+              "-c",
+              "4",
+              "/tmp/bioinfo-perf-e125519/rust-fx",
+              "fq2fa",
+              "-j",
+              "1",
+              "-o",
+              "/tmp/bioinfo-perf-e125519/pilot/synthetic-100000/fx_fq2fa/0-before/out/reads.fasta",
+              "/tmp/bioinfo-readme-benchmark/synthetic-100000.fastq"
+            ],
+            "output_bytes": 17100000,
+            "stderr": "",
+            "block": 0,
+            "order_in_block": 2,
+            "payload_bytes": 17100000
+          }
+        ],
+        "after": [
+          {
+            "wall_s": 0.01,
+            "user_s": 0.0,
+            "sys_s": 0.0,
+            "max_rss_kb": 4892,
+            "elapsed_s": 0.017831682998803444,
+            "exit_code": 0,
+            "temp_peak_bytes_sampled": 0,
+            "before": {
+              "load_average": [
+                0.5126953125,
+                1.43212890625,
+                1.25732421875
+              ],
+              "temperature_c": {
+                "Core 28": 43.0,
+                "Core 12": 37.0,
+                "Core 16": 41.0,
+                "Core 26": 42.0,
+                "Core 29": 43.0,
+                "Package id 0": 44.0,
+                "Core 27": 42.0,
+                "Core 20": 40.0,
+                "Core 30": 43.0,
+                "Core 0": 37.0,
+                "Core 24": 42.0,
+                "Core 4": 38.0,
+                "Core 31": 43.0,
+                "Core 25": 42.0,
+                "Core 8": 38.0
+              },
+              "cpu_frequency_khz": 5000000
+            },
+            "after": {
+              "load_average": [
+                0.5126953125,
+                1.43212890625,
+                1.25732421875
+              ],
+              "temperature_c": {
+                "Core 28": 43.0,
+                "Core 12": 37.0,
+                "Core 16": 41.0,
+                "Core 26": 42.0,
+                "Core 29": 43.0,
+                "Package id 0": 44.0,
+                "Core 27": 42.0,
+                "Core 20": 40.0,
+                "Core 30": 43.0,
+                "Core 0": 37.0,
+                "Core 24": 42.0,
+                "Core 4": 38.0,
+                "Core 31": 43.0,
+                "Core 25": 42.0,
+                "Core 8": 38.0
+              },
+              "cpu_frequency_khz": 400103
+            },
+            "command": [
+              "taskset",
+              "-c",
+              "4",
+              "/tmp/bioinfo-perf-e125519/optimized/rust-fx",
+              "fq2fa",
+              "-j",
+              "1",
+              "-o",
+              "/tmp/bioinfo-perf-e125519/pilot/synthetic-100000/fx_fq2fa/0-after/out/reads.fasta",
+              "/tmp/bioinfo-readme-benchmark/synthetic-100000.fastq"
+            ],
+            "output_bytes": 17100000,
+            "stderr": "",
+            "block": 0,
+            "order_in_block": 0,
+            "payload_bytes": 17100000
+          }
+        ],
+        "upstream": [
+          {
+            "wall_s": 0.02,
+            "user_s": 0.01,
+            "sys_s": 0.0,
+            "max_rss_kb": 33228,
+            "elapsed_s": 0.023104105988750234,
+            "exit_code": 0,
+            "temp_peak_bytes_sampled": 0,
+            "before": {
+              "load_average": [
+                0.5126953125,
+                1.43212890625,
+                1.25732421875
+              ],
+              "temperature_c": {
+                "Core 28": 42.0,
+                "Core 12": 38.0,
+                "Core 16": 41.0,
+                "Core 26": 41.0,
+                "Core 29": 42.0,
+                "Package id 0": 43.0,
+                "Core 27": 41.0,
+                "Core 20": 39.0,
+                "Core 30": 42.0,
+                "Core 0": 40.0,
+                "Core 24": 41.0,
+                "Core 4": 38.0,
+                "Core 31": 42.0,
+                "Core 25": 41.0,
+                "Core 8": 38.0
+              },
+              "cpu_frequency_khz": 511304
+            },
+            "after": {
+              "load_average": [
+                0.5126953125,
+                1.43212890625,
+                1.25732421875
+              ],
+              "temperature_c": {
+                "Core 28": 42.0,
+                "Core 12": 38.0,
+                "Core 16": 41.0,
+                "Core 26": 41.0,
+                "Core 29": 42.0,
+                "Package id 0": 43.0,
+                "Core 27": 41.0,
+                "Core 20": 39.0,
+                "Core 30": 42.0,
+                "Core 0": 40.0,
+                "Core 24": 41.0,
+                "Core 4": 38.0,
+                "Core 31": 42.0,
+                "Core 25": 41.0,
+                "Core 8": 38.0
+              },
+              "cpu_frequency_khz": 400664
+            },
+            "command": [
+              "taskset",
+              "-c",
+              "4",
+              "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/tests/ci/env/bin/seqkit",
+              "fq2fa",
+              "-j",
+              "1",
+              "-o",
+              "/tmp/bioinfo-perf-e125519/pilot/synthetic-100000/fx_fq2fa/0-upstream/out/reads.fasta",
+              "/tmp/bioinfo-readme-benchmark/synthetic-100000.fastq"
+            ],
+            "output_bytes": 17100000,
+            "stderr": "",
+            "block": 0,
+            "order_in_block": 1,
+            "payload_bytes": 17100000
+          }
+        ]
+      },
+      "warmups": [
+        {
+          "before": {
+            "wall_s": 0.02,
+            "user_s": 0.01,
+            "sys_s": 0.0,
+            "max_rss_kb": 4968,
+            "elapsed_s": 0.0208201149944216,
+            "exit_code": 0,
+            "temp_peak_bytes_sampled": 0,
+            "before": {
+              "load_average": [
+                0.3828125,
+                1.42236328125,
+                1.2529296875
+              ],
+              "temperature_c": {
+                "Core 28": 44.0,
+                "Core 12": 39.0,
+                "Core 16": 41.0,
+                "Core 26": 43.0,
+                "Core 29": 44.0,
+                "Package id 0": 45.0,
+                "Core 27": 43.0,
+                "Core 20": 40.0,
+                "Core 30": 44.0,
+                "Core 0": 41.0,
+                "Core 24": 43.0,
+                "Core 4": 38.0,
+                "Core 31": 44.0,
+                "Core 25": 43.0,
+                "Core 8": 38.0
+              },
+              "cpu_frequency_khz": 5000000
+            },
+            "after": {
+              "load_average": [
+                0.3828125,
+                1.42236328125,
+                1.2529296875
+              ],
+              "temperature_c": {
+                "Core 28": 44.0,
+                "Core 12": 39.0,
+                "Core 16": 41.0,
+                "Core 26": 43.0,
+                "Core 29": 44.0,
+                "Package id 0": 45.0,
+                "Core 27": 43.0,
+                "Core 20": 40.0,
+                "Core 30": 44.0,
+                "Core 0": 41.0,
+                "Core 24": 43.0,
+                "Core 4": 38.0,
+                "Core 31": 44.0,
+                "Core 25": 43.0,
+                "Core 8": 38.0
+              },
+              "cpu_frequency_khz": 399205
+            },
+            "command": [
+              "taskset",
+              "-c",
+              "4",
+              "/tmp/bioinfo-perf-e125519/rust-fx",
+              "fq2fa",
+              "-j",
+              "1",
+              "-o",
+              "/tmp/bioinfo-perf-e125519/pilot/synthetic-100000/fx_fq2fa/-1-before/out/reads.fasta",
+              "/tmp/bioinfo-readme-benchmark/synthetic-100000.fastq"
+            ],
+            "output_bytes": 17100000,
+            "stderr": "",
+            "block": -1,
+            "order_in_block": 0,
+            "payload_bytes": 17100000
+          },
+          "upstream": {
+            "wall_s": 0.02,
+            "user_s": 0.01,
+            "sys_s": 0.01,
+            "max_rss_kb": 34004,
+            "elapsed_s": 0.02390814298996702,
+            "exit_code": 0,
+            "temp_peak_bytes_sampled": 0,
+            "before": {
+              "load_average": [
+                0.3828125,
+                1.42236328125,
+                1.2529296875
+              ],
+              "temperature_c": {
+                "Core 28": 43.0,
+                "Core 12": 38.0,
+                "Core 16": 41.0,
+                "Core 26": 43.0,
+                "Core 29": 43.0,
+                "Package id 0": 44.0,
+                "Core 27": 43.0,
+                "Core 20": 40.0,
+                "Core 30": 43.0,
+                "Core 0": 40.0,
+                "Core 24": 43.0,
+                "Core 4": 38.0,
+                "Core 31": 43.0,
+                "Core 25": 43.0,
+                "Core 8": 38.0
+              },
+              "cpu_frequency_khz": 5000000
+            },
+            "after": {
+              "load_average": [
+                0.3828125,
+                1.42236328125,
+                1.2529296875
+              ],
+              "temperature_c": {
+                "Core 28": 43.0,
+                "Core 12": 38.0,
+                "Core 16": 41.0,
+                "Core 26": 43.0,
+                "Core 29": 43.0,
+                "Package id 0": 44.0,
+                "Core 27": 43.0,
+                "Core 20": 40.0,
+                "Core 30": 43.0,
+                "Core 0": 40.0,
+                "Core 24": 43.0,
+                "Core 4": 38.0,
+                "Core 31": 43.0,
+                "Core 25": 43.0,
+                "Core 8": 38.0
+              },
+              "cpu_frequency_khz": 400205
+            },
+            "command": [
+              "taskset",
+              "-c",
+              "4",
+              "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/tests/ci/env/bin/seqkit",
+              "fq2fa",
+              "-j",
+              "1",
+              "-o",
+              "/tmp/bioinfo-perf-e125519/pilot/synthetic-100000/fx_fq2fa/-1-upstream/out/reads.fasta",
+              "/tmp/bioinfo-readme-benchmark/synthetic-100000.fastq"
+            ],
+            "output_bytes": 17100000,
+            "stderr": "",
+            "block": -1,
+            "order_in_block": 1,
+            "payload_bytes": 17100000
+          },
+          "after": {
+            "wall_s": 0.01,
+            "user_s": 0.0,
+            "sys_s": 0.0,
+            "max_rss_kb": 4756,
+            "elapsed_s": 0.017936278993147425,
+            "exit_code": 0,
+            "temp_peak_bytes_sampled": 0,
+            "before": {
+              "load_average": [
+                0.3828125,
+                1.42236328125,
+                1.2529296875
+              ],
+              "temperature_c": {
+                "Core 28": 43.0,
+                "Core 12": 37.0,
+                "Core 16": 41.0,
+                "Core 26": 42.0,
+                "Core 29": 43.0,
+                "Package id 0": 44.0,
+                "Core 27": 42.0,
+                "Core 20": 40.0,
+                "Core 30": 43.0,
+                "Core 0": 38.0,
+                "Core 24": 42.0,
+                "Core 4": 38.0,
+                "Core 31": 43.0,
+                "Core 25": 42.0,
+                "Core 8": 38.0
+              },
+              "cpu_frequency_khz": 612414
+            },
+            "after": {
+              "load_average": [
+                0.3828125,
+                1.42236328125,
+                1.2529296875
+              ],
+              "temperature_c": {
+                "Core 28": 43.0,
+                "Core 12": 37.0,
+                "Core 16": 41.0,
+                "Core 26": 42.0,
+                "Core 29": 43.0,
+                "Package id 0": 44.0,
+                "Core 27": 42.0,
+                "Core 20": 40.0,
+                "Core 30": 43.0,
+                "Core 0": 38.0,
+                "Core 24": 42.0,
+                "Core 4": 38.0,
+                "Core 31": 43.0,
+                "Core 25": 42.0,
+                "Core 8": 38.0
+              },
+              "cpu_frequency_khz": 400075
+            },
+            "command": [
+              "taskset",
+              "-c",
+              "4",
+              "/tmp/bioinfo-perf-e125519/optimized/rust-fx",
+              "fq2fa",
+              "-j",
+              "1",
+              "-o",
+              "/tmp/bioinfo-perf-e125519/pilot/synthetic-100000/fx_fq2fa/-1-after/out/reads.fasta",
+              "/tmp/bioinfo-readme-benchmark/synthetic-100000.fastq"
+            ],
+            "output_bytes": 17100000,
+            "stderr": "",
+            "block": -1,
+            "order_in_block": 2,
+            "payload_bytes": 17100000
+          }
+        }
+      ],
+      "checks": [
+        {
+          "passed": true,
+          "checks": {
+            "before": {
+              "passed": true,
+              "rule": "decoded output bytes",
+              "sha256": {
+                "rust": "9caec45eb584b1271ea4d584f478efc94323d48c3db157c1d97f7c71445aac5e",
+                "upstream": "9caec45eb584b1271ea4d584f478efc94323d48c3db157c1d97f7c71445aac5e"
+              }
+            },
+            "after": {
+              "passed": true,
+              "rule": "decoded output bytes",
+              "sha256": {
+                "rust": "9caec45eb584b1271ea4d584f478efc94323d48c3db157c1d97f7c71445aac5e",
+                "upstream": "9caec45eb584b1271ea4d584f478efc94323d48c3db157c1d97f7c71445aac5e"
+              }
+            },
+            "native_preservation": {
+              "passed": true,
+              "rule": "native output bytes (including BAM encoding for sort)",
+              "observations": {
+                "before": "9caec45eb584b1271ea4d584f478efc94323d48c3db157c1d97f7c71445aac5e",
+                "after": "9caec45eb584b1271ea4d584f478efc94323d48c3db157c1d97f7c71445aac5e"
+              }
+            }
+          },
+          "block": -1
+        },
+        {
+          "passed": true,
+          "checks": {
+            "before": {
+              "passed": true,
+              "rule": "decoded output bytes",
+              "sha256": {
+                "rust": "9caec45eb584b1271ea4d584f478efc94323d48c3db157c1d97f7c71445aac5e",
+                "upstream": "9caec45eb584b1271ea4d584f478efc94323d48c3db157c1d97f7c71445aac5e"
+              }
+            },
+            "after": {
+              "passed": true,
+              "rule": "decoded output bytes",
+              "sha256": {
+                "rust": "9caec45eb584b1271ea4d584f478efc94323d48c3db157c1d97f7c71445aac5e",
+                "upstream": "9caec45eb584b1271ea4d584f478efc94323d48c3db157c1d97f7c71445aac5e"
+              }
+            },
+            "native_preservation": {
+              "passed": true,
+              "rule": "native output bytes (including BAM encoding for sort)",
+              "observations": {
+                "before": "9caec45eb584b1271ea4d584f478efc94323d48c3db157c1d97f7c71445aac5e",
+                "after": "9caec45eb584b1271ea4d584f478efc94323d48c3db157c1d97f7c71445aac5e"
+              }
+            }
+          },
+          "block": 0
+        }
+      ],
+      "passed": true,
+      "compression": "none",
+      "summary": {
+        "before": {
+          "median_s": 0.020661350994487293,
+          "min_s": 0.020661350994487293,
+          "max_s": 0.020661350994487293,
+          "records_per_s": 4839954.561861964,
+          "max_rss_kib": 4904,
+          "cpu_median_s": 0.01,
+          "temp_peak_bytes_sampled": 0,
+          "output_bytes": [
+            17100000
+          ],
+          "payload_bytes": [
+            17100000
+          ]
+        },
+        "after": {
+          "median_s": 0.017831682998803444,
+          "min_s": 0.017831682998803444,
+          "max_s": 0.017831682998803444,
+          "records_per_s": 5607995.6113346275,
+          "max_rss_kib": 4892,
+          "cpu_median_s": 0,
+          "temp_peak_bytes_sampled": 0,
+          "output_bytes": [
+            17100000
+          ],
+          "payload_bytes": [
+            17100000
+          ]
+        },
+        "upstream": {
+          "median_s": 0.023104105988750234,
+          "min_s": 0.023104105988750234,
+          "max_s": 0.023104105988750234,
+          "records_per_s": 4328234.992026596,
+          "max_rss_kib": 33228,
+          "cpu_median_s": 0.01,
+          "temp_peak_bytes_sampled": 0,
+          "output_bytes": [
+            17100000
+          ],
+          "payload_bytes": [
+            17100000
+          ]
+        }
+      },
+      "paired_before_after_ratio": {
+        "samples": [
+          1.1586876570132907
+        ],
+        "median": 1.1586876570132907,
+        "min": 1.1586876570132907,
+        "max": 1.1586876570132907
+      }
+    },
+    {
+      "dataset": "synthetic-100000",
+      "records": 100000,
+      "case": "fq_lint",
+      "samples": {
+        "before": [
+          {
+            "wall_s": 0.03,
+            "user_s": 0.03,
+            "sys_s": 0.0,
+            "max_rss_kb": 11520,
+            "elapsed_s": 0.040584129994385876,
+            "exit_code": 0,
+            "temp_peak_bytes_sampled": 0,
+            "before": {
+              "load_average": [
+                0.47216796875,
+                1.3779296875,
+                1.2421875
+              ],
+              "temperature_c": {
+                "Core 28": 42.0,
+                "Core 12": 37.0,
+                "Core 16": 38.0,
+                "Core 26": 42.0,
+                "Core 29": 42.0,
+                "Package id 0": 44.0,
+                "Core 27": 42.0,
+                "Core 20": 40.0,
+                "Core 30": 42.0,
+                "Core 0": 40.0,
+                "Core 24": 42.0,
+                "Core 4": 38.0,
+                "Core 31": 42.0,
+                "Core 25": 42.0,
+                "Core 8": 39.0
+              },
+              "cpu_frequency_khz": 5000000
+            },
+            "after": {
+              "load_average": [
+                0.47216796875,
+                1.3779296875,
+                1.2421875
+              ],
+              "temperature_c": {
+                "Core 28": 42.0,
+                "Core 12": 37.0,
+                "Core 16": 38.0,
+                "Core 26": 42.0,
+                "Core 29": 42.0,
+                "Package id 0": 44.0,
+                "Core 27": 42.0,
+                "Core 20": 40.0,
+                "Core 30": 42.0,
+                "Core 0": 40.0,
+                "Core 24": 42.0,
+                "Core 4": 38.0,
+                "Core 31": 42.0,
+                "Core 25": 42.0,
+                "Core 8": 39.0
+              },
+              "cpu_frequency_khz": 400270
+            },
+            "command": [
+              "taskset",
+              "-c",
+              "4",
+              "/tmp/bioinfo-perf-e125519/rust-fx",
+              "lint",
+              "/tmp/bioinfo-readme-benchmark/synthetic-100000.fastq"
+            ],
+            "output_bytes": 0,
+            "stderr": "",
+            "block": 0,
+            "order_in_block": 2,
+            "payload_bytes": 783
+          }
+        ],
+        "after": [
+          {
+            "wall_s": 0.02,
+            "user_s": 0.01,
+            "sys_s": 0.0,
+            "max_rss_kb": 4876,
+            "elapsed_s": 0.023249619000125676,
+            "exit_code": 0,
+            "temp_peak_bytes_sampled": 0,
+            "before": {
+              "load_average": [
+                0.513671875,
+                1.4013671875,
+                1.2490234375
+              ],
+              "temperature_c": {
+                "Core 28": 42.0,
+                "Core 12": 38.0,
+                "Core 16": 39.0,
+                "Core 26": 41.0,
+                "Core 29": 42.0,
+                "Package id 0": 43.0,
+                "Core 27": 41.0,
+                "Core 20": 40.0,
+                "Core 30": 42.0,
+                "Core 0": 37.0,
+                "Core 24": 41.0,
+                "Core 4": 37.0,
+                "Core 31": 42.0,
+                "Core 25": 41.0,
+                "Core 8": 36.0
+              },
+              "cpu_frequency_khz": 3812348
+            },
+            "after": {
+              "load_average": [
+                0.513671875,
+                1.4013671875,
+                1.2490234375
+              ],
+              "temperature_c": {
+                "Core 28": 42.0,
+                "Core 12": 38.0,
+                "Core 16": 39.0,
+                "Core 26": 41.0,
+                "Core 29": 42.0,
+                "Package id 0": 43.0,
+                "Core 27": 41.0,
+                "Core 20": 40.0,
+                "Core 30": 42.0,
+                "Core 0": 37.0,
+                "Core 24": 41.0,
+                "Core 4": 37.0,
+                "Core 31": 42.0,
+                "Core 25": 41.0,
+                "Core 8": 36.0
+              },
+              "cpu_frequency_khz": 400000
+            },
+            "command": [
+              "taskset",
+              "-c",
+              "4",
+              "/tmp/bioinfo-perf-e125519/optimized/rust-fx",
+              "lint",
+              "/tmp/bioinfo-readme-benchmark/synthetic-100000.fastq"
+            ],
+            "output_bytes": 0,
+            "stderr": "",
+            "block": 0,
+            "order_in_block": 0,
+            "payload_bytes": 783
+          }
+        ],
+        "upstream": [
+          {
+            "wall_s": 0.02,
+            "user_s": 0.01,
+            "sys_s": 0.0,
+            "max_rss_kb": 4476,
+            "elapsed_s": 0.020981399007723667,
+            "exit_code": 0,
+            "temp_peak_bytes_sampled": 0,
+            "before": {
+              "load_average": [
+                0.47216796875,
+                1.3779296875,
+                1.2421875
+              ],
+              "temperature_c": {
+                "Core 28": 42.0,
+                "Core 12": 38.0,
+                "Core 16": 43.0,
+                "Core 26": 41.0,
+                "Core 29": 42.0,
+                "Package id 0": 44.0,
+                "Core 27": 41.0,
+                "Core 20": 40.0,
+                "Core 30": 43.0,
+                "Core 0": 40.0,
+                "Core 24": 42.0,
+                "Core 4": 38.0,
+                "Core 31": 43.0,
+                "Core 25": 42.0,
+                "Core 8": 38.0
+              },
+              "cpu_frequency_khz": 5000000
+            },
+            "after": {
+              "load_average": [
+                0.47216796875,
+                1.3779296875,
+                1.2421875
+              ],
+              "temperature_c": {
+                "Core 28": 42.0,
+                "Core 12": 38.0,
+                "Core 16": 43.0,
+                "Core 26": 41.0,
+                "Core 29": 42.0,
+                "Package id 0": 44.0,
+                "Core 27": 41.0,
+                "Core 20": 40.0,
+                "Core 30": 43.0,
+                "Core 0": 40.0,
+                "Core 24": 42.0,
+                "Core 4": 38.0,
+                "Core 31": 43.0,
+                "Core 25": 42.0,
+                "Core 8": 38.0
+              },
+              "cpu_frequency_khz": 826605
+            },
+            "command": [
+              "taskset",
+              "-c",
+              "4",
+              "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/tests/ci/env/bin/fq",
+              "lint",
+              "/tmp/bioinfo-readme-benchmark/synthetic-100000.fastq"
+            ],
+            "output_bytes": 0,
+            "stderr": "",
+            "block": 0,
+            "order_in_block": 1,
+            "payload_bytes": 1047
+          }
+        ]
+      },
+      "warmups": [
+        {
+          "upstream": {
+            "wall_s": 0.02,
+            "user_s": 0.01,
+            "sys_s": 0.0,
+            "max_rss_kb": 4440,
+            "elapsed_s": 0.020661681992351077,
+            "exit_code": 0,
+            "temp_peak_bytes_sampled": 0,
+            "before": {
+              "load_average": [
+                0.47119140625,
+                1.408203125,
+                1.25048828125
+              ],
+              "temperature_c": {
+                "Core 28": 43.0,
+                "Core 12": 37.0,
+                "Core 16": 39.0,
+                "Core 26": 41.0,
+                "Core 29": 43.0,
+                "Package id 0": 43.0,
+                "Core 27": 41.0,
+                "Core 20": 40.0,
+                "Core 30": 43.0,
+                "Core 0": 39.0,
+                "Core 24": 41.0,
+                "Core 4": 34.0,
+                "Core 31": 43.0,
+                "Core 25": 41.0,
+                "Core 8": 38.0
+              },
+              "cpu_frequency_khz": 3281195
+            },
+            "after": {
+              "load_average": [
+                0.47119140625,
+                1.408203125,
+                1.25048828125
+              ],
+              "temperature_c": {
+                "Core 28": 43.0,
+                "Core 12": 37.0,
+                "Core 16": 39.0,
+                "Core 26": 41.0,
+                "Core 29": 43.0,
+                "Package id 0": 43.0,
+                "Core 27": 41.0,
+                "Core 20": 40.0,
+                "Core 30": 43.0,
+                "Core 0": 39.0,
+                "Core 24": 41.0,
+                "Core 4": 34.0,
+                "Core 31": 43.0,
+                "Core 25": 41.0,
+                "Core 8": 38.0
+              },
+              "cpu_frequency_khz": 399950
+            },
+            "command": [
+              "taskset",
+              "-c",
+              "4",
+              "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/tests/ci/env/bin/fq",
+              "lint",
+              "/tmp/bioinfo-readme-benchmark/synthetic-100000.fastq"
+            ],
+            "output_bytes": 0,
+            "stderr": "",
+            "block": -1,
+            "order_in_block": 0,
+            "payload_bytes": 1047
+          },
+          "before": {
+            "wall_s": 0.03,
+            "user_s": 0.03,
+            "sys_s": 0.0,
+            "max_rss_kb": 11364,
+            "elapsed_s": 0.04057919200567994,
+            "exit_code": 0,
+            "temp_peak_bytes_sampled": 0,
+            "before": {
+              "load_average": [
+                0.513671875,
+                1.4013671875,
+                1.2490234375
+              ],
+              "temperature_c": {
+                "Core 28": 42.0,
+                "Core 12": 38.0,
+                "Core 16": 40.0,
+                "Core 26": 41.0,
+                "Core 29": 42.0,
+                "Package id 0": 43.0,
+                "Core 27": 41.0,
+                "Core 20": 40.0,
+                "Core 30": 42.0,
+                "Core 0": 39.0,
+                "Core 24": 42.0,
+                "Core 4": 37.0,
+                "Core 31": 42.0,
+                "Core 25": 42.0,
+                "Core 8": 37.0
+              },
+              "cpu_frequency_khz": 400346
+            },
+            "after": {
+              "load_average": [
+                0.513671875,
+                1.4013671875,
+                1.2490234375
+              ],
+              "temperature_c": {
+                "Core 28": 42.0,
+                "Core 12": 38.0,
+                "Core 16": 40.0,
+                "Core 26": 41.0,
+                "Core 29": 42.0,
+                "Package id 0": 43.0,
+                "Core 27": 41.0,
+                "Core 20": 40.0,
+                "Core 30": 42.0,
+                "Core 0": 39.0,
+                "Core 24": 42.0,
+                "Core 4": 37.0,
+                "Core 31": 42.0,
+                "Core 25": 42.0,
+                "Core 8": 37.0
+              },
+              "cpu_frequency_khz": 400329
+            },
+            "command": [
+              "taskset",
+              "-c",
+              "4",
+              "/tmp/bioinfo-perf-e125519/rust-fx",
+              "lint",
+              "/tmp/bioinfo-readme-benchmark/synthetic-100000.fastq"
+            ],
+            "output_bytes": 0,
+            "stderr": "",
+            "block": -1,
+            "order_in_block": 1,
+            "payload_bytes": 783
+          },
+          "after": {
+            "wall_s": 0.02,
+            "user_s": 0.01,
+            "sys_s": 0.0,
+            "max_rss_kb": 4712,
+            "elapsed_s": 0.023529149999376386,
+            "exit_code": 0,
+            "temp_peak_bytes_sampled": 0,
+            "before": {
+              "load_average": [
+                0.513671875,
+                1.4013671875,
+                1.2490234375
+              ],
+              "temperature_c": {
+                "Core 28": 42.0,
+                "Core 12": 38.0,
+                "Core 16": 40.0,
+                "Core 26": 41.0,
+                "Core 29": 42.0,
+                "Package id 0": 43.0,
+                "Core 27": 41.0,
+                "Core 20": 40.0,
+                "Core 30": 42.0,
+                "Core 0": 39.0,
+                "Core 24": 41.0,
+                "Core 4": 38.0,
+                "Core 31": 43.0,
+                "Core 25": 41.0,
+                "Core 8": 38.0
+              },
+              "cpu_frequency_khz": 5000000
+            },
+            "after": {
+              "load_average": [
+                0.513671875,
+                1.4013671875,
+                1.2490234375
+              ],
+              "temperature_c": {
+                "Core 28": 42.0,
+                "Core 12": 38.0,
+                "Core 16": 40.0,
+                "Core 26": 41.0,
+                "Core 29": 42.0,
+                "Package id 0": 43.0,
+                "Core 27": 41.0,
+                "Core 20": 40.0,
+                "Core 30": 42.0,
+                "Core 0": 39.0,
+                "Core 24": 41.0,
+                "Core 4": 38.0,
+                "Core 31": 43.0,
+                "Core 25": 41.0,
+                "Core 8": 38.0
+              },
+              "cpu_frequency_khz": 400509
+            },
+            "command": [
+              "taskset",
+              "-c",
+              "4",
+              "/tmp/bioinfo-perf-e125519/optimized/rust-fx",
+              "lint",
+              "/tmp/bioinfo-readme-benchmark/synthetic-100000.fastq"
+            ],
+            "output_bytes": 0,
+            "stderr": "",
+            "block": -1,
+            "order_in_block": 2,
+            "payload_bytes": 783
+          }
+        }
+      ],
+      "checks": [
+        {
+          "passed": true,
+          "checks": {
+            "before": {
+              "passed": true,
+              "rule": "valid-input exit verdict plus independent FASTQ scan and invalid-tail controls",
+              "negative_control": {
+                "passed": true,
+                "sha256": "87693aec0784d5522cd0b5e21a2fe8a4786a8a6122ea3c6f03302c0fe4b49a9a",
+                "observations": {
+                  "rust": {
+                    "exit_code": 1,
+                    "stderr": "ERROR: [S005] ConsistentSeqQual (record 100001): sequence length 4 != quality length 1\n"
+                  },
+                  "upstream": {
+                    "exit_code": 1,
+                    "stderr": "/tmp/bioinfo-perf-e125519/pilot/synthetic-100000/fq_lint/before-negative/invalid-tail.fastq:400002:1: [S005] ConsistentSeqQualValidator: sequence-quality scores lengths mismatch: expected 4, got 1\n"
+                  }
+                }
+              }
+            },
+            "after": {
+              "passed": true,
+              "rule": "valid-input exit verdict plus independent FASTQ scan and invalid-tail controls",
+              "negative_control": {
+                "passed": true,
+                "sha256": "87693aec0784d5522cd0b5e21a2fe8a4786a8a6122ea3c6f03302c0fe4b49a9a",
+                "observations": {
+                  "rust": {
+                    "exit_code": 1,
+                    "stderr": "ERROR: [S005] ConsistentSeqQual (record 100001): sequence length 4 != quality length 1\n"
+                  },
+                  "upstream": {
+                    "exit_code": 1,
+                    "stderr": "/tmp/bioinfo-perf-e125519/pilot/synthetic-100000/fq_lint/after-negative/invalid-tail.fastq:400002:1: [S005] ConsistentSeqQualValidator: sequence-quality scores lengths mismatch: expected 4, got 1\n"
+                  }
+                }
+              }
+            },
+            "native_preservation": {
+              "passed": true,
+              "rule": "native lint messages, with wall-clock timestamps removed",
+              "observations": {
+                "before": "71f67e2eeece181bc6bfa029c42e3ea3bb7d8d9f5245e50e16300c49b8354a5a",
+                "after": "71f67e2eeece181bc6bfa029c42e3ea3bb7d8d9f5245e50e16300c49b8354a5a"
+              }
+            }
+          },
+          "block": -1
+        },
+        {
+          "passed": true,
+          "checks": {
+            "before": {
+              "passed": true,
+              "rule": "valid-input exit verdict plus independent FASTQ scan and invalid-tail controls",
+              "negative_control": {
+                "passed": true,
+                "sha256": "87693aec0784d5522cd0b5e21a2fe8a4786a8a6122ea3c6f03302c0fe4b49a9a",
+                "observations": {
+                  "rust": {
+                    "exit_code": 1,
+                    "stderr": "ERROR: [S005] ConsistentSeqQual (record 100001): sequence length 4 != quality length 1\n"
+                  },
+                  "upstream": {
+                    "exit_code": 1,
+                    "stderr": "/tmp/bioinfo-perf-e125519/pilot/synthetic-100000/fq_lint/before-negative/invalid-tail.fastq:400002:1: [S005] ConsistentSeqQualValidator: sequence-quality scores lengths mismatch: expected 4, got 1\n"
+                  }
+                }
+              }
+            },
+            "after": {
+              "passed": true,
+              "rule": "valid-input exit verdict plus independent FASTQ scan and invalid-tail controls",
+              "negative_control": {
+                "passed": true,
+                "sha256": "87693aec0784d5522cd0b5e21a2fe8a4786a8a6122ea3c6f03302c0fe4b49a9a",
+                "observations": {
+                  "rust": {
+                    "exit_code": 1,
+                    "stderr": "ERROR: [S005] ConsistentSeqQual (record 100001): sequence length 4 != quality length 1\n"
+                  },
+                  "upstream": {
+                    "exit_code": 1,
+                    "stderr": "/tmp/bioinfo-perf-e125519/pilot/synthetic-100000/fq_lint/after-negative/invalid-tail.fastq:400002:1: [S005] ConsistentSeqQualValidator: sequence-quality scores lengths mismatch: expected 4, got 1\n"
+                  }
+                }
+              }
+            },
+            "native_preservation": {
+              "passed": true,
+              "rule": "native lint messages, with wall-clock timestamps removed",
+              "observations": {
+                "before": "71f67e2eeece181bc6bfa029c42e3ea3bb7d8d9f5245e50e16300c49b8354a5a",
+                "after": "71f67e2eeece181bc6bfa029c42e3ea3bb7d8d9f5245e50e16300c49b8354a5a"
+              }
+            }
+          },
+          "block": 0
+        }
+      ],
+      "passed": true,
+      "compression": "none",
+      "summary": {
+        "before": {
+          "median_s": 0.040584129994385876,
+          "min_s": 0.040584129994385876,
+          "max_s": 0.040584129994385876,
+          "records_per_s": 2464017.3391380645,
+          "max_rss_kib": 11520,
+          "cpu_median_s": 0.03,
+          "temp_peak_bytes_sampled": 0,
+          "output_bytes": [
+            0
+          ],
+          "payload_bytes": [
+            783
+          ]
+        },
+        "after": {
+          "median_s": 0.023249619000125676,
+          "min_s": 0.023249619000125676,
+          "max_s": 0.023249619000125676,
+          "records_per_s": 4301145.7520856345,
+          "max_rss_kib": 4876,
+          "cpu_median_s": 0.01,
+          "temp_peak_bytes_sampled": 0,
+          "output_bytes": [
+            0
+          ],
+          "payload_bytes": [
+            783
+          ]
+        },
+        "upstream": {
+          "median_s": 0.020981399007723667,
+          "min_s": 0.020981399007723667,
+          "max_s": 0.020981399007723667,
+          "records_per_s": 4766126.413362047,
+          "max_rss_kib": 4476,
+          "cpu_median_s": 0.01,
+          "temp_peak_bytes_sampled": 0,
+          "output_bytes": [
+            0
+          ],
+          "payload_bytes": [
+            1047
+          ]
+        }
+      },
+      "paired_before_after_ratio": {
+        "samples": [
+          1.7455825832744398
+        ],
+        "median": 1.7455825832744398,
+        "min": 1.7455825832744398,
+        "max": 1.7455825832744398
+      }
+    },
+    {
+      "dataset": "synthetic-100000",
+      "records": 100000,
+      "case": "fastqc",
+      "samples": {
+        "before": [
+          {
+            "wall_s": 0.76,
+            "user_s": 0.75,
+            "sys_s": 0.0,
+            "max_rss_kb": 15196,
+            "elapsed_s": 0.7656997339945519,
+            "exit_code": 0,
+            "temp_peak_bytes_sampled": 0,
+            "before": {
+              "load_average": [
+                0.7353515625,
+                1.3916015625,
+                1.2490234375
+              ],
+              "temperature_c": {
+                "Core 28": 44.0,
+                "Core 12": 38.0,
+                "Core 16": 39.0,
+                "Core 26": 40.0,
+                "Core 29": 44.0,
+                "Package id 0": 44.0,
+                "Core 27": 41.0,
+                "Core 20": 40.0,
+                "Core 30": 43.0,
+                "Core 0": 36.0,
+                "Core 24": 41.0,
+                "Core 4": 37.0,
+                "Core 31": 43.0,
+                "Core 25": 41.0,
+                "Core 8": 36.0
+              },
+              "cpu_frequency_khz": 4976379
+            },
+            "after": {
+              "load_average": [
+                0.7353515625,
+                1.3916015625,
+                1.2490234375
+              ],
+              "temperature_c": {
+                "Core 28": 44.0,
+                "Core 12": 38.0,
+                "Core 16": 39.0,
+                "Core 26": 40.0,
+                "Core 29": 44.0,
+                "Package id 0": 44.0,
+                "Core 27": 41.0,
+                "Core 20": 40.0,
+                "Core 30": 43.0,
+                "Core 0": 36.0,
+                "Core 24": 41.0,
+                "Core 4": 37.0,
+                "Core 31": 43.0,
+                "Core 25": 41.0,
+                "Core 8": 36.0
+              },
+              "cpu_frequency_khz": 4962937
+            },
+            "command": [
+              "taskset",
+              "-c",
+              "4",
+              "/tmp/bioinfo-perf-e125519/rust-fastqc",
+              "--quiet",
+              "--extract",
+              "--outdir",
+              "/tmp/bioinfo-perf-e125519/pilot/synthetic-100000/fastqc/0-before/out",
+              "/tmp/bioinfo-readme-benchmark/synthetic-100000.fastq"
+            ],
+            "output_bytes": 50449,
+            "stderr": "",
+            "block": 0,
+            "order_in_block": 1,
+            "payload_bytes": 8707
+          }
+        ],
+        "after": [
+          {
+            "wall_s": 0.4,
+            "user_s": 0.39,
+            "sys_s": 0.0,
+            "max_rss_kb": 15212,
+            "elapsed_s": 0.40157656199880876,
+            "exit_code": 0,
+            "temp_peak_bytes_sampled": 0,
+            "before": {
+              "load_average": [
+                0.7353515625,
+                1.3916015625,
+                1.2490234375
+              ],
+              "temperature_c": {
+                "Core 28": 43.0,
+                "Core 12": 37.0,
+                "Core 16": 41.0,
+                "Core 26": 41.0,
+                "Core 29": 43.0,
+                "Package id 0": 43.0,
+                "Core 27": 41.0,
+                "Core 20": 36.0,
+                "Core 30": 43.0,
+                "Core 0": 39.0,
+                "Core 24": 41.0,
+                "Core 4": 37.0,
+                "Core 31": 43.0,
+                "Core 25": 41.0,
+                "Core 8": 37.0
+              },
+              "cpu_frequency_khz": 4972014
+            },
+            "after": {
+              "load_average": [
+                0.7353515625,
+                1.3916015625,
+                1.2490234375
+              ],
+              "temperature_c": {
+                "Core 28": 44.0,
+                "Core 12": 39.0,
+                "Core 16": 63.0,
+                "Core 26": 46.0,
+                "Core 29": 44.0,
+                "Package id 0": 72.0,
+                "Core 27": 46.0,
+                "Core 20": 42.0,
+                "Core 30": 44.0,
+                "Core 0": 51.0,
+                "Core 24": 46.0,
+                "Core 4": 38.0,
+                "Core 31": 44.0,
+                "Core 25": 46.0,
+                "Core 8": 72.0
+              },
+              "cpu_frequency_khz": 4890990
+            },
+            "command": [
+              "taskset",
+              "-c",
+              "4",
+              "/tmp/bioinfo-perf-e125519/optimized/rust-fastqc",
+              "--quiet",
+              "--extract",
+              "--outdir",
+              "/tmp/bioinfo-perf-e125519/pilot/synthetic-100000/fastqc/0-after/out",
+              "/tmp/bioinfo-readme-benchmark/synthetic-100000.fastq"
+            ],
+            "output_bytes": 50449,
+            "stderr": "",
+            "block": 0,
+            "order_in_block": 0,
+            "payload_bytes": 8707
+          }
+        ],
+        "upstream": [
+          {
+            "wall_s": 2.15,
+            "user_s": 1.41,
+            "sys_s": 0.04,
+            "max_rss_kb": 261624,
+            "elapsed_s": 2.1601396719925106,
+            "exit_code": 0,
+            "temp_peak_bytes_sampled": 0,
+            "before": {
+              "load_average": [
+                0.67626953125,
+                1.3681640625,
+                1.2421875
+              ],
+              "temperature_c": {
+                "Core 28": 42.0,
+                "Core 12": 37.0,
+                "Core 16": 39.0,
+                "Core 26": 40.0,
+                "Core 29": 42.0,
+                "Package id 0": 43.0,
+                "Core 27": 40.0,
+                "Core 20": 37.0,
+                "Core 30": 42.0,
+                "Core 0": 39.0,
+                "Core 24": 40.0,
+                "Core 4": 36.0,
+                "Core 31": 42.0,
+                "Core 25": 40.0,
+                "Core 8": 35.0
+              },
+              "cpu_frequency_khz": 4999171
+            },
+            "after": {
+              "load_average": [
+                0.67626953125,
+                1.3681640625,
+                1.2421875
+              ],
+              "temperature_c": {
+                "Core 28": 44.0,
+                "Core 12": 39.0,
+                "Core 16": 48.0,
+                "Core 26": 46.0,
+                "Core 29": 44.0,
+                "Package id 0": 48.0,
+                "Core 27": 46.0,
+                "Core 20": 42.0,
+                "Core 30": 44.0,
+                "Core 0": 41.0,
+                "Core 24": 46.0,
+                "Core 4": 40.0,
+                "Core 31": 44.0,
+                "Core 25": 46.0,
+                "Core 8": 46.0
+              },
+              "cpu_frequency_khz": 927277
+            },
+            "command": [
+              "taskset",
+              "-c",
+              "4",
+              "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/tests/ci/env/bin/fastqc",
+              "--quiet",
+              "--extract",
+              "--outdir",
+              "/tmp/bioinfo-perf-e125519/pilot/synthetic-100000/fastqc/0-upstream/out",
+              "/tmp/bioinfo-readme-benchmark/synthetic-100000.fastq"
+            ],
+            "output_bytes": 946068,
+            "stderr": "",
+            "block": 0,
+            "order_in_block": 2,
+            "payload_bytes": 8501
+          }
+        ]
+      },
+      "warmups": [
+        {
+          "before": {
+            "wall_s": 0.77,
+            "user_s": 0.76,
+            "sys_s": 0.0,
+            "max_rss_kb": 15160,
+            "elapsed_s": 0.7731668639898999,
+            "exit_code": 0,
+            "temp_peak_bytes_sampled": 0,
+            "before": {
+              "load_average": [
+                0.43408203125,
+                1.35498046875,
+                1.2353515625
+              ],
+              "temperature_c": {
+                "Core 28": 44.0,
+                "Core 12": 38.0,
+                "Core 16": 43.0,
+                "Core 26": 42.0,
+                "Core 29": 44.0,
+                "Package id 0": 44.0,
+                "Core 27": 42.0,
+                "Core 20": 39.0,
+                "Core 30": 44.0,
+                "Core 0": 40.0,
+                "Core 24": 42.0,
+                "Core 4": 38.0,
+                "Core 31": 43.0,
+                "Core 25": 42.0,
+                "Core 8": 38.0
+              },
+              "cpu_frequency_khz": 1168526
+            },
+            "after": {
+              "load_average": [
+                0.43408203125,
+                1.35498046875,
+                1.2353515625
+              ],
+              "temperature_c": {
+                "Core 28": 44.0,
+                "Core 12": 38.0,
+                "Core 16": 43.0,
+                "Core 26": 42.0,
+                "Core 29": 44.0,
+                "Package id 0": 44.0,
+                "Core 27": 42.0,
+                "Core 20": 39.0,
+                "Core 30": 44.0,
+                "Core 0": 40.0,
+                "Core 24": 42.0,
+                "Core 4": 38.0,
+                "Core 31": 43.0,
+                "Core 25": 42.0,
+                "Core 8": 38.0
+              },
+              "cpu_frequency_khz": 827567
+            },
+            "command": [
+              "taskset",
+              "-c",
+              "4",
+              "/tmp/bioinfo-perf-e125519/rust-fastqc",
+              "--quiet",
+              "--extract",
+              "--outdir",
+              "/tmp/bioinfo-perf-e125519/pilot/synthetic-100000/fastqc/-1-before/out",
+              "/tmp/bioinfo-readme-benchmark/synthetic-100000.fastq"
+            ],
+            "output_bytes": 50449,
+            "stderr": "",
+            "block": -1,
+            "order_in_block": 0,
+            "payload_bytes": 8707
+          },
+          "upstream": {
+            "wall_s": 2.15,
+            "user_s": 1.46,
+            "sys_s": 0.04,
+            "max_rss_kb": 260668,
+            "elapsed_s": 2.160603338998044,
+            "exit_code": 0,
+            "temp_peak_bytes_sampled": 0,
+            "before": {
+              "load_average": [
+                0.43408203125,
+                1.35498046875,
+                1.2353515625
+              ],
+              "temperature_c": {
+                "Core 28": 43.0,
+                "Core 12": 38.0,
+                "Core 16": 40.0,
+                "Core 26": 42.0,
+                "Core 29": 43.0,
+                "Package id 0": 44.0,
+                "Core 27": 42.0,
+                "Core 20": 40.0,
+                "Core 30": 43.0,
+                "Core 0": 37.0,
+                "Core 24": 41.0,
+                "Core 4": 38.0,
+                "Core 31": 43.0,
+                "Core 25": 42.0,
+                "Core 8": 37.0
+              },
+              "cpu_frequency_khz": 5000000
+            },
+            "after": {
+              "load_average": [
+                0.7998046875,
+                1.41552734375,
+                1.255859375
+              ],
+              "temperature_c": {
+                "Core 28": 44.0,
+                "Core 12": 43.0,
+                "Core 16": 69.0,
+                "Core 26": 46.0,
+                "Core 29": 44.0,
+                "Package id 0": 86.0,
+                "Core 27": 46.0,
+                "Core 20": 38.0,
+                "Core 30": 44.0,
+                "Core 0": 53.0,
+                "Core 24": 46.0,
+                "Core 4": 42.0,
+                "Core 31": 44.0,
+                "Core 25": 46.0,
+                "Core 8": 86.0
+              },
+              "cpu_frequency_khz": 4915025
+            },
+            "command": [
+              "taskset",
+              "-c",
+              "4",
+              "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/tests/ci/env/bin/fastqc",
+              "--quiet",
+              "--extract",
+              "--outdir",
+              "/tmp/bioinfo-perf-e125519/pilot/synthetic-100000/fastqc/-1-upstream/out",
+              "/tmp/bioinfo-readme-benchmark/synthetic-100000.fastq"
+            ],
+            "output_bytes": 946068,
+            "stderr": "",
+            "block": -1,
+            "order_in_block": 1,
+            "payload_bytes": 8501
+          },
+          "after": {
+            "wall_s": 0.39,
+            "user_s": 0.39,
+            "sys_s": 0.0,
+            "max_rss_kb": 15176,
+            "elapsed_s": 0.4004805690055946,
+            "exit_code": 0,
+            "temp_peak_bytes_sampled": 0,
+            "before": {
+              "load_average": [
+                0.7998046875,
+                1.41552734375,
+                1.255859375
+              ],
+              "temperature_c": {
+                "Core 28": 43.0,
+                "Core 12": 38.0,
+                "Core 16": 42.0,
+                "Core 26": 42.0,
+                "Core 29": 43.0,
+                "Package id 0": 44.0,
+                "Core 27": 42.0,
+                "Core 20": 39.0,
+                "Core 30": 43.0,
+                "Core 0": 38.0,
+                "Core 24": 42.0,
+                "Core 4": 38.0,
+                "Core 31": 43.0,
+                "Core 25": 42.0,
+                "Core 8": 37.0
+              },
+              "cpu_frequency_khz": 4953783
+            },
+            "after": {
+              "load_average": [
+                0.7998046875,
+                1.41552734375,
+                1.255859375
+              ],
+              "temperature_c": {
+                "Core 28": 43.0,
+                "Core 12": 38.0,
+                "Core 16": 42.0,
+                "Core 26": 42.0,
+                "Core 29": 43.0,
+                "Package id 0": 44.0,
+                "Core 27": 42.0,
+                "Core 20": 39.0,
+                "Core 30": 43.0,
+                "Core 0": 38.0,
+                "Core 24": 42.0,
+                "Core 4": 38.0,
+                "Core 31": 43.0,
+                "Core 25": 42.0,
+                "Core 8": 37.0
+              },
+              "cpu_frequency_khz": 4979741
+            },
+            "command": [
+              "taskset",
+              "-c",
+              "4",
+              "/tmp/bioinfo-perf-e125519/optimized/rust-fastqc",
+              "--quiet",
+              "--extract",
+              "--outdir",
+              "/tmp/bioinfo-perf-e125519/pilot/synthetic-100000/fastqc/-1-after/out",
+              "/tmp/bioinfo-readme-benchmark/synthetic-100000.fastq"
+            ],
+            "output_bytes": 50449,
+            "stderr": "",
+            "block": -1,
+            "order_in_block": 2,
+            "payload_bytes": 8707
+          }
+        }
+      ],
+      "checks": [
+        {
+          "passed": true,
+          "checks": {
+            "before": {
+              "passed": true,
+              "rule": "independent read count, displayed total bases and length; full raw module comparisons retained",
+              "full_module_equality": false,
+              "module_equal": {
+                "Basic Statistics": true,
+                "Per base sequence quality": true,
+                "Per sequence quality scores": true,
+                "Per base sequence content": true,
+                "Per sequence GC content": false,
+                "Per base N content": true,
+                "Sequence Length Distribution": true,
+                "Sequence Duplication Levels": true,
+                "Overrepresented sequences": true,
+                "Adapter Content": true
+              },
+              "differences": {
+                "Per sequence GC content": {
+                  "rust": [
+                    ">>Per sequence GC content\tpass",
+                    "#GC Content\tCount",
+                    "0\t0.0",
+                    "1\t0.0",
+                    "2\t0.0",
+                    "3\t0.0",
+                    "4\t0.0",
+                    "5\t0.0",
+                    "6\t0.0",
+                    "7\t0.0",
+                    "8\t0.0",
+                    "9\t0.0",
+                    "10\t0.0",
+                    "11\t0.0",
+                    "12\t0.0",
+                    "13\t0.0",
+                    "14\t0.0",
+                    "15\t0.0",
+                    "16\t0.0",
+                    "17\t0.0",
+                    "18\t0.0",
+                    "19\t0.0",
+                    "20\t0.0",
+                    "21\t0.0",
+                    "22\t0.0",
+                    "23\t0.0",
+                    "24\t0.0",
+                    "25\t0.0",
+                    "26\t0.0",
+                    "27\t0.0",
+                    "28\t0.0",
+                    "29\t0.0",
+                    "30\t0.0",
+                    "31\t0.0",
+                    "32\t0.0",
+                    "33\t0.0",
+                    "34\t1.6666666666666665",
+                    "35\t6.5",
+                    "36\t20.999999999999993",
+                    "37\t40.0",
+                    "38\t89.33333333333314",
+                    "39\t161.0",
+                    "40\t310.66666666666646",
+                    "41\t557.5",
+                    "42\t939.0000000000368",
+                    "43\t1496.0",
+                    "44\t2199.666666666549",
+                    "45\t3071.0",
+                    "46\t3983.333333334027",
+                    "47\t4919.5",
+                    "48\t5688.666666665963",
+                    "49\t6343.0",
+                    "50\t6446.666666665274",
+                    "51\t6360.5",
+                    "52\t5768.66666666589",
+                    "53\t5014.5",
+                    "54\t4139.333333334039",
+                    "55\t3206.5",
+                    "56\t2294.6666666665924",
+                    "57\t1518.5",
+                    "58\t993.3333333333763",
+                    "59\t626.0",
+                    "60\t352.66666666666407",
+                    "61\t177.5",
+                    "62\t84.66666666666654",
+                    "63\t34.0",
+                    "64\t17.000000000000007",
+                    "65\t7.0",
+                    "66\t2.333333333333333",
+                    "67\t1.0",
+                    "68\t0.6666666666666666",
+                    "69\t0.0",
+                    "70\t0.0",
+                    "71\t0.0",
+                    "72\t0.0",
+                    "73\t0.0",
+                    "74\t0.0",
+                    "75\t0.0",
+                    "76\t0.0",
+                    "77\t0.0",
+                    "78\t0.0",
+                    "79\t0.0",
+                    "80\t0.0",
+                    "81\t0.0",
+                    "82\t0.0",
+                    "83\t0.0",
+                    "84\t0.0",
+                    "85\t0.0",
+                    "86\t0.0",
+                    "87\t0.0",
+                    "88\t0.0",
+                    "89\t0.0",
+                    "90\t0.0",
+                    "91\t0.0",
+                    "92\t0.0",
+                    "93\t0.0",
+                    "94\t0.0",
+                    "95\t0.0",
+                    "96\t0.0",
+                    "97\t0.0",
+                    "98\t0.0",
+                    "99\t0.0",
+                    "100\t0.0"
+                  ],
+                  "upstream": [
+                    ">>Per sequence GC content\tpass",
+                    "#GC Content\tCount",
+                    "0\t0.0",
+                    "1\t0.0",
+                    "2\t0.0",
+                    "3\t0.0",
+                    "4\t0.0",
+                    "5\t0.0",
+                    "6\t0.0",
+                    "7\t0.0",
+                    "8\t0.0",
+                    "9\t0.0",
+                    "10\t0.0",
+                    "11\t0.0",
+                    "12\t0.0",
+                    "13\t0.0",
+                    "14\t0.0",
+                    "15\t0.0",
+                    "16\t0.0",
+                    "17\t0.0",
+                    "18\t0.0",
+                    "19\t0.0",
+                    "20\t0.0",
+                    "21\t0.0",
+                    "22\t0.0",
+                    "23\t0.0",
+                    "24\t0.0",
+                    "25\t0.0",
+                    "26\t0.0",
+                    "27\t0.0",
+                    "28\t0.0",
+                    "29\t1.5",
+                    "30\t3.0",
+                    "31\t2.0",
+                    "32\t5.0",
+                    "33\t17.5",
+                    "34\t42.0",
+                    "35\t66.0",
+                    "36\t110.5",
+                    "37\t205.5",
+                    "38\t358.0",
+                    "39\t581.0",
+                    "40\t910.0",
+                    "41\t1361.5",
+                    "42\t1948.0",
+                    "43\t2599.5",
+                    "44\t3374.0",
+                    "45\t4413.0",
+                    "46\t5323.0",
+                    "47\t6110.5",
+                    "48\t6974.0",
+                    "49\t7534.0",
+                    "50\t7733.5",
+                    "51\t7811.5",
+                    "52\t7642.0",
+                    "53\t7083.0",
+                    "54\t6211.5",
+                    "55\t5332.0",
+                    "56\t4478.5",
+                    "57\t3498.5",
+                    "58\t2649.5",
+                    "59\t1956.0",
+                    "60\t1362.5",
+                    "61\t910.0",
+                    "62\t582.0",
+                    "63\t351.5",
+                    "64\t203.5",
+                    "65\t119.5",
+                    "66\t67.5",
+                    "67\t36.5",
+                    "68\t19.0",
+                    "69\t9.0",
+                    "70\t3.0",
+                    "71\t0.5",
+                    "72\t0.0",
+                    "73\t0.0",
+                    "74\t0.0",
+                    "75\t0.0",
+                    "76\t0.0",
+                    "77\t0.0",
+                    "78\t0.0",
+                    "79\t0.0",
+                    "80\t0.0",
+                    "81\t0.0",
+                    "82\t0.0",
+                    "83\t0.0",
+                    "84\t0.0",
+                    "85\t0.0",
+                    "86\t0.0",
+                    "87\t0.0",
+                    "88\t0.0",
+                    "89\t0.0",
+                    "90\t0.0",
+                    "91\t0.0",
+                    "92\t0.0",
+                    "93\t0.0",
+                    "94\t0.0",
+                    "95\t0.0",
+                    "96\t0.0",
+                    "97\t0.0",
+                    "98\t0.0",
+                    "99\t0.0",
+                    "100\t0.0"
+                  ]
+                }
+              },
+              "observations": {
+                "rust": {
+                  "basic": {
+                    "Filename": "synthetic-100000.fastq",
+                    "File type": "Conventional base calls",
+                    "Encoding": "Sanger / Illumina 1.9",
+                    "Total Sequences": "100000",
+                    "Total Bases": "15 Mbp",
+                    "Sequence length": "150",
+                    "Mean Length": "150",
+                    "Median Length": "150",
+                    "%GC": "50"
+                  },
+                  "independent_count_bases_and_length": true,
+                  "sha256": "20fad0a77204c62dc66b303b787ce6557749afcae2c09bd7578c603d7f66bd94"
+                },
+                "upstream": {
+                  "basic": {
+                    "Filename": "synthetic-100000.fastq",
+                    "File type": "Conventional base calls",
+                    "Encoding": "Sanger / Illumina 1.9",
+                    "Total Sequences": "100000",
+                    "Total Bases": "15 Mbp",
+                    "Sequence length": "150",
+                    "Mean Length": "150",
+                    "Median Length": "150",
+                    "%GC": "50"
+                  },
+                  "independent_count_bases_and_length": true,
+                  "sha256": "7e00d66426588a2fad8794d66ca0e6b7331b133c8efeab3ea1e26808b6aaf0a8"
+                }
+              },
+              "equal_work": false,
+              "speed_ratio_eligible": false
+            },
+            "after": {
+              "passed": true,
+              "rule": "independent read count, displayed total bases and length; full raw module comparisons retained",
+              "full_module_equality": false,
+              "module_equal": {
+                "Basic Statistics": true,
+                "Per base sequence quality": true,
+                "Per sequence quality scores": true,
+                "Per base sequence content": true,
+                "Per sequence GC content": false,
+                "Per base N content": true,
+                "Sequence Length Distribution": true,
+                "Sequence Duplication Levels": true,
+                "Overrepresented sequences": true,
+                "Adapter Content": true
+              },
+              "differences": {
+                "Per sequence GC content": {
+                  "rust": [
+                    ">>Per sequence GC content\tpass",
+                    "#GC Content\tCount",
+                    "0\t0.0",
+                    "1\t0.0",
+                    "2\t0.0",
+                    "3\t0.0",
+                    "4\t0.0",
+                    "5\t0.0",
+                    "6\t0.0",
+                    "7\t0.0",
+                    "8\t0.0",
+                    "9\t0.0",
+                    "10\t0.0",
+                    "11\t0.0",
+                    "12\t0.0",
+                    "13\t0.0",
+                    "14\t0.0",
+                    "15\t0.0",
+                    "16\t0.0",
+                    "17\t0.0",
+                    "18\t0.0",
+                    "19\t0.0",
+                    "20\t0.0",
+                    "21\t0.0",
+                    "22\t0.0",
+                    "23\t0.0",
+                    "24\t0.0",
+                    "25\t0.0",
+                    "26\t0.0",
+                    "27\t0.0",
+                    "28\t0.0",
+                    "29\t0.0",
+                    "30\t0.0",
+                    "31\t0.0",
+                    "32\t0.0",
+                    "33\t0.0",
+                    "34\t1.6666666666666665",
+                    "35\t6.5",
+                    "36\t20.999999999999993",
+                    "37\t40.0",
+                    "38\t89.33333333333314",
+                    "39\t161.0",
+                    "40\t310.66666666666646",
+                    "41\t557.5",
+                    "42\t939.0000000000368",
+                    "43\t1496.0",
+                    "44\t2199.666666666549",
+                    "45\t3071.0",
+                    "46\t3983.333333334027",
+                    "47\t4919.5",
+                    "48\t5688.666666665963",
+                    "49\t6343.0",
+                    "50\t6446.666666665274",
+                    "51\t6360.5",
+                    "52\t5768.66666666589",
+                    "53\t5014.5",
+                    "54\t4139.333333334039",
+                    "55\t3206.5",
+                    "56\t2294.6666666665924",
+                    "57\t1518.5",
+                    "58\t993.3333333333763",
+                    "59\t626.0",
+                    "60\t352.66666666666407",
+                    "61\t177.5",
+                    "62\t84.66666666666654",
+                    "63\t34.0",
+                    "64\t17.000000000000007",
+                    "65\t7.0",
+                    "66\t2.333333333333333",
+                    "67\t1.0",
+                    "68\t0.6666666666666666",
+                    "69\t0.0",
+                    "70\t0.0",
+                    "71\t0.0",
+                    "72\t0.0",
+                    "73\t0.0",
+                    "74\t0.0",
+                    "75\t0.0",
+                    "76\t0.0",
+                    "77\t0.0",
+                    "78\t0.0",
+                    "79\t0.0",
+                    "80\t0.0",
+                    "81\t0.0",
+                    "82\t0.0",
+                    "83\t0.0",
+                    "84\t0.0",
+                    "85\t0.0",
+                    "86\t0.0",
+                    "87\t0.0",
+                    "88\t0.0",
+                    "89\t0.0",
+                    "90\t0.0",
+                    "91\t0.0",
+                    "92\t0.0",
+                    "93\t0.0",
+                    "94\t0.0",
+                    "95\t0.0",
+                    "96\t0.0",
+                    "97\t0.0",
+                    "98\t0.0",
+                    "99\t0.0",
+                    "100\t0.0"
+                  ],
+                  "upstream": [
+                    ">>Per sequence GC content\tpass",
+                    "#GC Content\tCount",
+                    "0\t0.0",
+                    "1\t0.0",
+                    "2\t0.0",
+                    "3\t0.0",
+                    "4\t0.0",
+                    "5\t0.0",
+                    "6\t0.0",
+                    "7\t0.0",
+                    "8\t0.0",
+                    "9\t0.0",
+                    "10\t0.0",
+                    "11\t0.0",
+                    "12\t0.0",
+                    "13\t0.0",
+                    "14\t0.0",
+                    "15\t0.0",
+                    "16\t0.0",
+                    "17\t0.0",
+                    "18\t0.0",
+                    "19\t0.0",
+                    "20\t0.0",
+                    "21\t0.0",
+                    "22\t0.0",
+                    "23\t0.0",
+                    "24\t0.0",
+                    "25\t0.0",
+                    "26\t0.0",
+                    "27\t0.0",
+                    "28\t0.0",
+                    "29\t1.5",
+                    "30\t3.0",
+                    "31\t2.0",
+                    "32\t5.0",
+                    "33\t17.5",
+                    "34\t42.0",
+                    "35\t66.0",
+                    "36\t110.5",
+                    "37\t205.5",
+                    "38\t358.0",
+                    "39\t581.0",
+                    "40\t910.0",
+                    "41\t1361.5",
+                    "42\t1948.0",
+                    "43\t2599.5",
+                    "44\t3374.0",
+                    "45\t4413.0",
+                    "46\t5323.0",
+                    "47\t6110.5",
+                    "48\t6974.0",
+                    "49\t7534.0",
+                    "50\t7733.5",
+                    "51\t7811.5",
+                    "52\t7642.0",
+                    "53\t7083.0",
+                    "54\t6211.5",
+                    "55\t5332.0",
+                    "56\t4478.5",
+                    "57\t3498.5",
+                    "58\t2649.5",
+                    "59\t1956.0",
+                    "60\t1362.5",
+                    "61\t910.0",
+                    "62\t582.0",
+                    "63\t351.5",
+                    "64\t203.5",
+                    "65\t119.5",
+                    "66\t67.5",
+                    "67\t36.5",
+                    "68\t19.0",
+                    "69\t9.0",
+                    "70\t3.0",
+                    "71\t0.5",
+                    "72\t0.0",
+                    "73\t0.0",
+                    "74\t0.0",
+                    "75\t0.0",
+                    "76\t0.0",
+                    "77\t0.0",
+                    "78\t0.0",
+                    "79\t0.0",
+                    "80\t0.0",
+                    "81\t0.0",
+                    "82\t0.0",
+                    "83\t0.0",
+                    "84\t0.0",
+                    "85\t0.0",
+                    "86\t0.0",
+                    "87\t0.0",
+                    "88\t0.0",
+                    "89\t0.0",
+                    "90\t0.0",
+                    "91\t0.0",
+                    "92\t0.0",
+                    "93\t0.0",
+                    "94\t0.0",
+                    "95\t0.0",
+                    "96\t0.0",
+                    "97\t0.0",
+                    "98\t0.0",
+                    "99\t0.0",
+                    "100\t0.0"
+                  ]
+                }
+              },
+              "observations": {
+                "rust": {
+                  "basic": {
+                    "Filename": "synthetic-100000.fastq",
+                    "File type": "Conventional base calls",
+                    "Encoding": "Sanger / Illumina 1.9",
+                    "Total Sequences": "100000",
+                    "Total Bases": "15 Mbp",
+                    "Sequence length": "150",
+                    "Mean Length": "150",
+                    "Median Length": "150",
+                    "%GC": "50"
+                  },
+                  "independent_count_bases_and_length": true,
+                  "sha256": "20fad0a77204c62dc66b303b787ce6557749afcae2c09bd7578c603d7f66bd94"
+                },
+                "upstream": {
+                  "basic": {
+                    "Filename": "synthetic-100000.fastq",
+                    "File type": "Conventional base calls",
+                    "Encoding": "Sanger / Illumina 1.9",
+                    "Total Sequences": "100000",
+                    "Total Bases": "15 Mbp",
+                    "Sequence length": "150",
+                    "Mean Length": "150",
+                    "Median Length": "150",
+                    "%GC": "50"
+                  },
+                  "independent_count_bases_and_length": true,
+                  "sha256": "7e00d66426588a2fad8794d66ca0e6b7331b133c8efeab3ea1e26808b6aaf0a8"
+                }
+              },
+              "equal_work": false,
+              "speed_ratio_eligible": false
+            },
+            "native_preservation": {
+              "passed": true,
+              "rule": "all native report, summary, HTML and ZIP bytes",
+              "observations": {
+                "before": {
+                  "synthetic-100000_fastqc/fastqc_data.txt": "20fad0a77204c62dc66b303b787ce6557749afcae2c09bd7578c603d7f66bd94",
+                  "synthetic-100000_fastqc/fastqc_report.html": "fd2b1d260e652d382b4b4cfffc8e06bbfeddb95cb16f8e31c0ed86bdc96340f6",
+                  "synthetic-100000_fastqc/summary.txt": "8604f1e88edfee08761bc021a67d3109e372298d854d22900f5144ee9f01ad03",
+                  "synthetic-100000_fastqc.html": "fd2b1d260e652d382b4b4cfffc8e06bbfeddb95cb16f8e31c0ed86bdc96340f6",
+                  "synthetic-100000_fastqc.zip": "7b1ad4c63505771ccf77027c98fa67f7619f3e853b4ea23ad2c204adc21069b1"
+                },
+                "after": {
+                  "synthetic-100000_fastqc/fastqc_data.txt": "20fad0a77204c62dc66b303b787ce6557749afcae2c09bd7578c603d7f66bd94",
+                  "synthetic-100000_fastqc/fastqc_report.html": "fd2b1d260e652d382b4b4cfffc8e06bbfeddb95cb16f8e31c0ed86bdc96340f6",
+                  "synthetic-100000_fastqc/summary.txt": "8604f1e88edfee08761bc021a67d3109e372298d854d22900f5144ee9f01ad03",
+                  "synthetic-100000_fastqc.html": "fd2b1d260e652d382b4b4cfffc8e06bbfeddb95cb16f8e31c0ed86bdc96340f6",
+                  "synthetic-100000_fastqc.zip": "7b1ad4c63505771ccf77027c98fa67f7619f3e853b4ea23ad2c204adc21069b1"
+                }
+              }
+            }
+          },
+          "block": -1
+        },
+        {
+          "passed": true,
+          "checks": {
+            "before": {
+              "passed": true,
+              "rule": "independent read count, displayed total bases and length; full raw module comparisons retained",
+              "full_module_equality": false,
+              "module_equal": {
+                "Basic Statistics": true,
+                "Per base sequence quality": true,
+                "Per sequence quality scores": true,
+                "Per base sequence content": true,
+                "Per sequence GC content": false,
+                "Per base N content": true,
+                "Sequence Length Distribution": true,
+                "Sequence Duplication Levels": true,
+                "Overrepresented sequences": true,
+                "Adapter Content": true
+              },
+              "differences": {
+                "Per sequence GC content": {
+                  "rust": [
+                    ">>Per sequence GC content\tpass",
+                    "#GC Content\tCount",
+                    "0\t0.0",
+                    "1\t0.0",
+                    "2\t0.0",
+                    "3\t0.0",
+                    "4\t0.0",
+                    "5\t0.0",
+                    "6\t0.0",
+                    "7\t0.0",
+                    "8\t0.0",
+                    "9\t0.0",
+                    "10\t0.0",
+                    "11\t0.0",
+                    "12\t0.0",
+                    "13\t0.0",
+                    "14\t0.0",
+                    "15\t0.0",
+                    "16\t0.0",
+                    "17\t0.0",
+                    "18\t0.0",
+                    "19\t0.0",
+                    "20\t0.0",
+                    "21\t0.0",
+                    "22\t0.0",
+                    "23\t0.0",
+                    "24\t0.0",
+                    "25\t0.0",
+                    "26\t0.0",
+                    "27\t0.0",
+                    "28\t0.0",
+                    "29\t0.0",
+                    "30\t0.0",
+                    "31\t0.0",
+                    "32\t0.0",
+                    "33\t0.0",
+                    "34\t1.6666666666666665",
+                    "35\t6.5",
+                    "36\t20.999999999999993",
+                    "37\t40.0",
+                    "38\t89.33333333333314",
+                    "39\t161.0",
+                    "40\t310.66666666666646",
+                    "41\t557.5",
+                    "42\t939.0000000000368",
+                    "43\t1496.0",
+                    "44\t2199.666666666549",
+                    "45\t3071.0",
+                    "46\t3983.333333334027",
+                    "47\t4919.5",
+                    "48\t5688.666666665963",
+                    "49\t6343.0",
+                    "50\t6446.666666665274",
+                    "51\t6360.5",
+                    "52\t5768.66666666589",
+                    "53\t5014.5",
+                    "54\t4139.333333334039",
+                    "55\t3206.5",
+                    "56\t2294.6666666665924",
+                    "57\t1518.5",
+                    "58\t993.3333333333763",
+                    "59\t626.0",
+                    "60\t352.66666666666407",
+                    "61\t177.5",
+                    "62\t84.66666666666654",
+                    "63\t34.0",
+                    "64\t17.000000000000007",
+                    "65\t7.0",
+                    "66\t2.333333333333333",
+                    "67\t1.0",
+                    "68\t0.6666666666666666",
+                    "69\t0.0",
+                    "70\t0.0",
+                    "71\t0.0",
+                    "72\t0.0",
+                    "73\t0.0",
+                    "74\t0.0",
+                    "75\t0.0",
+                    "76\t0.0",
+                    "77\t0.0",
+                    "78\t0.0",
+                    "79\t0.0",
+                    "80\t0.0",
+                    "81\t0.0",
+                    "82\t0.0",
+                    "83\t0.0",
+                    "84\t0.0",
+                    "85\t0.0",
+                    "86\t0.0",
+                    "87\t0.0",
+                    "88\t0.0",
+                    "89\t0.0",
+                    "90\t0.0",
+                    "91\t0.0",
+                    "92\t0.0",
+                    "93\t0.0",
+                    "94\t0.0",
+                    "95\t0.0",
+                    "96\t0.0",
+                    "97\t0.0",
+                    "98\t0.0",
+                    "99\t0.0",
+                    "100\t0.0"
+                  ],
+                  "upstream": [
+                    ">>Per sequence GC content\tpass",
+                    "#GC Content\tCount",
+                    "0\t0.0",
+                    "1\t0.0",
+                    "2\t0.0",
+                    "3\t0.0",
+                    "4\t0.0",
+                    "5\t0.0",
+                    "6\t0.0",
+                    "7\t0.0",
+                    "8\t0.0",
+                    "9\t0.0",
+                    "10\t0.0",
+                    "11\t0.0",
+                    "12\t0.0",
+                    "13\t0.0",
+                    "14\t0.0",
+                    "15\t0.0",
+                    "16\t0.0",
+                    "17\t0.0",
+                    "18\t0.0",
+                    "19\t0.0",
+                    "20\t0.0",
+                    "21\t0.0",
+                    "22\t0.0",
+                    "23\t0.0",
+                    "24\t0.0",
+                    "25\t0.0",
+                    "26\t0.0",
+                    "27\t0.0",
+                    "28\t0.0",
+                    "29\t1.5",
+                    "30\t3.0",
+                    "31\t2.0",
+                    "32\t5.0",
+                    "33\t17.5",
+                    "34\t42.0",
+                    "35\t66.0",
+                    "36\t110.5",
+                    "37\t205.5",
+                    "38\t358.0",
+                    "39\t581.0",
+                    "40\t910.0",
+                    "41\t1361.5",
+                    "42\t1948.0",
+                    "43\t2599.5",
+                    "44\t3374.0",
+                    "45\t4413.0",
+                    "46\t5323.0",
+                    "47\t6110.5",
+                    "48\t6974.0",
+                    "49\t7534.0",
+                    "50\t7733.5",
+                    "51\t7811.5",
+                    "52\t7642.0",
+                    "53\t7083.0",
+                    "54\t6211.5",
+                    "55\t5332.0",
+                    "56\t4478.5",
+                    "57\t3498.5",
+                    "58\t2649.5",
+                    "59\t1956.0",
+                    "60\t1362.5",
+                    "61\t910.0",
+                    "62\t582.0",
+                    "63\t351.5",
+                    "64\t203.5",
+                    "65\t119.5",
+                    "66\t67.5",
+                    "67\t36.5",
+                    "68\t19.0",
+                    "69\t9.0",
+                    "70\t3.0",
+                    "71\t0.5",
+                    "72\t0.0",
+                    "73\t0.0",
+                    "74\t0.0",
+                    "75\t0.0",
+                    "76\t0.0",
+                    "77\t0.0",
+                    "78\t0.0",
+                    "79\t0.0",
+                    "80\t0.0",
+                    "81\t0.0",
+                    "82\t0.0",
+                    "83\t0.0",
+                    "84\t0.0",
+                    "85\t0.0",
+                    "86\t0.0",
+                    "87\t0.0",
+                    "88\t0.0",
+                    "89\t0.0",
+                    "90\t0.0",
+                    "91\t0.0",
+                    "92\t0.0",
+                    "93\t0.0",
+                    "94\t0.0",
+                    "95\t0.0",
+                    "96\t0.0",
+                    "97\t0.0",
+                    "98\t0.0",
+                    "99\t0.0",
+                    "100\t0.0"
+                  ]
+                }
+              },
+              "observations": {
+                "rust": {
+                  "basic": {
+                    "Filename": "synthetic-100000.fastq",
+                    "File type": "Conventional base calls",
+                    "Encoding": "Sanger / Illumina 1.9",
+                    "Total Sequences": "100000",
+                    "Total Bases": "15 Mbp",
+                    "Sequence length": "150",
+                    "Mean Length": "150",
+                    "Median Length": "150",
+                    "%GC": "50"
+                  },
+                  "independent_count_bases_and_length": true,
+                  "sha256": "20fad0a77204c62dc66b303b787ce6557749afcae2c09bd7578c603d7f66bd94"
+                },
+                "upstream": {
+                  "basic": {
+                    "Filename": "synthetic-100000.fastq",
+                    "File type": "Conventional base calls",
+                    "Encoding": "Sanger / Illumina 1.9",
+                    "Total Sequences": "100000",
+                    "Total Bases": "15 Mbp",
+                    "Sequence length": "150",
+                    "Mean Length": "150",
+                    "Median Length": "150",
+                    "%GC": "50"
+                  },
+                  "independent_count_bases_and_length": true,
+                  "sha256": "7e00d66426588a2fad8794d66ca0e6b7331b133c8efeab3ea1e26808b6aaf0a8"
+                }
+              },
+              "equal_work": false,
+              "speed_ratio_eligible": false
+            },
+            "after": {
+              "passed": true,
+              "rule": "independent read count, displayed total bases and length; full raw module comparisons retained",
+              "full_module_equality": false,
+              "module_equal": {
+                "Basic Statistics": true,
+                "Per base sequence quality": true,
+                "Per sequence quality scores": true,
+                "Per base sequence content": true,
+                "Per sequence GC content": false,
+                "Per base N content": true,
+                "Sequence Length Distribution": true,
+                "Sequence Duplication Levels": true,
+                "Overrepresented sequences": true,
+                "Adapter Content": true
+              },
+              "differences": {
+                "Per sequence GC content": {
+                  "rust": [
+                    ">>Per sequence GC content\tpass",
+                    "#GC Content\tCount",
+                    "0\t0.0",
+                    "1\t0.0",
+                    "2\t0.0",
+                    "3\t0.0",
+                    "4\t0.0",
+                    "5\t0.0",
+                    "6\t0.0",
+                    "7\t0.0",
+                    "8\t0.0",
+                    "9\t0.0",
+                    "10\t0.0",
+                    "11\t0.0",
+                    "12\t0.0",
+                    "13\t0.0",
+                    "14\t0.0",
+                    "15\t0.0",
+                    "16\t0.0",
+                    "17\t0.0",
+                    "18\t0.0",
+                    "19\t0.0",
+                    "20\t0.0",
+                    "21\t0.0",
+                    "22\t0.0",
+                    "23\t0.0",
+                    "24\t0.0",
+                    "25\t0.0",
+                    "26\t0.0",
+                    "27\t0.0",
+                    "28\t0.0",
+                    "29\t0.0",
+                    "30\t0.0",
+                    "31\t0.0",
+                    "32\t0.0",
+                    "33\t0.0",
+                    "34\t1.6666666666666665",
+                    "35\t6.5",
+                    "36\t20.999999999999993",
+                    "37\t40.0",
+                    "38\t89.33333333333314",
+                    "39\t161.0",
+                    "40\t310.66666666666646",
+                    "41\t557.5",
+                    "42\t939.0000000000368",
+                    "43\t1496.0",
+                    "44\t2199.666666666549",
+                    "45\t3071.0",
+                    "46\t3983.333333334027",
+                    "47\t4919.5",
+                    "48\t5688.666666665963",
+                    "49\t6343.0",
+                    "50\t6446.666666665274",
+                    "51\t6360.5",
+                    "52\t5768.66666666589",
+                    "53\t5014.5",
+                    "54\t4139.333333334039",
+                    "55\t3206.5",
+                    "56\t2294.6666666665924",
+                    "57\t1518.5",
+                    "58\t993.3333333333763",
+                    "59\t626.0",
+                    "60\t352.66666666666407",
+                    "61\t177.5",
+                    "62\t84.66666666666654",
+                    "63\t34.0",
+                    "64\t17.000000000000007",
+                    "65\t7.0",
+                    "66\t2.333333333333333",
+                    "67\t1.0",
+                    "68\t0.6666666666666666",
+                    "69\t0.0",
+                    "70\t0.0",
+                    "71\t0.0",
+                    "72\t0.0",
+                    "73\t0.0",
+                    "74\t0.0",
+                    "75\t0.0",
+                    "76\t0.0",
+                    "77\t0.0",
+                    "78\t0.0",
+                    "79\t0.0",
+                    "80\t0.0",
+                    "81\t0.0",
+                    "82\t0.0",
+                    "83\t0.0",
+                    "84\t0.0",
+                    "85\t0.0",
+                    "86\t0.0",
+                    "87\t0.0",
+                    "88\t0.0",
+                    "89\t0.0",
+                    "90\t0.0",
+                    "91\t0.0",
+                    "92\t0.0",
+                    "93\t0.0",
+                    "94\t0.0",
+                    "95\t0.0",
+                    "96\t0.0",
+                    "97\t0.0",
+                    "98\t0.0",
+                    "99\t0.0",
+                    "100\t0.0"
+                  ],
+                  "upstream": [
+                    ">>Per sequence GC content\tpass",
+                    "#GC Content\tCount",
+                    "0\t0.0",
+                    "1\t0.0",
+                    "2\t0.0",
+                    "3\t0.0",
+                    "4\t0.0",
+                    "5\t0.0",
+                    "6\t0.0",
+                    "7\t0.0",
+                    "8\t0.0",
+                    "9\t0.0",
+                    "10\t0.0",
+                    "11\t0.0",
+                    "12\t0.0",
+                    "13\t0.0",
+                    "14\t0.0",
+                    "15\t0.0",
+                    "16\t0.0",
+                    "17\t0.0",
+                    "18\t0.0",
+                    "19\t0.0",
+                    "20\t0.0",
+                    "21\t0.0",
+                    "22\t0.0",
+                    "23\t0.0",
+                    "24\t0.0",
+                    "25\t0.0",
+                    "26\t0.0",
+                    "27\t0.0",
+                    "28\t0.0",
+                    "29\t1.5",
+                    "30\t3.0",
+                    "31\t2.0",
+                    "32\t5.0",
+                    "33\t17.5",
+                    "34\t42.0",
+                    "35\t66.0",
+                    "36\t110.5",
+                    "37\t205.5",
+                    "38\t358.0",
+                    "39\t581.0",
+                    "40\t910.0",
+                    "41\t1361.5",
+                    "42\t1948.0",
+                    "43\t2599.5",
+                    "44\t3374.0",
+                    "45\t4413.0",
+                    "46\t5323.0",
+                    "47\t6110.5",
+                    "48\t6974.0",
+                    "49\t7534.0",
+                    "50\t7733.5",
+                    "51\t7811.5",
+                    "52\t7642.0",
+                    "53\t7083.0",
+                    "54\t6211.5",
+                    "55\t5332.0",
+                    "56\t4478.5",
+                    "57\t3498.5",
+                    "58\t2649.5",
+                    "59\t1956.0",
+                    "60\t1362.5",
+                    "61\t910.0",
+                    "62\t582.0",
+                    "63\t351.5",
+                    "64\t203.5",
+                    "65\t119.5",
+                    "66\t67.5",
+                    "67\t36.5",
+                    "68\t19.0",
+                    "69\t9.0",
+                    "70\t3.0",
+                    "71\t0.5",
+                    "72\t0.0",
+                    "73\t0.0",
+                    "74\t0.0",
+                    "75\t0.0",
+                    "76\t0.0",
+                    "77\t0.0",
+                    "78\t0.0",
+                    "79\t0.0",
+                    "80\t0.0",
+                    "81\t0.0",
+                    "82\t0.0",
+                    "83\t0.0",
+                    "84\t0.0",
+                    "85\t0.0",
+                    "86\t0.0",
+                    "87\t0.0",
+                    "88\t0.0",
+                    "89\t0.0",
+                    "90\t0.0",
+                    "91\t0.0",
+                    "92\t0.0",
+                    "93\t0.0",
+                    "94\t0.0",
+                    "95\t0.0",
+                    "96\t0.0",
+                    "97\t0.0",
+                    "98\t0.0",
+                    "99\t0.0",
+                    "100\t0.0"
+                  ]
+                }
+              },
+              "observations": {
+                "rust": {
+                  "basic": {
+                    "Filename": "synthetic-100000.fastq",
+                    "File type": "Conventional base calls",
+                    "Encoding": "Sanger / Illumina 1.9",
+                    "Total Sequences": "100000",
+                    "Total Bases": "15 Mbp",
+                    "Sequence length": "150",
+                    "Mean Length": "150",
+                    "Median Length": "150",
+                    "%GC": "50"
+                  },
+                  "independent_count_bases_and_length": true,
+                  "sha256": "20fad0a77204c62dc66b303b787ce6557749afcae2c09bd7578c603d7f66bd94"
+                },
+                "upstream": {
+                  "basic": {
+                    "Filename": "synthetic-100000.fastq",
+                    "File type": "Conventional base calls",
+                    "Encoding": "Sanger / Illumina 1.9",
+                    "Total Sequences": "100000",
+                    "Total Bases": "15 Mbp",
+                    "Sequence length": "150",
+                    "Mean Length": "150",
+                    "Median Length": "150",
+                    "%GC": "50"
+                  },
+                  "independent_count_bases_and_length": true,
+                  "sha256": "7e00d66426588a2fad8794d66ca0e6b7331b133c8efeab3ea1e26808b6aaf0a8"
+                }
+              },
+              "equal_work": false,
+              "speed_ratio_eligible": false
+            },
+            "native_preservation": {
+              "passed": true,
+              "rule": "all native report, summary, HTML and ZIP bytes",
+              "observations": {
+                "before": {
+                  "synthetic-100000_fastqc/fastqc_data.txt": "20fad0a77204c62dc66b303b787ce6557749afcae2c09bd7578c603d7f66bd94",
+                  "synthetic-100000_fastqc/fastqc_report.html": "fd2b1d260e652d382b4b4cfffc8e06bbfeddb95cb16f8e31c0ed86bdc96340f6",
+                  "synthetic-100000_fastqc/summary.txt": "8604f1e88edfee08761bc021a67d3109e372298d854d22900f5144ee9f01ad03",
+                  "synthetic-100000_fastqc.html": "fd2b1d260e652d382b4b4cfffc8e06bbfeddb95cb16f8e31c0ed86bdc96340f6",
+                  "synthetic-100000_fastqc.zip": "7b1ad4c63505771ccf77027c98fa67f7619f3e853b4ea23ad2c204adc21069b1"
+                },
+                "after": {
+                  "synthetic-100000_fastqc/fastqc_data.txt": "20fad0a77204c62dc66b303b787ce6557749afcae2c09bd7578c603d7f66bd94",
+                  "synthetic-100000_fastqc/fastqc_report.html": "fd2b1d260e652d382b4b4cfffc8e06bbfeddb95cb16f8e31c0ed86bdc96340f6",
+                  "synthetic-100000_fastqc/summary.txt": "8604f1e88edfee08761bc021a67d3109e372298d854d22900f5144ee9f01ad03",
+                  "synthetic-100000_fastqc.html": "fd2b1d260e652d382b4b4cfffc8e06bbfeddb95cb16f8e31c0ed86bdc96340f6",
+                  "synthetic-100000_fastqc.zip": "7b1ad4c63505771ccf77027c98fa67f7619f3e853b4ea23ad2c204adc21069b1"
+                }
+              }
+            }
+          },
+          "block": 0
+        }
+      ],
+      "passed": true,
+      "compression": "report ZIP (different plot resources)",
+      "summary": {
+        "before": {
+          "median_s": 0.7656997339945519,
+          "min_s": 0.7656997339945519,
+          "max_s": 0.7656997339945519,
+          "records_per_s": 130599.49685278526,
+          "max_rss_kib": 15196,
+          "cpu_median_s": 0.75,
+          "temp_peak_bytes_sampled": 0,
+          "output_bytes": [
+            50449
+          ],
+          "payload_bytes": [
+            8707
+          ]
+        },
+        "after": {
+          "median_s": 0.40157656199880876,
+          "min_s": 0.40157656199880876,
+          "max_s": 0.40157656199880876,
+          "records_per_s": 249018.51717206705,
+          "max_rss_kib": 15212,
+          "cpu_median_s": 0.39,
+          "temp_peak_bytes_sampled": 0,
+          "output_bytes": [
+            50449
+          ],
+          "payload_bytes": [
+            8707
+          ]
+        },
+        "upstream": {
+          "median_s": 2.1601396719925106,
+          "min_s": 2.1601396719925106,
+          "max_s": 2.1601396719925106,
+          "records_per_s": 46293.3028343302,
+          "max_rss_kib": 261624,
+          "cpu_median_s": 1.45,
+          "temp_peak_bytes_sampled": 0,
+          "output_bytes": [
+            946068
+          ],
+          "payload_bytes": [
+            8501
+          ]
+        }
+      },
+      "paired_before_after_ratio": {
+        "samples": [
+          1.906734123583695
+        ],
+        "median": 1.906734123583695,
+        "min": 1.906734123583695,
+        "max": 1.906734123583695
+      }
+    },
+    {
+      "dataset": "synthetic-bam-100000",
+      "records": 100000,
+      "case": "bam_flagstat",
+      "samples": {
+        "before": [
+          {
+            "wall_s": 0.0,
+            "user_s": 0.0,
+            "sys_s": 0.0,
+            "max_rss_kb": 4088,
+            "elapsed_s": 0.010013779989094473,
+            "exit_code": 0,
+            "temp_peak_bytes_sampled": 0,
+            "before": {
+              "load_average": [
+                0.57177734375,
+                1.32275390625,
+                1.228515625
+              ],
+              "temperature_c": {
+                "Core 28": 42.0,
+                "Core 12": 37.0,
+                "Core 16": 38.0,
+                "Core 26": 39.0,
+                "Core 29": 42.0,
+                "Package id 0": 42.0,
+                "Core 27": 39.0,
+                "Core 20": 37.0,
+                "Core 30": 42.0,
+                "Core 0": 40.0,
+                "Core 24": 39.0,
+                "Core 4": 34.0,
+                "Core 31": 42.0,
+                "Core 25": 39.0,
+                "Core 8": 36.0
+              },
+              "cpu_frequency_khz": 5000000
+            },
+            "after": {
+              "load_average": [
+                0.57177734375,
+                1.32275390625,
+                1.228515625
+              ],
+              "temperature_c": {
+                "Core 28": 42.0,
+                "Core 12": 37.0,
+                "Core 16": 38.0,
+                "Core 26": 39.0,
+                "Core 29": 42.0,
+                "Package id 0": 42.0,
+                "Core 27": 39.0,
+                "Core 20": 37.0,
+                "Core 30": 42.0,
+                "Core 0": 40.0,
+                "Core 24": 39.0,
+                "Core 4": 34.0,
+                "Core 31": 42.0,
+                "Core 25": 39.0,
+                "Core 8": 36.0
+              },
+              "cpu_frequency_khz": 399638
+            },
+            "command": [
+              "taskset",
+              "-c",
+              "4",
+              "/tmp/bioinfo-perf-e125519/rust-bam",
+              "flagstat",
+              "/tmp/bioinfo-readme-benchmark/bam-100000/unsorted.bam"
+            ],
+            "output_bytes": 0,
+            "stderr": "",
+            "block": 0,
+            "order_in_block": 1,
+            "payload_bytes": 471
+          }
+        ],
+        "after": [
+          {
+            "wall_s": 0.0,
+            "user_s": 0.0,
+            "sys_s": 0.0,
+            "max_rss_kb": 4044,
+            "elapsed_s": 0.00892221400863491,
+            "exit_code": 0,
+            "temp_peak_bytes_sampled": 0,
+            "before": {
+              "load_average": [
+                0.57177734375,
+                1.32275390625,
+                1.228515625
+              ],
+              "temperature_c": {
+                "Core 28": 42.0,
+                "Core 12": 37.0,
+                "Core 16": 38.0,
+                "Core 26": 38.0,
+                "Core 29": 42.0,
+                "Package id 0": 42.0,
+                "Core 27": 38.0,
+                "Core 20": 37.0,
+                "Core 30": 42.0,
+                "Core 0": 36.0,
+                "Core 24": 38.0,
+                "Core 4": 37.0,
+                "Core 31": 42.0,
+                "Core 25": 38.0,
+                "Core 8": 36.0
+              },
+              "cpu_frequency_khz": 2581483
+            },
+            "after": {
+              "load_average": [
+                0.57177734375,
+                1.32275390625,
+                1.228515625
+              ],
+              "temperature_c": {
+                "Core 28": 42.0,
+                "Core 12": 37.0,
+                "Core 16": 38.0,
+                "Core 26": 38.0,
+                "Core 29": 42.0,
+                "Package id 0": 42.0,
+                "Core 27": 38.0,
+                "Core 20": 37.0,
+                "Core 30": 42.0,
+                "Core 0": 36.0,
+                "Core 24": 38.0,
+                "Core 4": 37.0,
+                "Core 31": 42.0,
+                "Core 25": 38.0,
+                "Core 8": 36.0
+              },
+              "cpu_frequency_khz": 1741257
+            },
+            "command": [
+              "taskset",
+              "-c",
+              "4",
+              "/tmp/bioinfo-perf-e125519/optimized/rust-bam",
+              "flagstat",
+              "/tmp/bioinfo-readme-benchmark/bam-100000/unsorted.bam"
+            ],
+            "output_bytes": 0,
+            "stderr": "",
+            "block": 0,
+            "order_in_block": 2,
+            "payload_bytes": 471
+          }
+        ],
+        "upstream": [
+          {
+            "wall_s": 0.0,
+            "user_s": 0.0,
+            "sys_s": 0.0,
+            "max_rss_kb": 3872,
+            "elapsed_s": 0.008038974992814474,
+            "exit_code": 0,
+            "temp_peak_bytes_sampled": 0,
+            "before": {
+              "load_average": [
+                0.57177734375,
+                1.32275390625,
+                1.228515625
+              ],
+              "temperature_c": {
+                "Core 28": 42.0,
+                "Core 12": 37.0,
+                "Core 16": 38.0,
+                "Core 26": 40.0,
+                "Core 29": 42.0,
+                "Package id 0": 42.0,
+                "Core 27": 40.0,
+                "Core 20": 37.0,
+                "Core 30": 42.0,
+                "Core 0": 37.0,
+                "Core 24": 40.0,
+                "Core 4": 37.0,
+                "Core 31": 42.0,
+                "Core 25": 40.0,
+                "Core 8": 36.0
+              },
+              "cpu_frequency_khz": 5000000
+            },
+            "after": {
+              "load_average": [
+                0.57177734375,
+                1.32275390625,
+                1.228515625
+              ],
+              "temperature_c": {
+                "Core 28": 42.0,
+                "Core 12": 37.0,
+                "Core 16": 38.0,
+                "Core 26": 40.0,
+                "Core 29": 42.0,
+                "Package id 0": 42.0,
+                "Core 27": 40.0,
+                "Core 20": 37.0,
+                "Core 30": 42.0,
+                "Core 0": 37.0,
+                "Core 24": 40.0,
+                "Core 4": 37.0,
+                "Core 31": 42.0,
+                "Core 25": 40.0,
+                "Core 8": 36.0
+              },
+              "cpu_frequency_khz": 400539
+            },
+            "command": [
+              "taskset",
+              "-c",
+              "4",
+              "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/tests/ci/env/bin/samtools",
+              "flagstat",
+              "/tmp/bioinfo-readme-benchmark/bam-100000/unsorted.bam"
+            ],
+            "output_bytes": 0,
+            "stderr": "",
+            "block": 0,
+            "order_in_block": 0,
+            "payload_bytes": 471
+          }
+        ]
+      },
+      "warmups": [
+        {
+          "upstream": {
+            "wall_s": 0.0,
+            "user_s": 0.0,
+            "sys_s": 0.0,
+            "max_rss_kb": 3820,
+            "elapsed_s": 0.008185644997865893,
+            "exit_code": 0,
+            "temp_peak_bytes_sampled": 0,
+            "before": {
+              "load_average": [
+                0.67626953125,
+                1.3681640625,
+                1.2421875
+              ],
+              "temperature_c": {
+                "Core 28": 42.0,
+                "Core 12": 38.0,
+                "Core 16": 39.0,
+                "Core 26": 41.0,
+                "Core 29": 42.0,
+                "Package id 0": 43.0,
+                "Core 27": 41.0,
+                "Core 20": 39.0,
+                "Core 30": 42.0,
+                "Core 0": 38.0,
+                "Core 24": 41.0,
+                "Core 4": 37.0,
+                "Core 31": 42.0,
+                "Core 25": 41.0,
+                "Core 8": 36.0
+              },
+              "cpu_frequency_khz": 5000000
+            },
+            "after": {
+              "load_average": [
+                0.67626953125,
+                1.3681640625,
+                1.2421875
+              ],
+              "temperature_c": {
+                "Core 28": 42.0,
+                "Core 12": 38.0,
+                "Core 16": 39.0,
+                "Core 26": 41.0,
+                "Core 29": 42.0,
+                "Package id 0": 43.0,
+                "Core 27": 41.0,
+                "Core 20": 39.0,
+                "Core 30": 42.0,
+                "Core 0": 38.0,
+                "Core 24": 41.0,
+                "Core 4": 37.0,
+                "Core 31": 42.0,
+                "Core 25": 41.0,
+                "Core 8": 36.0
+              },
+              "cpu_frequency_khz": 400223
+            },
+            "command": [
+              "taskset",
+              "-c",
+              "4",
+              "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/tests/ci/env/bin/samtools",
+              "flagstat",
+              "/tmp/bioinfo-readme-benchmark/bam-100000/unsorted.bam"
+            ],
+            "output_bytes": 0,
+            "stderr": "",
+            "block": -1,
+            "order_in_block": 0,
+            "payload_bytes": 471
+          },
+          "after": {
+            "wall_s": 0.0,
+            "user_s": 0.0,
+            "sys_s": 0.0,
+            "max_rss_kb": 4040,
+            "elapsed_s": 0.009319232995039783,
+            "exit_code": 0,
+            "temp_peak_bytes_sampled": 0,
+            "before": {
+              "load_average": [
+                0.6220703125,
+                1.34521484375,
+                1.2353515625
+              ],
+              "temperature_c": {
+                "Core 28": 42.0,
+                "Core 12": 37.0,
+                "Core 16": 38.0,
+                "Core 26": 41.0,
+                "Core 29": 42.0,
+                "Package id 0": 42.0,
+                "Core 27": 41.0,
+                "Core 20": 35.0,
+                "Core 30": 42.0,
+                "Core 0": 38.0,
+                "Core 24": 41.0,
+                "Core 4": 37.0,
+                "Core 31": 42.0,
+                "Core 25": 41.0,
+                "Core 8": 36.0
+              },
+              "cpu_frequency_khz": 5000000
+            },
+            "after": {
+              "load_average": [
+                0.6220703125,
+                1.34521484375,
+                1.2353515625
+              ],
+              "temperature_c": {
+                "Core 28": 42.0,
+                "Core 12": 37.0,
+                "Core 16": 38.0,
+                "Core 26": 41.0,
+                "Core 29": 42.0,
+                "Package id 0": 42.0,
+                "Core 27": 41.0,
+                "Core 20": 35.0,
+                "Core 30": 42.0,
+                "Core 0": 38.0,
+                "Core 24": 41.0,
+                "Core 4": 37.0,
+                "Core 31": 42.0,
+                "Core 25": 41.0,
+                "Core 8": 36.0
+              },
+              "cpu_frequency_khz": 400202
+            },
+            "command": [
+              "taskset",
+              "-c",
+              "4",
+              "/tmp/bioinfo-perf-e125519/optimized/rust-bam",
+              "flagstat",
+              "/tmp/bioinfo-readme-benchmark/bam-100000/unsorted.bam"
+            ],
+            "output_bytes": 0,
+            "stderr": "",
+            "block": -1,
+            "order_in_block": 1,
+            "payload_bytes": 471
+          },
+          "before": {
+            "wall_s": 0.0,
+            "user_s": 0.0,
+            "sys_s": 0.0,
+            "max_rss_kb": 4056,
+            "elapsed_s": 0.010646926006302238,
+            "exit_code": 0,
+            "temp_peak_bytes_sampled": 0,
+            "before": {
+              "load_average": [
+                0.6220703125,
+                1.34521484375,
+                1.2353515625
+              ],
+              "temperature_c": {
+                "Core 28": 42.0,
+                "Core 12": 34.0,
+                "Core 16": 39.0,
+                "Core 26": 40.0,
+                "Core 29": 42.0,
+                "Package id 0": 42.0,
+                "Core 27": 40.0,
+                "Core 20": 39.0,
+                "Core 30": 42.0,
+                "Core 0": 38.0,
+                "Core 24": 40.0,
+                "Core 4": 37.0,
+                "Core 31": 42.0,
+                "Core 25": 40.0,
+                "Core 8": 37.0
+              },
+              "cpu_frequency_khz": 400260
+            },
+            "after": {
+              "load_average": [
+                0.6220703125,
+                1.34521484375,
+                1.2353515625
+              ],
+              "temperature_c": {
+                "Core 28": 42.0,
+                "Core 12": 34.0,
+                "Core 16": 39.0,
+                "Core 26": 40.0,
+                "Core 29": 42.0,
+                "Package id 0": 42.0,
+                "Core 27": 40.0,
+                "Core 20": 39.0,
+                "Core 30": 42.0,
+                "Core 0": 38.0,
+                "Core 24": 40.0,
+                "Core 4": 37.0,
+                "Core 31": 42.0,
+                "Core 25": 40.0,
+                "Core 8": 37.0
+              },
+              "cpu_frequency_khz": 400119
+            },
+            "command": [
+              "taskset",
+              "-c",
+              "4",
+              "/tmp/bioinfo-perf-e125519/rust-bam",
+              "flagstat",
+              "/tmp/bioinfo-readme-benchmark/bam-100000/unsorted.bam"
+            ],
+            "output_bytes": 0,
+            "stderr": "",
+            "block": -1,
+            "order_in_block": 2,
+            "payload_bytes": 471
+          }
+        }
+      ],
+      "checks": [
+        {
+          "passed": true,
+          "checks": {
+            "before": {
+              "passed": true,
+              "rule": "decoded output bytes",
+              "sha256": {
+                "rust": "fe4b9ea41d9734fc2732f07b549e61dc61290e3f746dbc1bf85660dbb18ca58a",
+                "upstream": "fe4b9ea41d9734fc2732f07b549e61dc61290e3f746dbc1bf85660dbb18ca58a"
+              }
+            },
+            "after": {
+              "passed": true,
+              "rule": "decoded output bytes",
+              "sha256": {
+                "rust": "fe4b9ea41d9734fc2732f07b549e61dc61290e3f746dbc1bf85660dbb18ca58a",
+                "upstream": "fe4b9ea41d9734fc2732f07b549e61dc61290e3f746dbc1bf85660dbb18ca58a"
+              }
+            },
+            "native_preservation": {
+              "passed": true,
+              "rule": "native output bytes (including BAM encoding for sort)",
+              "observations": {
+                "before": "fe4b9ea41d9734fc2732f07b549e61dc61290e3f746dbc1bf85660dbb18ca58a",
+                "after": "fe4b9ea41d9734fc2732f07b549e61dc61290e3f746dbc1bf85660dbb18ca58a"
+              }
+            }
+          },
+          "block": -1
+        },
+        {
+          "passed": true,
+          "checks": {
+            "before": {
+              "passed": true,
+              "rule": "decoded output bytes",
+              "sha256": {
+                "rust": "fe4b9ea41d9734fc2732f07b549e61dc61290e3f746dbc1bf85660dbb18ca58a",
+                "upstream": "fe4b9ea41d9734fc2732f07b549e61dc61290e3f746dbc1bf85660dbb18ca58a"
+              }
+            },
+            "after": {
+              "passed": true,
+              "rule": "decoded output bytes",
+              "sha256": {
+                "rust": "fe4b9ea41d9734fc2732f07b549e61dc61290e3f746dbc1bf85660dbb18ca58a",
+                "upstream": "fe4b9ea41d9734fc2732f07b549e61dc61290e3f746dbc1bf85660dbb18ca58a"
+              }
+            },
+            "native_preservation": {
+              "passed": true,
+              "rule": "native output bytes (including BAM encoding for sort)",
+              "observations": {
+                "before": "fe4b9ea41d9734fc2732f07b549e61dc61290e3f746dbc1bf85660dbb18ca58a",
+                "after": "fe4b9ea41d9734fc2732f07b549e61dc61290e3f746dbc1bf85660dbb18ca58a"
+              }
+            }
+          },
+          "block": 0
+        }
+      ],
+      "passed": true,
+      "compression": "none",
+      "summary": {
+        "before": {
+          "median_s": 0.010013779989094473,
+          "min_s": 0.010013779989094473,
+          "max_s": 0.010013779989094473,
+          "records_per_s": 9986238.97358492,
+          "max_rss_kib": 4088,
+          "cpu_median_s": 0,
+          "temp_peak_bytes_sampled": 0,
+          "output_bytes": [
+            0
+          ],
+          "payload_bytes": [
+            471
+          ]
+        },
+        "after": {
+          "median_s": 0.00892221400863491,
+          "min_s": 0.00892221400863491,
+          "max_s": 0.00892221400863491,
+          "records_per_s": 11207980.4298821,
+          "max_rss_kib": 4044,
+          "cpu_median_s": 0,
+          "temp_peak_bytes_sampled": 0,
+          "output_bytes": [
+            0
+          ],
+          "payload_bytes": [
+            471
+          ]
+        },
+        "upstream": {
+          "median_s": 0.008038974992814474,
+          "min_s": 0.008038974992814474,
+          "max_s": 0.008038974992814474,
+          "records_per_s": 12439396.824767288,
+          "max_rss_kib": 3872,
+          "cpu_median_s": 0,
+          "temp_peak_bytes_sampled": 0,
+          "output_bytes": [
+            0
+          ],
+          "payload_bytes": [
+            471
+          ]
+        }
+      },
+      "paired_before_after_ratio": {
+        "samples": [
+          1.1223425014691586
+        ],
+        "median": 1.1223425014691586,
+        "min": 1.1223425014691586,
+        "max": 1.1223425014691586
+      }
+    },
+    {
+      "dataset": "synthetic-bam-100000",
+      "records": 100000,
+      "case": "bam_sort",
+      "samples": {
+        "before": [
+          {
+            "wall_s": 0.14,
+            "user_s": 0.12,
+            "sys_s": 0.01,
+            "max_rss_kb": 44516,
+            "elapsed_s": 0.1476470369962044,
+            "exit_code": 0,
+            "temp_peak_bytes_sampled": 1608218,
+            "before": {
+              "load_average": [
+                0.5185546875,
+                1.2734375,
+                1.21337890625
+              ],
+              "temperature_c": {
+                "Core 28": 41.0,
+                "Core 12": 35.0,
+                "Core 16": 38.0,
+                "Core 26": 41.0,
+                "Core 29": 42.0,
+                "Package id 0": 42.0,
+                "Core 27": 41.0,
+                "Core 20": 37.0,
+                "Core 30": 42.0,
+                "Core 0": 37.0,
+                "Core 24": 41.0,
+                "Core 4": 36.0,
+                "Core 31": 42.0,
+                "Core 25": 41.0,
+                "Core 8": 35.0
+              },
+              "cpu_frequency_khz": 5000000
+            },
+            "after": {
+              "load_average": [
+                0.5185546875,
+                1.2734375,
+                1.21337890625
+              ],
+              "temperature_c": {
+                "Core 28": 41.0,
+                "Core 12": 35.0,
+                "Core 16": 38.0,
+                "Core 26": 41.0,
+                "Core 29": 42.0,
+                "Package id 0": 42.0,
+                "Core 27": 41.0,
+                "Core 20": 37.0,
+                "Core 30": 42.0,
+                "Core 0": 37.0,
+                "Core 24": 41.0,
+                "Core 4": 36.0,
+                "Core 31": 42.0,
+                "Core 25": 41.0,
+                "Core 8": 35.0
+              },
+              "cpu_frequency_khz": 400228
+            },
+            "command": [
+              "taskset",
+              "-c",
+              "4",
+              "/tmp/bioinfo-perf-e125519/rust-bam",
+              "sort",
+              "--max-memory",
+              "32MiB",
+              "--threads",
+              "1",
+              "-o",
+              "/tmp/bioinfo-perf-e125519/pilot/synthetic-bam-100000/bam_sort/0-before/out/sorted.bam",
+              "/tmp/bioinfo-readme-benchmark/bam-100000/unsorted.bam"
+            ],
+            "output_bytes": 513111,
+            "stderr": "sorted 100000 records\n",
+            "block": 0,
+            "order_in_block": 1,
+            "payload_bytes": 513111
+          }
+        ],
+        "after": [
+          {
+            "wall_s": 0.12,
+            "user_s": 0.11,
+            "sys_s": 0.01,
+            "max_rss_kb": 43776,
+            "elapsed_s": 0.13027590600540861,
+            "exit_code": 0,
+            "temp_peak_bytes_sampled": 1608218,
+            "before": {
+              "load_average": [
+                0.5185546875,
+                1.2734375,
+                1.21337890625
+              ],
+              "temperature_c": {
+                "Core 28": 41.0,
+                "Core 12": 35.0,
+                "Core 16": 38.0,
+                "Core 26": 39.0,
+                "Core 29": 41.0,
+                "Package id 0": 41.0,
+                "Core 27": 40.0,
+                "Core 20": 38.0,
+                "Core 30": 41.0,
+                "Core 0": 37.0,
+                "Core 24": 40.0,
+                "Core 4": 35.0,
+                "Core 31": 41.0,
+                "Core 25": 40.0,
+                "Core 8": 36.0
+              },
+              "cpu_frequency_khz": 5000000
+            },
+            "after": {
+              "load_average": [
+                0.5185546875,
+                1.2734375,
+                1.21337890625
+              ],
+              "temperature_c": {
+                "Core 28": 41.0,
+                "Core 12": 35.0,
+                "Core 16": 38.0,
+                "Core 26": 39.0,
+                "Core 29": 41.0,
+                "Package id 0": 41.0,
+                "Core 27": 40.0,
+                "Core 20": 38.0,
+                "Core 30": 41.0,
+                "Core 0": 37.0,
+                "Core 24": 40.0,
+                "Core 4": 35.0,
+                "Core 31": 41.0,
+                "Core 25": 40.0,
+                "Core 8": 36.0
+              },
+              "cpu_frequency_khz": 2279360
+            },
+            "command": [
+              "taskset",
+              "-c",
+              "4",
+              "/tmp/bioinfo-perf-e125519/optimized/rust-bam",
+              "sort",
+              "--max-memory",
+              "32MiB",
+              "--threads",
+              "1",
+              "-o",
+              "/tmp/bioinfo-perf-e125519/pilot/synthetic-bam-100000/bam_sort/0-after/out/sorted.bam",
+              "/tmp/bioinfo-readme-benchmark/bam-100000/unsorted.bam"
+            ],
+            "output_bytes": 513111,
+            "stderr": "sorted 100000 records\n",
+            "block": 0,
+            "order_in_block": 2,
+            "payload_bytes": 513111
+          }
+        ],
+        "upstream": [
+          {
+            "wall_s": 0.04,
+            "user_s": 0.03,
+            "sys_s": 0.0,
+            "max_rss_kb": 30360,
+            "elapsed_s": 0.041911628999514505,
+            "exit_code": 0,
+            "temp_peak_bytes_sampled": 0,
+            "before": {
+              "load_average": [
+                0.56396484375,
+                1.29541015625,
+                1.22021484375
+              ],
+              "temperature_c": {
+                "Core 28": 41.0,
+                "Core 12": 35.0,
+                "Core 16": 38.0,
+                "Core 26": 40.0,
+                "Core 29": 42.0,
+                "Package id 0": 42.0,
+                "Core 27": 40.0,
+                "Core 20": 34.0,
+                "Core 30": 42.0,
+                "Core 0": 37.0,
+                "Core 24": 40.0,
+                "Core 4": 36.0,
+                "Core 31": 41.0,
+                "Core 25": 39.0,
+                "Core 8": 36.0
+              },
+              "cpu_frequency_khz": 5000000
+            },
+            "after": {
+              "load_average": [
+                0.56396484375,
+                1.29541015625,
+                1.22021484375
+              ],
+              "temperature_c": {
+                "Core 28": 41.0,
+                "Core 12": 35.0,
+                "Core 16": 38.0,
+                "Core 26": 40.0,
+                "Core 29": 42.0,
+                "Package id 0": 42.0,
+                "Core 27": 40.0,
+                "Core 20": 34.0,
+                "Core 30": 42.0,
+                "Core 0": 37.0,
+                "Core 24": 40.0,
+                "Core 4": 36.0,
+                "Core 31": 41.0,
+                "Core 25": 39.0,
+                "Core 8": 36.0
+              },
+              "cpu_frequency_khz": 400095
+            },
+            "command": [
+              "taskset",
+              "-c",
+              "4",
+              "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/tests/ci/env/bin/samtools",
+              "sort",
+              "-m",
+              "32M",
+              "-@",
+              "0",
+              "-l",
+              "6",
+              "-T",
+              "/tmp/bioinfo-perf-e125519/pilot/synthetic-bam-100000/bam_sort/0-upstream/tmp/sort",
+              "-o",
+              "/tmp/bioinfo-perf-e125519/pilot/synthetic-bam-100000/bam_sort/0-upstream/out/sorted.bam",
+              "/tmp/bioinfo-readme-benchmark/bam-100000/unsorted.bam"
+            ],
+            "output_bytes": 492467,
+            "stderr": "",
+            "block": 0,
+            "order_in_block": 0,
+            "payload_bytes": 492467
+          }
+        ]
+      },
+      "warmups": [
+        {
+          "upstream": {
+            "wall_s": 0.04,
+            "user_s": 0.03,
+            "sys_s": 0.0,
+            "max_rss_kb": 29332,
+            "elapsed_s": 0.04155724900192581,
+            "exit_code": 0,
+            "temp_peak_bytes_sampled": 0,
+            "before": {
+              "load_average": [
+                0.52587890625,
+                1.30078125,
+                1.2216796875
+              ],
+              "temperature_c": {
+                "Core 28": 42.0,
+                "Core 12": 37.0,
+                "Core 16": 38.0,
+                "Core 26": 38.0,
+                "Core 29": 42.0,
+                "Package id 0": 41.0,
+                "Core 27": 38.0,
+                "Core 20": 33.0,
+                "Core 30": 42.0,
+                "Core 0": 39.0,
+                "Core 24": 39.0,
+                "Core 4": 37.0,
+                "Core 31": 42.0,
+                "Core 25": 39.0,
+                "Core 8": 35.0
+              },
+              "cpu_frequency_khz": 782798
+            },
+            "after": {
+              "load_average": [
+                0.52587890625,
+                1.30078125,
+                1.2216796875
+              ],
+              "temperature_c": {
+                "Core 28": 42.0,
+                "Core 12": 37.0,
+                "Core 16": 38.0,
+                "Core 26": 38.0,
+                "Core 29": 42.0,
+                "Package id 0": 41.0,
+                "Core 27": 38.0,
+                "Core 20": 33.0,
+                "Core 30": 42.0,
+                "Core 0": 39.0,
+                "Core 24": 39.0,
+                "Core 4": 37.0,
+                "Core 31": 42.0,
+                "Core 25": 39.0,
+                "Core 8": 35.0
+              },
+              "cpu_frequency_khz": 399784
+            },
+            "command": [
+              "taskset",
+              "-c",
+              "4",
+              "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/tests/ci/env/bin/samtools",
+              "sort",
+              "-m",
+              "32M",
+              "-@",
+              "0",
+              "-l",
+              "6",
+              "-T",
+              "/tmp/bioinfo-perf-e125519/pilot/synthetic-bam-100000/bam_sort/-1-upstream/tmp/sort",
+              "-o",
+              "/tmp/bioinfo-perf-e125519/pilot/synthetic-bam-100000/bam_sort/-1-upstream/out/sorted.bam",
+              "/tmp/bioinfo-readme-benchmark/bam-100000/unsorted.bam"
+            ],
+            "output_bytes": 492469,
+            "stderr": "",
+            "block": -1,
+            "order_in_block": 0,
+            "payload_bytes": 492469
+          },
+          "after": {
+            "wall_s": 0.12,
+            "user_s": 0.12,
+            "sys_s": 0.0,
+            "max_rss_kb": 43784,
+            "elapsed_s": 0.13072392299363855,
+            "exit_code": 0,
+            "temp_peak_bytes_sampled": 1608218,
+            "before": {
+              "load_average": [
+                0.52587890625,
+                1.30078125,
+                1.2216796875
+              ],
+              "temperature_c": {
+                "Core 28": 42.0,
+                "Core 12": 35.0,
+                "Core 16": 39.0,
+                "Core 26": 40.0,
+                "Core 29": 42.0,
+                "Package id 0": 41.0,
+                "Core 27": 40.0,
+                "Core 20": 37.0,
+                "Core 30": 42.0,
+                "Core 0": 39.0,
+                "Core 24": 40.0,
+                "Core 4": 37.0,
+                "Core 31": 42.0,
+                "Core 25": 40.0,
+                "Core 8": 35.0
+              },
+              "cpu_frequency_khz": 400259
+            },
+            "after": {
+              "load_average": [
+                0.52587890625,
+                1.30078125,
+                1.2216796875
+              ],
+              "temperature_c": {
+                "Core 28": 42.0,
+                "Core 12": 35.0,
+                "Core 16": 39.0,
+                "Core 26": 40.0,
+                "Core 29": 42.0,
+                "Package id 0": 41.0,
+                "Core 27": 40.0,
+                "Core 20": 37.0,
+                "Core 30": 42.0,
+                "Core 0": 39.0,
+                "Core 24": 40.0,
+                "Core 4": 37.0,
+                "Core 31": 42.0,
+                "Core 25": 40.0,
+                "Core 8": 35.0
+              },
+              "cpu_frequency_khz": 400196
+            },
+            "command": [
+              "taskset",
+              "-c",
+              "4",
+              "/tmp/bioinfo-perf-e125519/optimized/rust-bam",
+              "sort",
+              "--max-memory",
+              "32MiB",
+              "--threads",
+              "1",
+              "-o",
+              "/tmp/bioinfo-perf-e125519/pilot/synthetic-bam-100000/bam_sort/-1-after/out/sorted.bam",
+              "/tmp/bioinfo-readme-benchmark/bam-100000/unsorted.bam"
+            ],
+            "output_bytes": 513111,
+            "stderr": "sorted 100000 records\n",
+            "block": -1,
+            "order_in_block": 1,
+            "payload_bytes": 513111
+          },
+          "before": {
+            "wall_s": 0.14,
+            "user_s": 0.13,
+            "sys_s": 0.01,
+            "max_rss_kb": 43712,
+            "elapsed_s": 0.1506046259892173,
+            "exit_code": 0,
+            "temp_peak_bytes_sampled": 1608218,
+            "before": {
+              "load_average": [
+                0.56396484375,
+                1.29541015625,
+                1.22021484375
+              ],
+              "temperature_c": {
+                "Core 28": 42.0,
+                "Core 12": 35.0,
+                "Core 16": 38.0,
+                "Core 26": 40.0,
+                "Core 29": 42.0,
+                "Package id 0": 43.0,
+                "Core 27": 40.0,
+                "Core 20": 36.0,
+                "Core 30": 42.0,
+                "Core 0": 37.0,
+                "Core 24": 40.0,
+                "Core 4": 37.0,
+                "Core 31": 42.0,
+                "Core 25": 40.0,
+                "Core 8": 38.0
+              },
+              "cpu_frequency_khz": 5000000
+            },
+            "after": {
+              "load_average": [
+                0.56396484375,
+                1.29541015625,
+                1.22021484375
+              ],
+              "temperature_c": {
+                "Core 28": 42.0,
+                "Core 12": 35.0,
+                "Core 16": 38.0,
+                "Core 26": 40.0,
+                "Core 29": 42.0,
+                "Package id 0": 43.0,
+                "Core 27": 40.0,
+                "Core 20": 36.0,
+                "Core 30": 42.0,
+                "Core 0": 37.0,
+                "Core 24": 40.0,
+                "Core 4": 37.0,
+                "Core 31": 42.0,
+                "Core 25": 40.0,
+                "Core 8": 38.0
+              },
+              "cpu_frequency_khz": 711903
+            },
+            "command": [
+              "taskset",
+              "-c",
+              "4",
+              "/tmp/bioinfo-perf-e125519/rust-bam",
+              "sort",
+              "--max-memory",
+              "32MiB",
+              "--threads",
+              "1",
+              "-o",
+              "/tmp/bioinfo-perf-e125519/pilot/synthetic-bam-100000/bam_sort/-1-before/out/sorted.bam",
+              "/tmp/bioinfo-readme-benchmark/bam-100000/unsorted.bam"
+            ],
+            "output_bytes": 513111,
+            "stderr": "sorted 100000 records\n",
+            "block": -1,
+            "order_in_block": 2,
+            "payload_bytes": 513111
+          }
+        }
+      ],
+      "checks": [
+        {
+          "passed": true,
+          "checks": {
+            "before": {
+              "passed": true,
+              "rule": "BAM without @PG; coordinate order required; equal-coordinate ties canonicalized",
+              "expected_records": 100000,
+              "observations": {
+                "rust": {
+                  "normalized_sha256": "0e343362756ee9604af8603b569824b13b6a696b18f6224ccf3860aea543320a",
+                  "records": 100000,
+                  "coordinate_sorted": true,
+                  "independent_representatives": null,
+                  "decoder_stderr": ""
+                },
+                "upstream": {
+                  "normalized_sha256": "0e343362756ee9604af8603b569824b13b6a696b18f6224ccf3860aea543320a",
+                  "records": 100000,
+                  "coordinate_sorted": true,
+                  "independent_representatives": null,
+                  "decoder_stderr": ""
+                }
+              }
+            },
+            "after": {
+              "passed": true,
+              "rule": "BAM without @PG; coordinate order required; equal-coordinate ties canonicalized",
+              "expected_records": 100000,
+              "observations": {
+                "rust": {
+                  "normalized_sha256": "0e343362756ee9604af8603b569824b13b6a696b18f6224ccf3860aea543320a",
+                  "records": 100000,
+                  "coordinate_sorted": true,
+                  "independent_representatives": null,
+                  "decoder_stderr": ""
+                },
+                "upstream": {
+                  "normalized_sha256": "0e343362756ee9604af8603b569824b13b6a696b18f6224ccf3860aea543320a",
+                  "records": 100000,
+                  "coordinate_sorted": true,
+                  "independent_representatives": null,
+                  "decoder_stderr": ""
+                }
+              }
+            },
+            "native_preservation": {
+              "passed": true,
+              "rule": "native output bytes (including BAM encoding for sort)",
+              "observations": {
+                "before": "f524db42e6ca7b9ff12aafb5f2a6ea6aa313b7f3440a74a082ef962bed053631",
+                "after": "f524db42e6ca7b9ff12aafb5f2a6ea6aa313b7f3440a74a082ef962bed053631"
+              }
+            }
+          },
+          "block": -1
+        },
+        {
+          "passed": true,
+          "checks": {
+            "before": {
+              "passed": true,
+              "rule": "BAM without @PG; coordinate order required; equal-coordinate ties canonicalized",
+              "expected_records": 100000,
+              "observations": {
+                "rust": {
+                  "normalized_sha256": "0e343362756ee9604af8603b569824b13b6a696b18f6224ccf3860aea543320a",
+                  "records": 100000,
+                  "coordinate_sorted": true,
+                  "independent_representatives": null,
+                  "decoder_stderr": ""
+                },
+                "upstream": {
+                  "normalized_sha256": "0e343362756ee9604af8603b569824b13b6a696b18f6224ccf3860aea543320a",
+                  "records": 100000,
+                  "coordinate_sorted": true,
+                  "independent_representatives": null,
+                  "decoder_stderr": ""
+                }
+              }
+            },
+            "after": {
+              "passed": true,
+              "rule": "BAM without @PG; coordinate order required; equal-coordinate ties canonicalized",
+              "expected_records": 100000,
+              "observations": {
+                "rust": {
+                  "normalized_sha256": "0e343362756ee9604af8603b569824b13b6a696b18f6224ccf3860aea543320a",
+                  "records": 100000,
+                  "coordinate_sorted": true,
+                  "independent_representatives": null,
+                  "decoder_stderr": ""
+                },
+                "upstream": {
+                  "normalized_sha256": "0e343362756ee9604af8603b569824b13b6a696b18f6224ccf3860aea543320a",
+                  "records": 100000,
+                  "coordinate_sorted": true,
+                  "independent_representatives": null,
+                  "decoder_stderr": ""
+                }
+              }
+            },
+            "native_preservation": {
+              "passed": true,
+              "rule": "native output bytes (including BAM encoding for sort)",
+              "observations": {
+                "before": "f524db42e6ca7b9ff12aafb5f2a6ea6aa313b7f3440a74a082ef962bed053631",
+                "after": "f524db42e6ca7b9ff12aafb5f2a6ea6aa313b7f3440a74a082ef962bed053631"
+              }
+            }
+          },
+          "block": 0
+        }
+      ],
+      "passed": true,
+      "compression": "final BGZF level 6; temporary codec is implementation-specific",
+      "summary": {
+        "before": {
+          "median_s": 0.1476470369962044,
+          "min_s": 0.1476470369962044,
+          "max_s": 0.1476470369962044,
+          "records_per_s": 677290.9367803346,
+          "max_rss_kib": 44516,
+          "cpu_median_s": 0.13,
+          "temp_peak_bytes_sampled": 1608218,
+          "output_bytes": [
+            513111
+          ],
+          "payload_bytes": [
+            513111
+          ]
+        },
+        "after": {
+          "median_s": 0.13027590600540861,
+          "min_s": 0.13027590600540861,
+          "max_s": 0.13027590600540861,
+          "records_per_s": 767601.6468912397,
+          "max_rss_kib": 43776,
+          "cpu_median_s": 0.12,
+          "temp_peak_bytes_sampled": 1608218,
+          "output_bytes": [
+            513111
+          ],
+          "payload_bytes": [
+            513111
+          ]
+        },
+        "upstream": {
+          "median_s": 0.041911628999514505,
+          "min_s": 0.041911628999514505,
+          "max_s": 0.041911628999514505,
+          "records_per_s": 2385972.6378365867,
+          "max_rss_kib": 30360,
+          "cpu_median_s": 0.03,
+          "temp_peak_bytes_sampled": 0,
+          "output_bytes": [
+            492467
+          ],
+          "payload_bytes": [
+            492467
+          ]
+        }
+      },
+      "paired_before_after_ratio": {
+        "samples": [
+          1.133341087568983
+        ],
+        "median": 1.133341087568983,
+        "min": 1.133341087568983,
+        "max": 1.133341087568983
+      }
+    }
+  ],
+  "passed": true,
+  "completed_utc": "2026-10-31T20:02:57.584853+00:00"
+}

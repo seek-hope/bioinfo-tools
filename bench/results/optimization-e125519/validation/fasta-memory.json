@@ -1,0 +1,81 @@
+{
+  "purpose": "record-lifetime regression check; one observation per artifact, not a speed claim",
+  "length_per_record": 33554432,
+  "records": 2,
+  "expected_sha256": "47eb8f6703299d9ba88c1dadb81dd0c8d28f23478c29cc6e2e5975edfb736580",
+  "observations": {
+    "before": {
+      "wall_s": 0.03,
+      "user_s": 0.0,
+      "sys_s": 0.03,
+      "max_rss_kb": 39568,
+      "command": [
+        "/usr/bin/time",
+        "-v",
+        "-o",
+        "/tmp/bioinfo-perf-e125519/fasta-memory/before.time",
+        "taskset",
+        "-c",
+        "4",
+        "/tmp/bioinfo-perf-e125519/rust-fx",
+        "fq2fa",
+        "-w",
+        "0",
+        "-o",
+        "/tmp/bioinfo-perf-e125519/fasta-memory/before.fa",
+        "/tmp/bioinfo-perf-e125519/fasta-memory/two-large.fa"
+      ],
+      "output_sha256": "47eb8f6703299d9ba88c1dadb81dd0c8d28f23478c29cc6e2e5975edfb736580",
+      "passed": true
+    },
+    "superseded": {
+      "wall_s": 0.03,
+      "user_s": 0.0,
+      "sys_s": 0.02,
+      "max_rss_kb": 72524,
+      "command": [
+        "/usr/bin/time",
+        "-v",
+        "-o",
+        "/tmp/bioinfo-perf-e125519/fasta-memory/superseded.time",
+        "taskset",
+        "-c",
+        "4",
+        "/tmp/bioinfo-perf-e125519/optimized-final/rust-fx",
+        "fq2fa",
+        "-w",
+        "0",
+        "-o",
+        "/tmp/bioinfo-perf-e125519/fasta-memory/superseded.fa",
+        "/tmp/bioinfo-perf-e125519/fasta-memory/two-large.fa"
+      ],
+      "output_sha256": "47eb8f6703299d9ba88c1dadb81dd0c8d28f23478c29cc6e2e5975edfb736580",
+      "passed": true
+    },
+    "after": {
+      "wall_s": 0.03,
+      "user_s": 0.0,
+      "sys_s": 0.03,
+      "max_rss_kb": 39540,
+      "command": [
+        "/usr/bin/time",
+        "-v",
+        "-o",
+        "/tmp/bioinfo-perf-e125519/fasta-memory/after.time",
+        "taskset",
+        "-c",
+        "4",
+        "/tmp/bioinfo-perf-e125519/optimized-current/rust-fx",
+        "fq2fa",
+        "-w",
+        "0",
+        "-o",
+        "/tmp/bioinfo-perf-e125519/fasta-memory/after.fa",
+        "/tmp/bioinfo-perf-e125519/fasta-memory/two-large.fa"
+      ],
+      "output_sha256": "47eb8f6703299d9ba88c1dadb81dd0c8d28f23478c29cc6e2e5975edfb736580",
+      "passed": true
+    }
+  },
+  "passed": true
+}

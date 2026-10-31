@@ -28,21 +28,14 @@ use crate::stats::{FlagStat, IdxStats};
 // helpers
 // --------------------------------------------------------------------------- //
 
-/// Translate a header reference id into its name.
-///
-/// Returns an owned `String` because noodles stores header names as `BString`,
-/// which has no borrowed `&str` view. The allocation is once per record field and
-/// only in `flagstat`, whose cost is dominated by flag arithmetic.
-///
-/// Returns `None` for an id that is absent or out of range, so an out-of-spec
-/// record cannot panic the counting loops.
-fn reference_name(header: &sam::Header, id: Option<usize>) -> Option<String> {
-    let id = id?;
+/// Resolve header reference names once, preserving the existing lossy UTF-8
+/// interpretation. Record IDs then index this table without per-record strings.
+fn reference_names(header: &sam::Header) -> Vec<String> {
     header
         .reference_sequences()
         .iter()
-        .nth(id)
         .map(|(name, _)| String::from_utf8_lossy(name.as_ref()).into_owned())
+        .collect()
 }
 
 /// Parse a `--reference` style id from a record, tolerating an error.
@@ -1570,6 +1563,7 @@ pub fn flagstat(input: &Path) -> Result<String> {
     let mut reader = AlignmentReader::open(input)?;
     let header = reader.read_header()?;
 
+    let names = reference_names(&header);
     let mut stat = FlagStat::default();
     let mut record = Record::default();
     loop {
@@ -1578,13 +1572,15 @@ pub fn flagstat(input: &Path) -> Result<String> {
             break;
         }
         let flags = record.flags();
-        let reference = reference_name(&header, tolerant_reference_id(&record));
-        let mate_reference = reference_name(&header, record.mate_reference_sequence_id());
+        let reference = tolerant_reference_id(&record).and_then(|id| names.get(id));
+        let mate_reference = record
+            .mate_reference_sequence_id()
+            .and_then(|id| names.get(id));
         let mapping_quality = record.mapping_quality().map(|q| q.get());
         stat.add(
             flags,
-            reference.as_deref(),
-            mate_reference.as_deref(),
+            reference.map(String::as_str),
+            mate_reference.map(String::as_str),
             mapping_quality,
         );
     }
@@ -1951,10 +1947,17 @@ fn record_memory(record: &Record) -> u64 {
     (std::mem::size_of::<Record>() + name + sequence + qualities + 256) as u64
 }
 
-fn write_index(file: &mut File, index: usize) -> Result<()> {
+fn write_index(file: &mut impl Write, index: usize) -> Result<()> {
     let index = u64::try_from(index)
         .map_err(|_| Error::runtime("record index does not fit in u64".to_string()))?;
     file.write_all(&index.to_le_bytes())
+        .map_err(|error| Error::io(format!("cannot write sort index: {error}")))
+}
+
+fn flush_index(file: &mut impl Write) -> Result<()> {
+    // Buffered writes can first fail here. Keep the diagnostic used when the
+    // same underlying write failed immediately in write_index.
+    file.flush()
         .map_err(|error| Error::io(format!("cannot write sort index: {error}")))
 }
 
@@ -1970,8 +1973,11 @@ fn spill_run(
 
     let file = File::create(&path)
         .map_err(|error| Error::io(format!("cannot create {}: {error}", path.display())))?;
-    let mut index_file = File::create(&index_path)
+    let index_file = File::create(&index_path)
         .map_err(|error| Error::io(format!("cannot create {}: {error}", index_path.display())))?;
+    // Sidecars contain one eight-byte index per record. Buffer those writes;
+    // flushing below still propagates errors before a run is published.
+    let mut index_file = BufWriter::with_capacity(64 * 1024, index_file);
     let mut writer = BamWriter::new_fast(file);
     writer.write_header(header)?;
     for (key, record) in &sorted {
@@ -1981,9 +1987,7 @@ fn spill_run(
     let file = writer.finish()?;
     file.sync_all()
         .map_err(|error| Error::io(format!("cannot sync {}: {error}", path.display())))?;
-    index_file
-        .flush()
-        .map_err(|error| Error::io(format!("cannot flush {}: {error}", index_path.display())))?;
+    flush_index(&mut index_file)?;
     Ok(path)
 }
 
@@ -2095,8 +2099,9 @@ fn merge_to_run(temp: &mut TempDir, paths: &[PathBuf], header: &sam::Header) -> 
     let index_path = path.with_extension("idx");
     let file = File::create(&path)
         .map_err(|error| Error::io(format!("cannot create {}: {error}", path.display())))?;
-    let mut index_file = File::create(&index_path)
+    let index_file = File::create(&index_path)
         .map_err(|error| Error::io(format!("cannot create {}: {error}", index_path.display())))?;
+    let mut index_file = BufWriter::with_capacity(64 * 1024, index_file);
     let mut writer = BamWriter::new_fast(file);
     writer.write_header(header)?;
     while let Some(item) = heap.pop() {
@@ -2113,9 +2118,7 @@ fn merge_to_run(temp: &mut TempDir, paths: &[PathBuf], header: &sam::Header) -> 
     let file = writer.finish()?;
     file.sync_all()
         .map_err(|error| Error::io(format!("cannot sync {}: {error}", path.display())))?;
-    index_file
-        .flush()
-        .map_err(|error| Error::io(format!("cannot flush {}: {error}", index_path.display())))?;
+    flush_index(&mut index_file)?;
     Ok(path)
 }
 
@@ -2299,6 +2302,25 @@ fn header_with_coordinate_sort(header: sam::Header) -> sam::Header {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn buffered_sort_index_propagates_deferred_write_failure() {
+        struct FullDisk;
+        impl Write for FullDisk {
+            fn write(&mut self, _: &[u8]) -> std::io::Result<usize> {
+                Err(std::io::Error::other("disk full"))
+            }
+            fn flush(&mut self) -> std::io::Result<()> {
+                Ok(())
+            }
+        }
+        let mut writer = BufWriter::with_capacity(64, FullDisk);
+        write_index(&mut writer, 7).unwrap();
+        assert_eq!(
+            flush_index(&mut writer).unwrap_err().to_string(),
+            "cannot write sort index: disk full"
+        );
+    }
 
     #[test]
     fn the_bgzf_eof_marker_is_the_28_byte_htslib_pattern() {

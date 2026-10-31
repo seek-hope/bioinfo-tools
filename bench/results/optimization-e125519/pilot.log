@@ -1,0 +1,12 @@
+synthetic-100000 fx_stats block -1 order ('after', 'before', 'upstream') passed True {'after': 0.1042, 'before': 0.1989, 'upstream': 0.0474}
+synthetic-100000 fx_stats block 0 order ('after', 'upstream', 'before') passed True {'after': 0.1051, 'upstream': 0.0461, 'before': 0.2013}
+synthetic-100000 fx_fq2fa block -1 order ('before', 'upstream', 'after') passed True {'before': 0.0208, 'upstream': 0.0239, 'after': 0.0179}
+synthetic-100000 fx_fq2fa block 0 order ('after', 'upstream', 'before') passed True {'after': 0.0178, 'upstream': 0.0231, 'before': 0.0207}
+synthetic-100000 fq_lint block -1 order ('upstream', 'before', 'after') passed True {'upstream': 0.0207, 'before': 0.0406, 'after': 0.0235}
+synthetic-100000 fq_lint block 0 order ('after', 'upstream', 'before') passed True {'after': 0.0232, 'upstream': 0.021, 'before': 0.0406}
+synthetic-100000 fastqc block -1 order ('before', 'upstream', 'after') passed True {'before': 0.7732, 'upstream': 2.1606, 'after': 0.4005}
+synthetic-100000 fastqc block 0 order ('after', 'before', 'upstream') passed True {'after': 0.4016, 'before': 0.7657, 'upstream': 2.1601}
+synthetic-bam-100000 bam_flagstat block -1 order ('upstream', 'after', 'before') passed True {'upstream': 0.0082, 'after': 0.0093, 'before': 0.0106}
+synthetic-bam-100000 bam_flagstat block 0 order ('upstream', 'before', 'after') passed True {'upstream': 0.008, 'before': 0.01, 'after': 0.0089}
+synthetic-bam-100000 bam_sort block -1 order ('upstream', 'after', 'before') passed True {'upstream': 0.0416, 'after': 0.1307, 'before': 0.1506}
+synthetic-bam-100000 bam_sort block 0 order ('upstream', 'before', 'after') passed True {'upstream': 0.0419, 'before': 0.1476, 'after': 0.1303}

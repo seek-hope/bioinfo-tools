@@ -1,0 +1,26 @@
+{
+  "baseline_revision": "e1255197285329e0c184293ef36868de30694ee0",
+  "rustc": "rustc 1.99.1 (58cf8f9c3 2026-10-13)",
+  "build_commands": [
+    "cargo build --release --workspace --bins --locked",
+    "cargo build --release --locked -p rust-fx"
+  ],
+  "artifacts": {
+    "rust-fx": {
+      "before": "f9c17835b6c3e8e4a37475f21e27f84fc5068492a4dceff36fa7a1a42641e50a",
+      "after": "7b700efecdff821b1115a0c8d1ded5f32d1187fc8974b8078c90cf72ca3e8d9d",
+      "baseline_matches_original_measured_binary": true
+    },
+    "rust-bam": {
+      "before": "9f05eb49e043fcdb1ad163711e934920c45cc2e242f4ed6804c479576c42a17a",
+      "after": "bc1300432371e80ede2cef8e225c89b4bf923197ec3873fa22f62d4c5aef28c2",
+      "baseline_matches_original_measured_binary": true
+    },
+    "rust-fastqc": {
+      "before": "8f45261c8647d33a1680fd246df19c0270764dcbc76026b5e1b23d92b2ee654c",
+      "after": "b618708f0f5ce7b70794bfcc7688d78ec97743f43901db48fff10b317725bba7",
+      "baseline_matches_original_measured_binary": true
+    }
+  },
+  "note": "Formal artifacts; first pilot used the separately retained optimized directory."
+}

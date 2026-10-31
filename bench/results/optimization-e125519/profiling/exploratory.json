@@ -1,0 +1,41 @@
+{
+  "scope": "exploratory; fixed order, no cooldown; excluded from formal claims",
+  "observations": [
+    {
+      "block": 0,
+      "label": "phase1",
+      "seconds": 0.10152315799496137,
+      "sha256": "d82bee04202a2845f3451e0ad8a2de3128a962c5db3ebdfd7a6c2268fe85f8a0"
+    },
+    {
+      "block": 0,
+      "label": "branchless",
+      "seconds": 0.06374270399101079,
+      "sha256": "d82bee04202a2845f3451e0ad8a2de3128a962c5db3ebdfd7a6c2268fe85f8a0"
+    },
+    {
+      "block": 1,
+      "label": "phase1",
+      "seconds": 0.10244926100131124,
+      "sha256": "d82bee04202a2845f3451e0ad8a2de3128a962c5db3ebdfd7a6c2268fe85f8a0"
+    },
+    {
+      "block": 1,
+      "label": "branchless",
+      "seconds": 0.06398231300408952,
+      "sha256": "d82bee04202a2845f3451e0ad8a2de3128a962c5db3ebdfd7a6c2268fe85f8a0"
+    },
+    {
+      "block": 2,
+      "label": "phase1",
+      "seconds": 0.10114453001006041,
+      "sha256": "d82bee04202a2845f3451e0ad8a2de3128a962c5db3ebdfd7a6c2268fe85f8a0"
+    },
+    {
+      "block": 2,
+      "label": "branchless",
+      "seconds": 0.06400832200597506,
+      "sha256": "d82bee04202a2845f3451e0ad8a2de3128a962c5db3ebdfd7a6c2268fe85f8a0"
+    }
+  ]
+}

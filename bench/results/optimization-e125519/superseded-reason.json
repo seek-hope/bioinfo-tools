@@ -1,0 +1,6 @@
+{
+  "reason": "Stopped to remove a newly identified FASTA fallback record-lifetime overlap; completed comparisons are retained, and no candidate timings will be used as final results.",
+  "interrupted_pids": [
+    1365162
+  ]
+}

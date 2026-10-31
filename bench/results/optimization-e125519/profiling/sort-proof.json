@@ -1,0 +1,29 @@
+{
+  "scope": "instrumented syscall counts, excluded from timed results",
+  "after_command": [
+    "strace",
+    "-qq",
+    "-c",
+    "-e",
+    "trace=write,writev,pwrite64",
+    "-o",
+    "/tmp/bioinfo-perf-e125519/sort-syscalls-after.txt",
+    "taskset",
+    "-c",
+    "4",
+    "/tmp/bioinfo-perf-e125519/optimized-current/rust-bam",
+    "sort",
+    "--max-memory",
+    "32MiB",
+    "--threads",
+    "1",
+    "-o",
+    "/tmp/bioinfo-perf-e125519/sort-profile-optimized/sorted.bam",
+    "/tmp/bioinfo-readme-benchmark/bam-100000/unsorted.bam"
+  ],
+  "output_sha256": {
+    "before": "f524db42e6ca7b9ff12aafb5f2a6ea6aa313b7f3440a74a082ef962bed053631",
+    "after": "f524db42e6ca7b9ff12aafb5f2a6ea6aa313b7f3440a74a082ef962bed053631"
+  },
+  "passed": true
+}

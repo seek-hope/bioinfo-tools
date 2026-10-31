@@ -135,6 +135,38 @@ memory and temporary-storage requirements.
 
 ## Measured performance
 
+### Optimization after e125519
+
+A follow-up compares the **exact original binaries** with the optimized build on
+the same SRR2584863/synthetic inputs (150 bp FASTQ), pinned to one logical P-core
+CPU, with five measured blocks per condition. The
+accepted population covers 13 conditions and 195 timed executions. Times below
+are medians; ratios are medians of paired **before/after native** times.
+
+<!-- README_OPTIMIZATION_START -->
+| Operation and input | Before s | After s | Upstream s | Paired before/after |
+| --- | ---: | ---: | ---: | ---: |
+| stats -a -T, 1M real reads | 1.972 | 0.621 | 0.501 | 3.17× |
+| fq2fa, 10M synthetic reads | 1.843 | 1.470 | 1.197 | 1.25× |
+| lint, 10M synthetic reads | 5.614 | 2.140 | 1.789 | 2.62× |
+| flagstat, 10M synthetic BAM records | 0.815 | 0.703 | 0.319 | 1.16× |
+| sort (32 MiB chunks), 1M synthetic BAM records | 1.406 | 1.246 | 0.533 | 1.13× |
+| FastQC, 1M real reads* | 8.025 | 4.479 | 6.171 | 1.79× |
+<!-- README_OPTIMIZATION_END -->
+
+For the 10M single-file lint case, peak RSS fell from **829.0 to 4.9 MiB** after
+removing an unused name set. Paired lint still retains read-one headers. Several
+optimized commands remain slower than upstream. *FastQC preserves every native
+report/HTML/ZIP byte; its upstream timing remains descriptive because report work
+and unresolved module values differ. See the [optimization report](bench/OPTIMIZATION.md)
+for all conditions, ranges, correctness checks, the resource-failure retry and
+reproduction. Inputs, outputs and temporary files remained on tmpfs.
+
+### Earlier upstream comparison
+
+The following measurements describe the build **before these optimizations**;
+the original observations remain unchanged.
+
 <!-- README_BENCHMARK_START -->
 Measured on **2026-10-31**: Linux, i7-13700H, 31.1 GiB visible RAM, with inputs,
 outputs and temporary files on **tmpfs**. Commands and descendants used one P-core

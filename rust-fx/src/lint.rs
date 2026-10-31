@@ -33,8 +33,6 @@
 //! validation, matching the workspace's shared exit-code contract rather than
 //! inventing a new code.
 
-use std::collections::HashSet;
-
 /// The level a validator is gated behind (`--single-read-validation-level`).
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub enum Level {
@@ -196,8 +194,8 @@ impl Validator {
 
 /// The record fields `lint` inspects.
 ///
-/// Borrowed rather than owned so a streaming validator allocates nothing per
-/// record except the one set of seen names that S007 requires.
+/// Borrowed so validation does not copy sequence or quality data. Name retention
+/// for paired validation belongs to the command, not this per-record validator.
 #[derive(Clone, Copy, Debug)]
 pub struct LintRecord<'a> {
     /// The header line *without* its marker, as the parser returns it.
@@ -275,14 +273,12 @@ impl LintError {
 
 /// A streaming validator.
 ///
-/// S007 needs to see every name, so this keeps one `HashSet` of headers. That is
-/// the documented behaviour and the only unbounded state `lint` has; it is
-/// proportional to the number of distinct names, not to the input size in bytes.
+/// This per-record validator retains only its configuration and record count.
+/// The command manages the names required by the paired validation passes.
 pub struct Linter {
     disabled: Vec<Validator>,
     single_ceiling: Level,
     paired_ceiling: Level,
-    seen_names: HashSet<Vec<u8>>,
     record: u64,
 }
 
@@ -294,7 +290,6 @@ impl Linter {
             disabled: Vec::new(),
             single_ceiling: Level::High,
             paired_ceiling: Level::High,
-            seen_names: HashSet::new(),
             record: 0,
         }
     }
@@ -462,9 +457,6 @@ impl Linter {
                 }
             }
         }
-        // S007 runs last because it must see a successfully-shaped record; it
-        // still records the name so a later duplicate is caught even if this
-        // record had another problem.
         // S007 (DuplicateName) is deliberately not checked here.
         //
         // In fq 0.12.0 it is a *special* validator: it is announced on its own
@@ -473,10 +465,8 @@ impl Linter {
         // validator list at every level, and a single file with duplicate names
         // exits 0. Checking it here made `lint_S007` fail where the oracle passes.
         //
-        // The seen-names set is still maintained, so the paired path can use it
-        // once W1-5 extends the pair validation, and `--disable-validator S007`
-        // still round-trips through `Validator::from_code`.
-        let _ = self.seen_names.insert(record.raw_header.to_vec());
+        // The paired command owns its name state. Retaining another set here
+        // would consume memory without contributing to a validation decision.
 
         errors
     }

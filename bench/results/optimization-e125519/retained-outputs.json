@@ -1,0 +1,60 @@
+{
+  "reason": "Free tmpfs after ENOSPC; copied and hash-verified before removing temporary originals",
+  "outputs": [
+    {
+      "source": "/tmp/bioinfo-perf-e125519/formal/synthetic-10000000/fx_fq2fa/0-after/out",
+      "destination": "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/optimization-retained/formal/synthetic-10000000/fx_fq2fa/0-after/out",
+      "files": {
+        "reads.fasta": {
+          "bytes": 1710000000,
+          "sha256": "a1f06c249a520833ee86df6a275837cb6a90fbf68c98ad97681d6c0094302096"
+        }
+      }
+    },
+    {
+      "source": "/tmp/bioinfo-perf-e125519/formal/synthetic-10000000/fx_fq2fa/0-before/out",
+      "destination": "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/optimization-retained/formal/synthetic-10000000/fx_fq2fa/0-before/out",
+      "files": {}
+    },
+    {
+      "source": "/tmp/bioinfo-perf-e125519/formal/synthetic-10000000/fx_fq2fa/0-upstream/out",
+      "destination": "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/optimization-retained/formal/synthetic-10000000/fx_fq2fa/0-upstream/out",
+      "files": {
+        "reads.fasta": {
+          "bytes": 1710000000,
+          "sha256": "a1f06c249a520833ee86df6a275837cb6a90fbf68c98ad97681d6c0094302096"
+        }
+      }
+    },
+    {
+      "source": "/tmp/bioinfo-perf-e125519/formal-current/synthetic-10000000/fx_fq2fa/-1-after/out",
+      "destination": "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/optimization-retained/formal-current/synthetic-10000000/fx_fq2fa/-1-after/out",
+      "files": {
+        "reads.fasta": {
+          "bytes": 1670467584,
+          "sha256": "dfd8c501a5287db8364165b11fb661cd593ebbfbcc96fca30f48e3e8073c0f15"
+        }
+      }
+    },
+    {
+      "source": "/tmp/bioinfo-perf-e125519/formal-current/synthetic-10000000/fx_fq2fa/-1-before/out",
+      "destination": "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/optimization-retained/formal-current/synthetic-10000000/fx_fq2fa/-1-before/out",
+      "files": {
+        "reads.fasta": {
+          "bytes": 1710000000,
+          "sha256": "a1f06c249a520833ee86df6a275837cb6a90fbf68c98ad97681d6c0094302096"
+        }
+      }
+    },
+    {
+      "source": "/tmp/bioinfo-perf-e125519/formal-current/synthetic-10000000/fx_fq2fa/-1-upstream/out",
+      "destination": "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/optimization-retained/formal-current/synthetic-10000000/fx_fq2fa/-1-upstream/out",
+      "files": {
+        "reads.fasta": {
+          "bytes": 1710000000,
+          "sha256": "a1f06c249a520833ee86df6a275837cb6a90fbf68c98ad97681d6c0094302096"
+        }
+      }
+    }
+  ]
+}

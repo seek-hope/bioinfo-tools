@@ -29,6 +29,9 @@ arguments exit 2; missing prerequisites, missing oracles, or wrong versions exit
 a failing check keeps its command's exit status. Base mode prints that external
 oracles were not run. The base gate also runs the ten README-benchmark evidence
 controls; BAM-specific controls skip when the pinned local samtools is absent.
+Eight additional optimization-evidence controls reject missing/failed observations
+and pilot summaries, require summaries to be computed from raw samples, and
+prevent retries from discarding measurements or changing inputs/artifacts.
 The optional FASTX/QC gate adds 22 independent/pinned SeqKit checks for inclusive
 Q20/Q30 and `fq2fa` line wrapping, using the freshly built native binary.
 

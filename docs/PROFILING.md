@@ -3,6 +3,12 @@
 Historical snapshot: targeted profiling on the recorded `49953ec` dirty
 worktree and host. The measurements below are not results for the current build.
 
+The later [optimization after e125519](../bench/OPTIMIZATION.md) covers stats,
+conversion, lint, flagstat, sort and QC with matched native before/after results,
+output-preservation checks and current source/binary provenance. It includes
+aggregate instruction and syscall counts; the original T11 evidence below stays
+historical.
+
 Status: **completed for the targeted profiling pass**. This is not a universal
 performance claim; the numbers belong to the host, binary and synthetic input
 recorded here.

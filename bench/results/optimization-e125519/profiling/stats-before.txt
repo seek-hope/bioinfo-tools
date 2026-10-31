@@ -1,0 +1,21 @@
+# started on Sun Nov  1 04:55:21 2026
+
+
+ Performance counter stats for 'taskset -c 4 /tmp/bioinfo-perf-e125519/rust-fx stats -a -T /tmp/bioinfo-readme-benchmark/synthetic-100000.fastq':
+
+            224.19 msec task-clock:u                                                          
+     <not counted>      cpu_atom/cycles/u                                                       (0.00%)
+       949,865,112      cpu_core/cycles/u                                                     
+     <not counted>      cpu_atom/instructions/u                                                 (0.00%)
+     2,939,286,781      cpu_core/instructions/u                                               
+     <not counted>      cpu_atom/branches/u                                                     (0.00%)
+       365,215,154      cpu_core/branches/u                                                   
+     <not counted>      cpu_atom/branch-misses/u                                                (0.00%)
+         9,706,964      cpu_core/branch-misses/u                                              
+
+       0.224438501 seconds time elapsed
+
+       0.221023000 seconds user
+       0.002969000 seconds sys
+
+

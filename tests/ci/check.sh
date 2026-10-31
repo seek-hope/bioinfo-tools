@@ -128,6 +128,7 @@ run python3 tests/ci/test_seqkit_exception_gate.py
 run python3 tests/ci/test_tile_proof.py
 run python3 tests/ci/test_kmer_proof.py
 run python3 bench/test_readme_benchmark.py
+run python3 -W error::ResourceWarning bench/test_optimization_benchmark.py
 run python3 tests/gate/test_acceptance.py
 run "${CARGO[@]}" fmt --all -- --check
 run "${CARGO[@]}" clippy --workspace --all-targets --locked "${cargo_offline[@]}" -- -D warnings

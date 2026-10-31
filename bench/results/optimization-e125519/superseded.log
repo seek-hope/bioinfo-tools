@@ -1,0 +1,71 @@
+real-1000000 fx_stats block -1 order ('after', 'before', 'upstream') passed True {'after': 0.6315, 'before': 1.9738, 'upstream': 0.5095}
+real-1000000 fx_stats block 0 order ('after', 'upstream', 'before') passed True {'after': 0.6287, 'upstream': 0.5058, 'before': 1.9727}
+real-1000000 fx_stats block 1 order ('before', 'upstream', 'after') passed True {'before': 1.9737, 'upstream': 0.5036, 'after': 0.6289}
+real-1000000 fx_stats block 2 order ('upstream', 'before', 'after') passed True {'upstream': 0.5022, 'before': 1.9682, 'after': 0.6322}
+real-1000000 fx_stats block 3 order ('before', 'after', 'upstream') passed True {'before': 1.972, 'after': 0.6287, 'upstream': 0.5013}
+real-1000000 fx_stats block 4 order ('upstream', 'after', 'before') passed True {'upstream': 0.5022, 'after': 0.6316, 'before': 1.9713}
+real-1000000 fx_fq2fa block -1 order ('before', 'upstream', 'after') passed True {'before': 0.2073, 'upstream': 0.2578, 'after': 0.1739}
+real-1000000 fx_fq2fa block 0 order ('after', 'upstream', 'before') passed True {'after': 0.1738, 'upstream': 0.2577, 'before': 0.2087}
+real-1000000 fx_fq2fa block 1 order ('after', 'before', 'upstream') passed True {'after': 0.1734, 'before': 0.2082, 'upstream': 0.2577}
+real-1000000 fx_fq2fa block 2 order ('upstream', 'before', 'after') passed True {'upstream': 0.2571, 'before': 0.2063, 'after': 0.1742}
+real-1000000 fx_fq2fa block 3 order ('before', 'after', 'upstream') passed True {'before': 0.208, 'after': 0.174, 'upstream': 0.2604}
+real-1000000 fx_fq2fa block 4 order ('upstream', 'after', 'before') passed True {'upstream': 0.257, 'after': 0.174, 'before': 0.2074}
+real-1000000 fq_lint block -1 order ('upstream', 'before', 'after') passed True {'upstream': 0.1983, 'before': 0.5303, 'after': 0.2316}
+real-1000000 fq_lint block 0 order ('after', 'upstream', 'before') passed True {'after': 0.2311, 'upstream': 0.1978, 'before': 0.5282}
+real-1000000 fq_lint block 1 order ('before', 'after', 'upstream') passed True {'before': 0.53, 'after': 0.2304, 'upstream': 0.1973}
+real-1000000 fq_lint block 2 order ('before', 'upstream', 'after') passed True {'before': 0.5278, 'upstream': 0.1978, 'after': 0.2316}
+real-1000000 fq_lint block 3 order ('upstream', 'after', 'before') passed True {'upstream': 0.1972, 'after': 0.231, 'before': 0.5282}
+real-1000000 fq_lint block 4 order ('after', 'before', 'upstream') passed True {'after': 0.2308, 'before': 0.528, 'upstream': 0.1987}
+real-1000000 fastqc block -1 order ('before', 'upstream', 'after') passed True {'before': 8.0629, 'upstream': 6.1663, 'after': 4.4552}
+real-1000000 fastqc block 0 order ('after', 'before', 'upstream') passed True {'after': 4.4952, 'before': 8.0637, 'upstream': 6.1679}
+real-1000000 fastqc block 1 order ('upstream', 'after', 'before') passed True {'upstream': 6.1676, 'after': 4.483, 'before': 8.0808}
+real-1000000 fastqc block 2 order ('before', 'after', 'upstream') passed True {'before': 8.0357, 'after': 4.4617, 'upstream': 6.1773}
+real-1000000 fastqc block 3 order ('after', 'upstream', 'before') passed True {'after': 4.4644, 'upstream': 6.1698, 'before': 8.0528}
+real-1000000 fastqc block 4 order ('upstream', 'before', 'after') passed True {'upstream': 6.1664, 'before': 8.0444, 'after': 4.4553}
+synthetic-1000000 fx_stats block -1 order ('upstream', 'after', 'before') passed True {'upstream': 0.3743, 'after': 0.6258, 'before': 1.9757}
+synthetic-1000000 fx_stats block 0 order ('upstream', 'before', 'after') passed True {'upstream': 0.3728, 'before': 1.9751, 'after': 0.6247}
+synthetic-1000000 fx_stats block 1 order ('before', 'upstream', 'after') passed True {'before': 1.9764, 'upstream': 0.3799, 'after': 0.6254}
+synthetic-1000000 fx_stats block 2 order ('after', 'upstream', 'before') passed True {'after': 0.6263, 'upstream': 0.3711, 'before': 1.9795}
+synthetic-1000000 fx_stats block 3 order ('before', 'after', 'upstream') passed True {'before': 1.976, 'after': 0.6266, 'upstream': 0.372}
+synthetic-1000000 fx_stats block 4 order ('after', 'before', 'upstream') passed True {'after': 0.625, 'before': 1.9728, 'upstream': 0.3741}
+synthetic-1000000 fx_fq2fa block -1 order ('upstream', 'after', 'before') passed True {'upstream': 0.1409, 'after': 0.1598, 'before': 0.1885}
+synthetic-1000000 fx_fq2fa block 0 order ('upstream', 'before', 'after') passed True {'upstream': 0.1375, 'before': 0.1891, 'after': 0.1613}
+synthetic-1000000 fx_fq2fa block 1 order ('after', 'before', 'upstream') passed True {'after': 0.1619, 'before': 0.1892, 'upstream': 0.1387}
+synthetic-1000000 fx_fq2fa block 2 order ('before', 'upstream', 'after') passed True {'before': 0.19, 'upstream': 0.1382, 'after': 0.1597}
+synthetic-1000000 fx_fq2fa block 3 order ('before', 'after', 'upstream') passed True {'before': 0.1893, 'after': 0.1593, 'upstream': 0.1384}
+synthetic-1000000 fx_fq2fa block 4 order ('after', 'upstream', 'before') passed True {'after': 0.1591, 'upstream': 0.1389, 'before': 0.1881}
+synthetic-1000000 fq_lint block -1 order ('upstream', 'before', 'after') passed True {'upstream': 0.189, 'before': 0.4913, 'after': 0.2162}
+synthetic-1000000 fq_lint block 0 order ('after', 'upstream', 'before') passed True {'after': 0.2155, 'upstream': 0.189, 'before': 0.4916}
+synthetic-1000000 fq_lint block 1 order ('before', 'after', 'upstream') passed True {'before': 0.4814, 'after': 0.2186, 'upstream': 0.1898}
+synthetic-1000000 fq_lint block 2 order ('before', 'upstream', 'after') passed True {'before': 0.5125, 'upstream': 0.1891, 'after': 0.2158}
+synthetic-1000000 fq_lint block 3 order ('after', 'before', 'upstream') passed True {'after': 0.2159, 'before': 0.4882, 'upstream': 0.1896}
+synthetic-1000000 fq_lint block 4 order ('upstream', 'after', 'before') passed True {'upstream': 0.1889, 'after': 0.2147, 'before': 0.4816}
+synthetic-1000000 fastqc block -1 order ('upstream', 'after', 'before') passed True {'upstream': 5.177, 'after': 4.4128, 'before': 7.9746}
+synthetic-1000000 fastqc block 0 order ('after', 'upstream', 'before') passed True {'after': 4.4021, 'upstream': 5.1637, 'before': 7.985}
+synthetic-1000000 fastqc block 1 order ('upstream', 'before', 'after') passed True {'upstream': 6.1656, 'before': 7.9882, 'after': 4.4196}
+synthetic-1000000 fastqc block 2 order ('before', 'upstream', 'after') passed True {'before': 7.9899, 'upstream': 5.1695, 'after': 4.418}
+synthetic-1000000 fastqc block 3 order ('before', 'after', 'upstream') passed True {'before': 8.0415, 'after': 4.4502, 'upstream': 6.1642}
+synthetic-1000000 fastqc block 4 order ('after', 'before', 'upstream') passed True {'after': 4.4109, 'before': 7.9947, 'upstream': 5.1688}
+synthetic-bam-1000000 bam_flagstat block -1 order ('before', 'after', 'upstream') passed True {'before': 0.084, 'after': 0.0703, 'upstream': 0.0365}
+synthetic-bam-1000000 bam_flagstat block 0 order ('upstream', 'before', 'after') passed True {'upstream': 0.0369, 'before': 0.083, 'after': 0.07}
+synthetic-bam-1000000 bam_flagstat block 1 order ('after', 'upstream', 'before') passed True {'after': 0.0697, 'upstream': 0.0364, 'before': 0.0833}
+synthetic-bam-1000000 bam_flagstat block 2 order ('before', 'upstream', 'after') passed True {'before': 0.0833, 'upstream': 0.0365, 'after': 0.0705}
+synthetic-bam-1000000 bam_flagstat block 3 order ('upstream', 'after', 'before') passed True {'upstream': 0.037, 'after': 0.0701, 'before': 0.0842}
+synthetic-bam-1000000 bam_flagstat block 4 order ('after', 'before', 'upstream') passed True {'after': 0.071, 'before': 0.0851, 'upstream': 0.0367}
+synthetic-bam-1000000 bam_sort block -1 order ('after', 'upstream', 'before') passed True {'after': 1.2768, 'upstream': 0.5332, 'before': 1.4397}
+synthetic-bam-1000000 bam_sort block 0 order ('after', 'before', 'upstream') passed True {'after': 1.285, 'before': 1.4419, 'upstream': 0.5333}
+synthetic-bam-1000000 bam_sort block 1 order ('before', 'upstream', 'after') passed True {'before': 1.4202, 'upstream': 0.5323, 'after': 1.242}
+synthetic-bam-1000000 bam_sort block 2 order ('upstream', 'after', 'before') passed True {'upstream': 0.5348, 'after': 1.2694, 'before': 1.3982}
+synthetic-bam-1000000 bam_sort block 3 order ('before', 'after', 'upstream') passed True {'before': 1.3989, 'after': 1.2532, 'upstream': 0.5307}
+synthetic-bam-1000000 bam_sort block 4 order ('upstream', 'before', 'after') passed True {'upstream': 0.5347, 'before': 1.3921, 'after': 1.2558}
+synthetic-10000000 fx_fq2fa block -1 order ('upstream', 'before', 'after') passed True {'upstream': 1.2244, 'before': 1.7625, 'after': 1.4414}
+Traceback (most recent call last):
+  File "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/bench/optimization_benchmark.py", line 215, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/bench/optimization_benchmark.py", line 171, in main
+    observation = reference.run_one(command, directory, paths, env, 2, 300, args.cpu)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/bench/readme_benchmark.py", line 317, in run_one
+    time.sleep(cooldown)
+KeyboardInterrupt

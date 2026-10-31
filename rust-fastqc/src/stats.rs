@@ -262,6 +262,14 @@ impl QualityCounts {
     }
 }
 
+/// Only the most recent nonempty read length is cached, so variable-length
+/// input does not retain a separate model for every distinct length.
+#[derive(Clone, Debug, Default)]
+struct GcModelCache {
+    length: usize,
+    model: Vec<Vec<(usize, f64)>>,
+}
+
 /// Accumulated QC statistics for one input file.
 #[derive(Clone, Debug)]
 pub struct QcStats {
@@ -283,6 +291,7 @@ pub struct QcStats {
     pub bases_by_position: Vec<[u64; 4]>,
     /// Per-read GC-content distribution, already weighted by [`gc_model`].
     pub gc_distribution: Vec<f64>,
+    gc_model_cache: GcModelCache,
     /// Per-read mean-quality rounded down to an integer, and its count.
     pub quality_distribution: BTreeMap<u8, u64>,
     /// Duplication: sequence (truncated) → count.
@@ -321,6 +330,7 @@ impl QcStats {
             n_by_position: Vec::new(),
             bases_by_position: Vec::new(),
             gc_distribution: vec![0.0; 101],
+            gc_model_cache: GcModelCache::default(),
             quality_distribution: BTreeMap::new(),
             sequences: BTreeMap::new(),
             config: FastqcConfig::default(),
@@ -417,7 +427,17 @@ impl QcStats {
 
         // Per-read GC content, spread over bins by FastQC's model.
         if !sequence.is_empty() {
-            for (bin, increment) in gc_model(sequence.len())
+            if self.gc_model_cache.length != sequence.len() {
+                self.gc_model_cache = GcModelCache {
+                    length: sequence.len(),
+                    model: gc_model(sequence.len()),
+                };
+            }
+            // Reuse model values, but still add each read in the original order.
+            // Combining counts before multiplication would change rounding.
+            for (bin, increment) in self
+                .gc_model_cache
+                .model
                 .get(gc as usize)
                 .map(|values| values.as_slice())
                 .unwrap_or(&[])
@@ -629,6 +649,36 @@ mod tests {
             "-1.3877787807814457E-17"
         );
         assert_eq!(java_double(-0.0), "-0.0");
+    }
+
+    #[test]
+    fn cached_gc_model_preserves_mixed_length_distribution_bitwise() {
+        let mut stats = QcStats::new("mixed.fastq");
+        let mut expected = [0.0f64; 101];
+        for (seed, length) in [150, 150, 0, 1, 76, 76, 500, 75, 150, 151, 150]
+            .into_iter()
+            .enumerate()
+        {
+            let sequence: Vec<u8> = (0..length).map(|i| b"AacCGGNt"[(i + seed) % 8]).collect();
+            if length != 0 {
+                let gc = sequence
+                    .iter()
+                    .filter(|base| matches!(base.to_ascii_uppercase(), b'G' | b'C'))
+                    .count();
+                for (bin, increment) in &gc_model(length)[gc] {
+                    expected[*bin] += increment;
+                }
+            }
+            stats.add_read(&sequence, &vec![b'I'; length], 33);
+            assert_eq!(
+                stats
+                    .gc_distribution
+                    .iter()
+                    .map(|v| v.to_bits())
+                    .collect::<Vec<_>>(),
+                expected.map(f64::to_bits)
+            );
+        }
     }
 
     #[test]
