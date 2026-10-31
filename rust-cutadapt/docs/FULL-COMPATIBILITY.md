@@ -1,10 +1,6 @@
 # Full cutadapt 4.6 compatibility
 
-Status: **119 of 119 differential cases pass** against a real cutadapt 4.6 binary,
-and `tests/oracle/differential.py --matrix` exits 0. No behavioural deviations
-remain; the only intentional differences are the compressed-byte level and the
-extra note printed when an output file is left incomplete (see "Known
-deviations").
+Status: 119 of 119 differential cases pass against a real cutadapt 4.6 binary, and `tests/oracle/differential.py --matrix` exits 0. No behavioural deviations remain; the only intentional differences are the compressed-byte level and the extra note printed when an output file is left incomplete (see "Known deviations").
 
 Delivered: the full cutadapt 4.6 option surface, all adapter types, read
 modifications, filters, `--action` modes, `--revcomp`, renaming, auxiliary
@@ -28,11 +24,11 @@ cutadapt 4.6 invocation:
    rejected with the same exit code.
 2. **Exit codes.** `0` success, `1` runtime failure (I/O, parse, corrupt gzip,
    template errors), `2` usage error. A failure must not leave a
-   plausible-looking complete-looking output file.
+   plausible, complete-looking output file.
 3. **Read data.** Decompressed FASTQ/FASTA written to `-o`, stdout, and every
    auxiliary output (`--too-short-output`, `--too-long-output`,
    `--untrimmed-output`, and their `-paired-output` forms), plus
-   `--info-file`, `--rest-file`, `--wildcard-file`, must be **byte-identical**.
+   `--info-file`, `--rest-file`, `--wildcard-file`, must be byte-identical.
    Record order is input order. Headers, `+` lines, name transformations
    (`-x`, `-y`, `--rename`, `--strip-suffix`, `--length-tag`) and case
    changes (`--action lowercase`) are part of the byte comparison.

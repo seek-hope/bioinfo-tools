@@ -131,12 +131,7 @@ level 6 is much slower than zlib's. Measured on this machine:
 | 5 | 0.87–1.01 s | hyperfine, 3 sessions | 4.4x–5.1x | 26,708,750 B | +0.6 % |
 | 6 | 1.99–2.02 s | hyperfine, 2 sessions + 1 timed run | 2.2x | 26,240,006 B | −1.2 % |
 
-Level 6 clearly misses the 5x target. Level 5 straddles it (4.4x–5.1x), so it
-is too close to rely on. The shipped default is therefore level 3, which stays
-at 6.3x–6.9x with only 1.8 % larger output. The level can be changed with the
-`RUST_CUTADAPT_COMPRESSION_LEVEL` environment variable (0–9) if smaller output
-matters more than speed; it is not a CLI flag because a compression-level flag
-is outside the implemented cutadapt subset.
+Level 6 misses the 5x target. Level 5 straddles it (4.4x–5.1x), which is too close to rely on. The default is therefore level 3, which reaches 6.3x–6.9x with 1.8 % larger output. If smaller output matters more than speed, set the `RUST_CUTADAPT_COMPRESSION_LEVEL` environment variable (0–9); this is not a CLI flag because compression-level flags are outside the implemented cutadapt subset.
 
 The benchmark above was run with the default flags, exactly as in
 `bench/reference.json`.
@@ -178,5 +173,4 @@ hyperfine --warmup 1 --runs 3 -N \
 gzip -dc /tmp/rc-bench/out.fastq.gz | wc -l   # 3999984 lines = 999996 records
 ```
 
-`mkdir -p` is required: the output directory is not created by the program, so
-a missing directory makes it exit 1 with `cannot create output`.
+`mkdir -p` is required because the program does not create the output directory; if it is missing, the process exits 1 with `cannot create output`.

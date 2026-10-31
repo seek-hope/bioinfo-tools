@@ -1,7 +1,6 @@
 # rust-cutadapt
 
-A Rust implementation of the documented **cutadapt 4.6 command-line surface**
-for adapter trimming of FASTQ and FASTA reads.
+A Rust implementation of the documented cutadapt 4.6 command-line surface for adapter trimming of FASTQ and FASTA reads.
 
 This README describes the current binary. The original v0.1.0 subset text is
 preserved in [docs/HISTORY.md](docs/HISTORY.md); it does not describe the
@@ -110,11 +109,7 @@ for `-j 1`. The default-worker decision is recorded in
 
 ### Historical v0.1.0 subset
 
-The 6.3x–6.9x figure belongs to the **v0.1.0 subset**, not to the current
-tree: cutadapt 4.6 4.4363 s / 24,412 kB; v0.1.0 rust-cutadapt 0.64–0.70 s /
-11.6–13.4 MB across six hyperfine sessions. See [BENCHMARK.md](BENCHMARK.md)
-and [bench/reference.json](bench/reference.json) for that original method and
-baseline. Do not quote the old headline as a property of the current binary.
+The 6.3x–6.9x figure applies to the v0.1.0 subset, not the current tree: cutadapt 4.6 took 4.4363 s / 24,412 kB, while v0.1.0 rust-cutadapt took 0.64–0.70 s / 11.6–13.4 MB across six hyperfine sessions. See [BENCHMARK.md](BENCHMARK.md) and [bench/reference.json](bench/reference.json) for the original method and baseline. Do not cite that earlier number for the current binary.
 
 ## Build and test
 

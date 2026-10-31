@@ -1,7 +1,7 @@
 # 文档与受保护文件分类
 
-本文定义文档维护边界，避免把历史日志当成当前说明，也避免通过修改期望值来制造通过。
-它不是某次运行的工作日志。
+本文界定文档维护边界，防止把历史日志当成当前说明，或靠修改期望值来凑出测试通过。
+本文不是单次运行的工作日志。
 
 ## 1. 现行约束
 
@@ -23,8 +23,8 @@
 ## 2. 历史记录
 
 `docs/EVIDENCE-*.md`、配套 JSON、`docs/DELIVERY.md`、
-`docs/DEVELOPMENT-PLAN-LEGACY.md`、`rust-cutadapt/docs/HISTORY.md` 和各组件 benchmark
-记录保留其原始结论。它们用于追溯，不用于证明当前工作树仍然通过同一检查。
+`docs/DEVELOPMENT-PLAN-LEGACY.md`、`rust-cutadapt/docs/HISTORY.md` 及各组件 benchmark
+记录均保留原始结论。这些材料仅供追溯，不能证明当前工作树仍能通过相同检查。
 
 维护规则：
 

@@ -64,11 +64,7 @@ measurement.
 
 ## Upstream correctness benchmark
 
-`upstream.py` complements this structural runner with direct upstream output
-comparison. It runs the rust binary and the pinned upstream binary on the same
-generated input, for cutadapt, FastQC, SeqKit stats, samtools sort and UMI-tools
-dedup. It records the same `/usr/bin/time -v` and provenance fields, plus output
-hashes and a normalized comparison:
+`upstream.py` supplements the structural runner by comparing outputs directly against upstream binaries. It runs the rust binary and the pinned upstream binary on the same generated input for cutadapt, FastQC, SeqKit stats, samtools sort and UMI-tools dedup. In addition to the `/usr/bin/time -v` and provenance fields, it records output hashes and a normalized comparison:
 
 ```sh
 export PATH="$PWD/tests/ci/env/bin:$PATH"

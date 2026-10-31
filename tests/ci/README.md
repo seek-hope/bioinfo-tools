@@ -24,10 +24,10 @@ bash tests/ci/check.sh --with-fastx-qc-oracles --isolate-network
 | `--with-fastx-qc-oracles` | Base checks plus SeqKit 2.14.0/fq 0.12.0 and FastQC 0.13.0/MultiQC 1.35 differentials, with version probes first |
 | `--isolate-network` | Runs oracle probes and oracle suites under `unshare -Urn`; requires permitted user/network namespaces |
 
-The gate exits immediately on failure and does not print a PASS footer. Bad
-arguments exit 2; missing prerequisites, missing oracles or wrong versions exit 3;
-a failing check retains its command's status. Base mode prints that external
-oracles were **not** run.
+The gate exits immediately on failure without a PASS footer. Bad
+arguments exit 2; missing prerequisites, missing oracles, or wrong versions exit 3;
+a failing check keeps its command's exit status. Base mode prints that external
+oracles were not run.
 
 `cargo metadata` is used to locate the actual target directory, so
 `CARGO_TARGET_DIR` and Cargo target configuration are respected. This is a native
@@ -77,6 +77,6 @@ gate remains a maintainer decision.
 ## Remaining integration
 
 Full cutadapt differential, UMI exact/semantic/spill/determinism, BAM differential,
-coverage-guided fuzz, MSRV, performance trends and packaged/cross-platform
-artifacts are separate suites. They are not silently claimed by the base gate;
+coverage-guided fuzz, MSRV, performance trends, and packaged/cross-platform
+artifacts run as separate suites. The base gate does not claim to cover them;
 see [docs/DEVELOPMENT-PLAN.md](../../docs/DEVELOPMENT-PLAN.md).

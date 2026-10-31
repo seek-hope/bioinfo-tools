@@ -10,7 +10,7 @@
 > `snapshot.py --record --confirm-record`.
 > Historical W1-1 evidence is in `docs/EVIDENCE-W1-1.md`.
 
-This directory holds the instrument that proves **W1-1 is behaviour-neutral**.
+This directory holds the harness that verifies W1-1 is behaviour-neutral.
 
 W1-1 creates the Cargo workspace and the shared `bioinfo-common` crate, and
 moves four things out of the two binaries into it:
@@ -22,9 +22,9 @@ moves four things out of the two binaries into it:
 | the `--summary-json` contract | `bioinfo-common/src/summary.rs` |
 | the provenance block | `bioinfo-common/src/provenance.rs` |
 
-A refactor of that kind is only acceptable if **no stdout byte, stderr byte,
-file byte or exit code changes**. `snapshot.py` records those observables from
-the PRE-refactor binaries (`.work/w1-1-baseline/bin/*.before`) and compares any
+A refactor of this kind is only acceptable if no stdout byte, stderr byte,
+file byte, or exit code changes. `snapshot.py` records those observables from
+the pre-refactor binaries (`.work/w1-1-baseline/bin/*.before`) and compares any
 other pair of binaries against that recording.
 
 The plan's convention (`docs/DEVELOPMENT-PLAN.md`, "Milestone gates") is one
@@ -56,8 +56,8 @@ python3 tests/gate/test_acceptance.py
 ```
 
 Exit codes: `0` pass, `1` a case failed, `2` usage error, `3` a precondition
-(missing binary, missing golden, unresolved oracle) was not met. A missing oracle is **never** a
-skip: it is exit 3.
+(missing binary, missing golden, unresolved oracle) was not met. A missing oracle
+never skips; it exits 3.
 
 ### `m3.sh` options
 
@@ -70,7 +70,7 @@ skip: it is exit 3.
 | `GOLDEN_DIR` | golden directory | `tests/gate/golden` |
 | `GOLDEN_MANIFEST` | reviewed SHA-256 list | `tests/gate/golden.sha256` |
 
-`m3.sh` **never** builds. It fails the "binaries present" criterion instead, so
+`m3.sh` never runs a build. It fails the "binaries present" criterion instead, so
 a reviewer cannot accidentally gate a stale artifact.
 
 ---
@@ -78,7 +78,7 @@ a reviewer cannot accidentally gate a stale artifact.
 ## Why the goldens are recorded from the `.before` binaries
 
 `target/release/*` is rebuilt many times during the refactor. The `.before`
-binaries are the only objects whose observable behaviour is known-good: they
+binaries are the only ones with known-good observable behaviour: they
 were captured at the recorded commits in `docs/EVIDENCE-2026-10.md`
 (`rust-cutadapt` `9d9abdf`, `rust-umitools` `40b5b70`).
 
@@ -159,11 +159,11 @@ Per `docs/DEVELOPMENT-PLAN.md`:
   wall-clock timings, which are normalised or excluded rather than compared.
 * **L4** — unused. Every observable here is contractual at L0–L2.
 
-BAM output is compared as **header + records rendered by `samtools view -h`**,
-not as raw BGZF bytes: that is the plan's documented BAM rule, and a BGZF
-compression change is explicitly not a behaviour change. The rendered text is
-then normalised with the same rule set as any other text stream, because a
-header written by `samtools sort` carries a `@PG` line whose `CL` tag embeds this
+BAM output is compared as header + records rendered by `samtools view -h`,
+not as raw BGZF bytes. That follows the plan's documented BAM rule, where a BGZF
+compression change is not a behaviour change. The rendered text is
+then normalised with the same rule set as other text streams, because a
+header written by `samtools sort` carries a `@PG` line whose `CL` tag embeds the
 run's temp directory.
 
 The raw BGZF hash is **not** recorded in the golden. It cannot be: the temp
@@ -172,17 +172,17 @@ output legitimately differ, which would make the golden non-reproducible. The
 decompressed contract is the L1 rule (plan decision D4), and it is what the
 comparison enforces.
 
-gzip FASTQ output is compared on its **decompressed** bytes. The compressed hash
-is recorded as a note only, because the repo already documents a deliberate
+gzip FASTQ output is compared on its decompressed bytes. The compressed hash
+is recorded only as a note, because the repo already documents an intentional
 compression-level difference from cutadapt (level 3 vs 6).
 
 ---
 
 ## Normalisation: every rule and why
 
-Normalisation is a small, explicit list of **named** regex rules attached
-per case and per stream. There is no blanket scrub. A rule that stops matching
-is a **failure**, not a pass — see "Anti-weakening" below.
+Normalisation uses a small, explicit list of named regex rules attached
+per case and per stream, with no blanket scrubbing. A rule that stops matching
+is a failure, not a pass — see "Anti-weakening" below.
 
 | Rule | Applies to | Pattern (summary) | Why |
 | --- | --- | --- | --- |
@@ -201,8 +201,8 @@ is a **failure**, not a pass — see "Anti-weakening" below.
 
 ### Why `program_name` exists (constraint 1 from the baseline capture)
 
-clap renders usage/help/error text from **argv[0]'s basename** unless a
-`bin_name` is pinned. That produces two different divergences:
+clap renders usage, help, and error text from argv[0]'s basename unless
+`bin_name` is pinned. That produces two divergences:
 
 ```
 # rust-umitools does NOT pin a bin_name:
@@ -213,16 +213,16 @@ Usage: rust-umitools [OPTIONS] [INPUT] [OUTPUT] [THREADS]          # real build
 Usage: rust-cutadapt.before ...   # prints "Usage: rust-cutadapt ..."
 ```
 
-So the rule is an **alternation** of the resolved basename *and* both canonical
+The rule is an alternation of the resolved basename and both canonical
 names, built with `re.escape` and ordered longest-first so
 `rust-umitools.before` is never half-matched by `rust-umitools`. The rule name
-is deliberately **stable** (`program_name`) even though the pattern depends on
-the run: `rules_fired` is compared between the recorded and the verified
-observation, so a per-run name would fail every clap case.
+stays fixed (`program_name`) even though the pattern depends on
+the run: `rules_fired` is compared between the recorded and verified
+observations, so a per-run name would fail every clap case.
 
-It is attached **only** to cases flagged `clap_text=True`. The provenance block
-is deliberately **not** flagged: its first line contains the program name as
-*data*, and it is compared byte-exactly.
+This rule is attached only to cases flagged `clap_text=True`. The provenance block
+is intentionally left unflagged: its first line contains the program name as
+data, and it is compared byte-exactly.
 
 ### Why the provenance block has no rules (constraint 2 from the baseline capture)
 
@@ -238,11 +238,11 @@ exit codes       : 0 ok, 2 usage, 3 input, 4 io/resource
 ```
 
 This block is assembled by `bioinfo-common/src/provenance.rs`, so every
-character is contractual: the version, the reference hash, the column alignment,
-the field order and the line count. The noodles/provenance refresh was approved
-on 2026-10-26 and the corresponding contract was updated explicitly. The case is recorded at **L1** with an empty
-rule list, and `rules_fired` is empty for it. The `mirror:` and `<TMP>` rules
-cannot fire because none of that text contains a path.
+character is part of the contract: version, reference hash, column alignment,
+field order, and line count. The noodles/provenance refresh was approved
+on 2026-10-26 and the corresponding contract was updated explicitly. The case is recorded at L1 with an empty
+rule list and empty `rules_fired`. The `mirror:` and `<TMP>` rules
+cannot fire because the text contains no paths.
 
 The same text is asserted in-tree by
 `bioinfo_common::provenance`'s own unit test, and this golden is the independent
@@ -250,7 +250,7 @@ check that the shared implementation reproduces it.
 
 ### `--summary-json`: what "byte-exact except timings" means
 
-The contract is: everything except the **numeric values inside `"timings"`**.
+The contract covers everything except the numeric values inside `"timings"`.
 That includes
 
 * every key name and their order,
@@ -278,21 +278,21 @@ honestly rather than hidden: see "Could not be made deterministic".
 
 A harness that cannot fail is worthless, so:
 
-1. **`--self-test` is mandatory and is part of `m3.sh`.** It
-   * first verifies the **clean** golden (so a verifier that always fails cannot
-     "catch" mutations), then
-   * copies the goldens three times and applies one mutation each: one byte in a
-     text stream, one exit code, one hash in a binary stream,
-   * asserts `--verify` returns **non-zero** for every mutated copy,
+1. `--self-test` is mandatory and runs as part of `m3.sh`. It
+   * first verifies the clean golden (so a verifier that always fails cannot
+     "catch" mutations),
+   * copies the goldens three times and applies one mutation to each: one byte in a
+     text stream, one exit code, and one hash in a binary stream,
+   * asserts `--verify` returns non-zero for every mutated copy,
    * prints `SELFTEST PASS` or `SELFTEST FAIL` and exits non-zero on failure.
-2. **A rule that stops firing is a failure.** If
-   `cutadapt_finished_line` no longer matches, the text it was hiding has changed
-   shape, and silently passing would mean the gate no longer covers it.
-3. **A missing golden is a failure**, not a skip.
-4. **A missing oracle is exit 3**, never a silent skip of the BAM cases.
-5. `expect_exit` is a *model* of the exit-code contract. A mismatch is reported
-   loudly as `WARN` at record time and the **measured** code is what gets
-   recorded — the gate never encodes a guess as if it were evidence.
+2. A rule that stops firing fails the check. If
+   `cutadapt_finished_line` no longer matches, the text it was masking has changed
+   shape, and passing silently would leave it uncovered.
+3. A missing golden is a failure, not a skip.
+4. A missing oracle exits 3 rather than silently skipping the BAM cases.
+5. `expect_exit` models the exit-code contract. A mismatch is logged
+   as `WARN` at record time and the measured code is
+   recorded — the gate never records an unverified expectation as evidence.
 
 ---
 
@@ -363,11 +363,11 @@ reproducible must not be added to a golden; add it as a `note` instead.
 
 ## Fixes applied after the first recording attempt
 
-The harness was written by an instance whose tool set had no shell, so it could
-not execute anything. The recording and the debugging were done by the leader.
-Three defects surfaced on the first real run and are fixed here; they are listed
-so a reviewer knows what changed rather than assuming the first version was
-correct.
+The harness was initially written in an environment without shell access, so it could
+not be executed there. The leader ran the recording and debugging.
+Three defects surfaced on the first run and are fixed here; they are listed
+below so reviewers can see what changed rather than assuming the initial version worked
+as written.
 
 | Symptom | Cause | Fix |
 | --- | --- | --- |
@@ -411,13 +411,12 @@ golden digest manifest.
 ## Recording from the upstream oracle (`record_from_oracle`)
 
 Two cases — `cutadapt_read2_3prime` and `cutadapt_read2_5prime` — are recorded
-from the **cutadapt 4.6 oracle**, not from `--cutadapt`.
+from the cutadapt 4.6 oracle rather than `--cutadapt`.
 
-Reason: the pre-refactor binary answered read-2 `-G`/`-B` incorrectly (it typed
-them as 3' adapters and trimmed the wrong end of read 2; see
-`docs/EVIDENCE-W1-1.md` DR-10). Recording those cases from that binary would
-have frozen the defect into the golden as the expected answer — the gate would
-then have *required* the bug.
+The pre-refactor binary handled read-2 `-G`/`-B` incorrectly, treating
+them as 3' adapters and trimming the wrong end of read 2 (see
+`docs/EVIDENCE-W1-1.md` DR-10). Recording those cases from the pre-refactor binary would
+have baked the bug into the golden and made the gate enforce it.
 
 `record_from_oracle=True` on a `Case` makes `--record` run the upstream tool
 instead, and requires `$CUTADAPT_ORACLE` (or the documented resolution chain) to

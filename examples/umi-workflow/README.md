@@ -62,9 +62,9 @@ exits 3 with a clear message. It never fabricates an alignment in that mode.
 | `counts.tsv` | `rust-umitools count --per-gene --gene-tag GX` |
 | `multiqc/multiqc_report.html` | optional MultiQC consumer check |
 
-The smoke considers itself failed if `quickcheck` fails, `counts.tsv` is empty, or
-the QC report is missing. If MultiQC is not installed it prints a skip; that is
-not counted as a pass.
+The smoke test fails if `quickcheck` fails, `counts.tsv` is empty, or
+the QC report is missing. If MultiQC is not installed, the script prints a skip
+message rather than counting it as a pass.
 
 ## Scope and limits
 
