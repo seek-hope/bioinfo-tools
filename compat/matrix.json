@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "targets": {
     "rust-cutadapt": "cutadapt 4.6",
     "rust-umitools": "UMI-tools 1.1.6",
@@ -1791,10 +1791,10 @@
       "upstream": "FastQC 0.13.0",
       "surface": "-a --adapters",
       "kind": "option",
-      "status": "unsupported",
-      "evidence": "absent from compat/current/rust-fastqc.help.txt",
-      "deviation": "",
-      "next_action": "T6: implement or re-scope"
+      "status": "exception",
+      "evidence": "tests/oracle/fastqc_adapters_diff.py: 35 exact + 6 counting + 3 invalid-config cases; read-order invariant; 6 process/library tests",
+      "deviation": "FASTQC-ADAPTER-CORRECTNESS: native custom lists; equal-length hits are counted, independent of read order; empty lists fail before output",
+      "next_action": "Maintain adapter differential and independent boundary/order proof"
     },
     {
       "tool": "rust-fastqc",
@@ -1901,10 +1901,10 @@
       "upstream": "FastQC 0.13.0",
       "surface": "-j --java",
       "kind": "option",
-      "status": "unsupported",
-      "evidence": "absent from compat/current/rust-fastqc.help.txt",
-      "deviation": "",
-      "next_action": "T6: implement or re-scope"
+      "status": "exception",
+      "evidence": "rust-fastqc/tests/native_runtime.rs; docs/EVIDENCE-UPSTREAM-DEFECTS.md",
+      "deviation": "FASTQC-NATIVE-LAUNCHER: JVM launcher controls explicitly rejected with exit 2; native QC does not execute Java",
+      "next_action": "Maintain native-runtime regression and explicit approved exception"
     },
     {
       "tool": "rust-fastqc",
@@ -1961,10 +1961,10 @@
       "upstream": "FastQC 0.13.0",
       "surface": "--debug",
       "kind": "option",
-      "status": "unsupported",
-      "evidence": "absent from compat/current/rust-fastqc.help.txt",
-      "deviation": "",
-      "next_action": "T6: implement or re-scope"
+      "status": "exception",
+      "evidence": "rust-fastqc/tests/native_runtime.rs; docs/EVIDENCE-UPSTREAM-DEFECTS.md",
+      "deviation": "FASTQC-NATIVE-LAUNCHER: JVM launcher controls explicitly rejected with exit 2; native QC does not execute Java",
+      "next_action": "Maintain native-runtime regression and explicit approved exception"
     },
     {
       "tool": "rust-fastqc",
@@ -1972,7 +1972,7 @@
       "surface": "report:fastqc_data.txt",
       "kind": "report",
       "status": "verified",
-      "evidence": "22/22 QC fixtures; MultiQC parses data",
+      "evidence": "22 QC fixtures compare nine modules (Adapter Content excluded); separate adapter proof; MultiQC parses data",
       "deviation": "",
       "next_action": ""
     },
@@ -2001,10 +2001,30 @@
       "upstream": "FastQC 0.13.0",
       "surface": "module:adapter-content",
       "kind": "feature",
-      "status": "verified",
-      "evidence": "FastQC cumulative 12bp adapter algorithm; rust-fastqc 13/13; T8 1x/10x full fastqc_data exact",
+      "status": "exception",
+      "evidence": "tests/oracle/fastqc_adapters_diff.py: 44 cases; default/custom lists, short-read warnings and independent read-order proof",
+      "deviation": "FASTQC-ADAPTER-CORRECTNESS: correct equal-length/read-order defect and reject empty config before report creation",
+      "next_action": "Maintain adapter differential and independent boundary/order proof"
+    },
+    {
+      "tool": "rust-fastqc",
+      "upstream": "FastQC 0.13.0",
+      "surface": "module:kmer-content",
+      "kind": "feature",
+      "status": "unsupported",
+      "evidence": "rust-fastqc/src/absent.rs; FastQC 0.13.0 KmerContent module is not implemented",
       "deviation": "",
-      "next_action": ""
+      "next_action": "T6: implement position-specific enrichment before enabling via --limits"
+    },
+    {
+      "tool": "rust-fastqc",
+      "upstream": "FastQC 0.13.0",
+      "surface": "module:per-tile-quality",
+      "kind": "feature",
+      "status": "unsupported",
+      "evidence": "rust-fastqc/src/absent.rs; FastQC 0.13.0 PerTileQualityScores module is not implemented",
+      "deviation": "",
+      "next_action": "T6: implement header/tile aggregation before enabling via --limits"
     },
     {
       "tool": "rust-fastqc",
@@ -2091,10 +2111,10 @@
       "upstream": "SeqKit 2.14.0 / fq 0.12.0",
       "surface": "seqkit:translate",
       "kind": "command",
-      "status": "experimental",
-      "evidence": "rust-fx/tests/translate.rs (7 tests) + SeqKit 2.14 55/55 listing differential + translation tables",
-      "deviation": "invalid-base exit/partial-output behavior differs",
-      "next_action": "T7: align invalid-input commit policy"
+      "status": "exception",
+      "evidence": "tests/oracle/check_seqkit_exceptions.py: 710/756 exact + 46 hash-checked differences; independent IUPAC/ORF/trim/header proof",
+      "deviation": "SEQKIT-TRANSLATE-CORRECTNESS: correct documented upstream strand, ORF endpoint, right-trim and description defects",
+      "next_action": "Maintain independent correctness proof and reviewed raw observation hashes"
     },
     {
       "tool": "rust-fx",
@@ -2251,10 +2271,10 @@
       "upstream": "SeqKit 2.14.0 / fq 0.12.0",
       "surface": "seqkit:range",
       "kind": "command",
-      "status": "experimental",
-      "evidence": "rust-fx/tests/range.rs + seqkit_streaming.rs; tests/oracle/seqkit_streaming_diff.py: 203/206",
-      "deviation": "FASTQ-to-FASTA file mixing preserves per-file format instead of upstream pooled-quality carryover (3 mismatches)",
-      "next_action": "T7: retain mixed-format deviation; interval selection and stdin streaming are aligned"
+      "status": "exception",
+      "evidence": "tests/oracle/check_seqkit_exceptions.py: 203/206 exact plus independent provenance and composition proof",
+      "deviation": "SEQKIT-RANGE-QUALITY: preserve input formats; upstream manufactures invalid/stale FASTQ quality for FASTA (3 raw differences)",
+      "next_action": "Maintain independent correctness proof and visible raw differences"
     },
     {
       "tool": "rust-fx",
@@ -2531,10 +2551,10 @@
       "upstream": "SeqKit 2.14.0 / fq 0.12.0",
       "surface": "translate:basic -f/-F/-s/--clean/-m/-e/-x/-M",
       "kind": "feature",
-      "status": "verified",
-      "evidence": "rust-fx/tests/translate.rs (7 tests) + SeqKit 2.14 full option differential",
-      "deviation": "invalid-base exit/partial-output behavior differs",
-      "next_action": "T7: align invalid-input commit policy"
+      "status": "exception",
+      "evidence": "rust-fx/tests/translate*.rs (17 tests); tests/oracle/check_seqkit_exceptions.py",
+      "deviation": "SEQKIT-TRANSLATE-CORRECTNESS: full IUPAC/RNA complement, exact ORF nucleotide spans, right-end trim, lossless descriptions",
+      "next_action": "Maintain independent correctness proof and reviewed raw observation hashes"
     },
     {
       "tool": "rust-fx",
@@ -2542,7 +2562,7 @@
       "surface": "translate:tables 1-6,9-14,16,21-31",
       "kind": "feature",
       "status": "verified",
-      "evidence": "Biopython NCBI table generation + SeqKit 2.14 29/29 table differential",
+      "evidence": "tests/oracle/seqkit_translate_diff.py: all 3375 IUPAC codons in each of 24 tables, plus initiation and six-frame modes",
       "deviation": "unsupported IDs fail before output",
       "next_action": ""
     },
@@ -2552,7 +2572,7 @@
       "surface": "translate:listing -l/-L",
       "kind": "feature",
       "status": "verified",
-      "evidence": "rust-fx/tests/translate.rs + SeqKit 2.14 55/55 table/listing differential",
+      "evidence": "rust-fx/tests/translate.rs; tests/oracle/seqkit_translate_diff.py: 54 listing/precedence cases",
       "deviation": "unknown positive IDs return an empty successful listing",
       "next_action": ""
     },
@@ -2591,10 +2611,10 @@
       "upstream": "SeqKit 2.14.0 / fq 0.12.0",
       "surface": "range:streaming positive/negative/multi-file",
       "kind": "feature",
-      "status": "verified",
-      "evidence": "rust-fx/tests/range.rs + seqkit_streaming.rs + seqkit_streaming_diff.py interval/file/stdin cases",
-      "deviation": "START:-1 streams; other mixed signs rejected as upstream; mixed FASTQ-to-FASTA inputs remain a command-level deviation",
-      "next_action": ""
+      "status": "exception",
+      "evidence": "rust-fx/tests/range.rs + seqkit_streaming.rs; tests/oracle/check_seqkit_exceptions.py",
+      "deviation": "SEQKIT-RANGE-QUALITY: START:-1 streams with original record formats and qualities; no upstream cross-file quality contamination",
+      "next_action": "Maintain independent correctness proof and visible raw differences"
     },
     {
       "tool": "rust-fx",

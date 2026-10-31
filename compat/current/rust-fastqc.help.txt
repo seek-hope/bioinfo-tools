@@ -18,6 +18,9 @@ Options:
       --extract                     extract the report directory after writing the ZIP
       --delete                      with --extract, delete the ZIP after extraction
   -q, --quiet                       suppress progress messages
+  -j, --java <JAVA>                 recognized FastQC launcher option; rejected because this executable is native Rust
+      --debug                       recognized JVM-launcher debug option; rejected because no JVM is launched
+  -a, --adapters <TSV>              adapter list in name<TAB>sequence format
   -c, --contaminants <TSV>          contaminant list in name<TAB>sequence format
   -h, --help                        Print help
   -V, --version                     Print version

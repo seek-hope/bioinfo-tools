@@ -277,6 +277,7 @@ fn translate_command() -> Command {
                 .long("transl-table")
                 .value_name("INT")
                 .default_value("1")
+                .allow_hyphen_values(true)
                 .help("translation table ID (1-6, 9-14, 16, 21-31)"),
         )
         .arg(
@@ -337,6 +338,7 @@ fn translate_command() -> Command {
                 .long("min-len")
                 .value_name("INT")
                 .default_value("0")
+                .allow_hyphen_values(true)
                 .help("minimum amino-acid length for -s ORFs"),
         )
         .arg(

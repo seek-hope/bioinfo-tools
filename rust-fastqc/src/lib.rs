@@ -8,8 +8,10 @@
 //!
 //! `fastqc_data.txt` is a machine-readable contract: MultiQC parses it, and any
 //! byte difference in a field name or a numeric convention silently changes what
-//! downstream tools report. Every value and field name here was therefore taken
-//! from real FastQC 0.13.0 output on the fixture matrix, not from documentation.
+//! downstream tools report. Field names and numeric conventions are checked
+//! against pinned FastQC output. Proven upstream counting defects are corrected
+//! explicitly and independently tested; see `docs/EVIDENCE-FASTQC-ADAPTERS.md`
+//! in the workspace for the adapter differences.
 //!
 //! Two conventions are especially easy to get wrong and are pinned by tests:
 //!
@@ -29,7 +31,7 @@
 //! Present: Basic Statistics, Per base sequence quality, Per sequence quality
 //! scores, Per base sequence content, Per base N content, Per sequence GC content,
 //! Sequence Length Distribution, Sequence Duplication Levels, Overrepresented
-//! sequences, Adapter Content (FastQC cumulative 12bp adapter list).
+//! sequences, Adapter Content (default or custom literal adapters).
 //!
 //! See [`modules`] for the emitted modules and [`absent`] for the remaining gaps.
 
@@ -37,6 +39,7 @@
 #![warn(missing_docs)]
 
 pub mod absent;
+pub mod adapters;
 pub mod contaminants;
 pub mod error;
 pub mod grouping;

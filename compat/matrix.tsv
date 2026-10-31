@@ -173,7 +173,7 @@ rust-fastqc	FastQC 0.13.0	-h --help	option	verified	docs/EVIDENCE-QC.md; 22/22 f
 rust-fastqc	FastQC 0.13.0	-v --version	option	verified	docs/EVIDENCE-QC.md; 22/22 fixtures		
 rust-fastqc	FastQC 0.13.0	--outdir	option	verified	docs/EVIDENCE-QC.md; 22/22 fixtures		
 rust-fastqc	FastQC 0.13.0	-c --contaminants	option	verified	FastQC 0.13.0 default-list 22/22 + custom source 7/7 differential	custom name<TAB>sequence lists replace the built-in FastQC 0.13.0 list	
-rust-fastqc	FastQC 0.13.0	-a --adapters	option	unsupported	absent from compat/current/rust-fastqc.help.txt		T6: implement or re-scope
+rust-fastqc	FastQC 0.13.0	-a --adapters	option	exception	tests/oracle/fastqc_adapters_diff.py: 35 exact + 6 counting + 3 invalid-config cases; read-order invariant; 6 process/library tests	FASTQC-ADAPTER-CORRECTNESS: native custom lists; equal-length hits are counted, independent of read order; empty lists fail before output	Maintain adapter differential and independent boundary/order proof
 rust-fastqc	FastQC 0.13.0	-l --limits	option	unsupported	absent from compat/current/rust-fastqc.help.txt		T6: implement or re-scope
 rust-fastqc	FastQC 0.13.0	-d --dir	option	unsupported	absent from compat/current/rust-fastqc.help.txt		T6: implement or re-scope
 rust-fastqc	FastQC 0.13.0	--min_length	option	verified	FastQC 0.13.0 5/5 option differential; rust-fastqc 20 integration tests		
@@ -184,17 +184,19 @@ rust-fastqc	FastQC 0.13.0	-t --threads	option	unsupported	absent from compat/cur
 rust-fastqc	FastQC 0.13.0	-q --quiet	option	verified	FastQC 0.13.0 quiet/progress behavior and artifact smoke		
 rust-fastqc	FastQC 0.13.0	--fast5	option	unsupported	absent from compat/current/rust-fastqc.help.txt		T6: implement or re-scope
 rust-fastqc	FastQC 0.13.0	--phred64	option	verified	docs/EVIDENCE-QC.md; 22/22 fixtures		
-rust-fastqc	FastQC 0.13.0	-j --java	option	unsupported	absent from compat/current/rust-fastqc.help.txt		T6: implement or re-scope
+rust-fastqc	FastQC 0.13.0	-j --java	option	exception	rust-fastqc/tests/native_runtime.rs; docs/EVIDENCE-UPSTREAM-DEFECTS.md	FASTQC-NATIVE-LAUNCHER: JVM launcher controls explicitly rejected with exit 2; native QC does not execute Java	Maintain native-runtime regression and explicit approved exception
 rust-fastqc	FastQC 0.13.0	--nogroup	option	verified	FastQC 0.13.0 5/5 option differential; rust-fastqc 20 integration tests		
 rust-fastqc	FastQC 0.13.0	--png	option	unsupported	absent from compat/current/rust-fastqc.help.txt		T6: implement or re-scope
 rust-fastqc	FastQC 0.13.0	--extract	option	verified	FastQC 0.13.0 default/extract/delete layout differential (4/4)		
 rust-fastqc	FastQC 0.13.0	--delete	option	verified	FastQC 0.13.0 default/extract/delete layout differential (4/4)		
 rust-fastqc	FastQC 0.13.0	-f --format	option	unsupported	absent from compat/current/rust-fastqc.help.txt		T6: implement or re-scope
-rust-fastqc	FastQC 0.13.0	--debug	option	unsupported	absent from compat/current/rust-fastqc.help.txt		T6: implement or re-scope
-rust-fastqc	FastQC 0.13.0	report:fastqc_data.txt	report	verified	22/22 QC fixtures; MultiQC parses data		
+rust-fastqc	FastQC 0.13.0	--debug	option	exception	rust-fastqc/tests/native_runtime.rs; docs/EVIDENCE-UPSTREAM-DEFECTS.md	FASTQC-NATIVE-LAUNCHER: JVM launcher controls explicitly rejected with exit 2; native QC does not execute Java	Maintain native-runtime regression and explicit approved exception
+rust-fastqc	FastQC 0.13.0	report:fastqc_data.txt	report	verified	22 QC fixtures compare nine modules (Adapter Content excluded); separate adapter proof; MultiQC parses data		
 rust-fastqc	FastQC 0.13.0	report:HTML	report	experimental	data-table HTML with every module; no plot images or FastQC auxiliary assets		T6: implement plots or retain the documented data-table scope
 rust-fastqc	FastQC 0.13.0	report:ZIP	report	experimental	stored ZIP with data, summary and HTML; no plot images or FastQC auxiliary assets		T6: implement plots or retain the documented data-table scope
-rust-fastqc	FastQC 0.13.0	module:adapter-content	feature	verified	FastQC cumulative 12bp adapter algorithm; rust-fastqc 13/13; T8 1x/10x full fastqc_data exact		
+rust-fastqc	FastQC 0.13.0	module:adapter-content	feature	exception	tests/oracle/fastqc_adapters_diff.py: 44 cases; default/custom lists, short-read warnings and independent read-order proof	FASTQC-ADAPTER-CORRECTNESS: correct equal-length/read-order defect and reject empty config before report creation	Maintain adapter differential and independent boundary/order proof
+rust-fastqc	FastQC 0.13.0	module:kmer-content	feature	unsupported	rust-fastqc/src/absent.rs; FastQC 0.13.0 KmerContent module is not implemented		T6: implement position-specific enrichment before enabling via --limits
+rust-fastqc	FastQC 0.13.0	module:per-tile-quality	feature	unsupported	rust-fastqc/src/absent.rs; FastQC 0.13.0 PerTileQualityScores module is not implemented		T6: implement header/tile aggregation before enabling via --limits
 rust-fastqc	FastQC 0.13.0	module:contaminants	feature	verified	default FastQC 0.13.0 contaminant list plus custom overrides; 22/22 baseline + 7/7 custom source differential		
 rust-fastqc	FastQC 0.13.0	module:custom-contaminants	feature	verified	rust-fastqc/src/contaminants.rs + FastQC 0.13.0 7/7 source differential; forward/reverse/longest/one-mismatch cases		
 rust-fx	SeqKit 2.14.0 / fq 0.12.0	seqkit:faidx	command	experimental	rust-fx/tests/faidx.rs (4 tests) + SeqKit 2.14 region/regex/index differential	regex output follows input order; upstream Go map order is unstable	T7: implement faidx index side effects and regex IDs
@@ -203,7 +205,7 @@ rust-fx	SeqKit 2.14.0 / fq 0.12.0	seqkit:seq	command	verified	50/50 W1-3 FASTX d
 rust-fx	SeqKit 2.14.0 / fq 0.12.0	seqkit:sliding	command	verified	rust-fx/tests/sliding.rs (4 tests) + SeqKit 2.14 7/7 circular/greedy/global differential + compression tests		
 rust-fx	SeqKit 2.14.0 / fq 0.12.0	seqkit:stats	command	verified	50/50 W1-3 FASTX differential plus component tests	selected surface; other global flags are not covered	
 rust-fx	SeqKit 2.14.0 / fq 0.12.0	seqkit:subseq	command	experimental	rust-fx/tests/subseq*.rs + SeqKit 2.14 9/9 multi-file BED/GTF/flank differential	records are buffered per input; -U is unsupported	T7: complete subseq BED/GTF/flank semantics
-rust-fx	SeqKit 2.14.0 / fq 0.12.0	seqkit:translate	command	experimental	rust-fx/tests/translate.rs (7 tests) + SeqKit 2.14 55/55 listing differential + translation tables	invalid-base exit/partial-output behavior differs	T7: align invalid-input commit policy
+rust-fx	SeqKit 2.14.0 / fq 0.12.0	seqkit:translate	command	exception	tests/oracle/check_seqkit_exceptions.py: 710/756 exact + 46 hash-checked differences; independent IUPAC/ORF/trim/header proof	SEQKIT-TRANSLATE-CORRECTNESS: correct documented upstream strand, ORF endpoint, right-trim and description defects	Maintain independent correctness proof and reviewed raw observation hashes
 rust-fx	SeqKit 2.14.0 / fq 0.12.0	seqkit:watch	command	unsupported	absent from compat/current/rust-fx.help.txt		T7: implement selected SeqKit command
 rust-fx	SeqKit 2.14.0 / fq 0.12.0	seqkit:convert	command	unsupported	absent from compat/current/rust-fx.help.txt		T7: implement selected SeqKit command
 rust-fx	SeqKit 2.14.0 / fq 0.12.0	seqkit:fa2fq	command	verified	rust-fx/tests/fa2fq.rs (3 tests) + SeqKit 2.14 forward/reverse subsequence and quality differential + compression tests		
@@ -219,7 +221,7 @@ rust-fx	SeqKit 2.14.0 / fq 0.12.0	seqkit:duplicate	command	verified	rust-fx/test
 rust-fx	SeqKit 2.14.0 / fq 0.12.0	seqkit:head	command	verified	rust-fx/tests/head.rs (5 tests) + SeqKit 2.14 10/10 head differential + compression tests		
 rust-fx	SeqKit 2.14.0 / fq 0.12.0	seqkit:head-genome	command	unsupported	absent from compat/current/rust-fx.help.txt		T7: implement selected SeqKit command
 rust-fx	SeqKit 2.14.0 / fq 0.12.0	seqkit:pair	command	unsupported	absent from compat/current/rust-fx.help.txt		T7: implement selected SeqKit command
-rust-fx	SeqKit 2.14.0 / fq 0.12.0	seqkit:range	command	experimental	rust-fx/tests/range.rs + seqkit_streaming.rs; tests/oracle/seqkit_streaming_diff.py: 203/206	FASTQ-to-FASTA file mixing preserves per-file format instead of upstream pooled-quality carryover (3 mismatches)	T7: retain mixed-format deviation; interval selection and stdin streaming are aligned
+rust-fx	SeqKit 2.14.0 / fq 0.12.0	seqkit:range	command	exception	tests/oracle/check_seqkit_exceptions.py: 203/206 exact plus independent provenance and composition proof	SEQKIT-RANGE-QUALITY: preserve input formats; upstream manufactures invalid/stale FASTQ quality for FASTA (3 raw differences)	Maintain independent correctness proof and visible raw differences
 rust-fx	SeqKit 2.14.0 / fq 0.12.0	seqkit:rmdup	command	verified	rust-fx/tests/rmdup.rs (3 tests) + SeqKit 2.14 duplicate-report differential + compression tests		
 rust-fx	SeqKit 2.14.0 / fq 0.12.0	seqkit:sample	command	verified	50/50 W1-3 FASTX differential plus component tests	selected surface; other global flags are not covered	
 rust-fx	SeqKit 2.14.0 / fq 0.12.0	seqkit:sample2	command	unsupported	absent from compat/current/rust-fx.help.txt		T7: implement selected SeqKit command
@@ -247,13 +249,13 @@ rust-fx	SeqKit 2.14.0 / fq 0.12.0	grep:advanced --delete-matched/-I/-X/--id-rege
 rust-fx	SeqKit 2.14.0 / fq 0.12.0	rename:multiple-outfiles -m/-O/-f	feature	verified	rust-fx/tests/rename.rs + SeqKit 2.14 multiple-outfiles/force differential + compression tests		
 rust-fx	SeqKit 2.14.0 / fq 0.12.0	subseq:basic -r/--bed/--gtf/-u/-d/-f/--feature/--chr	feature	verified	rust-fx/tests/subseq*.rs + SeqKit 2.14 9/9 multi-file BED/GTF/flank differential	records are buffered per input; -U is unsupported	T7: use FASTA index or document the memory bound
 rust-fx	SeqKit 2.14.0 / fq 0.12.0	subseq:multi-file BED/GTF/flank/gene-tag	feature	verified	rust-fx/tests/subseq_gtf_flank.rs + SeqKit 2.14 9/9 multi-file differential including gene_id	records are buffered per input; -U is unsupported	
-rust-fx	SeqKit 2.14.0 / fq 0.12.0	translate:basic -f/-F/-s/--clean/-m/-e/-x/-M	feature	verified	rust-fx/tests/translate.rs (7 tests) + SeqKit 2.14 full option differential	invalid-base exit/partial-output behavior differs	T7: align invalid-input commit policy
-rust-fx	SeqKit 2.14.0 / fq 0.12.0	translate:tables 1-6,9-14,16,21-31	feature	verified	Biopython NCBI table generation + SeqKit 2.14 29/29 table differential	unsupported IDs fail before output	
-rust-fx	SeqKit 2.14.0 / fq 0.12.0	translate:listing -l/-L	feature	verified	rust-fx/tests/translate.rs + SeqKit 2.14 55/55 table/listing differential	unknown positive IDs return an empty successful listing	
+rust-fx	SeqKit 2.14.0 / fq 0.12.0	translate:basic -f/-F/-s/--clean/-m/-e/-x/-M	feature	exception	rust-fx/tests/translate*.rs (17 tests); tests/oracle/check_seqkit_exceptions.py	SEQKIT-TRANSLATE-CORRECTNESS: full IUPAC/RNA complement, exact ORF nucleotide spans, right-end trim, lossless descriptions	Maintain independent correctness proof and reviewed raw observation hashes
+rust-fx	SeqKit 2.14.0 / fq 0.12.0	translate:tables 1-6,9-14,16,21-31	feature	verified	tests/oracle/seqkit_translate_diff.py: all 3375 IUPAC codons in each of 24 tables, plus initiation and six-frame modes	unsupported IDs fail before output	
+rust-fx	SeqKit 2.14.0 / fq 0.12.0	translate:listing -l/-L	feature	verified	rust-fx/tests/translate.rs; tests/oracle/seqkit_translate_diff.py: 54 listing/precedence cases	unknown positive IDs return an empty successful listing	
 rust-fx	SeqKit 2.14.0 / fq 0.12.0	replace:special-and-filters {nr}/{fn}/{fbn}/{fbne}/{kv}/f-*	feature	verified	rust-fx/tests/replace.rs (4 tests) + SeqKit 2.14 15/15 special-symbol/filter differential + UUID shape	--compress-level is covered; UUID is not byte-compared	
 rust-fx	SeqKit 2.14.0 / fq 0.12.0	tab2fx:comment-prefix -p	feature	verified	rust-fx/tests/tab2fx.rs + SeqKit 2.14 CSV/repeated/empty/CRLF prefix differential in seqkit_streaming_diff.py	invalid CSV option diagnostics use the Rust CLI format	
 rust-fx	SeqKit 2.14.0 / fq 0.12.0	tab2fx:buffer-size -b	feature	verified	rust-fx/tests/tab2fx.rs + seqkit_streaming_diff.py: fractional/lowercase units, EOF/newline boundaries, early/late failure	64 KiB pending output is discarded on failure, not a whole-file pre-scan; non-finite/overflow buffer sizes are rejected	
-rust-fx	SeqKit 2.14.0 / fq 0.12.0	range:streaming positive/negative/multi-file	feature	verified	rust-fx/tests/range.rs + seqkit_streaming.rs + seqkit_streaming_diff.py interval/file/stdin cases	START:-1 streams; other mixed signs rejected as upstream; mixed FASTQ-to-FASTA inputs remain a command-level deviation	
+rust-fx	SeqKit 2.14.0 / fq 0.12.0	range:streaming positive/negative/multi-file	feature	exception	rust-fx/tests/range.rs + seqkit_streaming.rs; tests/oracle/check_seqkit_exceptions.py	SEQKIT-RANGE-QUALITY: START:-1 streams with original record formats and qualities; no upstream cross-file quality contamination	Maintain independent correctness proof and visible raw differences
 rust-fx	SeqKit 2.14.0 / fq 0.12.0	sliding:basic -W/-s/-S/-g/-c/-C/-X	feature	verified	rust-fx/tests/sliding.rs (4 tests) + SeqKit 2.14 7/7 circular/greedy/global differential + compression tests		
 rust-fx	SeqKit 2.14.0 / fq 0.12.0	rmdup:duplicate-reports -D/-d	feature	verified	rust-fx/tests/rmdup.rs duplicate reports + SeqKit 2.14 duplicate-report differential + compression tests		
 rust-fx	SeqKit 2.14.0 / fq 0.12.0	restart:start-with -s/-m/-I	feature	verified	rust-fx/tests/restart.rs (2 tests) + SeqKit 2.14 start-with forward/reverse/mismatch differential + compression tests		

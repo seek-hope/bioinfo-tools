@@ -11,6 +11,8 @@ import argparse
 import bz2
 from collections import Counter
 import gzip
+import hashlib
+import json
 import lzma
 from pathlib import Path
 import re
@@ -28,6 +30,7 @@ def main():
     parser.add_argument("--seqkit", default="tests/ci/env/bin/seqkit")
     parser.add_argument("--rust", default="target/debug/rust-fx")
     parser.add_argument("--command", choices=("range", "tab2fx"))
+    parser.add_argument("--report", type=Path, help="save raw observation hashes without changing comparisons")
     args = parser.parse_args()
     reference, candidate = [str(Path(p).resolve()) for p in (args.seqkit, args.rust)]
     version = subprocess.check_output([reference, "version"]).decode().strip()
@@ -35,6 +38,7 @@ def main():
         raise SystemExit(f"wrong reference: {version}")
     counts = Counter()
     failures = Counter()
+    observations = []
     with tempfile.TemporaryDirectory(prefix="bioinfo-seqkit-streaming-") as directory:
         root = Path(directory)
 
@@ -60,6 +64,16 @@ def main():
                 if artifact is not None and decode is not None and run.returncode == 0:
                     artifact = decode(artifact)
                 results.append((run.returncode, run.stdout, diagnostic(run.stderr), artifact))
+            observations.append({
+                "command": command, "case": label, "options": list(options),
+                "inputs_sha256": None if files is None else [hashlib.sha256(payload).hexdigest() for payload in files],
+                "passed": results[0] == results[1],
+                "observations": [{
+                    "code": code, "stdout_sha256": hashlib.sha256(stdout).hexdigest(),
+                    "stderr_sha256": hashlib.sha256(stderr).hexdigest(),
+                    "artifact_sha256": None if artifact is None else hashlib.sha256(artifact).hexdigest(),
+                } for code, stdout, stderr, artifact in results],
+            })
             if results[0] != results[1]:
                 for which, result in zip(("upstream", "rust"), results):
                     code, stdout, stderr, artifact = result
@@ -146,6 +160,9 @@ def main():
         failed = failures[command]
         status = "FAIL" if failed else "PASS"
         print(f"{status} SeqKit 2.14.0 {command}: {count-failed}/{count} differentials")
+    if args.report:
+        args.report.write_text(json.dumps({"reference": version, "counts": dict(counts),
+                                          "failures": dict(failures), "cases": observations}, indent=2) + "\n")
     if failures:
         raise SystemExit(1)
 

@@ -425,6 +425,18 @@ impl RecordReader {
         if qualities.len() != sequence.len() {
             return Err(invalid());
         }
+        // SeqKit delimits a FASTQ record at the next @ header (or EOF).
+        // Extra quality lines must invalidate this record before a caller can
+        // commit its output, even if an earlier line already matched its length.
+        loop {
+            match self.peek_line()? {
+                Some([]) => {
+                    self.next_line()?;
+                }
+                Some(line) if !line.starts_with(b"@") => return Err(invalid()),
+                _ => break,
+            }
+        }
         Ok(Some(RecordParts {
             name: raw_header[1..].to_vec(),
             raw_header,

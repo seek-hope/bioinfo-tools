@@ -13,7 +13,7 @@
 //! | Sequence Length Distribution | **yes** | |
 //! | Sequence Duplication Levels | **yes** | 50bp truncation, FastQC's default |
 //! | Overrepresented sequences | **yes** | threshold 0.1% of reads |
-//! | Adapter Content | **yes** | FastQC cumulative 12bp adapter list, BaseGroup rows |
+//! | Adapter Content | **yes** | Configured literal adapters, cumulative BaseGroup rows; documented counting corrections |
 //!
 //! ## Status verdicts
 //!
@@ -22,7 +22,7 @@
 //! the measured fixtures, not the whole limits file; the thresholds are recorded
 //! in [`Thresholds`].
 
-use crate::stats::{java_double, QcStats, ADAPTERS, BASE_ORDER};
+use crate::stats::{java_double, QcStats, BASE_ORDER};
 
 /// FastQC's module status.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -801,34 +801,46 @@ pub fn round_to(value: f64, places: u32) -> f64 {
 
 /// Adapter Content.
 ///
-/// FastQC groups the positions with `BaseGroup`, sums the cumulative adapter
-/// counts in each group, divides by the group width, and prints one decimal.
+/// FastQC groups positions with `BaseGroup` and averages their cumulative
+/// adapter percentages, using Java-style double formatting.
 /// The module warns above 5% and fails above 10% for any adapter.
 pub fn adapter_content(stats: &QcStats) -> ModuleResult {
     let total = stats.total_sequences;
-    let adapter_length = ADAPTERS
-        .first()
-        .map(|(_, sequence)| sequence.len())
+    let adapter_length = stats
+        .adapters
+        .iter()
+        .map(|adapter| adapter.sequence.len())
+        .max()
         .unwrap_or(0);
-    let max_start = stats.max_length().saturating_sub(adapter_length) + 1;
+    if adapter_length > stats.max_length() {
+        return ModuleResult {
+            name: "Adapter Content",
+            status: Status::Warn,
+            lines: Vec::new(),
+        };
+    }
+    let max_start = stats.max_length() - adapter_length + 1;
     let groups = crate::grouping::base_groups(max_start, stats.nogroup);
     let mut lines = Vec::new();
     if total > 0 && max_start > 0 && !stats.adapter_hits.is_empty() {
         let mut header = String::from("#Position");
-        for (name, _) in ADAPTERS {
+        for adapter in &stats.adapters {
             header.push('\t');
-            header.push_str(name);
+            header.push_str(&adapter.name);
         }
         lines.push(header);
         let mut worst = 0.0f64;
+        let mut cumulative = vec![0u64; stats.adapters.len()];
         for group in &groups {
             let width = (group.end - group.start + 1) as f64;
             let mut row = vec![group.label()];
-            for hits in &stats.adapter_hits {
-                let sum: u64 = (group.start - 1..group.end)
-                    .filter_map(|position| hits.get(position).copied())
-                    .sum();
-                let percent = (sum as f64 * 100.0 / total as f64) / width;
+            for (index, hits) in stats.adapter_hits.iter().enumerate() {
+                let mut sum = 0.0;
+                for position in group.start - 1..group.end {
+                    cumulative[index] += hits.get(position).copied().unwrap_or(0);
+                    sum += cumulative[index] as f64 * 100.0 / total as f64;
+                }
+                let percent = sum / width;
                 worst = worst.max(percent);
                 row.push(java_double(percent));
             }

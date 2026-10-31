@@ -1,0 +1,993 @@
+{
+  "schema_version": 1,
+  "reference": "seqkit v2.14.0",
+  "total_raw_cases": 756,
+  "policy": "User explicitly requested not to reproduce proven upstream errors. Exact comparisons remain unchanged; these finite differences require independent correctness checks.",
+  "proof": "tests/oracle/seqkit_correctness.py",
+  "differences": [
+    {
+      "case": "codons/1/('-f', '6', '-F')",
+      "defects": [
+        "ambiguous-complement",
+        "RNA-complement",
+        "reverse-ORF-coordinate"
+      ],
+      "observations": [
+        {
+          "code": 0,
+          "stdout_sha256": "a32f567d0a1569684171086045ea069c1681a423e76c180941ddcdcaf1864ed9",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "artifact_sha256": null
+        },
+        {
+          "code": 0,
+          "stdout_sha256": "59de92d8e6cb8bf797e16e672edd457c6587b3863a7c62fc8e0517acedc56c3a",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "artifact_sha256": null
+        }
+      ]
+    },
+    {
+      "case": "codons/2/('-f', '6', '-F')",
+      "defects": [
+        "ambiguous-complement",
+        "RNA-complement",
+        "reverse-ORF-coordinate"
+      ],
+      "observations": [
+        {
+          "code": 0,
+          "stdout_sha256": "e07e111a83013fbad5b318e886e1016752ee4fcdb24bbe395569dcc47823764e",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "artifact_sha256": null
+        },
+        {
+          "code": 0,
+          "stdout_sha256": "ddc9ecb00a24486d687ffc6552643b389584c53a271a9a761b74789816940210",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "artifact_sha256": null
+        }
+      ]
+    },
+    {
+      "case": "codons/3/('-f', '6', '-F')",
+      "defects": [
+        "ambiguous-complement",
+        "RNA-complement",
+        "reverse-ORF-coordinate"
+      ],
+      "observations": [
+        {
+          "code": 0,
+          "stdout_sha256": "d2a604ceab5a965839894bfdc53aa14ccf70fa090630927f21d0c0a79b94eb7e",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "artifact_sha256": null
+        },
+        {
+          "code": 0,
+          "stdout_sha256": "1a884f277702d09d5d89bba71e12df35d714271434b540ba01e1456675f89fb4",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "artifact_sha256": null
+        }
+      ]
+    },
+    {
+      "case": "codons/4/('-f', '6', '-F')",
+      "defects": [
+        "ambiguous-complement",
+        "RNA-complement",
+        "reverse-ORF-coordinate"
+      ],
+      "observations": [
+        {
+          "code": 0,
+          "stdout_sha256": "1a067ec7bc9f269873c961590544cfd58b659a1aa462bbbcda4ddc9bb77674e7",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "artifact_sha256": null
+        },
+        {
+          "code": 0,
+          "stdout_sha256": "e77d3ce6b1cc8782650fac011161067d56ab86d759d4ea4a221d33981eab724c",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "artifact_sha256": null
+        }
+      ]
+    },
+    {
+      "case": "codons/5/('-f', '6', '-F')",
+      "defects": [
+        "ambiguous-complement",
+        "RNA-complement",
+        "reverse-ORF-coordinate"
+      ],
+      "observations": [
+        {
+          "code": 0,
+          "stdout_sha256": "ae9740f1cc737cc5bfa7281041fdc5a7be7f6d7660527bcedeba05917a28a0f5",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "artifact_sha256": null
+        },
+        {
+          "code": 0,
+          "stdout_sha256": "ace77624aebd1f7b52a5097baa7f6b8f02186cea1d4c87bab3e9b09b85584e77",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "artifact_sha256": null
+        }
+      ]
+    },
+    {
+      "case": "codons/6/('-f', '6', '-F')",
+      "defects": [
+        "ambiguous-complement",
+        "RNA-complement",
+        "reverse-ORF-coordinate"
+      ],
+      "observations": [
+        {
+          "code": 0,
+          "stdout_sha256": "dc2d7c054e7959e3ffb5f2a7129ce20faa5484402f6099baaadab567a60a36d5",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "artifact_sha256": null
+        },
+        {
+          "code": 0,
+          "stdout_sha256": "8106b23d30bec2c38c3ce7e63b8c11033ebdf2b779aafde46b7492a17f38826a",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "artifact_sha256": null
+        }
+      ]
+    },
+    {
+      "case": "codons/9/('-f', '6', '-F')",
+      "defects": [
+        "ambiguous-complement",
+        "RNA-complement",
+        "reverse-ORF-coordinate"
+      ],
+      "observations": [
+        {
+          "code": 0,
+          "stdout_sha256": "fe2ed19235795e9d8b40038f1d1ab5b1ee871ca43110731d766832ec6d55c61d",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "artifact_sha256": null
+        },
+        {
+          "code": 0,
+          "stdout_sha256": "9f9c9d3ed0bfd6e725dab92a42d1cab4aeb4b7b49e3238914e8a7b77b27c05bd",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "artifact_sha256": null
+        }
+      ]
+    },
+    {
+      "case": "codons/10/('-f', '6', '-F')",
+      "defects": [
+        "ambiguous-complement",
+        "RNA-complement",
+        "reverse-ORF-coordinate"
+      ],
+      "observations": [
+        {
+          "code": 0,
+          "stdout_sha256": "5260bf921d15075e9e006866aa804436c00d49374aec764a10df3d3af2d1cff0",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "artifact_sha256": null
+        },
+        {
+          "code": 0,
+          "stdout_sha256": "583e7f302a8fdce70f8bcb8e3955ac5aa517dd60790e11a73e3c821dc17fa983",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "artifact_sha256": null
+        }
+      ]
+    },
+    {
+      "case": "codons/11/('-f', '6', '-F')",
+      "defects": [
+        "ambiguous-complement",
+        "RNA-complement",
+        "reverse-ORF-coordinate"
+      ],
+      "observations": [
+        {
+          "code": 0,
+          "stdout_sha256": "a32f567d0a1569684171086045ea069c1681a423e76c180941ddcdcaf1864ed9",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "artifact_sha256": null
+        },
+        {
+          "code": 0,
+          "stdout_sha256": "59de92d8e6cb8bf797e16e672edd457c6587b3863a7c62fc8e0517acedc56c3a",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "artifact_sha256": null
+        }
+      ]
+    },
+    {
+      "case": "codons/12/('-f', '6', '-F')",
+      "defects": [
+        "ambiguous-complement",
+        "RNA-complement",
+        "reverse-ORF-coordinate"
+      ],
+      "observations": [
+        {
+          "code": 0,
+          "stdout_sha256": "1f1327623213421c4d44073b2a5926a7d1bb4230a824ddc059f28dd892c92dbc",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "artifact_sha256": null
+        },
+        {
+          "code": 0,
+          "stdout_sha256": "3c6a3cbab21e4fa25ba59f45402f83309aff53ce808a5ed2c3ed27b5df04fa9e",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "artifact_sha256": null
+        }
+      ]
+    },
+    {
+      "case": "codons/13/('-f', '6', '-F')",
+      "defects": [
+        "ambiguous-complement",
+        "RNA-complement",
+        "reverse-ORF-coordinate"
+      ],
+      "observations": [
+        {
+          "code": 0,
+          "stdout_sha256": "cae22d0a0e5d10003bf9aa0e6753560f0ebc7d7049b04729a51cf55ddaa3b6c2",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "artifact_sha256": null
+        },
+        {
+          "code": 0,
+          "stdout_sha256": "805d59351596015539a0845e2496aea7e152c1401b0110226a03420e9a9079b1",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "artifact_sha256": null
+        }
+      ]
+    },
+    {
+      "case": "codons/14/('-f', '6', '-F')",
+      "defects": [
+        "ambiguous-complement",
+        "RNA-complement",
+        "reverse-ORF-coordinate"
+      ],
+      "observations": [
+        {
+          "code": 0,
+          "stdout_sha256": "1ec0993b128d17383d9f3a0c7ea6ece90fef9029934f8aa520d051d20d8714b0",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "artifact_sha256": null
+        },
+        {
+          "code": 0,
+          "stdout_sha256": "ab637d485c52075f3f23bedead1971126b2bedf3b66b532deeca1b1f406eed9d",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "artifact_sha256": null
+        }
+      ]
+    },
+    {
+      "case": "codons/16/('-f', '6', '-F')",
+      "defects": [
+        "ambiguous-complement",
+        "RNA-complement",
+        "reverse-ORF-coordinate"
+      ],
+      "observations": [
+        {
+          "code": 0,
+          "stdout_sha256": "c37231079d298429af95c42f4811999d71cf63f53c51a64f4c75e0fd0a40ecb7",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "artifact_sha256": null
+        },
+        {
+          "code": 0,
+          "stdout_sha256": "609bcbb19524d108da54c144b526482f2506ffeeda4389a82791bbb06f43ec55",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "artifact_sha256": null
+        }
+      ]
+    },
+    {
+      "case": "codons/21/('-f', '6', '-F')",
+      "defects": [
+        "ambiguous-complement",
+        "RNA-complement",
+        "reverse-ORF-coordinate"
+      ],
+      "observations": [
+        {
+          "code": 0,
+          "stdout_sha256": "c62296e88ce7f4c66dd20e8982b8450ac690b8f2c837ee1099d5ebf9ad820ac3",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "artifact_sha256": null
+        },
+        {
+          "code": 0,
+          "stdout_sha256": "973c84936ee6e38f58e517b6db170c7862aa072f92a4a42d698881eb51747909",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "artifact_sha256": null
+        }
+      ]
+    },
+    {
+      "case": "codons/22/('-f', '6', '-F')",
+      "defects": [
+        "ambiguous-complement",
+        "RNA-complement",
+        "reverse-ORF-coordinate"
+      ],
+      "observations": [
+        {
+          "code": 0,
+          "stdout_sha256": "9afb689b328b82bffd78f9d258d07c610cf85ee28bf397c213c6b10ddfae90f4",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "artifact_sha256": null
+        },
+        {
+          "code": 0,
+          "stdout_sha256": "dc9a2a43537280a9751a7c856141a4d58ee6fd22eb0503b95a77526db574f4dc",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "artifact_sha256": null
+        }
+      ]
+    },
+    {
+      "case": "codons/23/('-f', '6', '-F')",
+      "defects": [
+        "ambiguous-complement",
+        "RNA-complement",
+        "reverse-ORF-coordinate"
+      ],
+      "observations": [
+        {
+          "code": 0,
+          "stdout_sha256": "6452e098f9d06ddd596c37b9ceea908096f8f754c4264ee9e8eaf65646319fba",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "artifact_sha256": null
+        },
+        {
+          "code": 0,
+          "stdout_sha256": "25a432f729bf439545a6e89f8520127f669561f213443d99b8b9f9d07cce1049",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "artifact_sha256": null
+        }
+      ]
+    },
+    {
+      "case": "codons/24/('-f', '6', '-F')",
+      "defects": [
+        "ambiguous-complement",
+        "RNA-complement",
+        "reverse-ORF-coordinate"
+      ],
+      "observations": [
+        {
+          "code": 0,
+          "stdout_sha256": "7012b1655e898bc2b1bb911a2cddbc1ee3b59d1765fce9afd93a1dd40480fb9a",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "artifact_sha256": null
+        },
+        {
+          "code": 0,
+          "stdout_sha256": "2f468a5dfdce633add0d9eb91e7e2909a82d7045d221c7860dac66f1af5dfc7a",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "artifact_sha256": null
+        }
+      ]
+    },
+    {
+      "case": "codons/25/('-f', '6', '-F')",
+      "defects": [
+        "ambiguous-complement",
+        "RNA-complement",
+        "reverse-ORF-coordinate"
+      ],
+      "observations": [
+        {
+          "code": 0,
+          "stdout_sha256": "b6c6a81e7085dcea9caa100fbf9dcb5d44d5926b18977aff555617eb63217757",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "artifact_sha256": null
+        },
+        {
+          "code": 0,
+          "stdout_sha256": "04498ec0dfa3576fe69ad9c5565a46004fa762527f41de97989b40a93a8acdaf",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "artifact_sha256": null
+        }
+      ]
+    },
+    {
+      "case": "codons/26/('-f', '6', '-F')",
+      "defects": [
+        "ambiguous-complement",
+        "RNA-complement",
+        "reverse-ORF-coordinate"
+      ],
+      "observations": [
+        {
+          "code": 0,
+          "stdout_sha256": "ec055b5dd6a18152f3ebdffc7ab8236f642eb1041b0749c818bf1e93c8a13d9b",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "artifact_sha256": null
+        },
+        {
+          "code": 0,
+          "stdout_sha256": "87beb43ebd497c7f342ce85d6be7f5e8c277b6b8e601a5198fe8648a755afa97",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "artifact_sha256": null
+        }
+      ]
+    },
+    {
+      "case": "codons/27/('-f', '6', '-F')",
+      "defects": [
+        "ambiguous-complement",
+        "RNA-complement",
+        "reverse-ORF-coordinate"
+      ],
+      "observations": [
+        {
+          "code": 0,
+          "stdout_sha256": "73ebe9ca80e136f7cd20acef6684666f7a78dfe18e1048ac7ac9f45f9b4e657b",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "artifact_sha256": null
+        },
+        {
+          "code": 0,
+          "stdout_sha256": "7e6ae34e5a21a313cc8f46b77ca47807949b0e484e8a4e30a78fe45e96f0d2b1",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "artifact_sha256": null
+        }
+      ]
+    },
+    {
+      "case": "codons/28/('-f', '6', '-F')",
+      "defects": [
+        "ambiguous-complement",
+        "RNA-complement",
+        "reverse-ORF-coordinate"
+      ],
+      "observations": [
+        {
+          "code": 0,
+          "stdout_sha256": "73ebe9ca80e136f7cd20acef6684666f7a78dfe18e1048ac7ac9f45f9b4e657b",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "artifact_sha256": null
+        },
+        {
+          "code": 0,
+          "stdout_sha256": "7e6ae34e5a21a313cc8f46b77ca47807949b0e484e8a4e30a78fe45e96f0d2b1",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "artifact_sha256": null
+        }
+      ]
+    },
+    {
+      "case": "codons/29/('-f', '6', '-F')",
+      "defects": [
+        "ambiguous-complement",
+        "RNA-complement",
+        "reverse-ORF-coordinate"
+      ],
+      "observations": [
+        {
+          "code": 0,
+          "stdout_sha256": "27ea5a3d64641db1494892d42799ae3a8bbe154f15d1530fab9333f5c500ac38",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "artifact_sha256": null
+        },
+        {
+          "code": 0,
+          "stdout_sha256": "4e6483f1b5bf0bad4e8f6d61c0a0d1ddb8267bf643d136c4698f171c2e7b5591",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "artifact_sha256": null
+        }
+      ]
+    },
+    {
+      "case": "codons/30/('-f', '6', '-F')",
+      "defects": [
+        "ambiguous-complement",
+        "RNA-complement",
+        "reverse-ORF-coordinate"
+      ],
+      "observations": [
+        {
+          "code": 0,
+          "stdout_sha256": "a6ef2962472ac19abb523a99b1aa3b16bddcb0aabb4b646a8a99f74c38a6e33d",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "artifact_sha256": null
+        },
+        {
+          "code": 0,
+          "stdout_sha256": "817ef403a5c0274d8a5d512176b6cf6065b54a733b14bd55bf79af1889a3b191",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "artifact_sha256": null
+        }
+      ]
+    },
+    {
+      "case": "codons/31/('-f', '6', '-F')",
+      "defects": [
+        "ambiguous-complement",
+        "RNA-complement",
+        "reverse-ORF-coordinate"
+      ],
+      "observations": [
+        {
+          "code": 0,
+          "stdout_sha256": "b3809a73c3971121d8250473072852b8547621d883c0ba92855ace80bd0c5d94",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "artifact_sha256": null
+        },
+        {
+          "code": 0,
+          "stdout_sha256": "a25bc507fed12545159f0e9cce11e8702b5ed818b502b2002cc3dc79dfdcf6e0",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "artifact_sha256": null
+        }
+      ]
+    },
+    {
+      "case": "sequence/11/False/('--trim',)",
+      "defects": [
+        "right-trim"
+      ],
+      "observations": [
+        {
+          "code": 0,
+          "stdout_sha256": "79dd9ae67cc913093c30812ee3dd1483909a3847578c2c8049f4cfa12429bf13",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "artifact_sha256": null
+        },
+        {
+          "code": 0,
+          "stdout_sha256": "14fcec7f76d4a30b6984cf0eb61ac9f5deea1a1ae2042b939d9e9b1036d90243",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "artifact_sha256": null
+        }
+      ]
+    },
+    {
+      "case": "sequence/11/False/('--clean', '--trim')",
+      "defects": [
+        "right-trim"
+      ],
+      "observations": [
+        {
+          "code": 0,
+          "stdout_sha256": "79dd9ae67cc913093c30812ee3dd1483909a3847578c2c8049f4cfa12429bf13",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "artifact_sha256": null
+        },
+        {
+          "code": 0,
+          "stdout_sha256": "2e6893c3259ddc2835d7b6c416bc192756760b05663bdaf60f97a44f9b1fb32c",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "artifact_sha256": null
+        }
+      ]
+    },
+    {
+      "case": "sequence/11/True/('--trim',)",
+      "defects": [
+        "right-trim"
+      ],
+      "observations": [
+        {
+          "code": 0,
+          "stdout_sha256": "a58b493868640e81bef1fc50ab3bf85d3371139022df8f26245ecb5354084bbc",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "artifact_sha256": null
+        },
+        {
+          "code": 0,
+          "stdout_sha256": "68f70c02bb4403724deb15ad91041ab6f705f6a9c9ac474779da99f0599ec6c9",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "artifact_sha256": null
+        }
+      ]
+    },
+    {
+      "case": "sequence/11/True/('--clean', '--trim')",
+      "defects": [
+        "right-trim"
+      ],
+      "observations": [
+        {
+          "code": 0,
+          "stdout_sha256": "a58b493868640e81bef1fc50ab3bf85d3371139022df8f26245ecb5354084bbc",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "artifact_sha256": null
+        },
+        {
+          "code": 0,
+          "stdout_sha256": "19ca928e30def19a0dacc1bdab3bd7cf376b27dfce1a8dee068908fd5ccea112",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "artifact_sha256": null
+        }
+      ]
+    },
+    {
+      "case": "sequence/12/False/('--trim',)",
+      "defects": [
+        "right-trim"
+      ],
+      "observations": [
+        {
+          "code": 0,
+          "stdout_sha256": "79dd9ae67cc913093c30812ee3dd1483909a3847578c2c8049f4cfa12429bf13",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "artifact_sha256": null
+        },
+        {
+          "code": 0,
+          "stdout_sha256": "47351eb3bf365436c7310351cd3735c0b581ca6f7d4f1a1ace934e77c7ecf4aa",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "artifact_sha256": null
+        }
+      ]
+    },
+    {
+      "case": "sequence/12/False/('--clean', '--trim')",
+      "defects": [
+        "right-trim"
+      ],
+      "observations": [
+        {
+          "code": 0,
+          "stdout_sha256": "79dd9ae67cc913093c30812ee3dd1483909a3847578c2c8049f4cfa12429bf13",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "artifact_sha256": null
+        },
+        {
+          "code": 0,
+          "stdout_sha256": "47351eb3bf365436c7310351cd3735c0b581ca6f7d4f1a1ace934e77c7ecf4aa",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "artifact_sha256": null
+        }
+      ]
+    },
+    {
+      "case": "sequence/12/True/('--trim',)",
+      "defects": [
+        "right-trim"
+      ],
+      "observations": [
+        {
+          "code": 0,
+          "stdout_sha256": "a58b493868640e81bef1fc50ab3bf85d3371139022df8f26245ecb5354084bbc",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "artifact_sha256": null
+        },
+        {
+          "code": 0,
+          "stdout_sha256": "9c72988895349a41b9f82a835e48904331c2c01e3386070ad71d84f31c612277",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "artifact_sha256": null
+        }
+      ]
+    },
+    {
+      "case": "sequence/12/True/('--clean', '--trim')",
+      "defects": [
+        "right-trim"
+      ],
+      "observations": [
+        {
+          "code": 0,
+          "stdout_sha256": "a58b493868640e81bef1fc50ab3bf85d3371139022df8f26245ecb5354084bbc",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "artifact_sha256": null
+        },
+        {
+          "code": 0,
+          "stdout_sha256": "9c72988895349a41b9f82a835e48904331c2c01e3386070ad71d84f31c612277",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "artifact_sha256": null
+        }
+      ]
+    },
+    {
+      "case": "sequence/13/False/('--trim',)",
+      "defects": [
+        "right-trim"
+      ],
+      "observations": [
+        {
+          "code": 0,
+          "stdout_sha256": "711cb2f0ffb67a4d10f2d5c8fddf503e574d7e9edf29a24b3ce70613d07074e9",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "artifact_sha256": null
+        },
+        {
+          "code": 0,
+          "stdout_sha256": "240d054d448a0e5950fdb9bf6d59e3f55b15893052be0cf5b666afd008bf7b1f",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "artifact_sha256": null
+        }
+      ]
+    },
+    {
+      "case": "sequence/13/False/('--clean', '--trim')",
+      "defects": [
+        "right-trim"
+      ],
+      "observations": [
+        {
+          "code": 0,
+          "stdout_sha256": "711cb2f0ffb67a4d10f2d5c8fddf503e574d7e9edf29a24b3ce70613d07074e9",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "artifact_sha256": null
+        },
+        {
+          "code": 0,
+          "stdout_sha256": "28e1ada5ad39e836521b95f2f23b03703a80f67e984418830658dadd8326d26f",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "artifact_sha256": null
+        }
+      ]
+    },
+    {
+      "case": "sequence/13/True/('--trim',)",
+      "defects": [
+        "right-trim"
+      ],
+      "observations": [
+        {
+          "code": 0,
+          "stdout_sha256": "0155497c5cb39c6bb24b492820503ed49a9a29efa863ab14fbdb533b81531e3c",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "artifact_sha256": null
+        },
+        {
+          "code": 0,
+          "stdout_sha256": "abcb982b05eed1256afaa22a43246ae10fa148c6ccfd9a2c105fa4164e7f6418",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "artifact_sha256": null
+        }
+      ]
+    },
+    {
+      "case": "sequence/13/True/('--clean', '--trim')",
+      "defects": [
+        "right-trim"
+      ],
+      "observations": [
+        {
+          "code": 0,
+          "stdout_sha256": "0155497c5cb39c6bb24b492820503ed49a9a29efa863ab14fbdb533b81531e3c",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "artifact_sha256": null
+        },
+        {
+          "code": 0,
+          "stdout_sha256": "16cb6c2cd055975d13cfa5e79ed537ce25c4e339e0e4f90f0e4b797beeb1cb65",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "artifact_sha256": null
+        }
+      ]
+    },
+    {
+      "case": "sequence/15/False/('-f', '6', '-e', '-F')",
+      "defects": [
+        "ambiguous-complement",
+        "RNA-complement",
+        "reverse-ORF-coordinate"
+      ],
+      "observations": [
+        {
+          "code": 0,
+          "stdout_sha256": "f25db6c964d68ee412c2dd64fa6e9e79ef100f981c1afc2fe0f3f9635abfdf0d",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "artifact_sha256": null
+        },
+        {
+          "code": 0,
+          "stdout_sha256": "0b06433acc2bc5e2593323874dd21c2dd3dc0362faf7ea3ccfbe02795740e7c1",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "artifact_sha256": null
+        }
+      ]
+    },
+    {
+      "case": "sequence/15/False/('-f', '6', '-s', '-e')",
+      "defects": [
+        "ambiguous-complement",
+        "RNA-complement",
+        "reverse-ORF-coordinate"
+      ],
+      "observations": [
+        {
+          "code": 0,
+          "stdout_sha256": "cdef7d7bae87cf6dd99b6f1b4d577fe882683d40b93820248f7f5d2bb706c2e1",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "artifact_sha256": null
+        },
+        {
+          "code": 0,
+          "stdout_sha256": "5ae8ffcdac4d21c8e3060018e4f204e9e1f2e3c4fa52ad79fbc7f35842908530",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "artifact_sha256": null
+        }
+      ]
+    },
+    {
+      "case": "sequence/15/True/('-f', '6', '-e', '-F')",
+      "defects": [
+        "ambiguous-complement",
+        "RNA-complement",
+        "reverse-ORF-coordinate"
+      ],
+      "observations": [
+        {
+          "code": 0,
+          "stdout_sha256": "8755ce4320b676b9f60f82efe1f668b46859f02429f2bf5b585eb60a65b6e55d",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "artifact_sha256": null
+        },
+        {
+          "code": 0,
+          "stdout_sha256": "7ab2e44487f0e826f7407f6b7309aa0e486d3534fe55f301748c31b10c87d7dc",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "artifact_sha256": null
+        }
+      ]
+    },
+    {
+      "case": "sequence/15/True/('-f', '6', '-s', '-e')",
+      "defects": [
+        "ambiguous-complement",
+        "RNA-complement",
+        "reverse-ORF-coordinate"
+      ],
+      "observations": [
+        {
+          "code": 0,
+          "stdout_sha256": "4d748e27416dd2ff540e7b88622825d9f874bd6d33cab9dea8efad1b7a7da0eb",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "artifact_sha256": null
+        },
+        {
+          "code": 0,
+          "stdout_sha256": "74e7fcce0c23a1a176616e55fcbd24277b63d4b1e52d7e498d776fa69aee7108",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "artifact_sha256": null
+        }
+      ]
+    },
+    {
+      "case": "sequence/16/True/('-f', '6', '-e', '-F')",
+      "defects": [
+        "ambiguous-complement",
+        "RNA-complement",
+        "reverse-ORF-coordinate"
+      ],
+      "observations": [
+        {
+          "code": 0,
+          "stdout_sha256": "ac893bcb098133943016d04475ef3eb820442202cff17e7e9e799960291219f0",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "artifact_sha256": null
+        },
+        {
+          "code": 0,
+          "stdout_sha256": "5493ab8d8450cb01d5f29676ee0292447587e330d22a963c76e87575bf265b2f",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "artifact_sha256": null
+        }
+      ]
+    },
+    {
+      "case": "sequence/16/True/('-f', '6', '-s', '-e')",
+      "defects": [
+        "ambiguous-complement",
+        "RNA-complement",
+        "reverse-ORF-coordinate"
+      ],
+      "observations": [
+        {
+          "code": 0,
+          "stdout_sha256": "8ef44e5b639d2efa631ba2e02fecf15145841390251fac2000635c517b8447e0",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "artifact_sha256": null
+        },
+        {
+          "code": 0,
+          "stdout_sha256": "5ba6007d393af9cf3a2d027e38be9138378bc1c067403d27c67f565817fae93f",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "artifact_sha256": null
+        }
+      ]
+    },
+    {
+      "case": "header/b'r  desc'/('-F',)",
+      "defects": [
+        "description-loss"
+      ],
+      "observations": [
+        {
+          "code": 0,
+          "stdout_sha256": "9f95a5f81b53f7b93ed13dec0e15c983b8aee29c447e96e28f84c3cecaaef70c",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "artifact_sha256": null
+        },
+        {
+          "code": 0,
+          "stdout_sha256": "9f56583e89440b3f87e716571d3a01dd92728472c2f6ab521657eb4e27c0aa25",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "artifact_sha256": null
+        }
+      ]
+    },
+    {
+      "case": "header/b'r  desc'/('-s',)",
+      "defects": [
+        "description-loss"
+      ],
+      "observations": [
+        {
+          "code": 0,
+          "stdout_sha256": "1f51251a3e080725f955c262c5f00ce220e9d4e529664bd50ffcd6e44726d071",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "artifact_sha256": null
+        },
+        {
+          "code": 0,
+          "stdout_sha256": "0ce9706af673d572286c64fc1851d7fd633b0b6a1f92466e49e8df68d0b7d2af",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "artifact_sha256": null
+        }
+      ]
+    },
+    {
+      "case": "multi-file/b'>rna\\nAUGUUG\\n'/('-f', '6', '-e', '-F')",
+      "defects": [
+        "ambiguous-complement",
+        "RNA-complement",
+        "reverse-ORF-coordinate"
+      ],
+      "observations": [
+        {
+          "code": 0,
+          "stdout_sha256": "52a9b4c9173cdfd3d7d92971f683214cce98c1e5c3a45bd6400d10335ab15c66",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "artifact_sha256": null
+        },
+        {
+          "code": 0,
+          "stdout_sha256": "e629ecdf8bac53e789394f1c7bea4739891d5ba456354331c4a8f8410b41d2a4",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "artifact_sha256": null
+        }
+      ]
+    },
+    {
+      "case": "multi-file/b'>rna\\nAUGUUG\\n'/('-f', '6', '-s', '-e')",
+      "defects": [
+        "ambiguous-complement",
+        "RNA-complement",
+        "reverse-ORF-coordinate"
+      ],
+      "observations": [
+        {
+          "code": 0,
+          "stdout_sha256": "4302ed5f1fa0317b0cffaac10bf0018eea0c6e7f99e6b0fa32653c0ca15f45a9",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "artifact_sha256": null
+        },
+        {
+          "code": 0,
+          "stdout_sha256": "b94c0d003de3a4d7d4854103cd09d18913030a06b8d23e523bd8dfb8197160a3",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "artifact_sha256": null
+        }
+      ]
+    }
+  ]
+}

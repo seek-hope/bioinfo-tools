@@ -25,9 +25,15 @@ snapshot hashes.
 | `verified` | Executable upstream comparison or an explicit fixture supports the stated behavior. |
 | `experimental` | Some behavior is implemented, but coverage or a documented difference remains. |
 | `unsupported` | The capability is absent or rejected before output. |
+| `exception` | An explicitly approved behavior difference, with a registered rule and executable proof; it is not an upstream-equivalence pass. |
 
 Run `python3 tests/ci/check_compat.py` for the current row counts. Regenerate the
 matrix after a behavior change; do not mark a row verified without new evidence.
+Matrix schema 2 adds `exception`. The finite `approved-exceptions.json` registry
+requires explicit approval, a behavior rule, proof and a verifier for each such
+row. Native-only JVM exclusions and proven upstream defects are recorded separately
+from implemented equivalence and unfinished functionality. No missing scientific
+command can become an exception merely to reduce the unsupported count.
 
 ## Coverage notes
 
@@ -44,20 +50,29 @@ matrix after a behavior change; do not mark a row verified without new evidence.
   verified for merged inputs, `--min-depth`, flags and histogram/depth output
   with 57 cases plus 35 flag cases. The full `coverage` command remains
   experimental because CRAM is unsupported and `-r` is sequential.
-- **FastQC**: `fastqc_data.txt` and Adapter Content have direct oracle evidence.
+- **FastQC**: the 22-fixture `fastqc_data.txt` baseline excludes Adapter Content.
+  The dedicated adapter suite now compares 35 cases exactly and independently
+  proves six counting corrections and three empty-config rejections (44 cases).
+  `-a/--adapters` is implemented natively; the adapter option/module use an
+  explicit correctness exception. See [adapter evidence](../docs/EVIDENCE-FASTQC-ADAPTERS.md).
   The built-in and custom contaminant paths have 22/22 baseline and 7/7 custom
   source comparisons. `--extract/--delete` have 4/4 artifact-layout comparisons.
   `--nogroup`, `--min_length`, `--max_length` and `--dup_length` have 5/5
   option-group comparisons. HTML and stored ZIP artifacts remain experimental
   because plot images and FastQC auxiliary assets are not emitted; Kmer/tile
-  modules remain open.
+  modules and `--limits` remain open; both missing modules are explicit matrix
+  rows rather than narrative-only gaps. The JVM launcher options `-j/--java` and `--debug` are
+  explicit native-runtime exceptions: they fail before input/output access with
+  exit 2, while ordinary QC requires no JVM or upstream executable.
 - **SeqKit/fq**: `common`, `head`, `grep`, `sort`, `fa2fq`, `faidx`, `rmdup`,
   `restart`, `range`, `sliding`, `tab2fx`, `rename`, `replace`, `subseq` and
   `translate` have direct per-command differential evidence. The existing 50/50
   FASTX suite also covers `stats`, `seq`, `fq2fa`, `fx2tab`, `sample`, `split`
   and `fq lint`; those are selected-surface verified, not claims of complete
-  SeqKit replacement. `translate -l/-L` has 55/55 listing comparisons; its
-  invalid-base output policy remains experimental. `tab2fx` has 99/99 direct
+  SeqKit replacement. `translate` has 710/756 exact direct comparisons and 46
+  reviewed, hash-checked differences after correcting proven upstream defects.
+  Together with `range`, it has 434 independent correctness checks (see below).
+  `tab2fx` has 99/99 direct
   comparisons for conversion, byte fields, CSV comment prefixes, scanner limits,
   compressed input/output and fatal plain-output commit boundaries. `range`
   has 203/206 comparisons: interval selection and stdin streaming align, but
@@ -101,10 +116,47 @@ explicit FASTQ output width and discarded `+` descriptions are also covered.
 The `range` differential intentionally still exits nonzero: three cases append
 FASTA after FASTQ. SeqKit 2.14 can force the FASTA records to FASTQ and reuse the
 previous file's quality bytes from a pooled reader; Rust keeps each file's own
-format and never invents qualities. This is recorded as a migration difference,
-not normalized away or counted as a pass. Source inspection of the pinned
-`bio v0.15.2` reader shows that its reset/FASTA assignment does not clear the
-pooled record's quality field. No upstream pool-reuse behavior is simulated.
+format and never invents qualities. This is an approved, independently proven
+exception, not an exact-equivalence pass. The complete source analysis, malformed
+output and independent fq S005 rejection are in
+[the defect evidence](../docs/EVIDENCE-UPSTREAM-DEFECTS.md). The 96 provenance and
+96 composition checks derive expected records from typed inputs. No upstream
+pool-reuse behavior is simulated.
+
+## SeqKit translate evidence
+
+```bash
+python3 tests/oracle/check_seqkit_exceptions.py --rust target/release/rust-fx
+python3 tests/oracle/seqkit_translate_diff.py --rust target/release/rust-fx
+cargo test -p rust-fx --test translate --test translate_errors --locked
+```
+
+The raw differential still reports 710/756 exact cases and exits 1. Its 46
+mismatches are **not** suppressed or counted as byte-identical results. The separate
+exception gate first proves corrected semantics, then requires the exact reviewed
+case set and both binaries' observation hashes from
+`seqkit-translate-approved-differences.json`. Missing/new mismatches or changed
+output hashes fail. The gate also runs the original range/tab2fx differential.
+
+The 434 independent checks cover typed-record/quality provenance, IUPAC/RNA strand
+symmetry, ORF source-coordinate projection, right-end-only trimming and lossless
+descriptions. The strand checks include all 3375 IUPAC codons for every one of 24
+tables, three negative frames and both initiation modes. Six minimal reproductions,
+source references, a third-party FASTQ validator and negative controls are in
+[the defect evidence](../docs/EVIDENCE-UPSTREAM-DEFECTS.md).
+
+Translation remains single-pass with O(longest record) working memory, codec
+buffers and a 64 KiB commit buffer. Fatal errors exit 255, discard pending bytes
+and retain committed plain output. `-e` emits a blank record for each failed frame;
+all skipped translations still succeed. Initial alphabet detection is not bypassed
+by `-e` or `-x`. The complete record is validated, including quality continuation
+lines and codons following an internal X/STOP. There is no whole-file pre-scan.
+
+This surface does not claim support for every SeqKit global option or identical
+clap/pflag syntax diagnostics. Missing-file and same-file checks happen before
+output creation to preserve input data. Rust-specific flag type errors and platform
+I/O diagnostics retain the CLI's existing conventions. Compressed success output
+compares after decoding; aborted compressed physical bytes are backend-dependent.
 
 ## Regeneration
 

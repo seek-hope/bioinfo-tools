@@ -50,7 +50,7 @@ TARGETS = {
     ),
 }
 
-ALLOWED_STATUS = {"verified", "experimental", "unsupported"}
+ALLOWED_STATUS = {"verified", "experimental", "unsupported", "exception"}
 ALLOWED_KIND = {"command", "option", "feature", "report"}
 
 
@@ -112,8 +112,47 @@ def has_surface(rows: list[dict[str, str]], tool: str, surface: str) -> bool:
     return any(row["tool"] == tool and row["surface"] == surface for row in rows)
 
 
-def check_surface(rows: list[dict[str, str]]) -> list[str]:
+def check_exceptions(rows: list[dict[str, str]]) -> list[str]:
+    """An exception is an explicit approved difference, never implied support."""
+    registry = COMPAT / "approved-exceptions.json"
+    try:
+        policy = json.loads(registry.read_text(encoding="utf-8"))
+    except (OSError, ValueError) as error:
+        return [f"approved-exceptions.json: {error}"]
     errors: list[str] = []
+    if policy.get("schema_version") != 1 or not policy.get("decision_quote", "").strip():
+        errors.append("approved-exceptions.json: missing schema or explicit decision")
+    declared: set[tuple[str, str]] = set()
+    ids: set[str] = set()
+    for entry in policy.get("exceptions", []):
+        identifier = entry.get("id", "")
+        if not identifier or identifier in ids:
+            errors.append(f"invalid or duplicate exception id: {identifier!r}")
+        ids.add(identifier)
+        if entry.get("category") not in {"upstream-defect", "native-runtime"} or not entry.get("rule", "").strip():
+            errors.append(f"{identifier}: exception needs category and behavior rule")
+        for field in ("proof", "verifier"):
+            path = entry.get(field, "")
+            if not path or not (ROOT / path).is_file():
+                errors.append(f"{identifier}: missing {field}: {path}")
+        for tool, surface in entry.get("surfaces", []):
+            key = (tool, surface)
+            if key in declared:
+                errors.append(f"duplicate exception surface: {key}")
+            declared.add(key)
+    actual = {(row["tool"], row["surface"]) for row in rows if row["status"] == "exception"}
+    for key in sorted(actual - declared):
+        errors.append(f"{key}: exception lacks explicit approval and proof registration")
+    for key in sorted(declared - actual):
+        errors.append(f"{key}: approved deviation must remain visible as an exception")
+    for row in rows:
+        if row["status"] == "exception" and not row["deviation"].strip():
+            errors.append(f"{(row['tool'], row['surface'])}: exception needs an explicit deviation")
+    return errors
+
+
+def check_surface(rows: list[dict[str, str]]) -> list[str]:
+    errors: list[str] = check_exceptions(rows)
     keys = set()
     seen = set()
     for row in rows:
@@ -211,7 +250,7 @@ def snapshot_hashes() -> dict[str, str]:
 
 def document(rows: list[dict[str, str]]) -> dict:
     return {
-        "schema_version": 1,
+        "schema_version": 2,
         "targets": {tool: target[0] for tool, target in TARGETS.items()},
         "snapshots": snapshot_hashes(),
         "rows": rows,
@@ -234,8 +273,8 @@ def check_json(rows: list[dict[str, str]]) -> list[str]:
         return [f"{JSON_PATH.relative_to(ROOT)}: invalid JSON: {error}"]
     expected = document(rows)
     errors: list[str] = []
-    if saved.get("schema_version") != 1:
-        errors.append("matrix.json: schema_version must be 1")
+    if saved.get("schema_version") != 2:
+        errors.append("matrix.json: schema_version must be 2 (explicit approved exceptions)")
     if saved.get("targets") != expected["targets"]:
         errors.append("matrix.json: targets are stale")
     if saved.get("snapshots") != expected["snapshots"]:

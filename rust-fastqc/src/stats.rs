@@ -22,6 +22,8 @@
 //! so `19.066666666666666` prints in full while `40.0` prints as `40.0`. That is
 //! emulated in [`java_double`].
 
+use crate::adapters::Adapter;
+pub use crate::adapters::ADAPTERS;
 use crate::contaminants::Contaminant;
 use std::collections::BTreeMap;
 
@@ -247,7 +249,9 @@ pub struct QcStats {
     pub quality_distribution: BTreeMap<u8, u64>,
     /// Duplication: sequence (truncated) → count.
     pub sequences: BTreeMap<Vec<u8>, u64>,
-    /// Per-position exact adapter starts, one vector per [`ADAPTERS`] entry.
+    /// Configured adapters, in report column order.
+    pub adapters: Vec<Adapter>,
+    /// First-occurrence counts by position, one vector per configured adapter.
     pub adapter_hits: Vec<Vec<u64>>,
     /// Optional contaminant entries for the overrepresented-source column.
     pub contaminants: Vec<Contaminant>,
@@ -259,21 +263,6 @@ pub struct QcStats {
 
 /// The order `Per base sequence content` prints its columns in.
 pub const BASE_ORDER: [u8; 4] = *b"GATC";
-
-/// Adapter sequences from FastQC 0.13.0's `Configuration/adapter_list.txt`.
-///
-/// All entries are 12bp, and the module treats them as cumulative presence:
-/// after the first exact occurrence in a read, every position through the
-/// longest possible adapter start is counted. PolyA and PolyG are part of the
-/// default FastQC list and therefore belong here too.
-pub const ADAPTERS: [(&str, &str); 6] = [
-    ("Illumina Universal Adapter", "AGATCGGAAGAG"),
-    ("Illumina Small RNA 3' Adapter", "TGGAATTCTCGG"),
-    ("Illumina Small RNA 5' Adapter", "GATCGTCGGACT"),
-    ("Nextera Transposase Sequence", "CTGTCTCTTATA"),
-    ("PolyA", "AAAAAAAAAAAA"),
-    ("PolyG", "GGGGGGGGGGGG"),
-];
 
 impl QcStats {
     /// Create empty statistics for a file.
@@ -290,11 +279,18 @@ impl QcStats {
             gc_distribution: vec![0.0; 101],
             quality_distribution: BTreeMap::new(),
             sequences: BTreeMap::new(),
+            adapters: crate::adapters::defaults(),
             adapter_hits: vec![Vec::new(); ADAPTERS.len()],
             contaminants: Vec::new(),
             nogroup: false,
             dup_length: 50,
         }
+    }
+
+    /// Set adapters before adding reads; this resets the adapter counters.
+    pub fn set_adapters(&mut self, adapters: Vec<Adapter>) {
+        self.adapter_hits = vec![Vec::new(); adapters.len()];
+        self.adapters = adapters;
     }
 
     /// Set whether long-read positions are emitted individually.
@@ -391,34 +387,26 @@ impl QcStats {
             .collect();
         *self.sequences.entry(truncated).or_insert(0) += 1;
 
-        // FastQC's Adapter Content is cumulative from the first exact adapter
-        // occurrence through the longest possible start position. The bytecode
-        // also carries the previous count into newly grown positions, which
-        // matters when reads have different lengths.
-        let max_length = self.max_length();
-        for (index, (_, adapter)) in ADAPTERS.iter().enumerate() {
-            let adapter = adapter.as_bytes();
-            if adapter.is_empty() || max_length < adapter.len() {
+        // Retain each read's first hit even beyond the currently reportable
+        // range. Later reads can extend that range; discarding a hit here
+        // would make the final percentages depend on input order. Cumulative
+        // counts and the final longest-motif boundary are applied at reporting.
+        for (index, adapter) in self.adapters.iter().enumerate() {
+            let adapter = &adapter.sequence;
+            if adapter.is_empty() || sequence.len() < adapter.len() {
                 continue;
             }
-            let max_start = max_length - adapter.len() + 1;
-            let hits = &mut self.adapter_hits[index];
-            if hits.len() < max_start {
-                let fill = hits.last().copied().unwrap_or(0);
-                hits.resize(max_start, fill);
-            }
-            if sequence.len() < adapter.len() {
-                continue;
-            }
-            if let Some(start) = sequence
-                .windows(adapter.len())
-                .position(|window| window.eq_ignore_ascii_case(adapter))
-            {
-                if start < max_start {
-                    for count in &mut hits[start..max_start] {
-                        *count += 1;
-                    }
+            if let Some(start) = sequence.windows(adapter.len()).position(|window| {
+                window
+                    .iter()
+                    .zip(adapter)
+                    .all(|(base, expected)| base.to_ascii_uppercase() == *expected)
+            }) {
+                let hits = &mut self.adapter_hits[index];
+                if hits.len() <= start {
+                    hits.resize(start + 1, 0);
                 }
+                hits[start] += 1;
             }
         }
     }

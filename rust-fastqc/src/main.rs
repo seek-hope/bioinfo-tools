@@ -161,6 +161,26 @@ fn cli() -> Command {
                 .help("suppress progress messages"),
         )
         .arg(
+            Arg::new("java")
+                .short('j')
+                .long("java")
+                .value_name("JAVA")
+                .help("recognized FastQC launcher option; rejected because this executable is native Rust"),
+        )
+        .arg(
+            Arg::new("debug")
+                .long("debug")
+                .action(ArgAction::SetTrue)
+                .help("recognized JVM-launcher debug option; rejected because no JVM is launched"),
+        )
+        .arg(
+            Arg::new("adapters")
+                .short('a')
+                .long("adapters")
+                .value_name("TSV")
+                .help("adapter list in name<TAB>sequence format"),
+        )
+        .arg(
             Arg::new("contaminants")
                 .short('c')
                 .long("contaminants")
@@ -170,6 +190,11 @@ fn cli() -> Command {
 }
 
 fn run(matches: &clap::ArgMatches) -> Result<(), Error> {
+    if matches.get_one::<String>("java").is_some() || matches.get_flag("debug") {
+        return Err(Error::usage(
+            "-j/--java and --debug configure the upstream JVM launcher; rust-fastqc is native Rust and does not launch Java; remove these options",
+        ));
+    }
     let inputs: Vec<PathBuf> = matches
         .get_many::<String>("inputs")
         .map(|values| values.map(PathBuf::from).collect())
@@ -188,6 +213,18 @@ fn run(matches: &clap::ArgMatches) -> Result<(), Error> {
     };
     let to_stdout = matches.get_flag("stdout");
     let outdir = matches.get_one::<String>("outdir").map(PathBuf::from);
+    let adapters = match matches.get_one::<String>("adapters") {
+        Some(path) => {
+            let text = std::fs::read_to_string(path)
+                .map_err(|error| Error::io(format!("{path}: {error}")))?;
+            let (adapters, warnings) = rust_fastqc::adapters::parse(&text).map_err(Error::input)?;
+            for warning in warnings {
+                eprintln!("{warning}");
+            }
+            adapters
+        }
+        None => rust_fastqc::adapters::defaults(),
+    };
     let contaminants = match matches.get_one::<String>("contaminants") {
         Some(path) => read_contaminants(Path::new(path))?,
         None => rust_fastqc::contaminants::default_contaminants()
@@ -210,6 +247,7 @@ fn run(matches: &clap::ArgMatches) -> Result<(), Error> {
                 quality_offset: offset,
                 limits,
                 contaminants: &contaminants,
+                adapters: &adapters,
                 min_length: matches.get_one::<usize>("min_length").copied(),
                 max_length: matches.get_one::<usize>("max_length").copied(),
                 dup_length: *matches
@@ -296,6 +334,7 @@ struct AccumulateOptions<'a> {
     quality_offset: u8,
     limits: QcLimits,
     contaminants: &'a [Contaminant],
+    adapters: &'a [rust_fastqc::adapters::Adapter],
     min_length: Option<usize>,
     max_length: Option<usize>,
     dup_length: usize,
@@ -315,6 +354,7 @@ fn accumulate(
             quality_offset,
             limits,
             contaminants,
+            adapters: &rust_fastqc::adapters::defaults(),
             min_length: None,
             max_length: None,
             dup_length: 50,
@@ -346,6 +386,7 @@ fn accumulate_with_options(input: &Path, options: AccumulateOptions) -> Result<Q
         .unwrap_or_else(|| input.to_string_lossy().into_owned());
     let mut stats = QcStats::new(filename);
     stats.set_contaminants(options.contaminants.to_vec());
+    stats.set_adapters(options.adapters.to_vec());
     stats.set_dup_length(options.dup_length);
     stats.set_nogroup(options.nogroup);
     let mut buffer = Vec::new();

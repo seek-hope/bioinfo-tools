@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "decision": "The maintainer explicitly chose not to reproduce erroneous upstream behavior, provided reproducible proof shows the upstream is wrong and the Rust behavior is correct; and chose a pure Rust FastQC implementation with explicit JVM launcher exceptions.",
+  "decision_quote": "1. 错误行为不复现，但需给出确凿的证据说明上游行为有误而我们的实现是正确的；2.A。",
+  "exceptions": [
+    {
+      "id": "SEQKIT-RANGE-QUALITY",
+      "category": "upstream-defect",
+      "surfaces": [
+        ["rust-fx", "seqkit:range"],
+        ["rust-fx", "range:streaming positive/negative/multi-file"]
+      ],
+      "rule": "Preserve each selected record's original format and quality provenance. Never fabricate quality for a FASTA record.",
+      "proof": "docs/EVIDENCE-UPSTREAM-DEFECTS.md",
+      "verifier": "tests/oracle/check_seqkit_exceptions.py"
+    },
+    {
+      "id": "SEQKIT-TRANSLATE-CORRECTNESS",
+      "category": "upstream-defect",
+      "surfaces": [
+        ["rust-fx", "seqkit:translate"],
+        ["rust-fx", "translate:basic -f/-F/-s/--clean/-m/-e/-x/-M"]
+      ],
+      "rule": "Use full IUPAC/RNA complement, exact three-base ORF coordinate spans, right-end-only trimming and lossless descriptions. Every raw difference must have independent proof and match the reviewed finite observation manifest.",
+      "proof": "docs/EVIDENCE-UPSTREAM-DEFECTS.md",
+      "verifier": "tests/oracle/check_seqkit_exceptions.py"
+    },
+    {
+      "id": "FASTQC-NATIVE-LAUNCHER",
+      "category": "native-runtime",
+      "surfaces": [
+        ["rust-fastqc", "-j --java"],
+        ["rust-fastqc", "--debug"]
+      ],
+      "rule": "Do not launch Java or delegate to upstream FastQC. Reject JVM executable selection and JVM-launch debug before input/output access with a clear usage diagnostic and exit 2.",
+      "proof": "docs/EVIDENCE-UPSTREAM-DEFECTS.md",
+      "verifier": "rust-fastqc/tests/native_runtime.rs"
+    },
+    {
+      "id": "FASTQC-ADAPTER-CORRECTNESS",
+      "category": "upstream-defect",
+      "surfaces": [
+        ["rust-fastqc", "-a --adapters"],
+        ["rust-fastqc", "module:adapter-content"]
+      ],
+      "rule": "Count full adapter matches independently of read order, including equal-length reads and later expansion of the reported position range. Reject configurations containing no usable adapter before processing input or creating reports, rather than crashing mid-report.",
+      "proof": "docs/EVIDENCE-FASTQC-ADAPTERS.md",
+      "verifier": "tests/oracle/fastqc_adapters_diff.py"
+    }
+  ]
+}

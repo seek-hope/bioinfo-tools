@@ -1,8 +1,7 @@
 //! SeqKit `translate`: codon expansion, frames and ORF output modes.
 
-use crate::io::{CommandError, InputFormat, Output, OwnedRecord, RecordReader};
-use crate::transform;
-use bioinfo_fastx::writer::Layout;
+use crate::io::{CommandError, OwnedRecord, RecordReader};
+use crate::seqkit_io::{check_paths, SeqkitOutput};
 use std::collections::BTreeSet;
 use std::io::Write;
 
@@ -34,7 +33,7 @@ pub struct TranslateOptions {
     pub min_len: usize,
     /// `-e`: output a blank sequence on translation errors.
     pub skip_errors: bool,
-    /// `--trim`: remove trailing X and STOP characters.
+    /// `--trim`: remove trailing X and STOP characters, retaining internal ones.
     pub trim: bool,
     /// `-w`: FASTA line width.
     pub line_width: usize,
@@ -107,7 +106,7 @@ fn stop_codons(id: i32) -> &'static str {
     }
 }
 
-fn write_listing(options: &TranslateOptions, out: &mut Output) -> Result<bool, CommandError> {
+fn write_listing(options: &TranslateOptions, out: &mut SeqkitOutput) -> Result<bool, CommandError> {
     let directory = options.list_table == 0 || options.list_ambiguous == 0;
     if directory {
         let mut text = String::new();
@@ -348,12 +347,20 @@ fn bases(code: u8) -> &'static [u8] {
         b'D' => b"AGT",
         b'H' => b"ACT",
         b'V' => b"ACG",
-        b'N' | b'X' => b"ACGT",
+        b'N' => b"ACGT",
         _ => b"",
     }
 }
 
 fn codon(table: i32, codon: &[u8]) -> Option<char> {
+    if codon.iter().any(|base| {
+        bases(base.to_ascii_uppercase()).is_empty() && !matches!(base, b' ' | b'*' | b'-')
+    }) {
+        return None;
+    }
+    if codon == b"---" {
+        return Some('-');
+    }
     let mut candidates = BTreeSet::new();
     for first in bases(codon[0].to_ascii_uppercase()) {
         for second in bases(codon[1].to_ascii_uppercase()) {
@@ -365,9 +372,38 @@ fn codon(table: i32, codon: &[u8]) -> Option<char> {
         }
     }
     match candidates.len() {
-        0 => None,
+        0 => Some('X'),
         1 => candidates.into_iter().next(),
         _ => Some('X'),
+    }
+}
+
+/// Match the alphabet guessed from the first 10,000 bases of each file.
+/// Translation validates codons later; -x/-e do not bypass this file check.
+fn alphabet(sequence: &[u8]) -> &'static str {
+    if sequence.is_empty() {
+        return "Unlimit";
+    }
+    let sample = &sequence[..sequence.len().min(10_000)];
+    for letters in [b"ACGTRYSWKMBDHVN -.".as_slice(), b"ACGURYSWKMBDHVN -."] {
+        if sample
+            .iter()
+            .filter(|b| b.is_ascii())
+            .all(|b| letters.contains(&b.to_ascii_uppercase()))
+        {
+            return "nucleotide";
+        }
+    }
+    // Upstream's ASCII-set alphabet guess ignores bytes outside ASCII; the
+    // codon translator still rejects them unless -x or -e handles the error.
+    if sample
+        .iter()
+        .filter(|b| b.is_ascii())
+        .all(|b| b"ABCDEFGHIJKLMNOPQRSTUVWXYZ -*_.".contains(&b.to_ascii_uppercase()))
+    {
+        "Protein"
+    } else {
+        "Unlimit"
     }
 }
 
@@ -375,182 +411,222 @@ fn translate_sequence(
     sequence: &[u8],
     frame: i32,
     options: &TranslateOptions,
-) -> Result<(String, bool), CommandError> {
-    let (source, offset) = if frame > 0 {
-        (sequence.to_vec(), (frame - 1) as usize)
-    } else {
-        (
-            transform::reverse_complement(sequence),
-            (-frame - 1) as usize,
-        )
-    };
-    if offset >= source.len() {
-        return Ok((String::new(), false));
+) -> Result<Vec<u8>, CommandError> {
+    if sequence.len() < 3 {
+        return Err(CommandError::input(format!(
+            "seq: sequence too short to translate: {}",
+            sequence.len()
+        )));
     }
-    let mut protein = String::new();
+    let reversed;
+    let source = if frame > 0 {
+        sequence
+    } else {
+        // Complement the full IUPAC alphabet, including RNA U. The pinned
+        // upstream's DNA-only lookup leaves ambiguous bases/U unchanged;
+        // tests/oracle/seqkit_correctness.py proves that breaks strand symmetry.
+        reversed = crate::transform::reverse_complement(sequence);
+        &reversed
+    };
+    let offset = frame.unsigned_abs() as usize - 1;
+    let mut protein = Vec::with_capacity(source.len() / 3);
     let mut first = true;
     for chunk in source[offset..].as_chunks::<3>().0 {
-        let amino = match codon(options.table, chunk) {
-            Some(amino) => amino,
-            None if options.allow_unknown => 'X',
-            None if options.skip_errors => return Ok((String::new(), true)),
-            None => {
-                return Err(CommandError::input(
-                    "unknown codon; use -x/--allow-unknown-codon",
-                ))
-            }
+        let mut amino = match codon(options.table, chunk) {
+            Some(amino) => amino as u8,
+            None if options.allow_unknown => b'X',
+            None => return Err(CommandError::input("seq: invalid DNA base")),
         };
-        let amino = if first && options.init_m { 'M' } else { amino };
-        first = false;
+        if options.init_m {
+            if first {
+                if table_info(options.table)
+                    .expect("validated table")
+                    .start
+                    .split(", ")
+                    .any(|start| start.as_bytes().eq_ignore_ascii_case(chunk))
+                {
+                    amino = b'M';
+                }
+                first = false;
+            } else if amino == b'*' {
+                first = true;
+            }
+        }
+        if options.clean && amino == b'*' {
+            amino = b'X';
+        }
         protein.push(amino);
     }
-    if options.clean {
-        protein = protein.replace('*', "X");
-    }
+    // --trim is documented as removing the rightmost run. Retain internal
+    // X/STOP residues and validate the complete sequence before trimming.
     if options.trim {
-        while protein.ends_with('*') || protein.ends_with('X') {
+        while matches!(protein.last(), Some(b'X' | b'*')) {
             protein.pop();
         }
     }
-    Ok((protein, false))
+    Ok(protein)
+}
+
+fn id_and_description(name: &[u8]) -> (&[u8], &[u8]) {
+    let Some(split) = name.iter().position(|b| matches!(b, b' ' | b'\t')) else {
+        return (name, b"");
+    };
+    let mut desc = split + 1;
+    while desc < name.len() && matches!(name[desc], b' ' | b'\t') {
+        desc += 1;
+    }
+    (&name[..split], &name[desc.min(name.len())..])
+}
+
+fn write_sequence(out: &mut SeqkitOutput, sequence: &[u8], width: usize) -> std::io::Result<()> {
+    // xopen receives the wrapped sequence in one Write call. This boundary
+    // matters when an error follows a sequence larger than the 64 KiB buffer.
+    if width == 0 || sequence.len() <= width {
+        out.write_all(sequence)?;
+    } else {
+        let mut wrapped = Vec::with_capacity(sequence.len() + sequence.len() / width);
+        for (index, chunk) in sequence.chunks(width).enumerate() {
+            if index != 0 {
+                wrapped.push(b'\n');
+            }
+            wrapped.extend_from_slice(chunk);
+        }
+        out.write_all(&wrapped)?;
+    }
+    out.write_all(b"\n")
+}
+
+fn write_header(out: &mut SeqkitOutput, name: &[u8], suffix: Option<&str>) -> std::io::Result<()> {
+    let mut header = vec![b'>'];
+    if let Some(suffix) = suffix {
+        let (id, description) = id_and_description(name);
+        header.extend_from_slice(id);
+        header.extend_from_slice(suffix.as_bytes());
+        header.push(b' ');
+        header.extend_from_slice(description);
+    } else {
+        header.extend_from_slice(name);
+    }
+    header.push(b'\n');
+    out.write_all(&header)
 }
 
 fn write_orfs(
     record: &OwnedRecord,
-    protein: &str,
+    protein: &[u8],
     frame: i32,
     options: &TranslateOptions,
-    out: &mut Output,
+    out: &mut SeqkitOutput,
 ) -> Result<(), CommandError> {
-    let mut translated = record.clone();
-    let mut segment_start = 0usize;
-    let codons: Vec<char> = protein.chars().collect();
-    for index in 0..=codons.len() {
-        let stop = index == codons.len() || codons[index] == '*';
-        if !stop {
+    let mut start = 0;
+    for end in 0..=protein.len() {
+        if end != protein.len() && protein[end] != b'*' {
             continue;
         }
-        let segment = &codons[segment_start..index];
-        if !segment.is_empty() && segment.len() >= options.min_len {
-            let begin = segment_start * 3 + 1;
-            let end = index * 3;
-            let name = format!(
-                "{}_frame={}_begin={}_end={} ",
-                String::from_utf8_lossy(&record.name),
-                frame,
-                begin,
-                end
-            );
-            translated.name = name.clone().into_bytes();
-            let marker = record.raw_header.first().copied().unwrap_or(b'>');
-            translated.raw_header = format!("{}{}", char::from(marker), name).into_bytes();
-            translated.sequence = segment.iter().collect::<String>().into_bytes();
-            translated.qualities.clear();
-            translated.plus.clear();
-            translated.has_quality_line = false;
-            translated.write_to(out, Layout::Fasta, options.line_width)?;
+        if end > start && end - start >= options.min_len {
+            let (begin, finish) = if frame > 0 {
+                (
+                    start as i64 * 3 + i64::from(frame),
+                    end as i64 * 3 + i64::from(frame) - 1,
+                )
+            } else {
+                let finish = record.sequence.len() as i64 - start as i64 * 3 + i64::from(frame) + 1;
+                // 1-based inclusive coordinates must contain exactly three
+                // bases per emitted residue, regardless of the ORF terminator.
+                let begin = finish - (end - start) as i64 * 3 + 1;
+                (begin, finish)
+            };
+            write_header(
+                out,
+                &record.name,
+                Some(&format!("_frame={frame}_begin={begin}_end={finish}")),
+            )?;
+            write_sequence(out, &protein[start..end], options.line_width)?;
         }
-        segment_start = index + 1;
+        start = end + 1;
     }
     Ok(())
 }
 
-/// Run `translate`.
+/// Run `translate` with SeqKit's fatal-error output boundary.
 pub fn run(options: TranslateOptions) -> Result<(), CommandError> {
-    let mut out = Output::create_with_level(options.out_file.as_deref(), options.compress_level)?;
-    if write_listing(&options, &mut out)? {
-        return out.finish();
+    run_inner(options).map_err(|error| error.with_code(255))
+}
+
+fn run_inner(options: TranslateOptions) -> Result<(), CommandError> {
+    if table_info(options.table).is_none() {
+        return Err(CommandError::usage(format!(
+            "invalid translate table: {}",
+            options.table
+        )));
     }
-    if !matches!(
-        options.table,
-        1 | 2
-            | 3
-            | 4
-            | 5
-            | 6
-            | 9
-            | 10
-            | 11
-            | 12
-            | 13
-            | 14
-            | 16
-            | 21
-            | 22
-            | 23
-            | 24
-            | 25
-            | 26
-            | 27
-            | 28
-            | 29
-            | 30
-            | 31
-    ) {
-        return Err(CommandError::usage(
-            "unsupported translation table; supported IDs are 1-6, 9-14, 16 and 21-31",
-        ));
+    let mut frames = Vec::new();
+    for frame in &options.frames {
+        if *frame == 6 {
+            frames = vec![1, 2, 3, -1, -2, -3];
+            break;
+        }
+        if !matches!(frame, -3..=-1 | 1..=3) {
+            return Err(CommandError::usage(format!(
+                "invalid frame: {frame}. available: 1, 2, 3, -1, -2, -3, and 6 for all"
+            )));
+        }
+        frames.push(*frame);
     }
-    let frames = if options.frames.contains(&6) {
-        vec![1, 2, 3, -1, -2, -3]
-    } else {
-        options.frames.clone()
-    };
+    let listing = options.list_table >= 0 || options.list_ambiguous >= 0;
     let inputs = if options.inputs.is_empty() {
         vec!["-".to_string()]
     } else {
         options.inputs.clone()
     };
-    let mut successful_frames = 0usize;
+    if !listing {
+        check_paths(&inputs, options.out_file.as_deref())?;
+    }
+    let mut out = SeqkitOutput::create(options.out_file.as_deref(), options.compress_level)?;
+    if write_listing(&options, &mut out)? {
+        return out.finish();
+    }
+    let mut first_record = true;
     for input in &inputs {
-        let mut reader = RecordReader::open(input)?;
-        let layout = match reader.format() {
-            InputFormat::Fastq => Layout::Fasta,
-            InputFormat::Fasta => Layout::Fasta,
-        };
+        let mut reader = RecordReader::seqkit(input)?;
+        let mut file_alphabet = None;
         while let Some(record) = reader.next_record() {
             let record = record?;
-            for frame in &frames {
-                let (protein, had_error) = translate_sequence(&record.sequence, *frame, &options)?;
-                if had_error {
-                    let mut translated = record.clone();
-                    translated.name.extend_from_slice(b" ");
-                    translated.raw_header.extend_from_slice(b" ");
-                    translated.sequence.clear();
-                    translated.qualities.clear();
-                    translated.plus.clear();
-                    translated.has_quality_line = false;
-                    translated.write_to(&mut out, layout, options.line_width)?;
-                    continue;
+            let file_alphabet = *file_alphabet.get_or_insert_with(|| alphabet(&record.sequence));
+            if first_record {
+                if file_alphabet != "nucleotide" {
+                    return Err(CommandError::input(
+                        "command 'seqkit translate' only apply to DNA/RNA sequences",
+                    ));
                 }
-                successful_frames += 1;
+                first_record = false;
+            }
+            for frame in &frames {
+                let translated = if file_alphabet == "nucleotide" {
+                    translate_sequence(&record.sequence, *frame, &options)
+                } else {
+                    Err(CommandError::input(format!(
+                        "seq: only DNA/RNA sequence can all method Translate, the alphabet is {file_alphabet}"
+                    )))
+                };
+                let protein = match translated {
+                    Ok(protein) => protein,
+                    Err(_) if options.skip_errors => {
+                        write_header(&mut out, &record.name, Some(""))?;
+                        out.write_all(b"\n")?;
+                        continue;
+                    }
+                    Err(error) => return Err(error),
+                };
                 if options.out_subseqs {
                     write_orfs(&record, &protein, *frame, &options, &mut out)?;
                 } else {
-                    let mut translated = record.clone();
-                    translated.sequence = protein.as_bytes().to_vec();
-                    translated.qualities.clear();
-                    translated.plus.clear();
-                    translated.has_quality_line = false;
-                    if options.append_frame {
-                        translated
-                            .name
-                            .extend_from_slice(format!("_frame={frame} ").as_bytes());
-                    }
-                    let marker = record.raw_header.first().copied().unwrap_or(b'>');
-                    translated.raw_header = format!(
-                        "{}{}",
-                        char::from(marker),
-                        String::from_utf8_lossy(&translated.name)
-                    )
-                    .into_bytes();
-                    translated.write_to(&mut out, layout, options.line_width)?;
+                    let suffix = options.append_frame.then(|| format!("_frame={frame}"));
+                    write_header(&mut out, &record.name, suffix.as_deref())?;
+                    write_sequence(&mut out, &protein, options.line_width)?;
                 }
             }
         }
-    }
-    if options.skip_errors && successful_frames == 0 {
-        return Err(CommandError::runtime("no sequences could be translated").with_code(255));
     }
     out.finish()
 }

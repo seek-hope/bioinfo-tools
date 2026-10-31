@@ -266,6 +266,22 @@ def main() -> int:
     # FastQC: all pinned CLI options plus report artifacts and modules.
     for tokens in option_groups(UPSTREAM / "fastqc.help.txt"):
         surface = " ".join(tokens)
+        if "--adapters" in tokens:
+            add(
+                "rust-fastqc", surface, "option", "exception",
+                "tests/oracle/fastqc_adapters_diff.py: 35 exact + 6 counting + 3 invalid-config cases; read-order invariant; 6 process/library tests",
+                "FASTQC-ADAPTER-CORRECTNESS: native custom lists; equal-length hits are counted, independent of read order; empty lists fail before output",
+                "Maintain adapter differential and independent boundary/order proof",
+            )
+            continue
+        if "--java" in tokens or "--debug" in tokens:
+            add(
+                "rust-fastqc", surface, "option", "exception",
+                "rust-fastqc/tests/native_runtime.rs; docs/EVIDENCE-UPSTREAM-DEFECTS.md",
+                "FASTQC-NATIVE-LAUNCHER: JVM launcher controls explicitly rejected with exit 2; native QC does not execute Java",
+                "Maintain native-runtime regression and explicit approved exception",
+            )
+            continue
         if "--outdir" in tokens or "--phred64" in tokens:
             status = "verified"
         elif (
@@ -313,7 +329,7 @@ def main() -> int:
             "" if status == "verified" else "T6: implement or re-scope",
         )
     for surface, status, evidence, next_action in [
-        ("report:fastqc_data.txt", "verified", "22/22 QC fixtures; MultiQC parses data", ""),
+        ("report:fastqc_data.txt", "verified", "22 QC fixtures compare nine modules (Adapter Content excluded); separate adapter proof; MultiQC parses data", ""),
         (
             "report:HTML",
             "experimental",
@@ -328,9 +344,21 @@ def main() -> int:
         ),
         (
             "module:adapter-content",
-            "verified",
-            "FastQC cumulative 12bp adapter algorithm; rust-fastqc 13/13; T8 1x/10x full fastqc_data exact",
-            "",
+            "exception",
+            "tests/oracle/fastqc_adapters_diff.py: 44 cases; default/custom lists, short-read warnings and independent read-order proof",
+            "Maintain adapter differential and independent boundary/order proof",
+        ),
+        (
+            "module:kmer-content",
+            "unsupported",
+            "rust-fastqc/src/absent.rs; FastQC 0.13.0 KmerContent module is not implemented",
+            "T6: implement position-specific enrichment before enabling via --limits",
+        ),
+        (
+            "module:per-tile-quality",
+            "unsupported",
+            "rust-fastqc/src/absent.rs; FastQC 0.13.0 PerTileQualityScores module is not implemented",
+            "T6: implement header/tile aggregation before enabling via --limits",
         ),
         (
             "module:contaminants",
@@ -351,7 +379,7 @@ def main() -> int:
             "report" if surface.startswith("report:") else "feature",
             status,
             evidence,
-            "",
+            "FASTQC-ADAPTER-CORRECTNESS: correct equal-length/read-order defect and reject empty config before report creation" if surface == "module:adapter-content" else "",
             next_action,
         )
 
@@ -417,10 +445,10 @@ def main() -> int:
                 "rust-fx",
                 "seqkit:range",
                 "command",
-                "experimental",
-                "rust-fx/tests/range.rs + seqkit_streaming.rs; tests/oracle/seqkit_streaming_diff.py: 203/206",
-                "FASTQ-to-FASTA file mixing preserves per-file format instead of upstream pooled-quality carryover (3 mismatches)",
-                "T7: retain mixed-format deviation; interval selection and stdin streaming are aligned",
+                "exception",
+                "tests/oracle/check_seqkit_exceptions.py: 203/206 exact plus independent provenance and composition proof",
+                "SEQKIT-RANGE-QUALITY: preserve input formats; upstream manufactures invalid/stale FASTQ quality for FASTA (3 raw differences)",
+                "Maintain independent correctness proof and visible raw differences",
             )
         elif command == "sliding":
             add(
@@ -517,10 +545,10 @@ def main() -> int:
                 "rust-fx",
                 "seqkit:translate",
                 "command",
-                "experimental",
-                "rust-fx/tests/translate.rs (7 tests) + SeqKit 2.14 55/55 listing differential + translation tables",
-                "invalid-base exit/partial-output behavior differs",
-                "T7: align invalid-input commit policy",
+                "exception",
+                "tests/oracle/check_seqkit_exceptions.py: 710/756 exact + 46 hash-checked differences; independent IUPAC/ORF/trim/header proof",
+                "SEQKIT-TRANSLATE-CORRECTNESS: correct documented upstream strand, ORF endpoint, right-trim and description defects",
+                "Maintain independent correctness proof and reviewed raw observation hashes",
             )
         elif command == "common":
             add(
@@ -647,17 +675,17 @@ def main() -> int:
         "rust-fx",
         "translate:basic -f/-F/-s/--clean/-m/-e/-x/-M",
         "feature",
-        "verified",
-        "rust-fx/tests/translate.rs (7 tests) + SeqKit 2.14 full option differential",
-        "invalid-base exit/partial-output behavior differs",
-        "T7: align invalid-input commit policy",
+        "exception",
+        "rust-fx/tests/translate*.rs (17 tests); tests/oracle/check_seqkit_exceptions.py",
+        "SEQKIT-TRANSLATE-CORRECTNESS: full IUPAC/RNA complement, exact ORF nucleotide spans, right-end trim, lossless descriptions",
+        "Maintain independent correctness proof and reviewed raw observation hashes",
     )
     add(
         "rust-fx",
         "translate:tables 1-6,9-14,16,21-31",
         "feature",
         "verified",
-        "Biopython NCBI table generation + SeqKit 2.14 29/29 table differential",
+        "tests/oracle/seqkit_translate_diff.py: all 3375 IUPAC codons in each of 24 tables, plus initiation and six-frame modes",
         "unsupported IDs fail before output",
     )
     add(
@@ -665,7 +693,7 @@ def main() -> int:
         "translate:listing -l/-L",
         "feature",
         "verified",
-        "rust-fx/tests/translate.rs + SeqKit 2.14 55/55 table/listing differential",
+        "rust-fx/tests/translate.rs; tests/oracle/seqkit_translate_diff.py: 54 listing/precedence cases",
         "unknown positive IDs return an empty successful listing",
         "",
     )
@@ -699,10 +727,10 @@ def main() -> int:
         "rust-fx",
         "range:streaming positive/negative/multi-file",
         "feature",
-        "verified",
-        "rust-fx/tests/range.rs + seqkit_streaming.rs + seqkit_streaming_diff.py interval/file/stdin cases",
-        "START:-1 streams; other mixed signs rejected as upstream; mixed FASTQ-to-FASTA inputs remain a command-level deviation",
-        "",
+        "exception",
+        "rust-fx/tests/range.rs + seqkit_streaming.rs; tests/oracle/check_seqkit_exceptions.py",
+        "SEQKIT-RANGE-QUALITY: START:-1 streams with original record formats and qualities; no upstream cross-file quality contamination",
+        "Maintain independent correctness proof and visible raw differences",
     )
     add(
         "rust-fx",

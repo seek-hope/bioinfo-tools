@@ -334,20 +334,46 @@ fn common_options(sub: &ArgMatches) -> Result<CommonOptions, CommandError> {
 }
 
 fn translate_options(sub: &ArgMatches) -> Result<TranslateOptions, CommandError> {
-    let frames = sub
-        .get_many::<String>("frame")
-        .map(|values| {
-            values
-                .map(|value| value.parse::<i32>())
-                .collect::<Result<Vec<_>, _>>()
-        })
-        .transpose()
-        .map_err(|_| CommandError::usage("--frame must be an integer"))?
-        .unwrap_or_else(|| vec![1]);
+    let mut frames = Vec::new();
+    'frames: for value in sub.get_many::<String>("frame").into_iter().flatten() {
+        if value.is_empty() {
+            continue;
+        }
+        for value in value.split(',') {
+            let frame = value.parse::<i32>().map_err(|_| {
+                CommandError::usage(format!(
+                    "invalid frame(s): {value}. available: 1, 2, 3, -1, -2, -3, and 6 for all. multiple frames should be separated by comma"
+                )).with_code(255)
+            })?;
+            frames.push(frame);
+            if frame == 6 {
+                break 'frames;
+            }
+        }
+    }
     let table = sub
         .get_one::<String>("transl_table")
-        .and_then(|value| value.parse::<i32>().ok())
+        .map(|value| value.parse::<i32>())
+        .transpose()
+        .map_err(|_| CommandError::usage("--transl-table must be an integer"))?
         .unwrap_or(1);
+    if table <= 0 {
+        return Err(
+            CommandError::usage("value of flag --transl-table should be greater than 0")
+                .with_code(255),
+        );
+    }
+    let min_len = sub
+        .get_one::<String>("min_len")
+        .map(|value| value.parse::<i64>())
+        .transpose()
+        .map_err(|_| CommandError::usage("--min-len must be an integer"))?
+        .unwrap_or(0);
+    if min_len < 0 {
+        return Err(
+            CommandError::usage("value of flag --min-len should be greater than 0").with_code(255),
+        );
+    }
     let list_table = sub
         .get_one::<String>("list_table")
         .map(|value| value.parse::<i32>())
@@ -371,12 +397,7 @@ fn translate_options(sub: &ArgMatches) -> Result<TranslateOptions, CommandError>
         append_frame: sub.get_flag("append_frame"),
         out_subseqs: sub.get_flag("out_subseqs"),
         clean: sub.get_flag("clean"),
-        min_len: sub
-            .get_one::<String>("min_len")
-            .map(|value| value.parse::<usize>())
-            .transpose()
-            .map_err(|_| CommandError::usage("--min-len must be a non-negative integer"))?
-            .unwrap_or(0),
+        min_len: min_len as usize,
         skip_errors: sub.get_flag("skip_errors"),
         trim: sub.get_flag("trim"),
         line_width: line_width(sub),
