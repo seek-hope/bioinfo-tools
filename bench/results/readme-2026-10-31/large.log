@@ -1,0 +1,22 @@
+Formal measurements complete; preparing the prespecified large streaming extension.
+[bam_sort_core] merging from 7 files and 1 in-memory blocks...
+prepared /tmp/bioinfo-readme-benchmark/inputs-large.json
+Large input preparation complete; starting isolated measurements.
+synthetic-10000000 fx_fq2fa block=-1 order=['rust', 'upstream'] ok=True wall={'rust': 1.9531, 'upstream': 1.2983}
+synthetic-10000000 fx_fq2fa block=0 order=['upstream', 'rust'] ok=True wall={'upstream': 1.2887, 'rust': 1.9485}
+synthetic-10000000 fx_fq2fa block=1 order=['rust', 'upstream'] ok=True wall={'rust': 1.9797, 'upstream': 1.2758}
+synthetic-10000000 fx_fq2fa block=2 order=['rust', 'upstream'] ok=True wall={'rust': 1.9825, 'upstream': 1.279}
+synthetic-10000000 fx_fq2fa block=3 order=['upstream', 'rust'] ok=True wall={'upstream': 1.2968, 'rust': 1.986}
+synthetic-10000000 fx_fq2fa block=4 order=['upstream', 'rust'] ok=True wall={'upstream': 1.344, 'rust': 1.9708}
+synthetic-10000000 fq_lint block=-1 order=['rust', 'upstream'] ok=True wall={'rust': 6.5174, 'upstream': 1.9577}
+synthetic-10000000 fq_lint block=0 order=['rust', 'upstream'] ok=True wall={'rust': 6.4384, 'upstream': 1.9634}
+synthetic-10000000 fq_lint block=1 order=['rust', 'upstream'] ok=True wall={'rust': 6.4745, 'upstream': 1.9606}
+synthetic-10000000 fq_lint block=2 order=['rust', 'upstream'] ok=True wall={'rust': 6.4668, 'upstream': 1.9586}
+synthetic-10000000 fq_lint block=3 order=['upstream', 'rust'] ok=True wall={'upstream': 1.9475, 'rust': 6.4605}
+synthetic-10000000 fq_lint block=4 order=['upstream', 'rust'] ok=True wall={'upstream': 1.9592, 'rust': 6.505}
+synthetic-bam-10000000 bam_flagstat block=-1 order=['upstream', 'rust'] ok=True wall={'upstream': 0.3754, 'rust': 0.9773}
+synthetic-bam-10000000 bam_flagstat block=0 order=['upstream', 'rust'] ok=True wall={'upstream': 0.3746, 'rust': 0.9602}
+synthetic-bam-10000000 bam_flagstat block=1 order=['rust', 'upstream'] ok=True wall={'rust': 0.9601, 'upstream': 0.3728}
+synthetic-bam-10000000 bam_flagstat block=2 order=['rust', 'upstream'] ok=True wall={'rust': 0.9707, 'upstream': 0.374}
+synthetic-bam-10000000 bam_flagstat block=3 order=['upstream', 'rust'] ok=True wall={'upstream': 0.3769, 'rust': 0.9593}
+synthetic-bam-10000000 bam_flagstat block=4 order=['rust', 'upstream'] ok=True wall={'rust': 0.9735, 'upstream': 0.367}

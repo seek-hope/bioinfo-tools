@@ -1384,7 +1384,7 @@ fn fq2fa_command() -> Command {
                 .num_args(0..)
                 .action(ArgAction::Append),
         )
-        .arg(line_width_arg())
+        .arg(line_width_arg().default_value("0"))
         .arg(out_file_arg())
         .arg(threads_arg())
 }

@@ -127,6 +127,7 @@ run python3 tests/ci/test_compat_exceptions.py
 run python3 tests/ci/test_seqkit_exception_gate.py
 run python3 tests/ci/test_tile_proof.py
 run python3 tests/ci/test_kmer_proof.py
+run python3 bench/test_readme_benchmark.py
 run python3 tests/gate/test_acceptance.py
 run "${CARGO[@]}" fmt --all -- --check
 run "${CARGO[@]}" clippy --workspace --all-targets --locked "${cargo_offline[@]}" -- -D warnings
@@ -144,6 +145,7 @@ run python3 rust-cutadapt/tests/check.py --bin "$bin_dir/rust-cutadapt"
 if [ "$with_oracles" -eq 1 ]; then
     # Always test the binaries built above, not a stale default target directory.
     run "${oracle_prefix[@]}" bash tests/oracle/run_w13_oracle.sh --rust "$bin_dir/rust-fx"
+    run "${oracle_prefix[@]}" python3 bench/check_boundaries.py --rust "$bin_dir/rust-fx" --seqkit "$SEQKIT_ORACLE" --out "$target_dir/readme-boundaries.json"
     run "${oracle_prefix[@]}" python3 tests/oracle/check_seqkit_exceptions.py --seqkit "$SEQKIT_ORACLE" --fq "$FQ_ORACLE" --rust "$bin_dir/rust-fx"
     run "${oracle_prefix[@]}" bash tests/oracle/run_qc_oracle.sh --rust "$bin_dir/rust-fastqc"
     run "${oracle_prefix[@]}" python3 tests/oracle/fastqc_adapters_diff.py --fastqc "$FASTQC_ORACLE" --rust "$bin_dir/rust-fastqc"

@@ -1,0 +1,3528 @@
+{
+  "schema_version": 1,
+  "kind": "readme-benchmark",
+  "started_utc": "2026-10-31T14:12:25.488192+00:00",
+  "source": {
+    "commit": "aaf4ba4a2ba26cae748143c43160d2d3d2c6b830",
+    "dirty": true,
+    "dirty_paths": [
+      " M README.md",
+      " M rust-fx/src/cli.rs",
+      " M rust-fx/src/stats.rs",
+      " M tests/ci/check.sh",
+      " M tests/ci/check_docs.py",
+      "?? README.zh-CN.md",
+      "?? bench/README-PROTOCOL.md",
+      "?? bench/check_boundaries.py",
+      "?? bench/extend_readme_inputs.py",
+      "?? bench/readme_benchmark.py",
+      "?? bench/readme_inputs.py",
+      "?? bench/summarize_readme.py",
+      "?? bench/test_readme_benchmark.py",
+      "?? docs/readme-review/",
+      "?? rust-fx/tests/benchmark_boundaries.rs"
+    ]
+  },
+  "hardware": {
+    "platform": "Linux-7.3.0-4-cachyos-x86_64-with-glibc2.44",
+    "machine": "x86_64",
+    "processor": "",
+    "cpu_model": "13th Gen Intel(R) Core(TM) i7-13700H",
+    "logical_cpus": 20,
+    "memory_kb": 32638876
+  },
+  "topology": "CPU CORE SOCKET    MAXMHZ ONLINE\n  0    0      0 4800.0000    yes\n  1    0      0 4800.0000    yes\n  2    1      0 4800.0000    yes\n  3    1      0 4800.0000    yes\n  4    2      0 5000.0000    yes\n  5    2      0 5000.0000    yes\n  6    3      0 5000.0000    yes\n  7    3      0 5000.0000    yes\n  8    4      0 4800.0000    yes\n  9    4      0 4800.0000    yes\n 10    5      0 4800.0000    yes\n 11    5      0 4800.0000    yes\n 12    6      0 3700.0000    yes\n 13    7      0 3700.0000    yes\n 14    8      0 3700.0000    yes\n 15    9      0 3700.0000    yes\n 16   10      0 3700.0000    yes\n 17   11      0 3700.0000    yes\n 18   12      0 3700.0000    yes\n 19   13      0 3700.0000    yes\n",
+  "versions": {
+    "rust_cutadapt": {
+      "version": "rust-cutadapt 0.1.0",
+      "command": [
+        "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/release/rust-cutadapt",
+        "--version"
+      ],
+      "executable_sha256": "1d764006aedfdf3a9efff03f7f632a842f857185adbd09915c133264253e615f"
+    },
+    "rust_umi": {
+      "version": "rust-umitools 0.2.0",
+      "command": [
+        "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/release/rust-umitools",
+        "--version"
+      ],
+      "executable_sha256": "8ae59b6732ac93d69dd19bde403ebc9198e8cf8a3c9330f8cb5ef0672ca169c0"
+    },
+    "rust_bam": {
+      "version": "rust-bam 0.1.0",
+      "command": [
+        "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/release/rust-bam",
+        "--version"
+      ],
+      "executable_sha256": "9f05eb49e043fcdb1ad163711e934920c45cc2e242f4ed6804c479576c42a17a"
+    },
+    "rust_fastqc": {
+      "version": "rust-fastqc 0.1.0",
+      "command": [
+        "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/release/rust-fastqc",
+        "--version"
+      ],
+      "executable_sha256": "8f45261c8647d33a1680fd246df19c0270764dcbc76026b5e1b23d92b2ee654c"
+    },
+    "rust_fx": {
+      "version": "rust-fx 0.1.0",
+      "command": [
+        "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/release/rust-fx",
+        "--version"
+      ],
+      "executable_sha256": "f9c17835b6c3e8e4a37475f21e27f84fc5068492a4dceff36fa7a1a42641e50a"
+    },
+    "cutadapt": {
+      "version": "4.6",
+      "command": [
+        "/home/rimuru/.conda/envs/ta-cutadapt/bin/cutadapt",
+        "--version"
+      ],
+      "executable_sha256": "d2046ae459cc2841b2791f6baf598ce96445799177d5ba57345a94bcb75e95cd"
+    },
+    "umi_tools": {
+      "version": "UMI-tools version: 1.1.6",
+      "command": [
+        "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/tests/ci/env/bin/umi_tools",
+        "--version"
+      ],
+      "executable_sha256": "51b086ac20917bfefab549d3e161c0e7a743d3a7a3515f595a476ad038599505"
+    },
+    "samtools": {
+      "version": "samtools 1.24",
+      "command": [
+        "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/tests/ci/env/bin/samtools",
+        "--version"
+      ],
+      "executable_sha256": "884541a13ebd12bed53c1fbdc14b2320f0ee76e8f410a364f10e56c4773df937"
+    },
+    "fastqc": {
+      "version": "FastQC v0.13.0",
+      "command": [
+        "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/tests/ci/env/bin/fastqc",
+        "--version"
+      ],
+      "executable_sha256": "f9273e9b66066102306f854e89ecd68c99664cdfdee3ba4b595616bc47cd9e47"
+    },
+    "seqkit": {
+      "version": "seqkit v2.14.0",
+      "command": [
+        "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/tests/ci/env/bin/seqkit",
+        "version"
+      ],
+      "executable_sha256": "88aa8a539b1e9097220a47811367b7ef826eff8637e5284fdd32a372770d6f7d"
+    },
+    "fq": {
+      "version": "fq v0.12.0 (51779f50e 2024-07-08)",
+      "command": [
+        "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/tests/ci/env/bin/fq",
+        "--version"
+      ],
+      "executable_sha256": "600e8b204086bc0d3e225b0021fd234fc452bf72414af80ad8a115a327b5fcb2"
+    }
+  },
+  "runtime_payloads": {
+    "cutadapt": {
+      "python": "3.10.22 | packaged by conda-forge | (main, Oct  6 2026, 23:02:24) [GCC 14.4.0]",
+      "executable": "/home/rimuru/.conda/envs/ta-cutadapt/bin/python",
+      "zlib_runtime": "1.3.2",
+      "modules": {
+        "cutadapt": {
+          "version": "4.6",
+          "origin": "/home/rimuru/.conda/envs/ta-cutadapt/lib/python3.10/site-packages/cutadapt/__init__.py",
+          "package": true,
+          "payload_sha256": "4001539cdea89afa256eb0cea4ff1531a7670477f4d699164f36277fde323009"
+        },
+        "dnaio": {
+          "version": "1.2.4",
+          "origin": "/home/rimuru/.conda/envs/ta-cutadapt/lib/python3.10/site-packages/dnaio/__init__.py",
+          "package": true,
+          "payload_sha256": "9d8c8318befda74a60bdcc18d9992de67540ccbdd4a3da5241508d4cb2386d72"
+        },
+        "xopen": {
+          "version": "2.1.0",
+          "origin": "/home/rimuru/.conda/envs/ta-cutadapt/lib/python3.10/site-packages/xopen/__init__.py",
+          "package": true,
+          "payload_sha256": "fcc735cdc4f75762ca91a5e301488d26d4df6b8d8e06107d8d78b777d85ce07c"
+        },
+        "isal": {
+          "version": "1.8.0",
+          "origin": "/home/rimuru/.conda/envs/ta-cutadapt/lib/python3.10/site-packages/isal/__init__.py",
+          "package": true,
+          "payload_sha256": "cfa50e45b66a0fe0eee23820e1f1adaf4f2ddd4c435a7610f6cc65c1a08ffab5"
+        },
+        "zlib_ng": {
+          "version": "1.0.0",
+          "origin": "/home/rimuru/.conda/envs/ta-cutadapt/lib/python3.10/site-packages/zlib_ng/__init__.py",
+          "package": true,
+          "payload_sha256": "8c6aec5fddccef217cdb5640e2456fb16cf57a838985be44fe6fb6c08bfe6d9f"
+        }
+      },
+      "interpreter_sha256": "7bc5998c1ec9baca5002ab57edee39cee185615d2fff268adbc85ee94e611004"
+    },
+    "umi_tools": {
+      "python": "3.12.14 (main, Sep  2 2026, 23:27:36) [GCC 15.3.0]",
+      "executable": "/tmp/bioinfo-ci-toolchain/umi/bin/python3",
+      "zlib_runtime": "1.3.2",
+      "modules": {
+        "umi_tools": {
+          "version": "1.1.6",
+          "origin": "/tmp/bioinfo-ci-toolchain/umi/lib/python3.12/site-packages/umi_tools/__init__.py",
+          "package": true,
+          "payload_sha256": "051ff3a907ec3abf554e76e9ab417886ee278724349efb2c98e29f76d8a27220"
+        },
+        "pysam": {
+          "version": "0.24.1",
+          "origin": "/tmp/bioinfo-ci-toolchain/umi/lib/python3.12/site-packages/pysam/__init__.py",
+          "package": true,
+          "payload_sha256": "5db94a2b51c702aa27694af45e9b6ff4024e704352d583e37d830b3adb53e5b3"
+        },
+        "numpy": {
+          "version": "2.5.3",
+          "origin": "/tmp/bioinfo-ci-toolchain/umi/lib/python3.12/site-packages/numpy/__init__.py",
+          "package": true,
+          "payload_sha256": "3859c9777e0921866c984eade68c90b7c8da64fd1e61d6a1b308c25a0c1f83f6"
+        },
+        "scipy": {
+          "version": "1.18.1",
+          "origin": "/tmp/bioinfo-ci-toolchain/umi/lib/python3.12/site-packages/scipy/__init__.py",
+          "package": true,
+          "payload_sha256": "ee4fea1e93d6523ec1e20e412a20f0cd22f9cfa33a806ef96e10893156effc50"
+        },
+        "pandas": {
+          "version": "3.0.5",
+          "origin": "/tmp/bioinfo-ci-toolchain/umi/lib/python3.12/site-packages/pandas/__init__.py",
+          "package": true,
+          "payload_sha256": "5d014e2b93046bfe5aa1ebb4c2900ece584f1518d78865e608b638502bcdcaaf"
+        }
+      },
+      "interpreter_sha256": "3a253d0e0c1b98a7369cf9a65c3d0ddab367d6612a01741c3b593df32ec26365"
+    },
+    "fastqc_payload_sha256": "13b60f8cfcdae4a91104e5cf79954209de384c88e21121ff56079f0971faff5f",
+    "samtools_binary_sha256": "730fcc3c41bd851bfe4ff1cf8c4adf5cc48e9da01d40a1bb843fa598bcdec342",
+    "java": {
+      "version": "openjdk version \"25.0.2-internal\" 2026-01-20\nOpenJDK Runtime Environment (build 25.0.2-internal-adhoc.rattler.src)\nOpenJDK 64-Bit Server VM (build 25.0.2-internal-adhoc.rattler.src, mixed mode, sharing)",
+      "executable_sha256": "672aada4292bb68595371e9eaea5483714e9ddc57a0898e0c790c9d5e93b8578"
+    }
+  },
+  "native_source_sha256": {
+    "Cargo.lock": "7352864e1c3a0e2693ae7d2ad688f66959a3f0d5b6c73bb729cdec6d1720d20a",
+    "Cargo.toml": "4b57857f58c9d83b08f0142f0aeb67a643b79f14acc4b7f89b2b93fb4db4b896",
+    "rust-bam/src/commands.rs": "08818f8192fbb747a4e1ee90691bfb5e06d1421a7f6366ded0ad9e0d1a2906c8",
+    "rust-bam/src/error.rs": "f6c590e3832227555dbb708a46a189be8dc778d68a6873ab681dc8f7065fa688",
+    "rust-bam/src/format.rs": "3d4fcff9163f1f9967ebe8033a5d79e167ff1292f4cbce782d75958a4b9a269e",
+    "rust-bam/src/index_util.rs": "b5f5eff6e3915563d484aeaa5934f3ab23c2f69f8aa8e12073fe5829cec11a77",
+    "rust-bam/src/io_util.rs": "8039c9dfab770693a2cb748210bfb4f358b23f67352e517725806de336cb4c57",
+    "rust-bam/src/lib.rs": "cb1c502119f8e94d5e7773186c574b00f6dfab911380b0bebab6e3da41264e04",
+    "rust-bam/src/main.rs": "6743c7d60adff7434d802df659762dca0fc645748f0c925bca2bd4b6b40a1dc7",
+    "rust-bam/src/sort_order.rs": "aafa6a1360d57a3af76c837b3df05819d423c3d61ee6c58c21cb6cdf8c54c542",
+    "rust-bam/src/stats.rs": "bd3515e87e05761ef39ec027c97ea45467ff48d124aaf638dcbaddd517e73fc0",
+    "rust-cutadapt/src/adapter/matcher.rs": "a2ff465bbaeb743b32eddd3313a41f0a5a210bcd176401765250e6e1a6674cf0",
+    "rust-cutadapt/src/adapter/mod.rs": "d48c03c1ff521dd61f6c616e24b19c057d1ae4b019fb1c3f81274f59db53a354",
+    "rust-cutadapt/src/align.rs": "af4deae7062c562a4d29b17e50d5767d923694d078928bdea0b0067b988afbad",
+    "rust-cutadapt/src/auxout.rs": "517410281584ea8cd8c0b699291a4000b48f4fd9ce909cee4569bf2ea6b78cd4",
+    "rust-cutadapt/src/cli.rs": "632adafebe1f50143693698edd5567c48b956dc7cb6f8021319b98bb5f6eb566",
+    "rust-cutadapt/src/compress.rs": "74b0a9cd685bba68aec0656974d3252c202bd4d4d51c3023e97a3a48eceb6ae7",
+    "rust-cutadapt/src/engine.rs": "6baf89a5c40e84440f09099c0184ca936a6bd28b926dbe3f81ef92b59781ac44",
+    "rust-cutadapt/src/fastq.rs": "c6062afa0ca98d78f28998b7b6316abf190ad1cff82461d96364379d2cd8d8a4",
+    "rust-cutadapt/src/filter.rs": "cb4d1606b2af6fb381f767abcee8cedbfa8da4bd3083f193d293fd2fee15221a",
+    "rust-cutadapt/src/lib.rs": "19548e9694b04091405163f12b85b77d20e378e05e9be3cc0b74fede2b838a68",
+    "rust-cutadapt/src/main.rs": "2f184a2f6274dec836b1ecb15bea612e1e97e91af13caa9f729232335ee9b246",
+    "rust-cutadapt/src/modify.rs": "1d9490f039ca4ddd334d011b18f595fc27a5d545ac0027f7d4b5ee86f551929d",
+    "rust-cutadapt/src/pair.rs": "9a91a5f51d09d255ec9d0f20f19131dbb942cfa2451b5989e6baec674da153ba",
+    "rust-cutadapt/src/pipeline.rs": "86eb53bf4bdda70e87f73833a13b729b8ec2d89940de89b52c6775aa65a709e7",
+    "rust-cutadapt/src/report/fmt.rs": "afdbc57c74ddd47462d02bd7a9069de0c86ce1ced0a57fca8b762043fa3010f0",
+    "rust-cutadapt/src/report/json.rs": "f5d775220c4f9d2a93968076c8e1f6308d748741bc038636f9ec0fced4985608",
+    "rust-cutadapt/src/report/mod.rs": "f7cb4e0e84faca55cabfd85e4bde05415072d95633c1ae1258476fe33fe38b3b",
+    "rust-cutadapt/src/report/stats.rs": "2034803c7e53361cfbd8c5b13e186e8d77cbb1a8e0631c6a81f83a9b79db893a",
+    "rust-cutadapt/src/report/text.rs": "cae5852c50456e840c904f555b21931410fc001d07a56528c92db2f52443a297",
+    "rust-cutadapt/src/runreport.rs": "d37b4d7a7e9c8906a132d23e341fc83e0826e92a38116ae47a40a1063a693830",
+    "rust-cutadapt/src/trim.rs": "4d2f2d0802def8006ff494a7dbb3b564a5409c41cd98fba5c8c06fecf8f40fbe",
+    "rust-fastqc/src/absent.rs": "feb5ff1397ab60df7ea50d3136725909bf119a4832696e2adec01fc7bea92cc2",
+    "rust-fastqc/src/adapters.rs": "3bbfa509656cb3ce88933dc4ad0456268f65e1908d4699ef08cdcf312b83683f",
+    "rust-fastqc/src/config.rs": "711f0396ac6133c5b024c43da6c32e08191a03069ead72fb2613c941ebb84730",
+    "rust-fastqc/src/contaminants.rs": "fb3ced4f57563a10d0cde3151ddcf293af45800284adcd6d65592ead91a176ad",
+    "rust-fastqc/src/error.rs": "b57bec3376398ae1b80e07615add154f9c602d56d04a9dc00e66788d50c2b972",
+    "rust-fastqc/src/grouping.rs": "5a3922fa2cf703631b44e44833f6fb7944eaf465e5321108437c3f1e5ccb8222",
+    "rust-fastqc/src/kmer.rs": "6e8fe53a2f5032df365e2bb5891891d5212c415bb2f680f9824b15335c4ed48d",
+    "rust-fastqc/src/lib.rs": "ff346db4a57dd35fc1a914a915367799251d41c3554c8e6df4f7602a6d2c6d5b",
+    "rust-fastqc/src/limits.rs": "d0ad1b1e33a0fd5dfc3167858e5a60e17ee7e20adc1e920b0333961eb65b66cc",
+    "rust-fastqc/src/main.rs": "ca605410335e334bafbeac3d461d0740b5a3a5c3ce01fa77501d2ab7c52c98f8",
+    "rust-fastqc/src/modules.rs": "62e705badd03809c30f9e212a1941110ec49832320c05d0243a44f2321891b98",
+    "rust-fastqc/src/report.rs": "bac5bbc215b1346273a51bd665ade243b8d1ec8a99f6cb307b9ad086a48f98b7",
+    "rust-fastqc/src/stats.rs": "528d09d224cde0002e28dd6e99e7be63ce4063db95a79017b0f81109746c5526",
+    "rust-fastqc/src/tile.rs": "e18be7a43b6acbe3b843012c7e174253d26a37e7616a7ef204c0443a552369f1",
+    "rust-fastqc/src/zip.rs": "80c672b205e18ee66dc251721360f5ea56293828e1cfa7829d1595cf9e1b3814",
+    "rust-fx/src/cli.rs": "ee328d308038fcd9073fcbaf3bd0361a8fec94b5bb3927a1ceda1b5f5e3502bf",
+    "rust-fx/src/commands.rs": "e15738d7d0811c6683d34a7c92bee0a6b92979d2910911b9c5231c64afee54e4",
+    "rust-fx/src/grep.rs": "cba35cb9fac6503cc4885c22322b95ae113a24a460ee5bb6adb54969d96d5934",
+    "rust-fx/src/io.rs": "5afa4f8fab05dd76e41e37a0db22b5a9e332536931fa73cdc496ed0675f44f22",
+    "rust-fx/src/lib.rs": "569ce65959d7fc7b5f07517fa26a23eb82b2da1c09e5735169e76251c6900090",
+    "rust-fx/src/lint.rs": "a145b1845098236c55d3bbff2a0d667b786f92766141cc3cd49a247efb7e1d4a",
+    "rust-fx/src/main.rs": "e8c4c8d2215537b801a44883df3e0e62ac9541f9be30bf0551aca80b1f25e900",
+    "rust-fx/src/md5.rs": "e83b33de9ab61cfadffb2fcfd745bd6f28e9a2191b617cd29bcf51523c28bd1c",
+    "rust-fx/src/range.rs": "f6df9ac4a3fd5cbda26037e58aedead9a39fe633f1068db9af29ce11bf4b9818",
+    "rust-fx/src/replace.rs": "97a35593dc4eff71806139d3494c67d3940c4403f776a2cce1d0a3d279992210",
+    "rust-fx/src/sample.rs": "74107a82e355326bf0ecb7c9c09478c0d2177b9227d3cb05a93323ad0313ec8b",
+    "rust-fx/src/seqkit_io.rs": "d6c0a23a2d20d8f5b675986a024b18af29459cb3df42ce576a1c592c17d2c407",
+    "rust-fx/src/sort.rs": "ea4d43024af2379e48440fc7358c5d96b1e85a310ff2e2777212fe479cbb97c6",
+    "rust-fx/src/split.rs": "54de5860e8a472831c2281b39125480e7d2edec4a923dedd89887c6142b7e7c4",
+    "rust-fx/src/stats.rs": "32afcd3e2603195c4bf47ce3c1e815f5e96cc806ed7900b26510131bcfe4de66",
+    "rust-fx/src/tab2fx.rs": "68a7ba03fe2e2cbdeb32d1daf0e31c7dc2fe819651cb31be1f4a30ea4704dea8",
+    "rust-fx/src/table.rs": "6eb364210d687140e4621f6e6b58aa0831e81e8d759e45eb36a598fbf2169372",
+    "rust-fx/src/transform.rs": "12714bccb09091c29065185a91516df91a345b021fc34f452839d149b574d7d7",
+    "rust-fx/src/translate.rs": "f67224a05e06ec7d81f40f56c75cbe01365de46c35061723e5dca62878bb6b79",
+    "rust-umitools/src/cli.rs": "310027d9768448e347e49bcb8770cd50be77e5e1d6b475d76a901b83e2b30583",
+    "rust-umitools/src/commands/count.rs": "a620ede0df8219836cac159822afcb5de198d82c3288425b4bc6848fc1a9932e",
+    "rust-umitools/src/commands/count_tab.rs": "2d3c40afe97cff01d89bc4be2d5405dbf320a5756bebdd2f828c4163d38173c3",
+    "rust-umitools/src/commands/dedup.rs": "560cf67369aa1cbd285a7d0af8aca2ea792fd3217feb04d5fec2ff85e9923e9a",
+    "rust-umitools/src/commands/dedup_stats.rs": "5bfe4b1aabd53da9865384d32e14fde069a23f1ed6e34cfa12352c451087cb7c",
+    "rust-umitools/src/commands/extract.rs": "364af5dd89ef730489677ad8f903c8a536458c9301fdb3b27bd601b9754206df",
+    "rust-umitools/src/commands/group.rs": "2ef90b0ad95cb6642693346a6ef0a43ff23885145e21b17948613cb84b6d59e4",
+    "rust-umitools/src/commands/mod.rs": "fbac353802b46a9fadbce6fb13237831341b9132b458b13ec3e9c9e4eb9f6574",
+    "rust-umitools/src/commands/whitelist.rs": "6bb57902c631e4188e4ab06d9df6cc3499d2c03b86cbd3110c05c89f6a4f8edd",
+    "rust-umitools/src/compat/mod.rs": "f59d9e3ef036061731b34802a9b48e5f90f89f93bd3981c91a38419695106483",
+    "rust-umitools/src/compat/pyrng.rs": "c039c3e34d59cefd778adc7e659d40a3d7a6278cbef5586990176af78f628bf0",
+    "rust-umitools/src/core/barcode.rs": "8b045f11eb8bf245cddae68a74d832af6538628dae897a7ef9d9d1ccfb2ad836",
+    "rust-umitools/src/core/bundle.rs": "ed4ca63f4c1147981dc5ce7c016360619056ee6e2ca4461ac75653ccaab833cb",
+    "rust-umitools/src/core/cluster.rs": "1e3ed9fe735635135b6eb27cbba79f189dc5581b3cc8678124d64580dcfc229a",
+    "rust-umitools/src/core/disk_bundle.rs": "5ffb51ada6cd6c1b97b8b04943794f210ef0e4e29b1cb8927b05bee913f1ccb0",
+    "rust-umitools/src/core/distance.rs": "7fab20d1e5b4bedb3602f92fe2d42d74e756bd2fd32f7ca9e9365dbe052f0bf4",
+    "rust-umitools/src/core/mod.rs": "3d543d40318e641195691c7fd916217f746ed8b2f94a2285c82b2d4eb8339e25",
+    "rust-umitools/src/core/neighbors.rs": "dadb225b74c4275ccc0ec4ee3a0dd5af367f2a184e923bbfad8b2c3d1cd7d52e",
+    "rust-umitools/src/core/rng.rs": "072c5bd6849b7ee0fdf7c9df47ea9f10c1b7c41fc3ba6ccc50ade54bba3cdfbd",
+    "rust-umitools/src/core/umi.rs": "13e3a6928a682c84deea4a1c4a57f0fd12e5eac34f4237b0c44189a2447d7402",
+    "rust-umitools/src/error.rs": "3eacc719f249169e3a6128f794133888bb01ace7ba92ea167cdc27eba1cf6743",
+    "rust-umitools/src/io/alignment.rs": "005f1ba97fcc86c5862ca79c3eaad5e7ae94e9ed6ae0c32f7dc233399e2334e0",
+    "rust-umitools/src/io/bam.rs": "6f8c652b401c32e486c8b24251e36ce0b04161f7bfc1f8db58a4447baf55b0e1",
+    "rust-umitools/src/io/fastq.rs": "ecae200fbfd8ea988c744832e2e897e9b233bd8b50e2b347dd800283eb31694a",
+    "rust-umitools/src/io/mod.rs": "aa0e976ed4c38e485191d4b5610984566ee2abcf7f2c012c01cbfe3b56af9cdd",
+    "rust-umitools/src/io/paired.rs": "a6a0c91271bfbd49b88a64f202c5e737f1bcb7f3ccb8999ae6030b2916b45564",
+    "rust-umitools/src/io/sort.rs": "3c08cdfde9e4fa3e95310d70e1e39b73573aa0f0ce3774b5d4714578638a6970",
+    "rust-umitools/src/io/spill.rs": "719f6050d83167ad6ff606f69870d55bae4b4f00830d2bd644580240b897f6d1",
+    "rust-umitools/src/lib.rs": "a82a2065344b1b1126ce51f9edde8bb6fdb74bc18305d5a8305d72198720edd4",
+    "rust-umitools/src/main.rs": "7d7b9da15b560ebda5ab86a2ace333d684bc87b8ff45081f17c4cfc55d0da8e0",
+    "rust-umitools/src/runtime/budget.rs": "154c3c69b48cfc29b2358848a758525bff0170e0d7a0ef43995b9cabdd9bf7ed",
+    "rust-umitools/src/runtime/mod.rs": "a2adc8ee29ccde53880f74fa3bc30e20ddc4bd75c17bdfaaecea4bedc2248f52",
+    "rust-umitools/src/runtime/pipeline.rs": "780c273c7d6ba3442594ccf48bf8f6077db2970a872daaba2ad4bfadc141fe2b",
+    "rust-umitools/src/runtime/summary.rs": "56b2601fbc4ca4e4e643b6def8476c82fc1b4d57889ee1665214dd1e491d32c1",
+    "bioinfo-common/src/diagnostic.rs": "d9283c193000559ce2781e7c1224dd43ac515fe1f1024e5b3fb35740131fbaf5",
+    "bioinfo-common/src/exit.rs": "25655be39bdb8aca9771738aa7e1e64a955ec5b10da30a0769c2c461cf2e9c2b",
+    "bioinfo-common/src/lib.rs": "eed83a850d1fe44670768426f4791cd4dd256fc412a4705403518f227ef85fb5",
+    "bioinfo-common/src/provenance.rs": "570f333aa038a344e36769763560b65d57d25eba063d3f8d6404701338102dd3",
+    "bioinfo-common/src/summary.rs": "52c4d9a5bdf8fd1d4b7feee31b8c04d719917de37e19117e5711fa5109f7b329",
+    "bioinfo-fastx/src/bgzf.rs": "08ffb05b4bd102b4b2d9e668824c75778d4490a1a404ecffb182b53b3ebd9b82",
+    "bioinfo-fastx/src/bin/fastx-fuzz.rs": "d3384d328b6bda05b78956277f52efb41eb945438521eb6ddb084e3aa886c590",
+    "bioinfo-fastx/src/chunker.rs": "e5ec74a6a113f174e6b15c13c145897e1f8f98ffeb877b736057e8d29fea7588",
+    "bioinfo-fastx/src/compress.rs": "a8c29f48f23699675529061bd6b69a372d63d1c4ab35063a244cb0615de7edb6",
+    "bioinfo-fastx/src/format.rs": "1f4737aef16254c464e916aa3959308f08408a32b12af1894ed405200beca7f0",
+    "bioinfo-fastx/src/lib.rs": "3333ebd30be0774c3fe2b9e68cb4e73806df92911f9f5edf8f9f1a81c61605ea",
+    "bioinfo-fastx/src/parser.rs": "9b398b72cc318673b5fecce83cf5e7c61134503c34bd2f50411a300d46293af7",
+    "bioinfo-fastx/src/reader.rs": "390a31584949784f8c3fb4557b67e170efde1f389426d068042db4994b050920",
+    "bioinfo-fastx/src/writer.rs": "286e128778652191de2e683d29118cd8bec4039d4c18e0b8b185dd072c5a42c9"
+  },
+  "script_sha256": {
+    "readme_benchmark.py": "a1c29b7a927ec4afe3ccf7516fc4ce424cb48c2f5cf3a8c4480e9d8d472eb780",
+    "readme_inputs.py": "ab13d23ffdc1f4df3c46b121b08566dd1a9adf846e60d5422750281e0417e7df",
+    "run.py": "2f0eedb5961b9e2e179fc498a0369ac01ef294de37dd0e75c5beaf28428c287d",
+    "upstream.py": "dbc63a0f109a4a977fb365dfbe5d31075b8cfd31d0645f192bc938bbf40317bc"
+  },
+  "inputs": {
+    "schema_version": 1,
+    "seed": 20261031,
+    "real_source": {
+      "run": "SRR2584863",
+      "organism": "Escherichia coli B str. REL606",
+      "instrument": "Illumina HiSeq 2500",
+      "mate": 1,
+      "url": "https://ftp.sra.ebi.ac.uk/vol1/fastq/SRR258/003/SRR2584863/SRR2584863_1.fastq.gz",
+      "md5": "4a1529a4165970302d6d8cb50b6e7a43",
+      "bytes": 183292913,
+      "records": 1553259,
+      "sha256": "c2b69fdbe3423a8ab9fb185cb57cff574874e32deb3cebd3396a0deb3eb2dcf9"
+    },
+    "parent_manifest_sha256": "c41fdcff7b6f48fcbb63137189e2240e5645eb49570a84a3dada4a48962dd112",
+    "generator_sha256": "9cc76c590ee219c8157b5f8237186f1950a52b2944fb3fcf1f406e4d3b0d828f",
+    "shared_generator_sha256": "ab13d23ffdc1f4df3c46b121b08566dd1a9adf846e60d5422750281e0417e7df",
+    "datasets": [
+      {
+        "id": "synthetic-10000000",
+        "kind": "fastq",
+        "path": "/tmp/bioinfo-readme-benchmark/synthetic-10000000.fastq",
+        "source": "synthetic",
+        "seed": 20261031,
+        "records": 10000000,
+        "bases": 1500000000,
+        "gc_bases": 750761556,
+        "min_length": 150,
+        "max_length": 150,
+        "sha256": "a6fb750732e992bbbe718aca2c461f6d92b8b468baf0f2054126f5132bd58f90",
+        "bytes": 3240000000,
+        "independent_fastq_validation": true
+      },
+      {
+        "id": "synthetic-bam-10000000",
+        "kind": "bam",
+        "records": 10000000,
+        "bundles": 357112,
+        "expected_dedup_records": 714224,
+        "unsorted": "/tmp/bioinfo-readme-benchmark/bam-10000000/unsorted.bam",
+        "sorted": "/tmp/bioinfo-readme-benchmark/bam-10000000/sorted.bam",
+        "expected_qnames": "/tmp/bioinfo-readme-benchmark/bam-10000000/dedup-qnames.txt",
+        "sha256": {
+          "unsorted.bam": "ac682bf424751f56f5f811d6ee008cc4558ef6dd1b871d408e54cf31068da5e8",
+          "sorted.bam": "9375e83d06000dd6b2bb6c8c8b67898ed9e74800bc645096986b407601cd5dd5",
+          "sorted.bam.bai": "d354e8f89be40fa2f32259da315a40cacd8972a6de5626aef13b3b4041499bc2",
+          "dedup-qnames.txt": "f721f8012edf0fc9ce009ef95651c98bae1d061f68d6b5985266c53d6af119bb"
+        },
+        "generator": {
+          "seed": 20261031,
+          "bundle_scales": [
+            1,
+            10,
+            100
+          ],
+          "umi_counts_per_scale": [
+            6,
+            2,
+            1,
+            1
+          ],
+          "umi_distance_from_major": [
+            0,
+            1,
+            2,
+            10
+          ],
+          "independent_representative": "unique highest MAPQ"
+        }
+      }
+    ]
+  },
+  "input_manifest_sha256": "86efab8612ed25819b0be6e9bf6e8adf47f4d181ccbe1dfc254dfe9d21ba9896",
+  "parameters": {
+    "inputs": "/tmp/bioinfo-readme-benchmark/inputs-large.json",
+    "out": "/tmp/bioinfo-readme-benchmark/large.json",
+    "cutadapt": "/home/rimuru/.conda/envs/ta-cutadapt/bin/cutadapt",
+    "oracle_dir": "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/tests/ci/env/bin",
+    "cpu": "4",
+    "multi_cpu": "0,2,4,6",
+    "repeats": 5,
+    "warmups": 1,
+    "cooldown": 2.0,
+    "timeout": 300,
+    "datasets": "",
+    "cases": "fx_fq2fa,fq_lint,bam_flagstat",
+    "pilot": false,
+    "run_name": "large-runs",
+    "toolchain_cache": "/tmp/bioinfo-ci-toolchain",
+    "seed": 20261031
+  },
+  "results": [
+    {
+      "dataset": "synthetic-10000000",
+      "records": 10000000,
+      "case": "fx_fq2fa",
+      "samples": {
+        "rust": [
+          {
+            "wall_s": 1.94,
+            "user_s": 1.4,
+            "sys_s": 0.53,
+            "max_rss_kb": 5168,
+            "elapsed_s": 1.9484661300084554,
+            "exit_code": 0,
+            "temp_peak_bytes_sampled": 0,
+            "before": {
+              "load_average": [
+                2.3916015625,
+                2.2734375,
+                2.08642578125
+              ],
+              "temperature_c": {
+                "Core 28": 48.0,
+                "Core 12": 50.0,
+                "Core 16": 49.0,
+                "Core 26": 46.0,
+                "Core 29": 48.0,
+                "Package id 0": 50.0,
+                "Core 27": 46.0,
+                "Core 20": 47.0,
+                "Core 30": 48.0,
+                "Core 0": 48.0,
+                "Core 24": 46.0,
+                "Core 4": 48.0,
+                "Core 31": 48.0,
+                "Core 25": 46.0,
+                "Core 8": 49.0
+              },
+              "cpu_frequency_khz": 4719327
+            },
+            "after": {
+              "load_average": [
+                2.3916015625,
+                2.2734375,
+                2.08642578125
+              ],
+              "temperature_c": {
+                "Core 28": 47.0,
+                "Core 12": 48.0,
+                "Core 16": 72.0,
+                "Core 26": 47.0,
+                "Core 29": 47.0,
+                "Package id 0": 84.0,
+                "Core 27": 47.0,
+                "Core 20": 45.0,
+                "Core 30": 47.0,
+                "Core 0": 60.0,
+                "Core 24": 47.0,
+                "Core 4": 44.0,
+                "Core 31": 47.0,
+                "Core 25": 47.0,
+                "Core 8": 84.0
+              },
+              "cpu_frequency_khz": 753197
+            },
+            "command": [
+              "taskset",
+              "-c",
+              "4",
+              "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/release/rust-fx",
+              "fq2fa",
+              "-j",
+              "1",
+              "-o",
+              "/tmp/bioinfo-readme-benchmark/large-runs/synthetic-10000000/fx_fq2fa/0-rust/out/reads.fasta",
+              "/tmp/bioinfo-readme-benchmark/synthetic-10000000.fastq"
+            ],
+            "output_bytes": 1710000000,
+            "stderr": "",
+            "block": 0,
+            "order_in_block": 1,
+            "payload_bytes": 1710000000
+          },
+          {
+            "wall_s": 1.97,
+            "user_s": 1.4,
+            "sys_s": 0.57,
+            "max_rss_kb": 5196,
+            "elapsed_s": 1.9797414959903108,
+            "exit_code": 0,
+            "temp_peak_bytes_sampled": 0,
+            "before": {
+              "load_average": [
+                2.6005859375,
+                2.31884765625,
+                2.1025390625
+              ],
+              "temperature_c": {
+                "Core 28": 45.0,
+                "Core 12": 49.0,
+                "Core 16": 44.0,
+                "Core 26": 43.0,
+                "Core 29": 45.0,
+                "Package id 0": 49.0,
+                "Core 27": 43.0,
+                "Core 20": 45.0,
+                "Core 30": 45.0,
+                "Core 0": 46.0,
+                "Core 24": 43.0,
+                "Core 4": 46.0,
+                "Core 31": 45.0,
+                "Core 25": 43.0,
+                "Core 8": 43.0
+              },
+              "cpu_frequency_khz": 4005615
+            },
+            "after": {
+              "load_average": [
+                2.6005859375,
+                2.31884765625,
+                2.1025390625
+              ],
+              "temperature_c": {
+                "Core 28": 47.0,
+                "Core 12": 52.0,
+                "Core 16": 61.0,
+                "Core 26": 47.0,
+                "Core 29": 47.0,
+                "Package id 0": 65.0,
+                "Core 27": 47.0,
+                "Core 20": 45.0,
+                "Core 30": 47.0,
+                "Core 0": 58.0,
+                "Core 24": 47.0,
+                "Core 4": 46.0,
+                "Core 31": 47.0,
+                "Core 25": 47.0,
+                "Core 8": 65.0
+              },
+              "cpu_frequency_khz": 399007
+            },
+            "command": [
+              "taskset",
+              "-c",
+              "4",
+              "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/release/rust-fx",
+              "fq2fa",
+              "-j",
+              "1",
+              "-o",
+              "/tmp/bioinfo-readme-benchmark/large-runs/synthetic-10000000/fx_fq2fa/1-rust/out/reads.fasta",
+              "/tmp/bioinfo-readme-benchmark/synthetic-10000000.fastq"
+            ],
+            "output_bytes": 1710000000,
+            "stderr": "",
+            "block": 1,
+            "order_in_block": 0,
+            "payload_bytes": 1710000000
+          },
+          {
+            "wall_s": 1.98,
+            "user_s": 1.41,
+            "sys_s": 0.56,
+            "max_rss_kb": 5160,
+            "elapsed_s": 1.98254101301427,
+            "exit_code": 0,
+            "temp_peak_bytes_sampled": 0,
+            "before": {
+              "load_average": [
+                2.52099609375,
+                2.30908203125,
+                2.1015625
+              ],
+              "temperature_c": {
+                "Core 28": 50.0,
+                "Core 12": 55.0,
+                "Core 16": 51.0,
+                "Core 26": 49.0,
+                "Core 29": 50.0,
+                "Package id 0": 55.0,
+                "Core 27": 49.0,
+                "Core 20": 49.0,
+                "Core 30": 50.0,
+                "Core 0": 50.0,
+                "Core 24": 49.0,
+                "Core 4": 51.0,
+                "Core 31": 50.0,
+                "Core 25": 49.0,
+                "Core 8": 47.0
+              },
+              "cpu_frequency_khz": 2738129
+            },
+            "after": {
+              "load_average": [
+                2.52099609375,
+                2.30908203125,
+                2.1015625
+              ],
+              "temperature_c": {
+                "Core 28": 48.0,
+                "Core 12": 50.0,
+                "Core 16": 75.0,
+                "Core 26": 51.0,
+                "Core 29": 48.0,
+                "Package id 0": 98.0,
+                "Core 27": 51.0,
+                "Core 20": 47.0,
+                "Core 30": 49.0,
+                "Core 0": 66.0,
+                "Core 24": 51.0,
+                "Core 4": 49.0,
+                "Core 31": 49.0,
+                "Core 25": 51.0,
+                "Core 8": 98.0
+              },
+              "cpu_frequency_khz": 1182578
+            },
+            "command": [
+              "taskset",
+              "-c",
+              "4",
+              "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/release/rust-fx",
+              "fq2fa",
+              "-j",
+              "1",
+              "-o",
+              "/tmp/bioinfo-readme-benchmark/large-runs/synthetic-10000000/fx_fq2fa/2-rust/out/reads.fasta",
+              "/tmp/bioinfo-readme-benchmark/synthetic-10000000.fastq"
+            ],
+            "output_bytes": 1710000000,
+            "stderr": "",
+            "block": 2,
+            "order_in_block": 0,
+            "payload_bytes": 1710000000
+          },
+          {
+            "wall_s": 1.98,
+            "user_s": 1.45,
+            "sys_s": 0.52,
+            "max_rss_kb": 5340,
+            "elapsed_s": 1.985991917012143,
+            "exit_code": 0,
+            "temp_peak_bytes_sampled": 0,
+            "before": {
+              "load_average": [
+                2.10302734375,
+                2.2275390625,
+                2.07763671875
+              ],
+              "temperature_c": {
+                "Core 28": 47.0,
+                "Core 12": 48.0,
+                "Core 16": 47.0,
+                "Core 26": 45.0,
+                "Core 29": 47.0,
+                "Package id 0": 54.0,
+                "Core 27": 45.0,
+                "Core 20": 47.0,
+                "Core 30": 47.0,
+                "Core 0": 53.0,
+                "Core 24": 45.0,
+                "Core 4": 46.0,
+                "Core 31": 47.0,
+                "Core 25": 45.0,
+                "Core 8": 48.0
+              },
+              "cpu_frequency_khz": 1304880
+            },
+            "after": {
+              "load_average": [
+                2.10302734375,
+                2.2275390625,
+                2.07763671875
+              ],
+              "temperature_c": {
+                "Core 28": 47.0,
+                "Core 12": 53.0,
+                "Core 16": 73.0,
+                "Core 26": 49.0,
+                "Core 29": 47.0,
+                "Package id 0": 97.0,
+                "Core 27": 49.0,
+                "Core 20": 47.0,
+                "Core 30": 47.0,
+                "Core 0": 61.0,
+                "Core 24": 49.0,
+                "Core 4": 50.0,
+                "Core 31": 47.0,
+                "Core 25": 49.0,
+                "Core 8": 97.0
+              },
+              "cpu_frequency_khz": 400116
+            },
+            "command": [
+              "taskset",
+              "-c",
+              "4",
+              "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/release/rust-fx",
+              "fq2fa",
+              "-j",
+              "1",
+              "-o",
+              "/tmp/bioinfo-readme-benchmark/large-runs/synthetic-10000000/fx_fq2fa/3-rust/out/reads.fasta",
+              "/tmp/bioinfo-readme-benchmark/synthetic-10000000.fastq"
+            ],
+            "output_bytes": 1710000000,
+            "stderr": "",
+            "block": 3,
+            "order_in_block": 1,
+            "payload_bytes": 1710000000
+          },
+          {
+            "wall_s": 1.97,
+            "user_s": 1.42,
+            "sys_s": 0.53,
+            "max_rss_kb": 5516,
+            "elapsed_s": 1.970757788993069,
+            "exit_code": 0,
+            "temp_peak_bytes_sampled": 0,
+            "before": {
+              "load_average": [
+                2.01318359375,
+                2.203125,
+                2.0712890625
+              ],
+              "temperature_c": {
+                "Core 28": 50.0,
+                "Core 12": 56.0,
+                "Core 16": 63.0,
+                "Core 26": 53.0,
+                "Core 29": 50.0,
+                "Package id 0": 63.0,
+                "Core 27": 53.0,
+                "Core 20": 52.0,
+                "Core 30": 50.0,
+                "Core 0": 51.0,
+                "Core 24": 53.0,
+                "Core 4": 51.0,
+                "Core 31": 50.0,
+                "Core 25": 53.0,
+                "Core 8": 47.0
+              },
+              "cpu_frequency_khz": 5000000
+            },
+            "after": {
+              "load_average": [
+                2.01318359375,
+                2.203125,
+                2.0712890625
+              ],
+              "temperature_c": {
+                "Core 28": 48.0,
+                "Core 12": 50.0,
+                "Core 16": 74.0,
+                "Core 26": 50.0,
+                "Core 29": 48.0,
+                "Package id 0": 96.0,
+                "Core 27": 50.0,
+                "Core 20": 49.0,
+                "Core 30": 48.0,
+                "Core 0": 60.0,
+                "Core 24": 50.0,
+                "Core 4": 46.0,
+                "Core 31": 48.0,
+                "Core 25": 50.0,
+                "Core 8": 96.0
+              },
+              "cpu_frequency_khz": 400000
+            },
+            "command": [
+              "taskset",
+              "-c",
+              "4",
+              "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/release/rust-fx",
+              "fq2fa",
+              "-j",
+              "1",
+              "-o",
+              "/tmp/bioinfo-readme-benchmark/large-runs/synthetic-10000000/fx_fq2fa/4-rust/out/reads.fasta",
+              "/tmp/bioinfo-readme-benchmark/synthetic-10000000.fastq"
+            ],
+            "output_bytes": 1710000000,
+            "stderr": "",
+            "block": 4,
+            "order_in_block": 1,
+            "payload_bytes": 1710000000
+          }
+        ],
+        "upstream": [
+          {
+            "wall_s": 1.28,
+            "user_s": 0.72,
+            "sys_s": 0.55,
+            "max_rss_kb": 35508,
+            "elapsed_s": 1.2887385959911626,
+            "exit_code": 0,
+            "temp_peak_bytes_sampled": 0,
+            "before": {
+              "load_average": [
+                2.60009765625,
+                2.31201171875,
+                2.09814453125
+              ],
+              "temperature_c": {
+                "Core 28": 45.0,
+                "Core 12": 45.0,
+                "Core 16": 44.0,
+                "Core 26": 45.0,
+                "Core 29": 45.0,
+                "Package id 0": 46.0,
+                "Core 27": 45.0,
+                "Core 20": 43.0,
+                "Core 30": 47.0,
+                "Core 0": 47.0,
+                "Core 24": 45.0,
+                "Core 4": 44.0,
+                "Core 31": 47.0,
+                "Core 25": 45.0,
+                "Core 8": 43.0
+              },
+              "cpu_frequency_khz": 2054638
+            },
+            "after": {
+              "load_average": [
+                2.60009765625,
+                2.31201171875,
+                2.09814453125
+              ],
+              "temperature_c": {
+                "Core 28": 48.0,
+                "Core 12": 50.0,
+                "Core 16": 61.0,
+                "Core 26": 51.0,
+                "Core 29": 48.0,
+                "Package id 0": 61.0,
+                "Core 27": 51.0,
+                "Core 20": 47.0,
+                "Core 30": 48.0,
+                "Core 0": 55.0,
+                "Core 24": 51.0,
+                "Core 4": 49.0,
+                "Core 31": 48.0,
+                "Core 25": 51.0,
+                "Core 8": 59.0
+              },
+              "cpu_frequency_khz": 440162
+            },
+            "command": [
+              "taskset",
+              "-c",
+              "4",
+              "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/tests/ci/env/bin/seqkit",
+              "fq2fa",
+              "-j",
+              "1",
+              "-o",
+              "/tmp/bioinfo-readme-benchmark/large-runs/synthetic-10000000/fx_fq2fa/0-upstream/out/reads.fasta",
+              "/tmp/bioinfo-readme-benchmark/synthetic-10000000.fastq"
+            ],
+            "output_bytes": 1710000000,
+            "stderr": "",
+            "block": 0,
+            "order_in_block": 0,
+            "payload_bytes": 1710000000
+          },
+          {
+            "wall_s": 1.27,
+            "user_s": 0.8,
+            "sys_s": 0.46,
+            "max_rss_kb": 27140,
+            "elapsed_s": 1.2757964240008732,
+            "exit_code": 0,
+            "temp_peak_bytes_sampled": 0,
+            "before": {
+              "load_average": [
+                2.39208984375,
+                2.2802734375,
+                2.0908203125
+              ],
+              "temperature_c": {
+                "Core 28": 45.0,
+                "Core 12": 48.0,
+                "Core 16": 44.0,
+                "Core 26": 43.0,
+                "Core 29": 45.0,
+                "Package id 0": 48.0,
+                "Core 27": 43.0,
+                "Core 20": 43.0,
+                "Core 30": 45.0,
+                "Core 0": 48.0,
+                "Core 24": 43.0,
+                "Core 4": 44.0,
+                "Core 31": 45.0,
+                "Core 25": 43.0,
+                "Core 8": 44.0
+              },
+              "cpu_frequency_khz": 897128
+            },
+            "after": {
+              "load_average": [
+                2.39208984375,
+                2.2802734375,
+                2.0908203125
+              ],
+              "temperature_c": {
+                "Core 28": 46.0,
+                "Core 12": 48.0,
+                "Core 16": 63.0,
+                "Core 26": 49.0,
+                "Core 29": 46.0,
+                "Package id 0": 63.0,
+                "Core 27": 49.0,
+                "Core 20": 46.0,
+                "Core 30": 46.0,
+                "Core 0": 56.0,
+                "Core 24": 49.0,
+                "Core 4": 46.0,
+                "Core 31": 46.0,
+                "Core 25": 49.0,
+                "Core 8": 51.0
+              },
+              "cpu_frequency_khz": 400240
+            },
+            "command": [
+              "taskset",
+              "-c",
+              "4",
+              "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/tests/ci/env/bin/seqkit",
+              "fq2fa",
+              "-j",
+              "1",
+              "-o",
+              "/tmp/bioinfo-readme-benchmark/large-runs/synthetic-10000000/fx_fq2fa/1-upstream/out/reads.fasta",
+              "/tmp/bioinfo-readme-benchmark/synthetic-10000000.fastq"
+            ],
+            "output_bytes": 1710000000,
+            "stderr": "",
+            "block": 1,
+            "order_in_block": 1,
+            "payload_bytes": 1710000000
+          },
+          {
+            "wall_s": 1.27,
+            "user_s": 0.79,
+            "sys_s": 0.48,
+            "max_rss_kb": 24488,
+            "elapsed_s": 1.2789556429925142,
+            "exit_code": 0,
+            "temp_peak_bytes_sampled": 0,
+            "before": {
+              "load_average": [
+                2.39892578125,
+                2.287109375,
+                2.09521484375
+              ],
+              "temperature_c": {
+                "Core 28": 44.0,
+                "Core 12": 46.0,
+                "Core 16": 44.0,
+                "Core 26": 43.0,
+                "Core 29": 44.0,
+                "Package id 0": 49.0,
+                "Core 27": 43.0,
+                "Core 20": 43.0,
+                "Core 30": 44.0,
+                "Core 0": 49.0,
+                "Core 24": 43.0,
+                "Core 4": 45.0,
+                "Core 31": 44.0,
+                "Core 25": 43.0,
+                "Core 8": 44.0
+              },
+              "cpu_frequency_khz": 757897
+            },
+            "after": {
+              "load_average": [
+                2.39892578125,
+                2.287109375,
+                2.09521484375
+              ],
+              "temperature_c": {
+                "Core 28": 47.0,
+                "Core 12": 56.0,
+                "Core 16": 63.0,
+                "Core 26": 49.0,
+                "Core 29": 47.0,
+                "Package id 0": 71.0,
+                "Core 27": 49.0,
+                "Core 20": 48.0,
+                "Core 30": 47.0,
+                "Core 0": 65.0,
+                "Core 24": 49.0,
+                "Core 4": 49.0,
+                "Core 31": 47.0,
+                "Core 25": 49.0,
+                "Core 8": 71.0
+              },
+              "cpu_frequency_khz": 549941
+            },
+            "command": [
+              "taskset",
+              "-c",
+              "4",
+              "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/tests/ci/env/bin/seqkit",
+              "fq2fa",
+              "-j",
+              "1",
+              "-o",
+              "/tmp/bioinfo-readme-benchmark/large-runs/synthetic-10000000/fx_fq2fa/2-upstream/out/reads.fasta",
+              "/tmp/bioinfo-readme-benchmark/synthetic-10000000.fastq"
+            ],
+            "output_bytes": 1710000000,
+            "stderr": "",
+            "block": 2,
+            "order_in_block": 1,
+            "payload_bytes": 1710000000
+          },
+          {
+            "wall_s": 1.29,
+            "user_s": 0.75,
+            "sys_s": 0.53,
+            "max_rss_kb": 33076,
+            "elapsed_s": 1.2968248580000363,
+            "exit_code": 0,
+            "temp_peak_bytes_sampled": 0,
+            "before": {
+              "load_average": [
+                2.28662109375,
+                2.265625,
+                2.0888671875
+              ],
+              "temperature_c": {
+                "Core 28": 49.0,
+                "Core 12": 62.0,
+                "Core 16": 53.0,
+                "Core 26": 49.0,
+                "Core 29": 49.0,
+                "Package id 0": 65.0,
+                "Core 27": 49.0,
+                "Core 20": 51.0,
+                "Core 30": 49.0,
+                "Core 0": 65.0,
+                "Core 24": 49.0,
+                "Core 4": 55.0,
+                "Core 31": 49.0,
+                "Core 25": 49.0,
+                "Core 8": 61.0
+              },
+              "cpu_frequency_khz": 4460648
+            },
+            "after": {
+              "load_average": [
+                2.28662109375,
+                2.265625,
+                2.0888671875
+              ],
+              "temperature_c": {
+                "Core 28": 48.0,
+                "Core 12": 48.0,
+                "Core 16": 74.0,
+                "Core 26": 49.0,
+                "Core 29": 48.0,
+                "Package id 0": 96.0,
+                "Core 27": 49.0,
+                "Core 20": 46.0,
+                "Core 30": 48.0,
+                "Core 0": 74.0,
+                "Core 24": 49.0,
+                "Core 4": 45.0,
+                "Core 31": 48.0,
+                "Core 25": 49.0,
+                "Core 8": 96.0
+              },
+              "cpu_frequency_khz": 4456486
+            },
+            "command": [
+              "taskset",
+              "-c",
+              "4",
+              "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/tests/ci/env/bin/seqkit",
+              "fq2fa",
+              "-j",
+              "1",
+              "-o",
+              "/tmp/bioinfo-readme-benchmark/large-runs/synthetic-10000000/fx_fq2fa/3-upstream/out/reads.fasta",
+              "/tmp/bioinfo-readme-benchmark/synthetic-10000000.fastq"
+            ],
+            "output_bytes": 1710000000,
+            "stderr": "",
+            "block": 3,
+            "order_in_block": 0,
+            "payload_bytes": 1710000000
+          },
+          {
+            "wall_s": 1.34,
+            "user_s": 0.79,
+            "sys_s": 0.54,
+            "max_rss_kb": 34296,
+            "elapsed_s": 1.3439850699942326,
+            "exit_code": 0,
+            "temp_peak_bytes_sampled": 0,
+            "before": {
+              "load_average": [
+                2.0146484375,
+                2.20703125,
+                2.07177734375
+              ],
+              "temperature_c": {
+                "Core 28": 48.0,
+                "Core 12": 48.0,
+                "Core 16": 48.0,
+                "Core 26": 47.0,
+                "Core 29": 48.0,
+                "Package id 0": 54.0,
+                "Core 27": 47.0,
+                "Core 20": 47.0,
+                "Core 30": 48.0,
+                "Core 0": 54.0,
+                "Core 24": 47.0,
+                "Core 4": 45.0,
+                "Core 31": 48.0,
+                "Core 25": 47.0,
+                "Core 8": 52.0
+              },
+              "cpu_frequency_khz": 568204
+            },
+            "after": {
+              "load_average": [
+                2.0146484375,
+                2.20703125,
+                2.07177734375
+              ],
+              "temperature_c": {
+                "Core 28": 50.0,
+                "Core 12": 72.0,
+                "Core 16": 77.0,
+                "Core 26": 59.0,
+                "Core 29": 50.0,
+                "Package id 0": 90.0,
+                "Core 27": 59.0,
+                "Core 20": 64.0,
+                "Core 30": 50.0,
+                "Core 0": 90.0,
+                "Core 24": 59.0,
+                "Core 4": 64.0,
+                "Core 31": 50.0,
+                "Core 25": 59.0,
+                "Core 8": 84.0
+              },
+              "cpu_frequency_khz": 4700000
+            },
+            "command": [
+              "taskset",
+              "-c",
+              "4",
+              "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/tests/ci/env/bin/seqkit",
+              "fq2fa",
+              "-j",
+              "1",
+              "-o",
+              "/tmp/bioinfo-readme-benchmark/large-runs/synthetic-10000000/fx_fq2fa/4-upstream/out/reads.fasta",
+              "/tmp/bioinfo-readme-benchmark/synthetic-10000000.fastq"
+            ],
+            "output_bytes": 1710000000,
+            "stderr": "",
+            "block": 4,
+            "order_in_block": 0,
+            "payload_bytes": 1710000000
+          }
+        ]
+      },
+      "warmups": [
+        {
+          "rust": {
+            "wall_s": 1.95,
+            "user_s": 1.45,
+            "sys_s": 0.49,
+            "max_rss_kb": 5212,
+            "elapsed_s": 1.9530824800021946,
+            "exit_code": 0,
+            "temp_peak_bytes_sampled": 0,
+            "before": {
+              "load_average": [
+                2.8916015625,
+                2.357421875,
+                2.11083984375
+              ],
+              "temperature_c": {
+                "Core 28": 47.0,
+                "Core 12": 50.0,
+                "Core 16": 67.0,
+                "Core 26": 53.0,
+                "Core 29": 47.0,
+                "Package id 0": 67.0,
+                "Core 27": 53.0,
+                "Core 20": 47.0,
+                "Core 30": 47.0,
+                "Core 0": 51.0,
+                "Core 24": 53.0,
+                "Core 4": 49.0,
+                "Core 31": 47.0,
+                "Core 25": 53.0,
+                "Core 8": 58.0
+              },
+              "cpu_frequency_khz": 985462
+            },
+            "after": {
+              "load_average": [
+                2.8916015625,
+                2.357421875,
+                2.11083984375
+              ],
+              "temperature_c": {
+                "Core 28": 47.0,
+                "Core 12": 49.0,
+                "Core 16": 58.0,
+                "Core 26": 47.0,
+                "Core 29": 47.0,
+                "Package id 0": 58.0,
+                "Core 27": 47.0,
+                "Core 20": 45.0,
+                "Core 30": 47.0,
+                "Core 0": 56.0,
+                "Core 24": 47.0,
+                "Core 4": 49.0,
+                "Core 31": 47.0,
+                "Core 25": 47.0,
+                "Core 8": 57.0
+              },
+              "cpu_frequency_khz": 1869835
+            },
+            "command": [
+              "taskset",
+              "-c",
+              "4",
+              "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/release/rust-fx",
+              "fq2fa",
+              "-j",
+              "1",
+              "-o",
+              "/tmp/bioinfo-readme-benchmark/large-runs/synthetic-10000000/fx_fq2fa/-1-rust/out/reads.fasta",
+              "/tmp/bioinfo-readme-benchmark/synthetic-10000000.fastq"
+            ],
+            "output_bytes": 1710000000,
+            "stderr": "",
+            "block": -1,
+            "order_in_block": 0,
+            "payload_bytes": 1710000000
+          },
+          "upstream": {
+            "wall_s": 1.29,
+            "user_s": 0.75,
+            "sys_s": 0.53,
+            "max_rss_kb": 24452,
+            "elapsed_s": 1.2982973089965526,
+            "exit_code": 0,
+            "temp_peak_bytes_sampled": 0,
+            "before": {
+              "load_average": [
+                2.73974609375,
+                2.33447265625,
+                2.1044921875
+              ],
+              "temperature_c": {
+                "Core 28": 44.0,
+                "Core 12": 52.0,
+                "Core 16": 44.0,
+                "Core 26": 43.0,
+                "Core 29": 44.0,
+                "Package id 0": 52.0,
+                "Core 27": 43.0,
+                "Core 20": 43.0,
+                "Core 30": 43.0,
+                "Core 0": 45.0,
+                "Core 24": 43.0,
+                "Core 4": 45.0,
+                "Core 31": 43.0,
+                "Core 25": 43.0,
+                "Core 8": 40.0
+              },
+              "cpu_frequency_khz": 2228814
+            },
+            "after": {
+              "load_average": [
+                2.73974609375,
+                2.33447265625,
+                2.1044921875
+              ],
+              "temperature_c": {
+                "Core 28": 48.0,
+                "Core 12": 60.0,
+                "Core 16": 65.0,
+                "Core 26": 51.0,
+                "Core 29": 48.0,
+                "Package id 0": 99.0,
+                "Core 27": 51.0,
+                "Core 20": 46.0,
+                "Core 30": 48.0,
+                "Core 0": 61.0,
+                "Core 24": 51.0,
+                "Core 4": 99.0,
+                "Core 31": 48.0,
+                "Core 25": 51.0,
+                "Core 8": 68.0
+              },
+              "cpu_frequency_khz": 400000
+            },
+            "command": [
+              "taskset",
+              "-c",
+              "4",
+              "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/tests/ci/env/bin/seqkit",
+              "fq2fa",
+              "-j",
+              "1",
+              "-o",
+              "/tmp/bioinfo-readme-benchmark/large-runs/synthetic-10000000/fx_fq2fa/-1-upstream/out/reads.fasta",
+              "/tmp/bioinfo-readme-benchmark/synthetic-10000000.fastq"
+            ],
+            "output_bytes": 1710000000,
+            "stderr": "",
+            "block": -1,
+            "order_in_block": 1,
+            "payload_bytes": 1710000000
+          }
+        }
+      ],
+      "checks": [
+        {
+          "passed": true,
+          "rule": "decoded output bytes",
+          "sha256": {
+            "rust": "a1f06c249a520833ee86df6a275837cb6a90fbf68c98ad97681d6c0094302096",
+            "upstream": "a1f06c249a520833ee86df6a275837cb6a90fbf68c98ad97681d6c0094302096"
+          },
+          "block": -1
+        },
+        {
+          "passed": true,
+          "rule": "decoded output bytes",
+          "sha256": {
+            "upstream": "a1f06c249a520833ee86df6a275837cb6a90fbf68c98ad97681d6c0094302096",
+            "rust": "a1f06c249a520833ee86df6a275837cb6a90fbf68c98ad97681d6c0094302096"
+          },
+          "block": 0
+        },
+        {
+          "passed": true,
+          "rule": "decoded output bytes",
+          "sha256": {
+            "rust": "a1f06c249a520833ee86df6a275837cb6a90fbf68c98ad97681d6c0094302096",
+            "upstream": "a1f06c249a520833ee86df6a275837cb6a90fbf68c98ad97681d6c0094302096"
+          },
+          "block": 1
+        },
+        {
+          "passed": true,
+          "rule": "decoded output bytes",
+          "sha256": {
+            "rust": "a1f06c249a520833ee86df6a275837cb6a90fbf68c98ad97681d6c0094302096",
+            "upstream": "a1f06c249a520833ee86df6a275837cb6a90fbf68c98ad97681d6c0094302096"
+          },
+          "block": 2
+        },
+        {
+          "passed": true,
+          "rule": "decoded output bytes",
+          "sha256": {
+            "upstream": "a1f06c249a520833ee86df6a275837cb6a90fbf68c98ad97681d6c0094302096",
+            "rust": "a1f06c249a520833ee86df6a275837cb6a90fbf68c98ad97681d6c0094302096"
+          },
+          "block": 3
+        },
+        {
+          "passed": true,
+          "rule": "decoded output bytes",
+          "sha256": {
+            "upstream": "a1f06c249a520833ee86df6a275837cb6a90fbf68c98ad97681d6c0094302096",
+            "rust": "a1f06c249a520833ee86df6a275837cb6a90fbf68c98ad97681d6c0094302096"
+          },
+          "block": 4
+        }
+      ],
+      "cpu_affinity": "4",
+      "passed": true,
+      "compression": "none",
+      "summary": {
+        "rust": {
+          "median_s": 1.9797414959903108,
+          "min_s": 1.9484661300084554,
+          "max_s": 1.985991917012143,
+          "records_per_s": 5051164.518324033,
+          "max_rss_kib": 5516,
+          "cpu_median_s": 1.9699999999999998,
+          "temp_peak_bytes_sampled": 0,
+          "output_bytes": [
+            1710000000,
+            1710000000,
+            1710000000,
+            1710000000,
+            1710000000
+          ],
+          "payload_bytes": [
+            1710000000,
+            1710000000,
+            1710000000,
+            1710000000,
+            1710000000
+          ]
+        },
+        "upstream": {
+          "median_s": 1.2887385959911626,
+          "min_s": 1.2757964240008732,
+          "max_s": 1.3439850699942326,
+          "records_per_s": 7759525.501220089,
+          "max_rss_kib": 35508,
+          "cpu_median_s": 1.27,
+          "temp_peak_bytes_sampled": 0,
+          "output_bytes": [
+            1710000000,
+            1710000000,
+            1710000000,
+            1710000000,
+            1710000000
+          ],
+          "payload_bytes": [
+            1710000000,
+            1710000000,
+            1710000000,
+            1710000000,
+            1710000000
+          ]
+        }
+      },
+      "paired_speed_ratio": {
+        "samples": [
+          0.6614118542494604,
+          0.6444257629517895,
+          0.6451092989233955,
+          0.6529859698276441,
+          0.6819635966939006
+        ],
+        "median": 0.6529859698276441,
+        "min": 0.6444257629517895,
+        "max": 0.6819635966939006
+      }
+    },
+    {
+      "dataset": "synthetic-10000000",
+      "records": 10000000,
+      "case": "fq_lint",
+      "samples": {
+        "rust": [
+          {
+            "wall_s": 6.43,
+            "user_s": 5.98,
+            "sys_s": 0.43,
+            "max_rss_kb": 849236,
+            "elapsed_s": 6.438396798010217,
+            "exit_code": 0,
+            "temp_peak_bytes_sampled": 0,
+            "before": {
+              "load_average": [
+                1.591796875,
+                2.0859375,
+                2.0361328125
+              ],
+              "temperature_c": {
+                "Core 28": 49.0,
+                "Core 12": 55.0,
+                "Core 16": 52.0,
+                "Core 26": 49.0,
+                "Core 29": 49.0,
+                "Package id 0": 55.0,
+                "Core 27": 49.0,
+                "Core 20": 51.0,
+                "Core 30": 49.0,
+                "Core 0": 52.0,
+                "Core 24": 49.0,
+                "Core 4": 50.0,
+                "Core 31": 49.0,
+                "Core 25": 49.0,
+                "Core 8": 47.0
+              },
+              "cpu_frequency_khz": 4718650
+            },
+            "after": {
+              "load_average": [
+                1.62451171875,
+                2.08447265625,
+                2.03564453125
+              ],
+              "temperature_c": {
+                "Core 28": 48.0,
+                "Core 12": 49.0,
+                "Core 16": 55.0,
+                "Core 26": 47.0,
+                "Core 29": 48.0,
+                "Package id 0": 55.0,
+                "Core 27": 47.0,
+                "Core 20": 47.0,
+                "Core 30": 48.0,
+                "Core 0": 52.0,
+                "Core 24": 47.0,
+                "Core 4": 45.0,
+                "Core 31": 48.0,
+                "Core 25": 47.0,
+                "Core 8": 55.0
+              },
+              "cpu_frequency_khz": 2775696
+            },
+            "command": [
+              "taskset",
+              "-c",
+              "4",
+              "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/release/rust-fx",
+              "lint",
+              "/tmp/bioinfo-readme-benchmark/synthetic-10000000.fastq"
+            ],
+            "output_bytes": 0,
+            "stderr": "",
+            "block": 0,
+            "order_in_block": 0,
+            "payload_bytes": 785
+          },
+          {
+            "wall_s": 6.47,
+            "user_s": 6.05,
+            "sys_s": 0.4,
+            "max_rss_kb": 849316,
+            "elapsed_s": 6.4745490930072265,
+            "exit_code": 0,
+            "temp_peak_bytes_sampled": 0,
+            "before": {
+              "load_average": [
+                1.57421875,
+                2.06640625,
+                2.02978515625
+              ],
+              "temperature_c": {
+                "Core 28": 45.0,
+                "Core 12": 46.0,
+                "Core 16": 48.0,
+                "Core 26": 47.0,
+                "Core 29": 45.0,
+                "Package id 0": 48.0,
+                "Core 27": 47.0,
+                "Core 20": 46.0,
+                "Core 30": 45.0,
+                "Core 0": 46.0,
+                "Core 24": 47.0,
+                "Core 4": 44.0,
+                "Core 31": 45.0,
+                "Core 25": 47.0,
+                "Core 8": 46.0
+              },
+              "cpu_frequency_khz": 3156421
+            },
+            "after": {
+              "load_average": [
+                1.56591796875,
+                2.04736328125,
+                2.0234375
+              ],
+              "temperature_c": {
+                "Core 28": 45.0,
+                "Core 12": 48.0,
+                "Core 16": 60.0,
+                "Core 26": 47.0,
+                "Core 29": 45.0,
+                "Package id 0": 73.0,
+                "Core 27": 47.0,
+                "Core 20": 47.0,
+                "Core 30": 45.0,
+                "Core 0": 56.0,
+                "Core 24": 47.0,
+                "Core 4": 46.0,
+                "Core 31": 45.0,
+                "Core 25": 47.0,
+                "Core 8": 73.0
+              },
+              "cpu_frequency_khz": 4348215
+            },
+            "command": [
+              "taskset",
+              "-c",
+              "4",
+              "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/release/rust-fx",
+              "lint",
+              "/tmp/bioinfo-readme-benchmark/synthetic-10000000.fastq"
+            ],
+            "output_bytes": 0,
+            "stderr": "",
+            "block": 1,
+            "order_in_block": 0,
+            "payload_bytes": 785
+          },
+          {
+            "wall_s": 6.46,
+            "user_s": 6.05,
+            "sys_s": 0.39,
+            "max_rss_kb": 849200,
+            "elapsed_s": 6.4667905300011626,
+            "exit_code": 0,
+            "temp_peak_bytes_sampled": 0,
+            "before": {
+              "load_average": [
+                1.5205078125,
+                2.02978515625,
+                2.017578125
+              ],
+              "temperature_c": {
+                "Core 28": 48.0,
+                "Core 12": 53.0,
+                "Core 16": 47.0,
+                "Core 26": 46.0,
+                "Core 29": 48.0,
+                "Package id 0": 53.0,
+                "Core 27": 46.0,
+                "Core 20": 49.0,
+                "Core 30": 48.0,
+                "Core 0": 47.0,
+                "Core 24": 46.0,
+                "Core 4": 49.0,
+                "Core 31": 48.0,
+                "Core 25": 46.0,
+                "Core 8": 46.0
+              },
+              "cpu_frequency_khz": 3414213
+            },
+            "after": {
+              "load_average": [
+                1.478515625,
+                2.01220703125,
+                2.01171875
+              ],
+              "temperature_c": {
+                "Core 28": 48.0,
+                "Core 12": 48.0,
+                "Core 16": 58.0,
+                "Core 26": 47.0,
+                "Core 29": 48.0,
+                "Package id 0": 58.0,
+                "Core 27": 47.0,
+                "Core 20": 46.0,
+                "Core 30": 48.0,
+                "Core 0": 58.0,
+                "Core 24": 47.0,
+                "Core 4": 48.0,
+                "Core 31": 48.0,
+                "Core 25": 47.0,
+                "Core 8": 48.0
+              },
+              "cpu_frequency_khz": 895032
+            },
+            "command": [
+              "taskset",
+              "-c",
+              "4",
+              "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/release/rust-fx",
+              "lint",
+              "/tmp/bioinfo-readme-benchmark/synthetic-10000000.fastq"
+            ],
+            "output_bytes": 0,
+            "stderr": "",
+            "block": 2,
+            "order_in_block": 0,
+            "payload_bytes": 785
+          },
+          {
+            "wall_s": 6.45,
+            "user_s": 6.02,
+            "sys_s": 0.42,
+            "max_rss_kb": 849280,
+            "elapsed_s": 6.460482972004684,
+            "exit_code": 0,
+            "temp_peak_bytes_sampled": 0,
+            "before": {
+              "load_average": [
+                1.4111328125,
+                1.97900390625,
+                2.0
+              ],
+              "temperature_c": {
+                "Core 28": 45.0,
+                "Core 12": 48.0,
+                "Core 16": 47.0,
+                "Core 26": 46.0,
+                "Core 29": 45.0,
+                "Package id 0": 48.0,
+                "Core 27": 46.0,
+                "Core 20": 45.0,
+                "Core 30": 45.0,
+                "Core 0": 46.0,
+                "Core 24": 46.0,
+                "Core 4": 46.0,
+                "Core 31": 45.0,
+                "Core 25": 46.0,
+                "Core 8": 46.0
+              },
+              "cpu_frequency_khz": 4269506
+            },
+            "after": {
+              "load_average": [
+                1.65576171875,
+                2.01318359375,
+                2.0107421875
+              ],
+              "temperature_c": {
+                "Core 28": 47.0,
+                "Core 12": 49.0,
+                "Core 16": 63.0,
+                "Core 26": 49.0,
+                "Core 29": 47.0,
+                "Package id 0": 77.0,
+                "Core 27": 49.0,
+                "Core 20": 46.0,
+                "Core 30": 47.0,
+                "Core 0": 58.0,
+                "Core 24": 49.0,
+                "Core 4": 46.0,
+                "Core 31": 47.0,
+                "Core 25": 49.0,
+                "Core 8": 77.0
+              },
+              "cpu_frequency_khz": 2799238
+            },
+            "command": [
+              "taskset",
+              "-c",
+              "4",
+              "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/release/rust-fx",
+              "lint",
+              "/tmp/bioinfo-readme-benchmark/synthetic-10000000.fastq"
+            ],
+            "output_bytes": 0,
+            "stderr": "",
+            "block": 3,
+            "order_in_block": 1,
+            "payload_bytes": 785
+          },
+          {
+            "wall_s": 6.5,
+            "user_s": 6.05,
+            "sys_s": 0.43,
+            "max_rss_kb": 849172,
+            "elapsed_s": 6.505038917006459,
+            "exit_code": 0,
+            "temp_peak_bytes_sampled": 0,
+            "before": {
+              "load_average": [
+                1.60302734375,
+                1.99609375,
+                2.0048828125
+              ],
+              "temperature_c": {
+                "Core 28": 44.0,
+                "Core 12": 45.0,
+                "Core 16": 45.0,
+                "Core 26": 45.0,
+                "Core 29": 44.0,
+                "Package id 0": 51.0,
+                "Core 27": 45.0,
+                "Core 20": 43.0,
+                "Core 30": 44.0,
+                "Core 0": 51.0,
+                "Core 24": 45.0,
+                "Core 4": 44.0,
+                "Core 31": 44.0,
+                "Core 25": 45.0,
+                "Core 8": 45.0
+              },
+              "cpu_frequency_khz": 3475412
+            },
+            "after": {
+              "load_average": [
+                1.71533203125,
+                2.01318359375,
+                2.01025390625
+              ],
+              "temperature_c": {
+                "Core 28": 49.0,
+                "Core 12": 51.0,
+                "Core 16": 60.0,
+                "Core 26": 49.0,
+                "Core 29": 49.0,
+                "Package id 0": 68.0,
+                "Core 27": 50.0,
+                "Core 20": 48.0,
+                "Core 30": 48.0,
+                "Core 0": 56.0,
+                "Core 24": 50.0,
+                "Core 4": 45.0,
+                "Core 31": 48.0,
+                "Core 25": 50.0,
+                "Core 8": 66.0
+              },
+              "cpu_frequency_khz": 3119249
+            },
+            "command": [
+              "taskset",
+              "-c",
+              "4",
+              "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/release/rust-fx",
+              "lint",
+              "/tmp/bioinfo-readme-benchmark/synthetic-10000000.fastq"
+            ],
+            "output_bytes": 0,
+            "stderr": "",
+            "block": 4,
+            "order_in_block": 1,
+            "payload_bytes": 785
+          }
+        ],
+        "upstream": [
+          {
+            "wall_s": 1.96,
+            "user_s": 1.64,
+            "sys_s": 0.31,
+            "max_rss_kb": 4496,
+            "elapsed_s": 1.9633823280018987,
+            "exit_code": 0,
+            "temp_peak_bytes_sampled": 0,
+            "before": {
+              "load_average": [
+                1.62451171875,
+                2.08447265625,
+                2.03564453125
+              ],
+              "temperature_c": {
+                "Core 28": 45.0,
+                "Core 12": 48.0,
+                "Core 16": 46.0,
+                "Core 26": 46.0,
+                "Core 29": 45.0,
+                "Package id 0": 48.0,
+                "Core 27": 46.0,
+                "Core 20": 45.0,
+                "Core 30": 47.0,
+                "Core 0": 46.0,
+                "Core 24": 46.0,
+                "Core 4": 49.0,
+                "Core 31": 47.0,
+                "Core 25": 46.0,
+                "Core 8": 46.0
+              },
+              "cpu_frequency_khz": 742405
+            },
+            "after": {
+              "load_average": [
+                1.57421875,
+                2.06640625,
+                2.02978515625
+              ],
+              "temperature_c": {
+                "Core 28": 47.0,
+                "Core 12": 46.0,
+                "Core 16": 63.0,
+                "Core 26": 49.0,
+                "Core 29": 47.0,
+                "Package id 0": 63.0,
+                "Core 27": 49.0,
+                "Core 20": 46.0,
+                "Core 30": 47.0,
+                "Core 0": 57.0,
+                "Core 24": 49.0,
+                "Core 4": 44.0,
+                "Core 31": 47.0,
+                "Core 25": 49.0,
+                "Core 8": 51.0
+              },
+              "cpu_frequency_khz": 673591
+            },
+            "command": [
+              "taskset",
+              "-c",
+              "4",
+              "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/tests/ci/env/bin/fq",
+              "lint",
+              "/tmp/bioinfo-readme-benchmark/synthetic-10000000.fastq"
+            ],
+            "output_bytes": 0,
+            "stderr": "",
+            "block": 0,
+            "order_in_block": 1,
+            "payload_bytes": 1049
+          },
+          {
+            "wall_s": 1.95,
+            "user_s": 1.63,
+            "sys_s": 0.31,
+            "max_rss_kb": 4524,
+            "elapsed_s": 1.9606030750001082,
+            "exit_code": 0,
+            "temp_peak_bytes_sampled": 0,
+            "before": {
+              "load_average": [
+                1.56591796875,
+                2.04736328125,
+                2.0234375
+              ],
+              "temperature_c": {
+                "Core 28": 47.0,
+                "Core 12": 48.0,
+                "Core 16": 45.0,
+                "Core 26": 45.0,
+                "Core 29": 47.0,
+                "Package id 0": 49.0,
+                "Core 27": 45.0,
+                "Core 20": 46.0,
+                "Core 30": 47.0,
+                "Core 0": 47.0,
+                "Core 24": 45.0,
+                "Core 4": 45.0,
+                "Core 31": 47.0,
+                "Core 25": 45.0,
+                "Core 8": 49.0
+              },
+              "cpu_frequency_khz": 4753973
+            },
+            "after": {
+              "load_average": [
+                1.56591796875,
+                2.04736328125,
+                2.0234375
+              ],
+              "temperature_c": {
+                "Core 28": 54.0,
+                "Core 12": 55.0,
+                "Core 16": 75.0,
+                "Core 26": 54.0,
+                "Core 29": 54.0,
+                "Package id 0": 97.0,
+                "Core 27": 54.0,
+                "Core 20": 51.0,
+                "Core 30": 54.0,
+                "Core 0": 61.0,
+                "Core 24": 54.0,
+                "Core 4": 50.0,
+                "Core 31": 54.0,
+                "Core 25": 54.0,
+                "Core 8": 97.0
+              },
+              "cpu_frequency_khz": 400620
+            },
+            "command": [
+              "taskset",
+              "-c",
+              "4",
+              "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/tests/ci/env/bin/fq",
+              "lint",
+              "/tmp/bioinfo-readme-benchmark/synthetic-10000000.fastq"
+            ],
+            "output_bytes": 0,
+            "stderr": "",
+            "block": 1,
+            "order_in_block": 1,
+            "payload_bytes": 1049
+          },
+          {
+            "wall_s": 1.95,
+            "user_s": 1.65,
+            "sys_s": 0.29,
+            "max_rss_kb": 4532,
+            "elapsed_s": 1.9585880330123473,
+            "exit_code": 0,
+            "temp_peak_bytes_sampled": 0,
+            "before": {
+              "load_average": [
+                1.35986328125,
+                1.978515625,
+                2.00048828125
+              ],
+              "temperature_c": {
+                "Core 28": 45.0,
+                "Core 12": 47.0,
+                "Core 16": 46.0,
+                "Core 26": 46.0,
+                "Core 29": 45.0,
+                "Package id 0": 48.0,
+                "Core 27": 46.0,
+                "Core 20": 46.0,
+                "Core 30": 45.0,
+                "Core 0": 48.0,
+                "Core 24": 46.0,
+                "Core 4": 44.0,
+                "Core 31": 45.0,
+                "Core 25": 46.0,
+                "Core 8": 46.0
+              },
+              "cpu_frequency_khz": 961101
+            },
+            "after": {
+              "load_average": [
+                1.35986328125,
+                1.978515625,
+                2.00048828125
+              ],
+              "temperature_c": {
+                "Core 28": 45.0,
+                "Core 12": 48.0,
+                "Core 16": 60.0,
+                "Core 26": 49.0,
+                "Core 29": 45.0,
+                "Package id 0": 63.0,
+                "Core 27": 49.0,
+                "Core 20": 46.0,
+                "Core 30": 45.0,
+                "Core 0": 56.0,
+                "Core 24": 49.0,
+                "Core 4": 45.0,
+                "Core 31": 45.0,
+                "Core 25": 49.0,
+                "Core 8": 63.0
+              },
+              "cpu_frequency_khz": 400191
+            },
+            "command": [
+              "taskset",
+              "-c",
+              "4",
+              "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/tests/ci/env/bin/fq",
+              "lint",
+              "/tmp/bioinfo-readme-benchmark/synthetic-10000000.fastq"
+            ],
+            "output_bytes": 0,
+            "stderr": "",
+            "block": 2,
+            "order_in_block": 1,
+            "payload_bytes": 1049
+          },
+          {
+            "wall_s": 1.94,
+            "user_s": 1.65,
+            "sys_s": 0.29,
+            "max_rss_kb": 4504,
+            "elapsed_s": 1.9474709719943348,
+            "exit_code": 0,
+            "temp_peak_bytes_sampled": 0,
+            "before": {
+              "load_average": [
+                1.35986328125,
+                1.978515625,
+                2.00048828125
+              ],
+              "temperature_c": {
+                "Core 28": 48.0,
+                "Core 12": 48.0,
+                "Core 16": 46.0,
+                "Core 26": 46.0,
+                "Core 29": 48.0,
+                "Package id 0": 63.0,
+                "Core 27": 46.0,
+                "Core 20": 46.0,
+                "Core 30": 48.0,
+                "Core 0": 63.0,
+                "Core 24": 46.0,
+                "Core 4": 45.0,
+                "Core 31": 48.0,
+                "Core 25": 46.0,
+                "Core 8": 53.0
+              },
+              "cpu_frequency_khz": 2188412
+            },
+            "after": {
+              "load_average": [
+                1.4111328125,
+                1.97900390625,
+                2.0
+              ],
+              "temperature_c": {
+                "Core 28": 49.0,
+                "Core 12": 51.0,
+                "Core 16": 72.0,
+                "Core 26": 51.0,
+                "Core 29": 49.0,
+                "Package id 0": 84.0,
+                "Core 27": 51.0,
+                "Core 20": 48.0,
+                "Core 30": 49.0,
+                "Core 0": 60.0,
+                "Core 24": 51.0,
+                "Core 4": 48.0,
+                "Core 31": 49.0,
+                "Core 25": 51.0,
+                "Core 8": 84.0
+              },
+              "cpu_frequency_khz": 1017598
+            },
+            "command": [
+              "taskset",
+              "-c",
+              "4",
+              "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/tests/ci/env/bin/fq",
+              "lint",
+              "/tmp/bioinfo-readme-benchmark/synthetic-10000000.fastq"
+            ],
+            "output_bytes": 0,
+            "stderr": "",
+            "block": 3,
+            "order_in_block": 0,
+            "payload_bytes": 1049
+          },
+          {
+            "wall_s": 1.95,
+            "user_s": 1.63,
+            "sys_s": 0.32,
+            "max_rss_kb": 4356,
+            "elapsed_s": 1.9592413670034148,
+            "exit_code": 0,
+            "temp_peak_bytes_sampled": 0,
+            "before": {
+              "load_average": [
+                1.65576171875,
+                2.01318359375,
+                2.0107421875
+              ],
+              "temperature_c": {
+                "Core 28": 45.0,
+                "Core 12": 46.0,
+                "Core 16": 44.0,
+                "Core 26": 45.0,
+                "Core 29": 45.0,
+                "Package id 0": 46.0,
+                "Core 27": 45.0,
+                "Core 20": 45.0,
+                "Core 30": 45.0,
+                "Core 0": 46.0,
+                "Core 24": 45.0,
+                "Core 4": 44.0,
+                "Core 31": 45.0,
+                "Core 25": 45.0,
+                "Core 8": 45.0
+              },
+              "cpu_frequency_khz": 3800366
+            },
+            "after": {
+              "load_average": [
+                1.65576171875,
+                2.01318359375,
+                2.0107421875
+              ],
+              "temperature_c": {
+                "Core 28": 47.0,
+                "Core 12": 50.0,
+                "Core 16": 75.0,
+                "Core 26": 51.0,
+                "Core 29": 47.0,
+                "Package id 0": 94.0,
+                "Core 27": 51.0,
+                "Core 20": 46.0,
+                "Core 30": 47.0,
+                "Core 0": 61.0,
+                "Core 24": 51.0,
+                "Core 4": 46.0,
+                "Core 31": 47.0,
+                "Core 25": 51.0,
+                "Core 8": 94.0
+              },
+              "cpu_frequency_khz": 4488953
+            },
+            "command": [
+              "taskset",
+              "-c",
+              "4",
+              "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/tests/ci/env/bin/fq",
+              "lint",
+              "/tmp/bioinfo-readme-benchmark/synthetic-10000000.fastq"
+            ],
+            "output_bytes": 0,
+            "stderr": "",
+            "block": 4,
+            "order_in_block": 0,
+            "payload_bytes": 1049
+          }
+        ]
+      },
+      "warmups": [
+        {
+          "rust": {
+            "wall_s": 6.51,
+            "user_s": 6.1,
+            "sys_s": 0.39,
+            "max_rss_kb": 849160,
+            "elapsed_s": 6.517366207001032,
+            "exit_code": 0,
+            "temp_peak_bytes_sampled": 0,
+            "before": {
+              "load_average": [
+                1.85595703125,
+                2.15966796875,
+                2.05908203125
+              ],
+              "temperature_c": {
+                "Core 28": 47.0,
+                "Core 12": 48.0,
+                "Core 16": 47.0,
+                "Core 26": 46.0,
+                "Core 29": 47.0,
+                "Package id 0": 50.0,
+                "Core 27": 46.0,
+                "Core 20": 47.0,
+                "Core 30": 47.0,
+                "Core 0": 49.0,
+                "Core 24": 46.0,
+                "Core 4": 45.0,
+                "Core 31": 47.0,
+                "Core 25": 46.0,
+                "Core 8": 47.0
+              },
+              "cpu_frequency_khz": 3759942
+            },
+            "after": {
+              "load_average": [
+                1.787109375,
+                2.14013671875,
+                2.05322265625
+              ],
+              "temperature_c": {
+                "Core 28": 50.0,
+                "Core 12": 56.0,
+                "Core 16": 63.0,
+                "Core 26": 49.0,
+                "Core 29": 50.0,
+                "Package id 0": 76.0,
+                "Core 27": 49.0,
+                "Core 20": 51.0,
+                "Core 30": 50.0,
+                "Core 0": 61.0,
+                "Core 24": 49.0,
+                "Core 4": 53.0,
+                "Core 31": 50.0,
+                "Core 25": 49.0,
+                "Core 8": 76.0
+              },
+              "cpu_frequency_khz": 603947
+            },
+            "command": [
+              "taskset",
+              "-c",
+              "4",
+              "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/release/rust-fx",
+              "lint",
+              "/tmp/bioinfo-readme-benchmark/synthetic-10000000.fastq"
+            ],
+            "output_bytes": 0,
+            "stderr": "",
+            "block": -1,
+            "order_in_block": 0,
+            "payload_bytes": 785
+          },
+          "upstream": {
+            "wall_s": 1.95,
+            "user_s": 1.65,
+            "sys_s": 0.29,
+            "max_rss_kb": 4492,
+            "elapsed_s": 1.9577351449988782,
+            "exit_code": 0,
+            "temp_peak_bytes_sampled": 0,
+            "before": {
+              "load_average": [
+                1.6435546875,
+                2.1044921875,
+                2.0419921875
+              ],
+              "temperature_c": {
+                "Core 28": 47.0,
+                "Core 12": 50.0,
+                "Core 16": 47.0,
+                "Core 26": 45.0,
+                "Core 29": 47.0,
+                "Package id 0": 50.0,
+                "Core 27": 45.0,
+                "Core 20": 46.0,
+                "Core 30": 47.0,
+                "Core 0": 46.0,
+                "Core 24": 45.0,
+                "Core 4": 48.0,
+                "Core 31": 47.0,
+                "Core 25": 45.0,
+                "Core 8": 46.0
+              },
+              "cpu_frequency_khz": 3929185
+            },
+            "after": {
+              "load_average": [
+                1.6435546875,
+                2.1044921875,
+                2.0419921875
+              ],
+              "temperature_c": {
+                "Core 28": 47.0,
+                "Core 12": 49.0,
+                "Core 16": 72.0,
+                "Core 26": 47.0,
+                "Core 29": 47.0,
+                "Package id 0": 94.0,
+                "Core 27": 47.0,
+                "Core 20": 46.0,
+                "Core 30": 47.0,
+                "Core 0": 58.0,
+                "Core 24": 47.0,
+                "Core 4": 47.0,
+                "Core 31": 47.0,
+                "Core 25": 47.0,
+                "Core 8": 94.0
+              },
+              "cpu_frequency_khz": 1216691
+            },
+            "command": [
+              "taskset",
+              "-c",
+              "4",
+              "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/tests/ci/env/bin/fq",
+              "lint",
+              "/tmp/bioinfo-readme-benchmark/synthetic-10000000.fastq"
+            ],
+            "output_bytes": 0,
+            "stderr": "",
+            "block": -1,
+            "order_in_block": 1,
+            "payload_bytes": 1049
+          }
+        }
+      ],
+      "checks": [
+        {
+          "passed": true,
+          "rule": "valid-input exit verdict plus independent FASTQ scan and invalid-tail controls",
+          "negative_control": {
+            "passed": true,
+            "sha256": "ff167d8c0e111b00927acd59538fb29a6f7c97ffb7dc8fc83c1cd259440d7569",
+            "observations": {
+              "rust": {
+                "exit_code": 1,
+                "stderr": "ERROR: [S005] ConsistentSeqQual (record 10000001): sequence length 4 != quality length 1\n"
+              },
+              "upstream": {
+                "exit_code": 1,
+                "stderr": "/tmp/bioinfo-readme-benchmark/large-runs/synthetic-10000000/fq_lint/invalid-tail.fastq:40000002:1: [S005] ConsistentSeqQualValidator: sequence-quality scores lengths mismatch: expected 4, got 1\n"
+              }
+            }
+          },
+          "block": -1
+        },
+        {
+          "passed": true,
+          "rule": "valid-input exit verdict plus independent FASTQ scan and invalid-tail controls",
+          "negative_control": {
+            "passed": true,
+            "sha256": "ff167d8c0e111b00927acd59538fb29a6f7c97ffb7dc8fc83c1cd259440d7569",
+            "observations": {
+              "rust": {
+                "exit_code": 1,
+                "stderr": "ERROR: [S005] ConsistentSeqQual (record 10000001): sequence length 4 != quality length 1\n"
+              },
+              "upstream": {
+                "exit_code": 1,
+                "stderr": "/tmp/bioinfo-readme-benchmark/large-runs/synthetic-10000000/fq_lint/invalid-tail.fastq:40000002:1: [S005] ConsistentSeqQualValidator: sequence-quality scores lengths mismatch: expected 4, got 1\n"
+              }
+            }
+          },
+          "block": 0
+        },
+        {
+          "passed": true,
+          "rule": "valid-input exit verdict plus independent FASTQ scan and invalid-tail controls",
+          "negative_control": {
+            "passed": true,
+            "sha256": "ff167d8c0e111b00927acd59538fb29a6f7c97ffb7dc8fc83c1cd259440d7569",
+            "observations": {
+              "rust": {
+                "exit_code": 1,
+                "stderr": "ERROR: [S005] ConsistentSeqQual (record 10000001): sequence length 4 != quality length 1\n"
+              },
+              "upstream": {
+                "exit_code": 1,
+                "stderr": "/tmp/bioinfo-readme-benchmark/large-runs/synthetic-10000000/fq_lint/invalid-tail.fastq:40000002:1: [S005] ConsistentSeqQualValidator: sequence-quality scores lengths mismatch: expected 4, got 1\n"
+              }
+            }
+          },
+          "block": 1
+        },
+        {
+          "passed": true,
+          "rule": "valid-input exit verdict plus independent FASTQ scan and invalid-tail controls",
+          "negative_control": {
+            "passed": true,
+            "sha256": "ff167d8c0e111b00927acd59538fb29a6f7c97ffb7dc8fc83c1cd259440d7569",
+            "observations": {
+              "rust": {
+                "exit_code": 1,
+                "stderr": "ERROR: [S005] ConsistentSeqQual (record 10000001): sequence length 4 != quality length 1\n"
+              },
+              "upstream": {
+                "exit_code": 1,
+                "stderr": "/tmp/bioinfo-readme-benchmark/large-runs/synthetic-10000000/fq_lint/invalid-tail.fastq:40000002:1: [S005] ConsistentSeqQualValidator: sequence-quality scores lengths mismatch: expected 4, got 1\n"
+              }
+            }
+          },
+          "block": 2
+        },
+        {
+          "passed": true,
+          "rule": "valid-input exit verdict plus independent FASTQ scan and invalid-tail controls",
+          "negative_control": {
+            "passed": true,
+            "sha256": "ff167d8c0e111b00927acd59538fb29a6f7c97ffb7dc8fc83c1cd259440d7569",
+            "observations": {
+              "rust": {
+                "exit_code": 1,
+                "stderr": "ERROR: [S005] ConsistentSeqQual (record 10000001): sequence length 4 != quality length 1\n"
+              },
+              "upstream": {
+                "exit_code": 1,
+                "stderr": "/tmp/bioinfo-readme-benchmark/large-runs/synthetic-10000000/fq_lint/invalid-tail.fastq:40000002:1: [S005] ConsistentSeqQualValidator: sequence-quality scores lengths mismatch: expected 4, got 1\n"
+              }
+            }
+          },
+          "block": 3
+        },
+        {
+          "passed": true,
+          "rule": "valid-input exit verdict plus independent FASTQ scan and invalid-tail controls",
+          "negative_control": {
+            "passed": true,
+            "sha256": "ff167d8c0e111b00927acd59538fb29a6f7c97ffb7dc8fc83c1cd259440d7569",
+            "observations": {
+              "rust": {
+                "exit_code": 1,
+                "stderr": "ERROR: [S005] ConsistentSeqQual (record 10000001): sequence length 4 != quality length 1\n"
+              },
+              "upstream": {
+                "exit_code": 1,
+                "stderr": "/tmp/bioinfo-readme-benchmark/large-runs/synthetic-10000000/fq_lint/invalid-tail.fastq:40000002:1: [S005] ConsistentSeqQualValidator: sequence-quality scores lengths mismatch: expected 4, got 1\n"
+              }
+            }
+          },
+          "block": 4
+        }
+      ],
+      "cpu_affinity": "4",
+      "passed": true,
+      "compression": "none",
+      "summary": {
+        "rust": {
+          "median_s": 6.4667905300011626,
+          "min_s": 6.438396798010217,
+          "max_s": 6.505038917006459,
+          "records_per_s": 1546362.1333654367,
+          "max_rss_kib": 849316,
+          "cpu_median_s": 6.4399999999999995,
+          "temp_peak_bytes_sampled": 0,
+          "output_bytes": [
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "payload_bytes": [
+            785,
+            785,
+            785,
+            785,
+            785
+          ]
+        },
+        "upstream": {
+          "median_s": 1.9592413670034148,
+          "min_s": 1.9474709719943348,
+          "max_s": 1.9633823280018987,
+          "records_per_s": 5104016.364913028,
+          "max_rss_kib": 4532,
+          "cpu_median_s": 1.94,
+          "temp_peak_bytes_sampled": 0,
+          "output_bytes": [
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "payload_bytes": [
+            1049,
+            1049,
+            1049,
+            1049,
+            1049
+          ]
+        }
+      },
+      "paired_speed_ratio": {
+        "samples": [
+          0.30494894763377756,
+          0.30281692930827236,
+          0.3028686369112987,
+          0.3014435577701145,
+          0.30118826220720507
+        ],
+        "median": 0.30281692930827236,
+        "min": 0.30118826220720507,
+        "max": 0.30494894763377756
+      }
+    },
+    {
+      "dataset": "synthetic-bam-10000000",
+      "records": 10000000,
+      "case": "bam_flagstat",
+      "samples": {
+        "rust": [
+          {
+            "wall_s": 0.95,
+            "user_s": 0.94,
+            "sys_s": 0.01,
+            "max_rss_kb": 4200,
+            "elapsed_s": 0.9602269949973561,
+            "exit_code": 0,
+            "temp_peak_bytes_sampled": 0,
+            "before": {
+              "load_average": [
+                1.6787109375,
+                1.99560546875,
+                2.00390625
+              ],
+              "temperature_c": {
+                "Core 28": 47.0,
+                "Core 12": 48.0,
+                "Core 16": 46.0,
+                "Core 26": 45.0,
+                "Core 29": 47.0,
+                "Package id 0": 53.0,
+                "Core 27": 45.0,
+                "Core 20": 45.0,
+                "Core 30": 47.0,
+                "Core 0": 53.0,
+                "Core 24": 45.0,
+                "Core 4": 45.0,
+                "Core 31": 45.0,
+                "Core 25": 45.0,
+                "Core 8": 49.0
+              },
+              "cpu_frequency_khz": 2780213
+            },
+            "after": {
+              "load_average": [
+                1.6787109375,
+                1.99560546875,
+                2.00390625
+              ],
+              "temperature_c": {
+                "Core 28": 47.0,
+                "Core 12": 48.0,
+                "Core 16": 46.0,
+                "Core 26": 45.0,
+                "Core 29": 47.0,
+                "Package id 0": 53.0,
+                "Core 27": 45.0,
+                "Core 20": 45.0,
+                "Core 30": 47.0,
+                "Core 0": 53.0,
+                "Core 24": 45.0,
+                "Core 4": 45.0,
+                "Core 31": 45.0,
+                "Core 25": 45.0,
+                "Core 8": 49.0
+              },
+              "cpu_frequency_khz": 765420
+            },
+            "command": [
+              "taskset",
+              "-c",
+              "4",
+              "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/release/rust-bam",
+              "flagstat",
+              "/tmp/bioinfo-readme-benchmark/bam-10000000/unsorted.bam"
+            ],
+            "output_bytes": 0,
+            "stderr": "",
+            "block": 0,
+            "order_in_block": 1,
+            "payload_bytes": 479
+          },
+          {
+            "wall_s": 0.95,
+            "user_s": 0.95,
+            "sys_s": 0.0,
+            "max_rss_kb": 4020,
+            "elapsed_s": 0.9601438819954637,
+            "exit_code": 0,
+            "temp_peak_bytes_sampled": 0,
+            "before": {
+              "load_average": [
+                1.70458984375,
+                1.99609375,
+                2.00341796875
+              ],
+              "temperature_c": {
+                "Core 28": 47.0,
+                "Core 12": 48.0,
+                "Core 16": 46.0,
+                "Core 26": 46.0,
+                "Core 29": 47.0,
+                "Package id 0": 48.0,
+                "Core 27": 46.0,
+                "Core 20": 46.0,
+                "Core 30": 47.0,
+                "Core 0": 46.0,
+                "Core 24": 46.0,
+                "Core 4": 45.0,
+                "Core 31": 47.0,
+                "Core 25": 46.0,
+                "Core 8": 46.0
+              },
+              "cpu_frequency_khz": 2250777
+            },
+            "after": {
+              "load_average": [
+                1.70458984375,
+                1.99609375,
+                2.00341796875
+              ],
+              "temperature_c": {
+                "Core 28": 47.0,
+                "Core 12": 49.0,
+                "Core 16": 69.0,
+                "Core 26": 49.0,
+                "Core 29": 47.0,
+                "Package id 0": 74.0,
+                "Core 27": 49.0,
+                "Core 20": 47.0,
+                "Core 30": 47.0,
+                "Core 0": 57.0,
+                "Core 24": 49.0,
+                "Core 4": 45.0,
+                "Core 31": 47.0,
+                "Core 25": 49.0,
+                "Core 8": 74.0
+              },
+              "cpu_frequency_khz": 689002
+            },
+            "command": [
+              "taskset",
+              "-c",
+              "4",
+              "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/release/rust-bam",
+              "flagstat",
+              "/tmp/bioinfo-readme-benchmark/bam-10000000/unsorted.bam"
+            ],
+            "output_bytes": 0,
+            "stderr": "",
+            "block": 1,
+            "order_in_block": 0,
+            "payload_bytes": 479
+          },
+          {
+            "wall_s": 0.97,
+            "user_s": 0.95,
+            "sys_s": 0.0,
+            "max_rss_kb": 4060,
+            "elapsed_s": 0.9707223839941435,
+            "exit_code": 0,
+            "temp_peak_bytes_sampled": 0,
+            "before": {
+              "load_average": [
+                1.728515625,
+                1.99658203125,
+                2.0029296875
+              ],
+              "temperature_c": {
+                "Core 28": 49.0,
+                "Core 12": 50.0,
+                "Core 16": 48.0,
+                "Core 26": 46.0,
+                "Core 29": 49.0,
+                "Package id 0": 52.0,
+                "Core 27": 46.0,
+                "Core 20": 50.0,
+                "Core 30": 49.0,
+                "Core 0": 47.0,
+                "Core 24": 46.0,
+                "Core 4": 46.0,
+                "Core 31": 49.0,
+                "Core 25": 46.0,
+                "Core 8": 47.0
+              },
+              "cpu_frequency_khz": 2092274
+            },
+            "after": {
+              "load_average": [
+                1.728515625,
+                1.99658203125,
+                2.0029296875
+              ],
+              "temperature_c": {
+                "Core 28": 49.0,
+                "Core 12": 50.0,
+                "Core 16": 48.0,
+                "Core 26": 46.0,
+                "Core 29": 49.0,
+                "Package id 0": 52.0,
+                "Core 27": 46.0,
+                "Core 20": 50.0,
+                "Core 30": 49.0,
+                "Core 0": 47.0,
+                "Core 24": 46.0,
+                "Core 4": 46.0,
+                "Core 31": 49.0,
+                "Core 25": 46.0,
+                "Core 8": 47.0
+              },
+              "cpu_frequency_khz": 1046622
+            },
+            "command": [
+              "taskset",
+              "-c",
+              "4",
+              "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/release/rust-bam",
+              "flagstat",
+              "/tmp/bioinfo-readme-benchmark/bam-10000000/unsorted.bam"
+            ],
+            "output_bytes": 0,
+            "stderr": "",
+            "block": 2,
+            "order_in_block": 0,
+            "payload_bytes": 479
+          },
+          {
+            "wall_s": 0.95,
+            "user_s": 0.95,
+            "sys_s": 0.0,
+            "max_rss_kb": 4100,
+            "elapsed_s": 0.9593214280030224,
+            "exit_code": 0,
+            "temp_peak_bytes_sampled": 0,
+            "before": {
+              "load_average": [
+                1.75048828125,
+                1.9970703125,
+                2.00244140625
+              ],
+              "temperature_c": {
+                "Core 28": 47.0,
+                "Core 12": 48.0,
+                "Core 16": 48.0,
+                "Core 26": 46.0,
+                "Core 29": 47.0,
+                "Package id 0": 49.0,
+                "Core 27": 46.0,
+                "Core 20": 49.0,
+                "Core 30": 47.0,
+                "Core 0": 49.0,
+                "Core 24": 46.0,
+                "Core 4": 44.0,
+                "Core 31": 47.0,
+                "Core 25": 46.0,
+                "Core 8": 48.0
+              },
+              "cpu_frequency_khz": 1498901
+            },
+            "after": {
+              "load_average": [
+                1.68994140625,
+                1.98046875,
+                1.99658203125
+              ],
+              "temperature_c": {
+                "Core 28": 47.0,
+                "Core 12": 48.0,
+                "Core 16": 48.0,
+                "Core 26": 46.0,
+                "Core 29": 47.0,
+                "Package id 0": 49.0,
+                "Core 27": 46.0,
+                "Core 20": 49.0,
+                "Core 30": 47.0,
+                "Core 0": 49.0,
+                "Core 24": 46.0,
+                "Core 4": 44.0,
+                "Core 31": 47.0,
+                "Core 25": 46.0,
+                "Core 8": 48.0
+              },
+              "cpu_frequency_khz": 400348
+            },
+            "command": [
+              "taskset",
+              "-c",
+              "4",
+              "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/release/rust-bam",
+              "flagstat",
+              "/tmp/bioinfo-readme-benchmark/bam-10000000/unsorted.bam"
+            ],
+            "output_bytes": 0,
+            "stderr": "",
+            "block": 3,
+            "order_in_block": 1,
+            "payload_bytes": 479
+          },
+          {
+            "wall_s": 0.97,
+            "user_s": 0.96,
+            "sys_s": 0.0,
+            "max_rss_kb": 4188,
+            "elapsed_s": 0.9734970660065301,
+            "exit_code": 0,
+            "temp_peak_bytes_sampled": 0,
+            "before": {
+              "load_average": [
+                1.68994140625,
+                1.98046875,
+                1.99658203125
+              ],
+              "temperature_c": {
+                "Core 28": 47.0,
+                "Core 12": 46.0,
+                "Core 16": 46.0,
+                "Core 26": 43.0,
+                "Core 29": 47.0,
+                "Package id 0": 49.0,
+                "Core 27": 43.0,
+                "Core 20": 45.0,
+                "Core 30": 47.0,
+                "Core 0": 46.0,
+                "Core 24": 43.0,
+                "Core 4": 49.0,
+                "Core 31": 47.0,
+                "Core 25": 43.0,
+                "Core 8": 46.0
+              },
+              "cpu_frequency_khz": 4700000
+            },
+            "after": {
+              "load_average": [
+                1.68994140625,
+                1.98046875,
+                1.99658203125
+              ],
+              "temperature_c": {
+                "Core 28": 47.0,
+                "Core 12": 49.0,
+                "Core 16": 67.0,
+                "Core 26": 51.0,
+                "Core 29": 47.0,
+                "Package id 0": 67.0,
+                "Core 27": 51.0,
+                "Core 20": 46.0,
+                "Core 30": 47.0,
+                "Core 0": 58.0,
+                "Core 24": 51.0,
+                "Core 4": 46.0,
+                "Core 31": 47.0,
+                "Core 25": 51.0,
+                "Core 8": 67.0
+              },
+              "cpu_frequency_khz": 4301972
+            },
+            "command": [
+              "taskset",
+              "-c",
+              "4",
+              "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/release/rust-bam",
+              "flagstat",
+              "/tmp/bioinfo-readme-benchmark/bam-10000000/unsorted.bam"
+            ],
+            "output_bytes": 0,
+            "stderr": "",
+            "block": 4,
+            "order_in_block": 0,
+            "payload_bytes": 479
+          }
+        ],
+        "upstream": [
+          {
+            "wall_s": 0.37,
+            "user_s": 0.35,
+            "sys_s": 0.01,
+            "max_rss_kb": 3884,
+            "elapsed_s": 0.3745991390023846,
+            "exit_code": 0,
+            "temp_peak_bytes_sampled": 0,
+            "before": {
+              "load_average": [
+                1.6787109375,
+                1.99560546875,
+                2.00390625
+              ],
+              "temperature_c": {
+                "Core 28": 45.0,
+                "Core 12": 52.0,
+                "Core 16": 48.0,
+                "Core 26": 45.0,
+                "Core 29": 45.0,
+                "Package id 0": 52.0,
+                "Core 27": 45.0,
+                "Core 20": 47.0,
+                "Core 30": 45.0,
+                "Core 0": 51.0,
+                "Core 24": 45.0,
+                "Core 4": 46.0,
+                "Core 31": 45.0,
+                "Core 25": 45.0,
+                "Core 8": 49.0
+              },
+              "cpu_frequency_khz": 1615314
+            },
+            "after": {
+              "load_average": [
+                1.6787109375,
+                1.99560546875,
+                2.00390625
+              ],
+              "temperature_c": {
+                "Core 28": 49.0,
+                "Core 12": 53.0,
+                "Core 16": 64.0,
+                "Core 26": 50.0,
+                "Core 29": 49.0,
+                "Package id 0": 69.0,
+                "Core 27": 50.0,
+                "Core 20": 52.0,
+                "Core 30": 49.0,
+                "Core 0": 61.0,
+                "Core 24": 50.0,
+                "Core 4": 66.0,
+                "Core 31": 49.0,
+                "Core 25": 50.0,
+                "Core 8": 69.0
+              },
+              "cpu_frequency_khz": 2424309
+            },
+            "command": [
+              "taskset",
+              "-c",
+              "4",
+              "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/tests/ci/env/bin/samtools",
+              "flagstat",
+              "/tmp/bioinfo-readme-benchmark/bam-10000000/unsorted.bam"
+            ],
+            "output_bytes": 0,
+            "stderr": "",
+            "block": 0,
+            "order_in_block": 0,
+            "payload_bytes": 479
+          },
+          {
+            "wall_s": 0.37,
+            "user_s": 0.36,
+            "sys_s": 0.0,
+            "max_rss_kb": 4228,
+            "elapsed_s": 0.3728003540018108,
+            "exit_code": 0,
+            "temp_peak_bytes_sampled": 0,
+            "before": {
+              "load_average": [
+                1.70458984375,
+                1.99609375,
+                2.00341796875
+              ],
+              "temperature_c": {
+                "Core 28": 47.0,
+                "Core 12": 50.0,
+                "Core 16": 48.0,
+                "Core 26": 46.0,
+                "Core 29": 47.0,
+                "Package id 0": 53.0,
+                "Core 27": 46.0,
+                "Core 20": 46.0,
+                "Core 30": 47.0,
+                "Core 0": 50.0,
+                "Core 24": 46.0,
+                "Core 4": 46.0,
+                "Core 31": 47.0,
+                "Core 25": 46.0,
+                "Core 8": 53.0
+              },
+              "cpu_frequency_khz": 4700657
+            },
+            "after": {
+              "load_average": [
+                1.70458984375,
+                1.99609375,
+                2.00341796875
+              ],
+              "temperature_c": {
+                "Core 28": 47.0,
+                "Core 12": 50.0,
+                "Core 16": 48.0,
+                "Core 26": 46.0,
+                "Core 29": 47.0,
+                "Package id 0": 53.0,
+                "Core 27": 46.0,
+                "Core 20": 46.0,
+                "Core 30": 47.0,
+                "Core 0": 50.0,
+                "Core 24": 46.0,
+                "Core 4": 46.0,
+                "Core 31": 47.0,
+                "Core 25": 46.0,
+                "Core 8": 53.0
+              },
+              "cpu_frequency_khz": 4308119
+            },
+            "command": [
+              "taskset",
+              "-c",
+              "4",
+              "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/tests/ci/env/bin/samtools",
+              "flagstat",
+              "/tmp/bioinfo-readme-benchmark/bam-10000000/unsorted.bam"
+            ],
+            "output_bytes": 0,
+            "stderr": "",
+            "block": 1,
+            "order_in_block": 1,
+            "payload_bytes": 479
+          },
+          {
+            "wall_s": 0.37,
+            "user_s": 0.36,
+            "sys_s": 0.0,
+            "max_rss_kb": 4044,
+            "elapsed_s": 0.37402054300764576,
+            "exit_code": 0,
+            "temp_peak_bytes_sampled": 0,
+            "before": {
+              "load_average": [
+                1.728515625,
+                1.99658203125,
+                2.0029296875
+              ],
+              "temperature_c": {
+                "Core 28": 47.0,
+                "Core 12": 55.0,
+                "Core 16": 52.0,
+                "Core 26": 51.0,
+                "Core 29": 47.0,
+                "Package id 0": 55.0,
+                "Core 27": 51.0,
+                "Core 20": 49.0,
+                "Core 30": 47.0,
+                "Core 0": 54.0,
+                "Core 24": 51.0,
+                "Core 4": 54.0,
+                "Core 31": 47.0,
+                "Core 25": 51.0,
+                "Core 8": 51.0
+              },
+              "cpu_frequency_khz": 884915
+            },
+            "after": {
+              "load_average": [
+                1.75048828125,
+                1.9970703125,
+                2.00244140625
+              ],
+              "temperature_c": {
+                "Core 28": 47.0,
+                "Core 12": 55.0,
+                "Core 16": 52.0,
+                "Core 26": 51.0,
+                "Core 29": 47.0,
+                "Package id 0": 55.0,
+                "Core 27": 51.0,
+                "Core 20": 49.0,
+                "Core 30": 47.0,
+                "Core 0": 54.0,
+                "Core 24": 51.0,
+                "Core 4": 54.0,
+                "Core 31": 47.0,
+                "Core 25": 51.0,
+                "Core 8": 51.0
+              },
+              "cpu_frequency_khz": 400532
+            },
+            "command": [
+              "taskset",
+              "-c",
+              "4",
+              "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/tests/ci/env/bin/samtools",
+              "flagstat",
+              "/tmp/bioinfo-readme-benchmark/bam-10000000/unsorted.bam"
+            ],
+            "output_bytes": 0,
+            "stderr": "",
+            "block": 2,
+            "order_in_block": 1,
+            "payload_bytes": 479
+          },
+          {
+            "wall_s": 0.37,
+            "user_s": 0.36,
+            "sys_s": 0.01,
+            "max_rss_kb": 3844,
+            "elapsed_s": 0.3769081600039499,
+            "exit_code": 0,
+            "temp_peak_bytes_sampled": 0,
+            "before": {
+              "load_average": [
+                1.75048828125,
+                1.9970703125,
+                2.00244140625
+              ],
+              "temperature_c": {
+                "Core 28": 48.0,
+                "Core 12": 49.0,
+                "Core 16": 48.0,
+                "Core 26": 47.0,
+                "Core 29": 48.0,
+                "Package id 0": 51.0,
+                "Core 27": 47.0,
+                "Core 20": 46.0,
+                "Core 30": 48.0,
+                "Core 0": 51.0,
+                "Core 24": 47.0,
+                "Core 4": 49.0,
+                "Core 31": 48.0,
+                "Core 25": 47.0,
+                "Core 8": 48.0
+              },
+              "cpu_frequency_khz": 4700336
+            },
+            "after": {
+              "load_average": [
+                1.75048828125,
+                1.9970703125,
+                2.00244140625
+              ],
+              "temperature_c": {
+                "Core 28": 49.0,
+                "Core 12": 47.0,
+                "Core 16": 66.0,
+                "Core 26": 49.0,
+                "Core 29": 49.0,
+                "Package id 0": 73.0,
+                "Core 27": 49.0,
+                "Core 20": 46.0,
+                "Core 30": 49.0,
+                "Core 0": 58.0,
+                "Core 24": 49.0,
+                "Core 4": 47.0,
+                "Core 31": 49.0,
+                "Core 25": 49.0,
+                "Core 8": 73.0
+              },
+              "cpu_frequency_khz": 399763
+            },
+            "command": [
+              "taskset",
+              "-c",
+              "4",
+              "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/tests/ci/env/bin/samtools",
+              "flagstat",
+              "/tmp/bioinfo-readme-benchmark/bam-10000000/unsorted.bam"
+            ],
+            "output_bytes": 0,
+            "stderr": "",
+            "block": 3,
+            "order_in_block": 0,
+            "payload_bytes": 479
+          },
+          {
+            "wall_s": 0.36,
+            "user_s": 0.35,
+            "sys_s": 0.0,
+            "max_rss_kb": 3932,
+            "elapsed_s": 0.36699442700773943,
+            "exit_code": 0,
+            "temp_peak_bytes_sampled": 0,
+            "before": {
+              "load_average": [
+                1.55419921875,
+                1.947265625,
+                1.98583984375
+              ],
+              "temperature_c": {
+                "Core 28": 47.0,
+                "Core 12": 48.0,
+                "Core 16": 47.0,
+                "Core 26": 46.0,
+                "Core 29": 47.0,
+                "Package id 0": 48.0,
+                "Core 27": 46.0,
+                "Core 20": 46.0,
+                "Core 30": 47.0,
+                "Core 0": 46.0,
+                "Core 24": 46.0,
+                "Core 4": 44.0,
+                "Core 31": 47.0,
+                "Core 25": 46.0,
+                "Core 8": 46.0
+              },
+              "cpu_frequency_khz": 2760902
+            },
+            "after": {
+              "load_average": [
+                1.55419921875,
+                1.947265625,
+                1.98583984375
+              ],
+              "temperature_c": {
+                "Core 28": 47.0,
+                "Core 12": 48.0,
+                "Core 16": 47.0,
+                "Core 26": 46.0,
+                "Core 29": 47.0,
+                "Package id 0": 48.0,
+                "Core 27": 46.0,
+                "Core 20": 46.0,
+                "Core 30": 47.0,
+                "Core 0": 46.0,
+                "Core 24": 46.0,
+                "Core 4": 44.0,
+                "Core 31": 47.0,
+                "Core 25": 46.0,
+                "Core 8": 46.0
+              },
+              "cpu_frequency_khz": 509046
+            },
+            "command": [
+              "taskset",
+              "-c",
+              "4",
+              "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/tests/ci/env/bin/samtools",
+              "flagstat",
+              "/tmp/bioinfo-readme-benchmark/bam-10000000/unsorted.bam"
+            ],
+            "output_bytes": 0,
+            "stderr": "",
+            "block": 4,
+            "order_in_block": 1,
+            "payload_bytes": 479
+          }
+        ]
+      },
+      "warmups": [
+        {
+          "upstream": {
+            "wall_s": 0.37,
+            "user_s": 0.36,
+            "sys_s": 0.0,
+            "max_rss_kb": 4196,
+            "elapsed_s": 0.37538154699723236,
+            "exit_code": 0,
+            "temp_peak_bytes_sampled": 0,
+            "before": {
+              "load_average": [
+                1.73828125,
+                2.0126953125,
+                2.009765625
+              ],
+              "temperature_c": {
+                "Core 28": 47.0,
+                "Core 12": 55.0,
+                "Core 16": 43.0,
+                "Core 26": 43.0,
+                "Core 29": 45.0,
+                "Package id 0": 52.0,
+                "Core 27": 43.0,
+                "Core 20": 45.0,
+                "Core 30": 45.0,
+                "Core 0": 49.0,
+                "Core 24": 43.0,
+                "Core 4": 46.0,
+                "Core 31": 45.0,
+                "Core 25": 43.0,
+                "Core 8": 43.0
+              },
+              "cpu_frequency_khz": 399865
+            },
+            "after": {
+              "load_average": [
+                1.73828125,
+                2.0126953125,
+                2.009765625
+              ],
+              "temperature_c": {
+                "Core 28": 47.0,
+                "Core 12": 55.0,
+                "Core 16": 43.0,
+                "Core 26": 43.0,
+                "Core 29": 45.0,
+                "Package id 0": 52.0,
+                "Core 27": 43.0,
+                "Core 20": 45.0,
+                "Core 30": 45.0,
+                "Core 0": 49.0,
+                "Core 24": 43.0,
+                "Core 4": 46.0,
+                "Core 31": 45.0,
+                "Core 25": 43.0,
+                "Core 8": 43.0
+              },
+              "cpu_frequency_khz": 400259
+            },
+            "command": [
+              "taskset",
+              "-c",
+              "4",
+              "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/tests/ci/env/bin/samtools",
+              "flagstat",
+              "/tmp/bioinfo-readme-benchmark/bam-10000000/unsorted.bam"
+            ],
+            "output_bytes": 0,
+            "stderr": "",
+            "block": -1,
+            "order_in_block": 0,
+            "payload_bytes": 479
+          },
+          "rust": {
+            "wall_s": 0.97,
+            "user_s": 0.97,
+            "sys_s": 0.0,
+            "max_rss_kb": 4276,
+            "elapsed_s": 0.9773234979948029,
+            "exit_code": 0,
+            "temp_peak_bytes_sampled": 0,
+            "before": {
+              "load_average": [
+                1.73828125,
+                2.0126953125,
+                2.009765625
+              ],
+              "temperature_c": {
+                "Core 28": 46.0,
+                "Core 12": 50.0,
+                "Core 16": 48.0,
+                "Core 26": 46.0,
+                "Core 29": 46.0,
+                "Package id 0": 53.0,
+                "Core 27": 46.0,
+                "Core 20": 46.0,
+                "Core 30": 46.0,
+                "Core 0": 53.0,
+                "Core 24": 46.0,
+                "Core 4": 47.0,
+                "Core 31": 46.0,
+                "Core 25": 46.0,
+                "Core 8": 49.0
+              },
+              "cpu_frequency_khz": 3793600
+            },
+            "after": {
+              "load_average": [
+                1.73828125,
+                2.0126953125,
+                2.009765625
+              ],
+              "temperature_c": {
+                "Core 28": 46.0,
+                "Core 12": 50.0,
+                "Core 16": 48.0,
+                "Core 26": 46.0,
+                "Core 29": 46.0,
+                "Package id 0": 53.0,
+                "Core 27": 46.0,
+                "Core 20": 46.0,
+                "Core 30": 46.0,
+                "Core 0": 53.0,
+                "Core 24": 46.0,
+                "Core 4": 47.0,
+                "Core 31": 46.0,
+                "Core 25": 46.0,
+                "Core 8": 49.0
+              },
+              "cpu_frequency_khz": 678747
+            },
+            "command": [
+              "taskset",
+              "-c",
+              "4",
+              "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/release/rust-bam",
+              "flagstat",
+              "/tmp/bioinfo-readme-benchmark/bam-10000000/unsorted.bam"
+            ],
+            "output_bytes": 0,
+            "stderr": "",
+            "block": -1,
+            "order_in_block": 1,
+            "payload_bytes": 479
+          }
+        }
+      ],
+      "checks": [
+        {
+          "passed": true,
+          "rule": "decoded output bytes",
+          "sha256": {
+            "upstream": "38c909927e2fae5ede1495bd1f3b49d8d45fbbac7f2dec4b03dcde75f12bf0c4",
+            "rust": "38c909927e2fae5ede1495bd1f3b49d8d45fbbac7f2dec4b03dcde75f12bf0c4"
+          },
+          "block": -1
+        },
+        {
+          "passed": true,
+          "rule": "decoded output bytes",
+          "sha256": {
+            "upstream": "38c909927e2fae5ede1495bd1f3b49d8d45fbbac7f2dec4b03dcde75f12bf0c4",
+            "rust": "38c909927e2fae5ede1495bd1f3b49d8d45fbbac7f2dec4b03dcde75f12bf0c4"
+          },
+          "block": 0
+        },
+        {
+          "passed": true,
+          "rule": "decoded output bytes",
+          "sha256": {
+            "rust": "38c909927e2fae5ede1495bd1f3b49d8d45fbbac7f2dec4b03dcde75f12bf0c4",
+            "upstream": "38c909927e2fae5ede1495bd1f3b49d8d45fbbac7f2dec4b03dcde75f12bf0c4"
+          },
+          "block": 1
+        },
+        {
+          "passed": true,
+          "rule": "decoded output bytes",
+          "sha256": {
+            "rust": "38c909927e2fae5ede1495bd1f3b49d8d45fbbac7f2dec4b03dcde75f12bf0c4",
+            "upstream": "38c909927e2fae5ede1495bd1f3b49d8d45fbbac7f2dec4b03dcde75f12bf0c4"
+          },
+          "block": 2
+        },
+        {
+          "passed": true,
+          "rule": "decoded output bytes",
+          "sha256": {
+            "upstream": "38c909927e2fae5ede1495bd1f3b49d8d45fbbac7f2dec4b03dcde75f12bf0c4",
+            "rust": "38c909927e2fae5ede1495bd1f3b49d8d45fbbac7f2dec4b03dcde75f12bf0c4"
+          },
+          "block": 3
+        },
+        {
+          "passed": true,
+          "rule": "decoded output bytes",
+          "sha256": {
+            "rust": "38c909927e2fae5ede1495bd1f3b49d8d45fbbac7f2dec4b03dcde75f12bf0c4",
+            "upstream": "38c909927e2fae5ede1495bd1f3b49d8d45fbbac7f2dec4b03dcde75f12bf0c4"
+          },
+          "block": 4
+        }
+      ],
+      "cpu_affinity": "4",
+      "passed": true,
+      "compression": "none",
+      "summary": {
+        "rust": {
+          "median_s": 0.9602269949973561,
+          "min_s": 0.9593214280030224,
+          "max_s": 0.9734970660065301,
+          "records_per_s": 10414204.195568917,
+          "max_rss_kib": 4200,
+          "cpu_median_s": 0.95,
+          "temp_peak_bytes_sampled": 0,
+          "output_bytes": [
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "payload_bytes": [
+            479,
+            479,
+            479,
+            479,
+            479
+          ]
+        },
+        "upstream": {
+          "median_s": 0.37402054300764576,
+          "min_s": 0.36699442700773943,
+          "max_s": 0.3769081600039499,
+          "records_per_s": 26736499.336603496,
+          "max_rss_kib": 4228,
+          "cpu_median_s": 0.36,
+          "temp_peak_bytes_sampled": 0,
+          "output_bytes": [
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "payload_bytes": [
+            479,
+            479,
+            479,
+            479,
+            479
+          ]
+        }
+      },
+      "paired_speed_ratio": {
+        "samples": [
+          0.3901151925055138,
+          0.3882755084863126,
+          0.385301244902479,
+          0.39289037959731926,
+          0.3769856528825714
+        ],
+        "median": 0.3882755084863126,
+        "min": 0.3769856528825714,
+        "max": 0.39289037959731926
+      }
+    }
+  ],
+  "completed_utc": "2026-10-31T14:15:26.297209+00:00",
+  "passed": true
+}

@@ -1,0 +1,1233 @@
+{
+  "schema_version": 1,
+  "planned_conditions": [
+    {
+      "dataset": "synthetic-100000",
+      "case": "fx_fq2fa"
+    },
+    {
+      "dataset": "synthetic-bam-100000",
+      "case": "bam_sort"
+    },
+    {
+      "dataset": "synthetic-bam-100000",
+      "case": "umi_dedup"
+    }
+  ],
+  "kind": "readme-pilot",
+  "started_utc": "2026-10-31T14:57:16.122001+00:00",
+  "source": {
+    "commit": "aaf4ba4a2ba26cae748143c43160d2d3d2c6b830",
+    "dirty": true,
+    "dirty_paths": [
+      " M README.md",
+      " M bench/README.md",
+      " M docs/DEVELOPMENT-PLAN.md",
+      " M rust-fx/src/cli.rs",
+      " M rust-fx/src/stats.rs",
+      " M tests/ci/README.md",
+      " M tests/ci/check.sh",
+      " M tests/ci/check_docs.py",
+      "?? README.zh-CN.md",
+      "?? bench/README-PROTOCOL.md",
+      "?? bench/RESULTS-README.md",
+      "?? bench/check_boundaries.py",
+      "?? bench/extend_readme_inputs.py",
+      "?? bench/prepare_readme_oracles.py",
+      "?? bench/readme_benchmark.py",
+      "?? bench/readme_inputs.py",
+      "?? bench/results/readme-2026-10-31/",
+      "?? bench/summarize_readme.py",
+      "?? bench/test_readme_benchmark.py",
+      "?? docs/readme-review/",
+      "?? rust-fx/tests/benchmark_boundaries.rs"
+    ]
+  },
+  "hardware": {
+    "platform": "Linux-7.3.0-4-cachyos-x86_64-with-glibc2.44",
+    "machine": "x86_64",
+    "processor": "",
+    "cpu_model": "13th Gen Intel(R) Core(TM) i7-13700H",
+    "logical_cpus": 20,
+    "memory_kb": 32638876
+  },
+  "topology": "CPU CORE SOCKET    MAXMHZ ONLINE\n  0    0      0 4800.0000    yes\n  1    0      0 4800.0000    yes\n  2    1      0 4800.0000    yes\n  3    1      0 4800.0000    yes\n  4    2      0 5000.0000    yes\n  5    2      0 5000.0000    yes\n  6    3      0 5000.0000    yes\n  7    3      0 5000.0000    yes\n  8    4      0 4800.0000    yes\n  9    4      0 4800.0000    yes\n 10    5      0 4800.0000    yes\n 11    5      0 4800.0000    yes\n 12    6      0 3700.0000    yes\n 13    7      0 3700.0000    yes\n 14    8      0 3700.0000    yes\n 15    9      0 3700.0000    yes\n 16   10      0 3700.0000    yes\n 17   11      0 3700.0000    yes\n 18   12      0 3700.0000    yes\n 19   13      0 3700.0000    yes\n",
+  "versions": {
+    "rust_cutadapt": {
+      "version": "rust-cutadapt 0.1.0",
+      "command": [
+        "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/release/rust-cutadapt",
+        "--version"
+      ],
+      "executable_sha256": "1d764006aedfdf3a9efff03f7f632a842f857185adbd09915c133264253e615f"
+    },
+    "rust_umi": {
+      "version": "rust-umitools 0.2.0",
+      "command": [
+        "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/release/rust-umitools",
+        "--version"
+      ],
+      "executable_sha256": "8ae59b6732ac93d69dd19bde403ebc9198e8cf8a3c9330f8cb5ef0672ca169c0"
+    },
+    "rust_bam": {
+      "version": "rust-bam 0.1.0",
+      "command": [
+        "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/release/rust-bam",
+        "--version"
+      ],
+      "executable_sha256": "9f05eb49e043fcdb1ad163711e934920c45cc2e242f4ed6804c479576c42a17a"
+    },
+    "rust_fastqc": {
+      "version": "rust-fastqc 0.1.0",
+      "command": [
+        "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/release/rust-fastqc",
+        "--version"
+      ],
+      "executable_sha256": "8f45261c8647d33a1680fd246df19c0270764dcbc76026b5e1b23d92b2ee654c"
+    },
+    "rust_fx": {
+      "version": "rust-fx 0.1.0",
+      "command": [
+        "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/release/rust-fx",
+        "--version"
+      ],
+      "executable_sha256": "f9c17835b6c3e8e4a37475f21e27f84fc5068492a4dceff36fa7a1a42641e50a"
+    },
+    "cutadapt": {
+      "version": "4.6",
+      "command": [
+        "/home/rimuru/.conda/envs/ta-cutadapt/bin/cutadapt",
+        "--version"
+      ],
+      "executable_sha256": "d2046ae459cc2841b2791f6baf598ce96445799177d5ba57345a94bcb75e95cd"
+    },
+    "umi_tools": {
+      "version": "UMI-tools version: 1.1.6",
+      "command": [
+        "/tmp/bioinfo-readme-repro-oracles/bin/umi_tools",
+        "--version"
+      ],
+      "executable_sha256": "f546349f4226a9ad36a31ffe736585eea4e4e367b457c338a08ceed9e15c3186"
+    },
+    "samtools": {
+      "version": "samtools 1.24",
+      "command": [
+        "/tmp/bioinfo-readme-repro-oracles/bin/samtools",
+        "--version"
+      ],
+      "executable_sha256": "271be7d26d5e6d129770ea794667d12c8cd60a7221aada524c2cd81e9a917fc6"
+    },
+    "fastqc": {
+      "version": "FastQC v0.13.0",
+      "command": [
+        "/tmp/bioinfo-readme-repro-oracles/bin/fastqc",
+        "--version"
+      ],
+      "executable_sha256": "8d39b240df979657d250f11dc2bab78b9a0d6c09dc93a799c47d5586880b1447"
+    },
+    "seqkit": {
+      "version": "seqkit v2.14.0",
+      "command": [
+        "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/tests/ci/env/bin/seqkit",
+        "version"
+      ],
+      "executable_sha256": "88aa8a539b1e9097220a47811367b7ef826eff8637e5284fdd32a372770d6f7d"
+    },
+    "fq": {
+      "version": "fq v0.12.0 (51779f50e 2024-07-08)",
+      "command": [
+        "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/tests/ci/env/bin/fq",
+        "--version"
+      ],
+      "executable_sha256": "600e8b204086bc0d3e225b0021fd234fc452bf72414af80ad8a115a327b5fcb2"
+    }
+  },
+  "runtime_payloads": {
+    "cutadapt": {
+      "python": "3.10.22 | packaged by conda-forge | (main, Oct  6 2026, 23:02:24) [GCC 14.4.0]",
+      "executable": "/home/rimuru/.conda/envs/ta-cutadapt/bin/python",
+      "zlib_runtime": "1.3.2",
+      "modules": {
+        "cutadapt": {
+          "version": "4.6",
+          "origin": "/home/rimuru/.conda/envs/ta-cutadapt/lib/python3.10/site-packages/cutadapt/__init__.py",
+          "package": true,
+          "payload_sha256": "4001539cdea89afa256eb0cea4ff1531a7670477f4d699164f36277fde323009"
+        },
+        "dnaio": {
+          "version": "1.2.4",
+          "origin": "/home/rimuru/.conda/envs/ta-cutadapt/lib/python3.10/site-packages/dnaio/__init__.py",
+          "package": true,
+          "payload_sha256": "9d8c8318befda74a60bdcc18d9992de67540ccbdd4a3da5241508d4cb2386d72"
+        },
+        "xopen": {
+          "version": "2.1.0",
+          "origin": "/home/rimuru/.conda/envs/ta-cutadapt/lib/python3.10/site-packages/xopen/__init__.py",
+          "package": true,
+          "payload_sha256": "fcc735cdc4f75762ca91a5e301488d26d4df6b8d8e06107d8d78b777d85ce07c"
+        },
+        "isal": {
+          "version": "1.8.0",
+          "origin": "/home/rimuru/.conda/envs/ta-cutadapt/lib/python3.10/site-packages/isal/__init__.py",
+          "package": true,
+          "payload_sha256": "cfa50e45b66a0fe0eee23820e1f1adaf4f2ddd4c435a7610f6cc65c1a08ffab5"
+        },
+        "zlib_ng": {
+          "version": "1.0.0",
+          "origin": "/home/rimuru/.conda/envs/ta-cutadapt/lib/python3.10/site-packages/zlib_ng/__init__.py",
+          "package": true,
+          "payload_sha256": "8c6aec5fddccef217cdb5640e2456fb16cf57a838985be44fe6fb6c08bfe6d9f"
+        }
+      },
+      "interpreter_sha256": "7bc5998c1ec9baca5002ab57edee39cee185615d2fff268adbc85ee94e611004"
+    },
+    "umi_tools": {
+      "python": "3.12.14 (main, Sep  2 2026, 23:27:36) [GCC 15.3.0]",
+      "executable": "/tmp/bioinfo-readme-repro-oracles/umi/bin/python3",
+      "zlib_runtime": "1.3.2",
+      "modules": {
+        "umi_tools": {
+          "version": "1.1.6",
+          "origin": "/tmp/bioinfo-readme-repro-oracles/umi/lib/python3.12/site-packages/umi_tools/__init__.py",
+          "package": true,
+          "payload_sha256": "051ff3a907ec3abf554e76e9ab417886ee278724349efb2c98e29f76d8a27220"
+        },
+        "pysam": {
+          "version": "0.24.1",
+          "origin": "/tmp/bioinfo-readme-repro-oracles/umi/lib/python3.12/site-packages/pysam/__init__.py",
+          "package": true,
+          "payload_sha256": "5db94a2b51c702aa27694af45e9b6ff4024e704352d583e37d830b3adb53e5b3"
+        },
+        "numpy": {
+          "version": "2.5.3",
+          "origin": "/tmp/bioinfo-readme-repro-oracles/umi/lib/python3.12/site-packages/numpy/__init__.py",
+          "package": true,
+          "payload_sha256": "3859c9777e0921866c984eade68c90b7c8da64fd1e61d6a1b308c25a0c1f83f6"
+        },
+        "scipy": {
+          "version": "1.18.1",
+          "origin": "/tmp/bioinfo-readme-repro-oracles/umi/lib/python3.12/site-packages/scipy/__init__.py",
+          "package": true,
+          "payload_sha256": "ee4fea1e93d6523ec1e20e412a20f0cd22f9cfa33a806ef96e10893156effc50"
+        },
+        "pandas": {
+          "version": "3.0.5",
+          "origin": "/tmp/bioinfo-readme-repro-oracles/umi/lib/python3.12/site-packages/pandas/__init__.py",
+          "package": true,
+          "payload_sha256": "5d014e2b93046bfe5aa1ebb4c2900ece584f1518d78865e608b638502bcdcaaf"
+        }
+      },
+      "interpreter_sha256": "3a253d0e0c1b98a7369cf9a65c3d0ddab367d6612a01741c3b593df32ec26365"
+    },
+    "fastqc_payload_sha256": "13b60f8cfcdae4a91104e5cf79954209de384c88e21121ff56079f0971faff5f",
+    "samtools_binary_sha256": "730fcc3c41bd851bfe4ff1cf8c4adf5cc48e9da01d40a1bb843fa598bcdec342",
+    "java": {
+      "version": "openjdk version \"25.0.2-internal\" 2026-01-20\nOpenJDK Runtime Environment (build 25.0.2-internal-adhoc.rattler.src)\nOpenJDK 64-Bit Server VM (build 25.0.2-internal-adhoc.rattler.src, mixed mode, sharing)",
+      "executable_sha256": "672aada4292bb68595371e9eaea5483714e9ddc57a0898e0c790c9d5e93b8578"
+    }
+  },
+  "native_source_sha256": {
+    "Cargo.lock": "7352864e1c3a0e2693ae7d2ad688f66959a3f0d5b6c73bb729cdec6d1720d20a",
+    "Cargo.toml": "4b57857f58c9d83b08f0142f0aeb67a643b79f14acc4b7f89b2b93fb4db4b896",
+    "rust-bam/src/commands.rs": "08818f8192fbb747a4e1ee90691bfb5e06d1421a7f6366ded0ad9e0d1a2906c8",
+    "rust-bam/src/error.rs": "f6c590e3832227555dbb708a46a189be8dc778d68a6873ab681dc8f7065fa688",
+    "rust-bam/src/format.rs": "3d4fcff9163f1f9967ebe8033a5d79e167ff1292f4cbce782d75958a4b9a269e",
+    "rust-bam/src/index_util.rs": "b5f5eff6e3915563d484aeaa5934f3ab23c2f69f8aa8e12073fe5829cec11a77",
+    "rust-bam/src/io_util.rs": "8039c9dfab770693a2cb748210bfb4f358b23f67352e517725806de336cb4c57",
+    "rust-bam/src/lib.rs": "cb1c502119f8e94d5e7773186c574b00f6dfab911380b0bebab6e3da41264e04",
+    "rust-bam/src/main.rs": "6743c7d60adff7434d802df659762dca0fc645748f0c925bca2bd4b6b40a1dc7",
+    "rust-bam/src/sort_order.rs": "aafa6a1360d57a3af76c837b3df05819d423c3d61ee6c58c21cb6cdf8c54c542",
+    "rust-bam/src/stats.rs": "bd3515e87e05761ef39ec027c97ea45467ff48d124aaf638dcbaddd517e73fc0",
+    "rust-cutadapt/src/adapter/matcher.rs": "a2ff465bbaeb743b32eddd3313a41f0a5a210bcd176401765250e6e1a6674cf0",
+    "rust-cutadapt/src/adapter/mod.rs": "d48c03c1ff521dd61f6c616e24b19c057d1ae4b019fb1c3f81274f59db53a354",
+    "rust-cutadapt/src/align.rs": "af4deae7062c562a4d29b17e50d5767d923694d078928bdea0b0067b988afbad",
+    "rust-cutadapt/src/auxout.rs": "517410281584ea8cd8c0b699291a4000b48f4fd9ce909cee4569bf2ea6b78cd4",
+    "rust-cutadapt/src/cli.rs": "632adafebe1f50143693698edd5567c48b956dc7cb6f8021319b98bb5f6eb566",
+    "rust-cutadapt/src/compress.rs": "74b0a9cd685bba68aec0656974d3252c202bd4d4d51c3023e97a3a48eceb6ae7",
+    "rust-cutadapt/src/engine.rs": "6baf89a5c40e84440f09099c0184ca936a6bd28b926dbe3f81ef92b59781ac44",
+    "rust-cutadapt/src/fastq.rs": "c6062afa0ca98d78f28998b7b6316abf190ad1cff82461d96364379d2cd8d8a4",
+    "rust-cutadapt/src/filter.rs": "cb4d1606b2af6fb381f767abcee8cedbfa8da4bd3083f193d293fd2fee15221a",
+    "rust-cutadapt/src/lib.rs": "19548e9694b04091405163f12b85b77d20e378e05e9be3cc0b74fede2b838a68",
+    "rust-cutadapt/src/main.rs": "2f184a2f6274dec836b1ecb15bea612e1e97e91af13caa9f729232335ee9b246",
+    "rust-cutadapt/src/modify.rs": "1d9490f039ca4ddd334d011b18f595fc27a5d545ac0027f7d4b5ee86f551929d",
+    "rust-cutadapt/src/pair.rs": "9a91a5f51d09d255ec9d0f20f19131dbb942cfa2451b5989e6baec674da153ba",
+    "rust-cutadapt/src/pipeline.rs": "86eb53bf4bdda70e87f73833a13b729b8ec2d89940de89b52c6775aa65a709e7",
+    "rust-cutadapt/src/report/fmt.rs": "afdbc57c74ddd47462d02bd7a9069de0c86ce1ced0a57fca8b762043fa3010f0",
+    "rust-cutadapt/src/report/json.rs": "f5d775220c4f9d2a93968076c8e1f6308d748741bc038636f9ec0fced4985608",
+    "rust-cutadapt/src/report/mod.rs": "f7cb4e0e84faca55cabfd85e4bde05415072d95633c1ae1258476fe33fe38b3b",
+    "rust-cutadapt/src/report/stats.rs": "2034803c7e53361cfbd8c5b13e186e8d77cbb1a8e0631c6a81f83a9b79db893a",
+    "rust-cutadapt/src/report/text.rs": "cae5852c50456e840c904f555b21931410fc001d07a56528c92db2f52443a297",
+    "rust-cutadapt/src/runreport.rs": "d37b4d7a7e9c8906a132d23e341fc83e0826e92a38116ae47a40a1063a693830",
+    "rust-cutadapt/src/trim.rs": "4d2f2d0802def8006ff494a7dbb3b564a5409c41cd98fba5c8c06fecf8f40fbe",
+    "rust-fastqc/src/absent.rs": "feb5ff1397ab60df7ea50d3136725909bf119a4832696e2adec01fc7bea92cc2",
+    "rust-fastqc/src/adapters.rs": "3bbfa509656cb3ce88933dc4ad0456268f65e1908d4699ef08cdcf312b83683f",
+    "rust-fastqc/src/config.rs": "711f0396ac6133c5b024c43da6c32e08191a03069ead72fb2613c941ebb84730",
+    "rust-fastqc/src/contaminants.rs": "fb3ced4f57563a10d0cde3151ddcf293af45800284adcd6d65592ead91a176ad",
+    "rust-fastqc/src/error.rs": "b57bec3376398ae1b80e07615add154f9c602d56d04a9dc00e66788d50c2b972",
+    "rust-fastqc/src/grouping.rs": "5a3922fa2cf703631b44e44833f6fb7944eaf465e5321108437c3f1e5ccb8222",
+    "rust-fastqc/src/kmer.rs": "6e8fe53a2f5032df365e2bb5891891d5212c415bb2f680f9824b15335c4ed48d",
+    "rust-fastqc/src/lib.rs": "ff346db4a57dd35fc1a914a915367799251d41c3554c8e6df4f7602a6d2c6d5b",
+    "rust-fastqc/src/limits.rs": "d0ad1b1e33a0fd5dfc3167858e5a60e17ee7e20adc1e920b0333961eb65b66cc",
+    "rust-fastqc/src/main.rs": "ca605410335e334bafbeac3d461d0740b5a3a5c3ce01fa77501d2ab7c52c98f8",
+    "rust-fastqc/src/modules.rs": "62e705badd03809c30f9e212a1941110ec49832320c05d0243a44f2321891b98",
+    "rust-fastqc/src/report.rs": "bac5bbc215b1346273a51bd665ade243b8d1ec8a99f6cb307b9ad086a48f98b7",
+    "rust-fastqc/src/stats.rs": "528d09d224cde0002e28dd6e99e7be63ce4063db95a79017b0f81109746c5526",
+    "rust-fastqc/src/tile.rs": "e18be7a43b6acbe3b843012c7e174253d26a37e7616a7ef204c0443a552369f1",
+    "rust-fastqc/src/zip.rs": "80c672b205e18ee66dc251721360f5ea56293828e1cfa7829d1595cf9e1b3814",
+    "rust-fx/src/cli.rs": "ee328d308038fcd9073fcbaf3bd0361a8fec94b5bb3927a1ceda1b5f5e3502bf",
+    "rust-fx/src/commands.rs": "e15738d7d0811c6683d34a7c92bee0a6b92979d2910911b9c5231c64afee54e4",
+    "rust-fx/src/grep.rs": "cba35cb9fac6503cc4885c22322b95ae113a24a460ee5bb6adb54969d96d5934",
+    "rust-fx/src/io.rs": "5afa4f8fab05dd76e41e37a0db22b5a9e332536931fa73cdc496ed0675f44f22",
+    "rust-fx/src/lib.rs": "569ce65959d7fc7b5f07517fa26a23eb82b2da1c09e5735169e76251c6900090",
+    "rust-fx/src/lint.rs": "a145b1845098236c55d3bbff2a0d667b786f92766141cc3cd49a247efb7e1d4a",
+    "rust-fx/src/main.rs": "e8c4c8d2215537b801a44883df3e0e62ac9541f9be30bf0551aca80b1f25e900",
+    "rust-fx/src/md5.rs": "e83b33de9ab61cfadffb2fcfd745bd6f28e9a2191b617cd29bcf51523c28bd1c",
+    "rust-fx/src/range.rs": "f6df9ac4a3fd5cbda26037e58aedead9a39fe633f1068db9af29ce11bf4b9818",
+    "rust-fx/src/replace.rs": "97a35593dc4eff71806139d3494c67d3940c4403f776a2cce1d0a3d279992210",
+    "rust-fx/src/sample.rs": "74107a82e355326bf0ecb7c9c09478c0d2177b9227d3cb05a93323ad0313ec8b",
+    "rust-fx/src/seqkit_io.rs": "d6c0a23a2d20d8f5b675986a024b18af29459cb3df42ce576a1c592c17d2c407",
+    "rust-fx/src/sort.rs": "ea4d43024af2379e48440fc7358c5d96b1e85a310ff2e2777212fe479cbb97c6",
+    "rust-fx/src/split.rs": "54de5860e8a472831c2281b39125480e7d2edec4a923dedd89887c6142b7e7c4",
+    "rust-fx/src/stats.rs": "32afcd3e2603195c4bf47ce3c1e815f5e96cc806ed7900b26510131bcfe4de66",
+    "rust-fx/src/tab2fx.rs": "68a7ba03fe2e2cbdeb32d1daf0e31c7dc2fe819651cb31be1f4a30ea4704dea8",
+    "rust-fx/src/table.rs": "6eb364210d687140e4621f6e6b58aa0831e81e8d759e45eb36a598fbf2169372",
+    "rust-fx/src/transform.rs": "12714bccb09091c29065185a91516df91a345b021fc34f452839d149b574d7d7",
+    "rust-fx/src/translate.rs": "f67224a05e06ec7d81f40f56c75cbe01365de46c35061723e5dca62878bb6b79",
+    "rust-umitools/src/cli.rs": "310027d9768448e347e49bcb8770cd50be77e5e1d6b475d76a901b83e2b30583",
+    "rust-umitools/src/commands/count.rs": "a620ede0df8219836cac159822afcb5de198d82c3288425b4bc6848fc1a9932e",
+    "rust-umitools/src/commands/count_tab.rs": "2d3c40afe97cff01d89bc4be2d5405dbf320a5756bebdd2f828c4163d38173c3",
+    "rust-umitools/src/commands/dedup.rs": "560cf67369aa1cbd285a7d0af8aca2ea792fd3217feb04d5fec2ff85e9923e9a",
+    "rust-umitools/src/commands/dedup_stats.rs": "5bfe4b1aabd53da9865384d32e14fde069a23f1ed6e34cfa12352c451087cb7c",
+    "rust-umitools/src/commands/extract.rs": "364af5dd89ef730489677ad8f903c8a536458c9301fdb3b27bd601b9754206df",
+    "rust-umitools/src/commands/group.rs": "2ef90b0ad95cb6642693346a6ef0a43ff23885145e21b17948613cb84b6d59e4",
+    "rust-umitools/src/commands/mod.rs": "fbac353802b46a9fadbce6fb13237831341b9132b458b13ec3e9c9e4eb9f6574",
+    "rust-umitools/src/commands/whitelist.rs": "6bb57902c631e4188e4ab06d9df6cc3499d2c03b86cbd3110c05c89f6a4f8edd",
+    "rust-umitools/src/compat/mod.rs": "f59d9e3ef036061731b34802a9b48e5f90f89f93bd3981c91a38419695106483",
+    "rust-umitools/src/compat/pyrng.rs": "c039c3e34d59cefd778adc7e659d40a3d7a6278cbef5586990176af78f628bf0",
+    "rust-umitools/src/core/barcode.rs": "8b045f11eb8bf245cddae68a74d832af6538628dae897a7ef9d9d1ccfb2ad836",
+    "rust-umitools/src/core/bundle.rs": "ed4ca63f4c1147981dc5ce7c016360619056ee6e2ca4461ac75653ccaab833cb",
+    "rust-umitools/src/core/cluster.rs": "1e3ed9fe735635135b6eb27cbba79f189dc5581b3cc8678124d64580dcfc229a",
+    "rust-umitools/src/core/disk_bundle.rs": "5ffb51ada6cd6c1b97b8b04943794f210ef0e4e29b1cb8927b05bee913f1ccb0",
+    "rust-umitools/src/core/distance.rs": "7fab20d1e5b4bedb3602f92fe2d42d74e756bd2fd32f7ca9e9365dbe052f0bf4",
+    "rust-umitools/src/core/mod.rs": "3d543d40318e641195691c7fd916217f746ed8b2f94a2285c82b2d4eb8339e25",
+    "rust-umitools/src/core/neighbors.rs": "dadb225b74c4275ccc0ec4ee3a0dd5af367f2a184e923bbfad8b2c3d1cd7d52e",
+    "rust-umitools/src/core/rng.rs": "072c5bd6849b7ee0fdf7c9df47ea9f10c1b7c41fc3ba6ccc50ade54bba3cdfbd",
+    "rust-umitools/src/core/umi.rs": "13e3a6928a682c84deea4a1c4a57f0fd12e5eac34f4237b0c44189a2447d7402",
+    "rust-umitools/src/error.rs": "3eacc719f249169e3a6128f794133888bb01ace7ba92ea167cdc27eba1cf6743",
+    "rust-umitools/src/io/alignment.rs": "005f1ba97fcc86c5862ca79c3eaad5e7ae94e9ed6ae0c32f7dc233399e2334e0",
+    "rust-umitools/src/io/bam.rs": "6f8c652b401c32e486c8b24251e36ce0b04161f7bfc1f8db58a4447baf55b0e1",
+    "rust-umitools/src/io/fastq.rs": "ecae200fbfd8ea988c744832e2e897e9b233bd8b50e2b347dd800283eb31694a",
+    "rust-umitools/src/io/mod.rs": "aa0e976ed4c38e485191d4b5610984566ee2abcf7f2c012c01cbfe3b56af9cdd",
+    "rust-umitools/src/io/paired.rs": "a6a0c91271bfbd49b88a64f202c5e737f1bcb7f3ccb8999ae6030b2916b45564",
+    "rust-umitools/src/io/sort.rs": "3c08cdfde9e4fa3e95310d70e1e39b73573aa0f0ce3774b5d4714578638a6970",
+    "rust-umitools/src/io/spill.rs": "719f6050d83167ad6ff606f69870d55bae4b4f00830d2bd644580240b897f6d1",
+    "rust-umitools/src/lib.rs": "a82a2065344b1b1126ce51f9edde8bb6fdb74bc18305d5a8305d72198720edd4",
+    "rust-umitools/src/main.rs": "7d7b9da15b560ebda5ab86a2ace333d684bc87b8ff45081f17c4cfc55d0da8e0",
+    "rust-umitools/src/runtime/budget.rs": "154c3c69b48cfc29b2358848a758525bff0170e0d7a0ef43995b9cabdd9bf7ed",
+    "rust-umitools/src/runtime/mod.rs": "a2adc8ee29ccde53880f74fa3bc30e20ddc4bd75c17bdfaaecea4bedc2248f52",
+    "rust-umitools/src/runtime/pipeline.rs": "780c273c7d6ba3442594ccf48bf8f6077db2970a872daaba2ad4bfadc141fe2b",
+    "rust-umitools/src/runtime/summary.rs": "56b2601fbc4ca4e4e643b6def8476c82fc1b4d57889ee1665214dd1e491d32c1",
+    "bioinfo-common/src/diagnostic.rs": "d9283c193000559ce2781e7c1224dd43ac515fe1f1024e5b3fb35740131fbaf5",
+    "bioinfo-common/src/exit.rs": "25655be39bdb8aca9771738aa7e1e64a955ec5b10da30a0769c2c461cf2e9c2b",
+    "bioinfo-common/src/lib.rs": "eed83a850d1fe44670768426f4791cd4dd256fc412a4705403518f227ef85fb5",
+    "bioinfo-common/src/provenance.rs": "570f333aa038a344e36769763560b65d57d25eba063d3f8d6404701338102dd3",
+    "bioinfo-common/src/summary.rs": "52c4d9a5bdf8fd1d4b7feee31b8c04d719917de37e19117e5711fa5109f7b329",
+    "bioinfo-fastx/src/bgzf.rs": "08ffb05b4bd102b4b2d9e668824c75778d4490a1a404ecffb182b53b3ebd9b82",
+    "bioinfo-fastx/src/bin/fastx-fuzz.rs": "d3384d328b6bda05b78956277f52efb41eb945438521eb6ddb084e3aa886c590",
+    "bioinfo-fastx/src/chunker.rs": "e5ec74a6a113f174e6b15c13c145897e1f8f98ffeb877b736057e8d29fea7588",
+    "bioinfo-fastx/src/compress.rs": "a8c29f48f23699675529061bd6b69a372d63d1c4ab35063a244cb0615de7edb6",
+    "bioinfo-fastx/src/format.rs": "1f4737aef16254c464e916aa3959308f08408a32b12af1894ed405200beca7f0",
+    "bioinfo-fastx/src/lib.rs": "3333ebd30be0774c3fe2b9e68cb4e73806df92911f9f5edf8f9f1a81c61605ea",
+    "bioinfo-fastx/src/parser.rs": "9b398b72cc318673b5fecce83cf5e7c61134503c34bd2f50411a300d46293af7",
+    "bioinfo-fastx/src/reader.rs": "390a31584949784f8c3fb4557b67e170efde1f389426d068042db4994b050920",
+    "bioinfo-fastx/src/writer.rs": "286e128778652191de2e683d29118cd8bec4039d4c18e0b8b185dd072c5a42c9"
+  },
+  "script_sha256": {
+    "readme_benchmark.py": "1f9b88fcf4c72e7976e6d7be60ed0771d2c88cc1296b04c93cc22fa7e7e378ff",
+    "readme_inputs.py": "4d0c3adbf82802235a451c52db8c621082a06893d659bc3b03faf036670f7544",
+    "run.py": "2f0eedb5961b9e2e179fc498a0369ac01ef294de37dd0e75c5beaf28428c287d",
+    "upstream.py": "dbc63a0f109a4a977fb365dfbe5d31075b8cfd31d0645f192bc938bbf40317bc"
+  },
+  "inputs": {
+    "schema_version": 1,
+    "seed": 20261031,
+    "real_source": {
+      "run": "SRR2584863",
+      "organism": "Escherichia coli B str. REL606",
+      "instrument": "Illumina HiSeq 2500",
+      "mate": 1,
+      "url": "https://ftp.sra.ebi.ac.uk/vol1/fastq/SRR258/003/SRR2584863/SRR2584863_1.fastq.gz",
+      "md5": "4a1529a4165970302d6d8cb50b6e7a43",
+      "bytes": 183292913,
+      "records": 1553259,
+      "sha256": "c2b69fdbe3423a8ab9fb185cb57cff574874e32deb3cebd3396a0deb3eb2dcf9"
+    },
+    "generator_sha256": "ab13d23ffdc1f4df3c46b121b08566dd1a9adf846e60d5422750281e0417e7df",
+    "datasets": [
+      {
+        "id": "synthetic-100000",
+        "kind": "fastq",
+        "path": "/tmp/bioinfo-readme-benchmark/synthetic-100000.fastq",
+        "source": "synthetic",
+        "seed": 20261031,
+        "records": 100000,
+        "bases": 15000000,
+        "gc_bases": 7509641,
+        "min_length": 150,
+        "max_length": 150,
+        "sha256": "5b5567c37911fbb90eeeee9ee4cf055a06ca37ada4f5752ac9e2f082e091cd5e",
+        "bytes": 32400000,
+        "independent_fastq_validation": true
+      },
+      {
+        "id": "synthetic-1000000",
+        "kind": "fastq",
+        "path": "/tmp/bioinfo-readme-benchmark/synthetic-1000000.fastq",
+        "source": "synthetic",
+        "seed": 20261031,
+        "records": 1000000,
+        "bases": 150000000,
+        "gc_bases": 75077905,
+        "min_length": 150,
+        "max_length": 150,
+        "sha256": "cf79538d0b08dd95b659bf1ca7d284c66a2cf9635e250cb975859ccdcb2f4b1f",
+        "bytes": 324000000,
+        "independent_fastq_validation": true
+      },
+      {
+        "id": "real-100000",
+        "kind": "fastq",
+        "path": "/tmp/bioinfo-readme-benchmark/real-100000.fastq",
+        "source": "SRR2584863",
+        "sampling": "seeded uniform record indices without replacement; retained source order",
+        "seed": 20261031,
+        "records": 100000,
+        "bases": 15000000,
+        "gc_bases": 7607375,
+        "min_length": 150,
+        "max_length": 150,
+        "sha256": "75c18153184ba1574b498a362cbdd3add53baf201a85afdd1022bf3e732bb03e",
+        "bytes": 36777761,
+        "independent_fastq_validation": true
+      },
+      {
+        "id": "real-1000000",
+        "kind": "fastq",
+        "path": "/tmp/bioinfo-readme-benchmark/real-1000000.fastq",
+        "source": "SRR2584863",
+        "sampling": "seeded uniform record indices without replacement; retained source order",
+        "seed": 20261031,
+        "records": 1000000,
+        "bases": 150000000,
+        "gc_bases": 76097573,
+        "min_length": 150,
+        "max_length": 150,
+        "sha256": "e118285a9688a73f43fb420237f5d236886cb8430a265176e4ffd6a132233d04",
+        "bytes": 367775653,
+        "independent_fastq_validation": true
+      },
+      {
+        "id": "synthetic-bam-100000",
+        "kind": "bam",
+        "records": 100000,
+        "bundles": 3556,
+        "expected_dedup_records": 7112,
+        "unsorted": "/tmp/bioinfo-readme-benchmark/bam-100000/unsorted.bam",
+        "sorted": "/tmp/bioinfo-readme-benchmark/bam-100000/sorted.bam",
+        "expected_qnames": "/tmp/bioinfo-readme-benchmark/bam-100000/dedup-qnames.txt",
+        "sha256": {
+          "unsorted.bam": "1f8aac0545db0eb0f65e94eaf2d7d165160216a467bc1317ff7bf439f969cadb",
+          "sorted.bam": "023e59bd0d27178c62861ae042ad4d67fded1a0364da0a3456eb01ead57bac6c",
+          "sorted.bam.bai": "e4626890fde03c32ab095b924b8473e2ae2dcdc3ffcb0355cdfac051e63aa461",
+          "dedup-qnames.txt": "5f1084092aa979ab0153920cceea2fffeb6f0c521498080d503fa764a4510c67"
+        },
+        "generator": {
+          "seed": 20261031,
+          "bundle_scales": [
+            1,
+            10,
+            100
+          ],
+          "umi_counts_per_scale": [
+            6,
+            2,
+            1,
+            1
+          ],
+          "umi_distance_from_major": [
+            0,
+            1,
+            2,
+            10
+          ],
+          "independent_representative": "unique highest MAPQ"
+        }
+      },
+      {
+        "id": "synthetic-bam-1000000",
+        "kind": "bam",
+        "records": 1000000,
+        "bundles": 35701,
+        "expected_dedup_records": 71402,
+        "unsorted": "/tmp/bioinfo-readme-benchmark/bam-1000000/unsorted.bam",
+        "sorted": "/tmp/bioinfo-readme-benchmark/bam-1000000/sorted.bam",
+        "expected_qnames": "/tmp/bioinfo-readme-benchmark/bam-1000000/dedup-qnames.txt",
+        "sha256": {
+          "unsorted.bam": "eaa0524018871f25422bba4faa9bef377483d7a8f8fcb8618a229e9fd842cc95",
+          "sorted.bam": "f321c734856a2f4adab1e4e2aa4dd99639eaa3cf6efc8e08cd77a4305e78695c",
+          "sorted.bam.bai": "6478d0044f84f3ca38c26ad83d6923a54f1a4b490e5d323e1e5f94396267b677",
+          "dedup-qnames.txt": "7165e621e4aa7950c30772062331447f0b46efbde834372d724542f28d790f11"
+        },
+        "generator": {
+          "seed": 20261031,
+          "bundle_scales": [
+            1,
+            10,
+            100
+          ],
+          "umi_counts_per_scale": [
+            6,
+            2,
+            1,
+            1
+          ],
+          "umi_distance_from_major": [
+            0,
+            1,
+            2,
+            10
+          ],
+          "independent_representative": "unique highest MAPQ"
+        }
+      }
+    ]
+  },
+  "input_manifest_sha256": "c41fdcff7b6f48fcbb63137189e2240e5645eb49570a84a3dada4a48962dd112",
+  "parameters": {
+    "inputs": "/tmp/bioinfo-readme-benchmark/inputs.json",
+    "out": "/tmp/bioinfo-readme-staging-smoke.json",
+    "cutadapt": "/home/rimuru/.conda/envs/ta-cutadapt/bin/cutadapt",
+    "oracle_dir": "/tmp/bioinfo-readme-repro-oracles/bin",
+    "cpu": "4",
+    "multi_cpu": "0,2,4,6",
+    "repeats": 1,
+    "warmups": 0,
+    "cooldown": 0.0,
+    "timeout": 300,
+    "datasets": "synthetic-100000,synthetic-bam-100000",
+    "cases": "fx_fq2fa,bam_sort,umi_dedup",
+    "pilot": true,
+    "run_name": "staging-smoke",
+    "toolchain_cache": "/tmp/bioinfo-readme-repro-oracles",
+    "seed": 20261031
+  },
+  "results": [
+    {
+      "dataset": "synthetic-100000",
+      "records": 100000,
+      "case": "fx_fq2fa",
+      "samples": {
+        "rust": [
+          {
+            "wall_s": 0.02,
+            "user_s": 0.01,
+            "sys_s": 0.0,
+            "max_rss_kb": 5196,
+            "elapsed_s": 0.021198831993388012,
+            "exit_code": 0,
+            "temp_peak_bytes_sampled": 0,
+            "before": {
+              "load_average": [
+                1.123046875,
+                1.61328125,
+                1.6337890625
+              ],
+              "temperature_c": {
+                "Core 28": 54.0,
+                "Core 12": 65.0,
+                "Core 16": 58.0,
+                "Core 26": 54.0,
+                "Core 29": 54.0,
+                "Package id 0": 74.0,
+                "Core 27": 54.0,
+                "Core 20": 57.0,
+                "Core 30": 54.0,
+                "Core 0": 74.0,
+                "Core 24": 54.0,
+                "Core 4": 60.0,
+                "Core 31": 54.0,
+                "Core 25": 54.0,
+                "Core 8": 64.0
+              },
+              "cpu_frequency_khz": 4320000
+            },
+            "after": {
+              "load_average": [
+                1.123046875,
+                1.61328125,
+                1.6337890625
+              ],
+              "temperature_c": {
+                "Core 28": 54.0,
+                "Core 12": 65.0,
+                "Core 16": 58.0,
+                "Core 26": 54.0,
+                "Core 29": 54.0,
+                "Package id 0": 74.0,
+                "Core 27": 54.0,
+                "Core 20": 57.0,
+                "Core 30": 54.0,
+                "Core 0": 74.0,
+                "Core 24": 54.0,
+                "Core 4": 60.0,
+                "Core 31": 54.0,
+                "Core 25": 54.0,
+                "Core 8": 64.0
+              },
+              "cpu_frequency_khz": 3802917
+            },
+            "command": [
+              "taskset",
+              "-c",
+              "4",
+              "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/release/rust-fx",
+              "fq2fa",
+              "-j",
+              "1",
+              "-o",
+              "/tmp/bioinfo-readme-benchmark/staging-smoke/synthetic-100000/fx_fq2fa/0-rust/out/reads.fasta",
+              "/tmp/bioinfo-readme-benchmark/synthetic-100000.fastq"
+            ],
+            "output_bytes": 17100000,
+            "stderr": "",
+            "block": 0,
+            "order_in_block": 1,
+            "payload_bytes": 17100000
+          }
+        ],
+        "upstream": [
+          {
+            "wall_s": 0.02,
+            "user_s": 0.01,
+            "sys_s": 0.0,
+            "max_rss_kb": 33188,
+            "elapsed_s": 0.02376245400228072,
+            "exit_code": 0,
+            "temp_peak_bytes_sampled": 0,
+            "before": {
+              "load_average": [
+                1.123046875,
+                1.61328125,
+                1.6337890625
+              ],
+              "temperature_c": {
+                "Core 28": 54.0,
+                "Core 12": 65.0,
+                "Core 16": 58.0,
+                "Core 26": 54.0,
+                "Core 29": 54.0,
+                "Package id 0": 74.0,
+                "Core 27": 54.0,
+                "Core 20": 57.0,
+                "Core 30": 54.0,
+                "Core 0": 74.0,
+                "Core 24": 54.0,
+                "Core 4": 60.0,
+                "Core 31": 54.0,
+                "Core 25": 54.0,
+                "Core 8": 64.0
+              },
+              "cpu_frequency_khz": 4152681
+            },
+            "after": {
+              "load_average": [
+                1.123046875,
+                1.61328125,
+                1.6337890625
+              ],
+              "temperature_c": {
+                "Core 28": 54.0,
+                "Core 12": 65.0,
+                "Core 16": 58.0,
+                "Core 26": 54.0,
+                "Core 29": 54.0,
+                "Package id 0": 74.0,
+                "Core 27": 54.0,
+                "Core 20": 57.0,
+                "Core 30": 54.0,
+                "Core 0": 74.0,
+                "Core 24": 54.0,
+                "Core 4": 60.0,
+                "Core 31": 54.0,
+                "Core 25": 54.0,
+                "Core 8": 64.0
+              },
+              "cpu_frequency_khz": 400331
+            },
+            "command": [
+              "taskset",
+              "-c",
+              "4",
+              "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/tests/ci/env/bin/seqkit",
+              "fq2fa",
+              "-j",
+              "1",
+              "-o",
+              "/tmp/bioinfo-readme-benchmark/staging-smoke/synthetic-100000/fx_fq2fa/0-upstream/out/reads.fasta",
+              "/tmp/bioinfo-readme-benchmark/synthetic-100000.fastq"
+            ],
+            "output_bytes": 17100000,
+            "stderr": "",
+            "block": 0,
+            "order_in_block": 0,
+            "payload_bytes": 17100000
+          }
+        ]
+      },
+      "warmups": [],
+      "checks": [
+        {
+          "passed": true,
+          "rule": "decoded output bytes",
+          "sha256": {
+            "upstream": "9caec45eb584b1271ea4d584f478efc94323d48c3db157c1d97f7c71445aac5e",
+            "rust": "9caec45eb584b1271ea4d584f478efc94323d48c3db157c1d97f7c71445aac5e"
+          },
+          "block": 0
+        }
+      ],
+      "cpu_affinity": "4",
+      "passed": true,
+      "compression": "none",
+      "summary": {
+        "rust": {
+          "median_s": 0.021198831993388012,
+          "min_s": 0.021198831993388012,
+          "max_s": 0.021198831993388012,
+          "records_per_s": 4717241.026825928,
+          "max_rss_kib": 5196,
+          "cpu_median_s": 0.01,
+          "temp_peak_bytes_sampled": 0,
+          "output_bytes": [
+            17100000
+          ],
+          "payload_bytes": [
+            17100000
+          ]
+        },
+        "upstream": {
+          "median_s": 0.02376245400228072,
+          "min_s": 0.02376245400228072,
+          "max_s": 0.02376245400228072,
+          "records_per_s": 4208319.561203654,
+          "max_rss_kib": 33188,
+          "cpu_median_s": 0.01,
+          "temp_peak_bytes_sampled": 0,
+          "output_bytes": [
+            17100000
+          ],
+          "payload_bytes": [
+            17100000
+          ]
+        }
+      },
+      "paired_speed_ratio": {
+        "samples": [
+          1.1209322291762258
+        ],
+        "median": 1.1209322291762258,
+        "min": 1.1209322291762258,
+        "max": 1.1209322291762258
+      }
+    },
+    {
+      "dataset": "synthetic-bam-100000",
+      "records": 100000,
+      "case": "bam_sort",
+      "samples": {
+        "rust": [
+          {
+            "wall_s": 0.17,
+            "user_s": 0.15,
+            "sys_s": 0.02,
+            "max_rss_kb": 44028,
+            "elapsed_s": 0.1798673629964469,
+            "exit_code": 0,
+            "temp_peak_bytes_sampled": 1608218,
+            "before": {
+              "load_average": [
+                1.123046875,
+                1.61328125,
+                1.6337890625
+              ],
+              "temperature_c": {
+                "Core 28": 54.0,
+                "Core 12": 65.0,
+                "Core 16": 58.0,
+                "Core 26": 54.0,
+                "Core 29": 54.0,
+                "Package id 0": 74.0,
+                "Core 27": 54.0,
+                "Core 20": 57.0,
+                "Core 30": 54.0,
+                "Core 0": 74.0,
+                "Core 24": 54.0,
+                "Core 4": 60.0,
+                "Core 31": 54.0,
+                "Core 25": 54.0,
+                "Core 8": 64.0
+              },
+              "cpu_frequency_khz": 4016116
+            },
+            "after": {
+              "load_average": [
+                1.123046875,
+                1.61328125,
+                1.6337890625
+              ],
+              "temperature_c": {
+                "Core 28": 54.0,
+                "Core 12": 65.0,
+                "Core 16": 58.0,
+                "Core 26": 54.0,
+                "Core 29": 54.0,
+                "Package id 0": 74.0,
+                "Core 27": 54.0,
+                "Core 20": 57.0,
+                "Core 30": 54.0,
+                "Core 0": 74.0,
+                "Core 24": 54.0,
+                "Core 4": 60.0,
+                "Core 31": 54.0,
+                "Core 25": 54.0,
+                "Core 8": 64.0
+              },
+              "cpu_frequency_khz": 2376099
+            },
+            "command": [
+              "taskset",
+              "-c",
+              "4",
+              "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/release/rust-bam",
+              "sort",
+              "--max-memory",
+              "32MiB",
+              "--threads",
+              "1",
+              "-o",
+              "/tmp/bioinfo-readme-benchmark/staging-smoke/synthetic-bam-100000/bam_sort/0-rust/out/sorted.bam",
+              "/tmp/bioinfo-readme-benchmark/bam-100000/unsorted.bam"
+            ],
+            "output_bytes": 513111,
+            "stderr": "sorted 100000 records\n",
+            "block": 0,
+            "order_in_block": 0,
+            "payload_bytes": 513111
+          }
+        ],
+        "upstream": [
+          {
+            "wall_s": 0.04,
+            "user_s": 0.04,
+            "sys_s": 0.0,
+            "max_rss_kb": 31144,
+            "elapsed_s": 0.048042385998996906,
+            "exit_code": 0,
+            "temp_peak_bytes_sampled": 0,
+            "before": {
+              "load_average": [
+                1.123046875,
+                1.61328125,
+                1.6337890625
+              ],
+              "temperature_c": {
+                "Core 28": 54.0,
+                "Core 12": 65.0,
+                "Core 16": 58.0,
+                "Core 26": 54.0,
+                "Core 29": 54.0,
+                "Package id 0": 74.0,
+                "Core 27": 54.0,
+                "Core 20": 57.0,
+                "Core 30": 54.0,
+                "Core 0": 74.0,
+                "Core 24": 54.0,
+                "Core 4": 60.0,
+                "Core 31": 54.0,
+                "Core 25": 54.0,
+                "Core 8": 64.0
+              },
+              "cpu_frequency_khz": 4271562
+            },
+            "after": {
+              "load_average": [
+                1.123046875,
+                1.61328125,
+                1.6337890625
+              ],
+              "temperature_c": {
+                "Core 28": 54.0,
+                "Core 12": 65.0,
+                "Core 16": 58.0,
+                "Core 26": 54.0,
+                "Core 29": 54.0,
+                "Package id 0": 74.0,
+                "Core 27": 54.0,
+                "Core 20": 57.0,
+                "Core 30": 54.0,
+                "Core 0": 74.0,
+                "Core 24": 54.0,
+                "Core 4": 60.0,
+                "Core 31": 54.0,
+                "Core 25": 54.0,
+                "Core 8": 64.0
+              },
+              "cpu_frequency_khz": 3050534
+            },
+            "command": [
+              "taskset",
+              "-c",
+              "4",
+              "/tmp/bioinfo-readme-repro-oracles/bin/samtools",
+              "sort",
+              "-m",
+              "32M",
+              "-@",
+              "0",
+              "-l",
+              "6",
+              "-T",
+              "/tmp/bioinfo-readme-benchmark/staging-smoke/synthetic-bam-100000/bam_sort/0-upstream/tmp/sort",
+              "-o",
+              "/tmp/bioinfo-readme-benchmark/staging-smoke/synthetic-bam-100000/bam_sort/0-upstream/out/sorted.bam",
+              "/tmp/bioinfo-readme-benchmark/bam-100000/unsorted.bam"
+            ],
+            "output_bytes": 492478,
+            "stderr": "",
+            "block": 0,
+            "order_in_block": 1,
+            "payload_bytes": 492478
+          }
+        ]
+      },
+      "warmups": [],
+      "checks": [
+        {
+          "passed": true,
+          "rule": "BAM without @PG; coordinate order required; equal-coordinate ties canonicalized",
+          "expected_records": 100000,
+          "observations": {
+            "rust": {
+              "normalized_sha256": "0e343362756ee9604af8603b569824b13b6a696b18f6224ccf3860aea543320a",
+              "records": 100000,
+              "coordinate_sorted": true,
+              "independent_representatives": null,
+              "decoder_stderr": ""
+            },
+            "upstream": {
+              "normalized_sha256": "0e343362756ee9604af8603b569824b13b6a696b18f6224ccf3860aea543320a",
+              "records": 100000,
+              "coordinate_sorted": true,
+              "independent_representatives": null,
+              "decoder_stderr": ""
+            }
+          },
+          "block": 0
+        }
+      ],
+      "cpu_affinity": "4",
+      "passed": true,
+      "compression": "final BGZF level 6; temporary codec is implementation-specific",
+      "summary": {
+        "rust": {
+          "median_s": 0.1798673629964469,
+          "min_s": 0.1798673629964469,
+          "max_s": 0.1798673629964469,
+          "records_per_s": 555965.2309017028,
+          "max_rss_kib": 44028,
+          "cpu_median_s": 0.16999999999999998,
+          "temp_peak_bytes_sampled": 1608218,
+          "output_bytes": [
+            513111
+          ],
+          "payload_bytes": [
+            513111
+          ]
+        },
+        "upstream": {
+          "median_s": 0.048042385998996906,
+          "min_s": 0.048042385998996906,
+          "max_s": 0.048042385998996906,
+          "records_per_s": 2081495.28631005,
+          "max_rss_kib": 31144,
+          "cpu_median_s": 0.04,
+          "temp_peak_bytes_sampled": 0,
+          "output_bytes": [
+            492478
+          ],
+          "payload_bytes": [
+            492478
+          ]
+        }
+      },
+      "paired_speed_ratio": {
+        "samples": [
+          0.2670989622500105
+        ],
+        "median": 0.2670989622500105,
+        "min": 0.2670989622500105,
+        "max": 0.2670989622500105
+      }
+    },
+    {
+      "dataset": "synthetic-bam-100000",
+      "records": 100000,
+      "case": "umi_dedup",
+      "samples": {
+        "rust": [
+          {
+            "wall_s": 0.04,
+            "user_s": 0.04,
+            "sys_s": 0.0,
+            "max_rss_kb": 38828,
+            "elapsed_s": 0.048639180007739924,
+            "exit_code": 0,
+            "temp_peak_bytes_sampled": 0,
+            "before": {
+              "load_average": [
+                1.123046875,
+                1.61328125,
+                1.6337890625
+              ],
+              "temperature_c": {
+                "Core 28": 51.0,
+                "Core 12": 54.0,
+                "Core 16": 64.0,
+                "Core 26": 53.0,
+                "Core 29": 51.0,
+                "Package id 0": 68.0,
+                "Core 27": 53.0,
+                "Core 20": 54.0,
+                "Core 30": 51.0,
+                "Core 0": 60.0,
+                "Core 24": 53.0,
+                "Core 4": 54.0,
+                "Core 31": 51.0,
+                "Core 25": 53.0,
+                "Core 8": 68.0
+              },
+              "cpu_frequency_khz": 400302
+            },
+            "after": {
+              "load_average": [
+                1.123046875,
+                1.61328125,
+                1.6337890625
+              ],
+              "temperature_c": {
+                "Core 28": 51.0,
+                "Core 12": 54.0,
+                "Core 16": 64.0,
+                "Core 26": 53.0,
+                "Core 29": 51.0,
+                "Package id 0": 68.0,
+                "Core 27": 53.0,
+                "Core 20": 54.0,
+                "Core 30": 51.0,
+                "Core 0": 60.0,
+                "Core 24": 53.0,
+                "Core 4": 54.0,
+                "Core 31": 51.0,
+                "Core 25": 53.0,
+                "Core 8": 68.0
+              },
+              "cpu_frequency_khz": 399773
+            },
+            "command": [
+              "taskset",
+              "-c",
+              "4",
+              "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/release/rust-umitools",
+              "dedup",
+              "-I",
+              "/tmp/bioinfo-readme-benchmark/bam-100000/sorted.bam",
+              "-S",
+              "/tmp/bioinfo-readme-benchmark/staging-smoke/synthetic-bam-100000/umi_dedup/0-rust/out/dedup.bam",
+              "--extract-umi-method=tag",
+              "--umi-tag=UB",
+              "--method=directional",
+              "--random-seed=1",
+              "--compresslevel=6",
+              "-L",
+              "/tmp/bioinfo-readme-benchmark/staging-smoke/synthetic-bam-100000/umi_dedup/0-rust/out/dedup.log",
+              "--threads",
+              "1",
+              "--tmpdir",
+              "/tmp/bioinfo-readme-benchmark/staging-smoke/synthetic-bam-100000/umi_dedup/0-rust/tmp"
+            ],
+            "output_bytes": 147828,
+            "stderr": "rust-umitools 0.2.0 dedup: threads=1 memory=7737MiB method=directional threshold=1 representative=upstream\nhardware            : logical_cpus=1 physical_cpus=14 cache=24MiB available_memory=15475MiB tmp_free=8163MiB chunk=192MiB threads=1\ncontainer limits     : memory=unlimited cpu=unlimited\nreads in            : 100000\nbundles             : 3556\noutput reads        : 7112\nunmapped removed    : 0\nno-UMI skipped      : 0\nMAPQ ties sampled   : 22888\nmates recovered     : 0\nevents              : input=100000 read2=0 unmapped=0 mate_unmapped=0 chimeric=0 unpaired=0 below_mapq=0 passthrough=0 subset_excluded=0\nparse+cluster       : 0.0s\nsort+commit         : 0.0s\nwall time           : 0.0s\n",
+            "block": 0,
+            "order_in_block": 1,
+            "payload_bytes": 147134
+          }
+        ],
+        "upstream": [
+          {
+            "wall_s": 1.32,
+            "user_s": 1.24,
+            "sys_s": 0.06,
+            "max_rss_kb": 184324,
+            "elapsed_s": 1.3220892210083548,
+            "exit_code": 0,
+            "temp_peak_bytes_sampled": 145842,
+            "before": {
+              "load_average": [
+                1.123046875,
+                1.61328125,
+                1.6337890625
+              ],
+              "temperature_c": {
+                "Core 28": 54.0,
+                "Core 12": 65.0,
+                "Core 16": 58.0,
+                "Core 26": 54.0,
+                "Core 29": 54.0,
+                "Package id 0": 74.0,
+                "Core 27": 54.0,
+                "Core 20": 57.0,
+                "Core 30": 54.0,
+                "Core 0": 74.0,
+                "Core 24": 54.0,
+                "Core 4": 60.0,
+                "Core 31": 54.0,
+                "Core 25": 54.0,
+                "Core 8": 64.0
+              },
+              "cpu_frequency_khz": 4446568
+            },
+            "after": {
+              "load_average": [
+                1.123046875,
+                1.61328125,
+                1.6337890625
+              ],
+              "temperature_c": {
+                "Core 28": 51.0,
+                "Core 12": 54.0,
+                "Core 16": 64.0,
+                "Core 26": 53.0,
+                "Core 29": 51.0,
+                "Package id 0": 68.0,
+                "Core 27": 53.0,
+                "Core 20": 54.0,
+                "Core 30": 51.0,
+                "Core 0": 60.0,
+                "Core 24": 53.0,
+                "Core 4": 54.0,
+                "Core 31": 51.0,
+                "Core 25": 53.0,
+                "Core 8": 68.0
+              },
+              "cpu_frequency_khz": 400217
+            },
+            "command": [
+              "taskset",
+              "-c",
+              "4",
+              "/tmp/bioinfo-readme-repro-oracles/bin/umi_tools",
+              "dedup",
+              "-I",
+              "/tmp/bioinfo-readme-benchmark/bam-100000/sorted.bam",
+              "-S",
+              "/tmp/bioinfo-readme-benchmark/staging-smoke/synthetic-bam-100000/umi_dedup/0-upstream/out/dedup.bam",
+              "--extract-umi-method=tag",
+              "--umi-tag=UB",
+              "--method=directional",
+              "--random-seed=1",
+              "--compresslevel=6",
+              "-L",
+              "/tmp/bioinfo-readme-benchmark/staging-smoke/synthetic-bam-100000/umi_dedup/0-upstream/out/dedup.log"
+            ],
+            "output_bytes": 150313,
+            "stderr": "",
+            "block": 0,
+            "order_in_block": 0,
+            "payload_bytes": 145842
+          }
+        ]
+      },
+      "warmups": [],
+      "checks": [
+        {
+          "passed": true,
+          "rule": "BAM without @PG; coordinate order required; equal-coordinate ties canonicalized",
+          "expected_records": 7112,
+          "observations": {
+            "upstream": {
+              "normalized_sha256": "c1468e48e8feb30d6d9426d8f67d0cead3919360b7c892f3c98e513b52ba5166",
+              "records": 7112,
+              "coordinate_sorted": true,
+              "independent_representatives": true,
+              "decoder_stderr": ""
+            },
+            "rust": {
+              "normalized_sha256": "c1468e48e8feb30d6d9426d8f67d0cead3919360b7c892f3c98e513b52ba5166",
+              "records": 7112,
+              "coordinate_sorted": true,
+              "independent_representatives": true,
+              "decoder_stderr": ""
+            }
+          },
+          "block": 0
+        }
+      ],
+      "cpu_affinity": "4",
+      "passed": true,
+      "compression": "BGZF level 6",
+      "summary": {
+        "rust": {
+          "median_s": 0.048639180007739924,
+          "min_s": 0.048639180007739924,
+          "max_s": 0.048639180007739924,
+          "records_per_s": 2055955.712742013,
+          "max_rss_kib": 38828,
+          "cpu_median_s": 0.04,
+          "temp_peak_bytes_sampled": 0,
+          "output_bytes": [
+            147828
+          ],
+          "payload_bytes": [
+            147134
+          ]
+        },
+        "upstream": {
+          "median_s": 1.3220892210083548,
+          "min_s": 1.3220892210083548,
+          "max_s": 1.3220892210083548,
+          "records_per_s": 75637.86044918376,
+          "max_rss_kib": 184324,
+          "cpu_median_s": 1.3,
+          "temp_peak_bytes_sampled": 145842,
+          "output_bytes": [
+            150313
+          ],
+          "payload_bytes": [
+            145842
+          ]
+        }
+      },
+      "paired_speed_ratio": {
+        "samples": [
+          27.181568866867647
+        ],
+        "median": 27.181568866867647,
+        "min": 27.181568866867647,
+        "max": 27.181568866867647
+      }
+    }
+  ],
+  "completed_utc": "2026-10-31T14:57:18.496970+00:00",
+  "complete_matrix": true,
+  "passed": true
+}

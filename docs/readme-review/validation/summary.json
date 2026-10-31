@@ -1,0 +1,18 @@
+{
+  "recorded_utc": "2026-10-31T15:00:40.961452+00:00",
+  "boundary_binaries": {
+    "measured": {
+      "sha256": "f9c17835b6c3e8e4a37475f21e27f84fc5068492a4dceff36fa7a1a42641e50a",
+      "stdout": "README boundary oracle: 22/22"
+    },
+    "workspace": {
+      "sha256": "40f20566cb0075212c42fe3bc9f1bc238e5b76a474f4626500bad985cff6101e",
+      "stdout": "README boundary oracle: 22/22"
+    }
+  },
+  "old_binary_sha256": "05cb5c96d1fbb916edf2ddc9953f3cb0e66f38caa84a7241387c3705bec7aba9",
+  "filesystem": "tmpfs",
+  "staging_smoke": "3 conditions passed; setup verification only, excluded from formal performance tables",
+  "base_status": 0,
+  "oracles_status": 0
+}

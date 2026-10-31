@@ -1,0 +1,177 @@
+{
+  "workdir": "/tmp/bioinfo-readme-example-n_aqz23d",
+  "note": "Synthetic SAM stands in for external alignment; no aligner is included or tested.",
+  "expected_dedup_records": 2,
+  "commands": [
+    {
+      "command": [
+        "rust-fx",
+        "stats",
+        "-a",
+        "-T",
+        "reads.fastq.gz"
+      ],
+      "exit_code": 0,
+      "stdout": "file\tformat\ttype\tnum_seqs\tsum_len\tmin_len\tavg_len\tmax_len\tQ1\tQ2\tQ3\tsum_gap\tN50\tN50_num\tQ20(%)\tQ30(%)\tAvgQual\tGC(%)\tsum_n\nreads.fastq.gz\tFASTQ\tDNA\t4\t324\t81\t81.0\t81\t81\t81\t81\t0\t81\t2\t100\t0\t20.00\t48.15\t0\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "rust-fx",
+        "lint",
+        "reads.fastq.gz"
+      ],
+      "exit_code": 0,
+      "stdout": "2026-10-31T14:48:11.505113Z  INFO fq::commands::lint: fq-lint start\n2026-10-31T14:48:11.505119Z  INFO fq::commands::lint: validating single end read\n2026-10-31T14:48:11.505121Z  INFO fq::validators: disabled validators: []\n2026-10-31T14:48:11.505124Z  INFO fq::validators: enabled single read validators: [\"[S003] NameValidator\", \"[S004] CompleteValidator\", \"[S002] AlphabetValidator\", \"[S001] PlusLineValidator\", \"[S005] ConsistentSeqQualValidator\", \"[S006] QualityStringValidator\"]\n2026-10-31T14:48:11.505125Z  INFO fq::validators: enabled paired read validators: []\n2026-10-31T14:48:11.505126Z  INFO fq::commands::lint: starting validation\n2026-10-31T14:48:11.505145Z  INFO fq::commands::lint: read 4 records\n2026-10-31T14:48:11.505146Z  INFO fq::commands::lint: fq-lint end\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "rust-fx",
+        "fq2fa",
+        "-w",
+        "0",
+        "reads.fastq.gz",
+        "-o",
+        "reads.fasta"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "rust-cutadapt",
+        "-a",
+        "AGATCGGAAGAGC",
+        "-m",
+        "30",
+        "-j",
+        "4",
+        "-o",
+        "trimmed.fastq.gz",
+        "reads.fastq.gz"
+      ],
+      "exit_code": 0,
+      "stdout": "This is cutadapt 0.1.0 with Python 3\nCommand line parameters: -a AGATCGGAAGAGC -m 30 -j 4 -o trimmed.fastq.gz reads.fastq.gz\nProcessing single-end reads on 4 cores ...\nFinished in 0.001 s (133.124 \u00b5s/read; 0.45 M reads/minute).\n\n=== Summary ===\n\nTotal reads processed:                       4\nReads with adapters:                         4 (100.0%)\n\n== Read fate breakdown ==\nReads that were too short:                   0 (0.0%)\nReads written (passing filters):             4 (100.0%)\n\nTotal basepairs processed:           324 bp\nTotal written (filtered):            272 bp (84.0%)\n\n=== Adapter 1 ===\n\nSequence: AGATCGGAAGAGC; Type: regular 3'; Length: 13; Trimmed: 4 times\n\nMinimum overlap: 3\nNo. of allowed errors:\n1-9 bp: 0; 10-13 bp: 1\n\nBases preceding removed adapters:\n  A: 0.0%\n  C: 0.0%\n  G: 0.0%\n  T: 100.0%\n  none/other: 0.0%\n\nOverview of removed sequences\nlength\tcount\texpect\tmax.err\terror counts\n13\t4\t0.0\t1\t4\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "rust-fastqc",
+        "--extract",
+        "-o",
+        "qc",
+        "trimmed.fastq.gz"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "wrote qc/trimmed_fastqc/fastqc_data.txt\n"
+    },
+    {
+      "command": [
+        "rust-umitools",
+        "extract",
+        "-p",
+        "NNNNNNNN",
+        "-I",
+        "reads.fastq.gz",
+        "-S",
+        "umi.fastq.gz"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "rust-umitools extract: reads in=4 reads out=4 discarded_quality=0 discarded_mismatch=0 too_short=0 wall=0.0s\n"
+    },
+    {
+      "command": [
+        "rust-cutadapt",
+        "-a",
+        "AGATCGGAAGAGC",
+        "-m",
+        "30",
+        "-j",
+        "4",
+        "-o",
+        "umi.trimmed.fastq.gz",
+        "umi.fastq.gz"
+      ],
+      "exit_code": 0,
+      "stdout": "This is cutadapt 0.1.0 with Python 3\nCommand line parameters: -a AGATCGGAAGAGC -m 30 -j 4 -o umi.trimmed.fastq.gz umi.fastq.gz\nProcessing single-end reads on 4 cores ...\nFinished in 0.000 s (90.116 \u00b5s/read; 0.67 M reads/minute).\n\n=== Summary ===\n\nTotal reads processed:                       4\nReads with adapters:                         4 (100.0%)\n\n== Read fate breakdown ==\nReads that were too short:                   0 (0.0%)\nReads written (passing filters):             4 (100.0%)\n\nTotal basepairs processed:           292 bp\nTotal written (filtered):            240 bp (82.2%)\n\n=== Adapter 1 ===\n\nSequence: AGATCGGAAGAGC; Type: regular 3'; Length: 13; Trimmed: 4 times\n\nMinimum overlap: 3\nNo. of allowed errors:\n1-9 bp: 0; 10-13 bp: 1\n\nBases preceding removed adapters:\n  A: 0.0%\n  C: 0.0%\n  G: 0.0%\n  T: 100.0%\n  none/other: 0.0%\n\nOverview of removed sequences\nlength\tcount\texpect\tmax.err\terror counts\n13\t4\t0.0\t1\t4\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "rust-bam",
+        "view",
+        "-b",
+        "-o",
+        "aligned.bam",
+        "aligned.sam"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "rust-bam",
+        "sort",
+        "-o",
+        "sorted.bam",
+        "aligned.bam"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "sorted 4 records\n"
+    },
+    {
+      "command": [
+        "rust-bam",
+        "index",
+        "sorted.bam"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "indexed 4 records into sorted.bam.bai\n"
+    },
+    {
+      "command": [
+        "rust-bam",
+        "flagstat",
+        "sorted.bam"
+      ],
+      "exit_code": 0,
+      "stdout": "4 + 0 in total (QC-passed reads + QC-failed reads)\n4 + 0 primary\n0 + 0 secondary\n0 + 0 supplementary\n0 + 0 duplicates\n0 + 0 primary duplicates\n4 + 0 mapped (100.00% : N/A)\n4 + 0 primary mapped (100.00% : N/A)\n0 + 0 paired in sequencing\n0 + 0 read1\n0 + 0 read2\n0 + 0 properly paired (N/A : N/A)\n0 + 0 with itself and mate mapped\n0 + 0 singletons (N/A : N/A)\n0 + 0 with mate mapped to a different chr\n0 + 0 with mate mapped to a different chr (mapQ>=5)\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "rust-umitools",
+        "dedup",
+        "--random-seed",
+        "1",
+        "--compresslevel",
+        "6",
+        "-I",
+        "sorted.bam",
+        "-S",
+        "dedup.bam"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "rust-umitools 0.2.0 dedup: threads=16 memory=7699MiB method=directional threshold=1 representative=upstream\nhardware            : logical_cpus=20 physical_cpus=14 cache=24MiB available_memory=15398MiB tmp_free=8172MiB chunk=192MiB threads=16\ncontainer limits     : memory=unlimited cpu=unlimited\nreads in            : 4\nbundles             : 2\noutput reads        : 2\nunmapped removed    : 0\nno-UMI skipped      : 0\nMAPQ ties sampled   : 0\nmates recovered     : 0\nevents              : input=4 read2=0 unmapped=0 mate_unmapped=0 chimeric=0 unpaired=0 below_mapq=0 passthrough=0 subset_excluded=0\nparse+cluster       : 0.0s\nsort+commit         : 0.0s\nwall time           : 0.0s\n"
+    },
+    {
+      "command": [
+        "rust-bam",
+        "view",
+        "-c",
+        "dedup.bam"
+      ],
+      "exit_code": 0,
+      "stdout": "2\n",
+      "stderr": ""
+    }
+  ]
+}

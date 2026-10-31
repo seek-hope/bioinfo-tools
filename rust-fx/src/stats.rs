@@ -3,22 +3,16 @@
 //!
 //! # Definitions, with their source
 //!
-//! Every definition below is taken from SeqKit 2.14.0's published documentation
-//! (`https://bioinf.shenwei.me/seqkit/usage/`, retrieved 2026-10-20), because
-//! **the SeqKit binary is not available in this environment** and no value here
-//! could be confirmed against it. The documentation is the same source class the
-//! development plan itself cites (source S21). See `docs/EVIDENCE-W1-3.md` DR-1
-//! for the status this gives the implementation: `experimental`, not `verified`.
+//! Definitions below are checked against pinned SeqKit 2.14.0. In particular,
+//! its Q20/Q30 help says "greater than", but its executable and `stat.go` include
+//! scores exactly at the threshold. Boundary regressions preserve that behavior.
 //!
-//! * **GC(%)** — `(G+C)/(G+C+A+T)`, so ambiguous bases are excluded from the
-//!   *denominator*. This differs from `(G+C)/length`, and the difference is
-//!   visible on any read containing `N`.
+//! * **GC(%)** — `stats` uses total sequence length; `fx2tab -g` excludes
+//!   ambiguous bases from the denominator.
 //! * **AvgQual** — explicitly *not* the arithmetic mean of the quality scores.
 //!   The documented procedure is: scores → error probabilities, mean, → back to a
 //!   score (`seqkit` issue #448).
-//! * **Q20(%)/Q30(%)** — documented as "percentage of bases with the quality
-//!   score greater than 20/30". The strictness of "greater than" (versus "at
-//!   least") is recorded in DR-3 as an open question.
+//! * **Q20(%)/Q30(%)** — percentage of bases with quality score at least 20/30.
 //! * **sum_n** — count of `N`, `n`, `X`, `x`.
 //! * **sum_gap** — count of the gap characters, default `- .` plus space and tab
 //!   (`seqkit seq -g` documents `-G` default `"- \t."`). Disjoint from `sum_n`.
@@ -159,9 +153,9 @@ impl GcSkewCounts {
 pub struct QualStats {
     /// Total bases scored.
     pub bases: u64,
-    /// Bases with a score strictly greater than 20.
+    /// Bases with a score at least 20.
     pub q20: u64,
-    /// Bases with a score strictly greater than 30.
+    /// Bases with a score at least 30.
     pub q30: u64,
     /// Sum of error probabilities, for [`QualStats::average_quality`].
     error_sum: f64,
@@ -175,10 +169,10 @@ impl QualStats {
         for &byte in qualities {
             let score = byte.saturating_sub(base);
             stats.bases += 1;
-            if score > 20 {
+            if score >= 20 {
                 stats.q20 += 1;
             }
-            if score > 30 {
+            if score >= 30 {
                 stats.q30 += 1;
             }
             // Convert the score back to an error probability, as SeqKit's
@@ -352,13 +346,13 @@ mod tests {
     }
 
     #[test]
-    fn quality_percentages_use_the_documented_predicate() {
-        // 'I' is 73; with base 33 the score is 40 (>30). '5' is 53 -> 20.
-        let stats = QualStats::from_qualities(b"II5I", 33);
+    fn quality_percentages_include_threshold_scores() {
+        // SeqKit 2.14.0 includes Q20 ('5') and Q30 ('?') at their thresholds.
+        let stats = QualStats::from_qualities(b"II5?", 33);
         assert_eq!(stats.bases, 4);
-        assert_eq!(stats.q20, 3, "'5' is exactly 20, which is not > 20");
+        assert_eq!(stats.q20, 4);
         assert_eq!(stats.q30, 3);
-        assert_eq!(stats.q20_percent(), Some(75.0));
+        assert_eq!(stats.q20_percent(), Some(100.0));
         assert_eq!(stats.q30_percent(), Some(75.0));
     }
 

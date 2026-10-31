@@ -1,0 +1,554 @@
+{
+  "upstream": "seqkit v2.14.0",
+  "rust": "/tmp/bioinfo-readme-measured-fx",
+  "cases": [
+    {
+      "case": "sanger-Q19",
+      "command": [
+        "stats",
+        "-a",
+        "-T",
+        "-E",
+        "sanger",
+        "-"
+      ],
+      "passed": true,
+      "observations": {
+        "rust": {
+          "exit": 0,
+          "stdout": "file\tformat\ttype\tnum_seqs\tsum_len\tmin_len\tavg_len\tmax_len\tQ1\tQ2\tQ3\tsum_gap\tN50\tN50_num\tQ20(%)\tQ30(%)\tAvgQual\tGC(%)\tsum_n\n-\tFASTQ\tDNA\t1\t4\t4\t4.0\t4\t4\t4\t4\t0\t4\t1\t0\t0\t19.00\t50.00\t0\n",
+          "stderr": "",
+          "independent_threshold_check": true
+        },
+        "upstream": {
+          "exit": 0,
+          "stdout": "file\tformat\ttype\tnum_seqs\tsum_len\tmin_len\tavg_len\tmax_len\tQ1\tQ2\tQ3\tsum_gap\tN50\tN50_num\tQ20(%)\tQ30(%)\tAvgQual\tGC(%)\tsum_n\n-\tFASTQ\tDNA\t1\t4\t4\t4.0\t4\t4\t4\t4\t0\t4\t1\t0\t0\t19.00\t50.00\t0\n",
+          "stderr": "",
+          "independent_threshold_check": true
+        }
+      }
+    },
+    {
+      "case": "sanger-Q20",
+      "command": [
+        "stats",
+        "-a",
+        "-T",
+        "-E",
+        "sanger",
+        "-"
+      ],
+      "passed": true,
+      "observations": {
+        "rust": {
+          "exit": 0,
+          "stdout": "file\tformat\ttype\tnum_seqs\tsum_len\tmin_len\tavg_len\tmax_len\tQ1\tQ2\tQ3\tsum_gap\tN50\tN50_num\tQ20(%)\tQ30(%)\tAvgQual\tGC(%)\tsum_n\n-\tFASTQ\tDNA\t1\t4\t4\t4.0\t4\t4\t4\t4\t0\t4\t1\t100\t0\t20.00\t50.00\t0\n",
+          "stderr": "",
+          "independent_threshold_check": true
+        },
+        "upstream": {
+          "exit": 0,
+          "stdout": "file\tformat\ttype\tnum_seqs\tsum_len\tmin_len\tavg_len\tmax_len\tQ1\tQ2\tQ3\tsum_gap\tN50\tN50_num\tQ20(%)\tQ30(%)\tAvgQual\tGC(%)\tsum_n\n-\tFASTQ\tDNA\t1\t4\t4\t4.0\t4\t4\t4\t4\t0\t4\t1\t100\t0\t20.00\t50.00\t0\n",
+          "stderr": "",
+          "independent_threshold_check": true
+        }
+      }
+    },
+    {
+      "case": "sanger-Q21",
+      "command": [
+        "stats",
+        "-a",
+        "-T",
+        "-E",
+        "sanger",
+        "-"
+      ],
+      "passed": true,
+      "observations": {
+        "rust": {
+          "exit": 0,
+          "stdout": "file\tformat\ttype\tnum_seqs\tsum_len\tmin_len\tavg_len\tmax_len\tQ1\tQ2\tQ3\tsum_gap\tN50\tN50_num\tQ20(%)\tQ30(%)\tAvgQual\tGC(%)\tsum_n\n-\tFASTQ\tDNA\t1\t4\t4\t4.0\t4\t4\t4\t4\t0\t4\t1\t100\t0\t21.00\t50.00\t0\n",
+          "stderr": "",
+          "independent_threshold_check": true
+        },
+        "upstream": {
+          "exit": 0,
+          "stdout": "file\tformat\ttype\tnum_seqs\tsum_len\tmin_len\tavg_len\tmax_len\tQ1\tQ2\tQ3\tsum_gap\tN50\tN50_num\tQ20(%)\tQ30(%)\tAvgQual\tGC(%)\tsum_n\n-\tFASTQ\tDNA\t1\t4\t4\t4.0\t4\t4\t4\t4\t0\t4\t1\t100\t0\t21.00\t50.00\t0\n",
+          "stderr": "",
+          "independent_threshold_check": true
+        }
+      }
+    },
+    {
+      "case": "sanger-Q29",
+      "command": [
+        "stats",
+        "-a",
+        "-T",
+        "-E",
+        "sanger",
+        "-"
+      ],
+      "passed": true,
+      "observations": {
+        "rust": {
+          "exit": 0,
+          "stdout": "file\tformat\ttype\tnum_seqs\tsum_len\tmin_len\tavg_len\tmax_len\tQ1\tQ2\tQ3\tsum_gap\tN50\tN50_num\tQ20(%)\tQ30(%)\tAvgQual\tGC(%)\tsum_n\n-\tFASTQ\tDNA\t1\t4\t4\t4.0\t4\t4\t4\t4\t0\t4\t1\t100\t0\t29.00\t50.00\t0\n",
+          "stderr": "",
+          "independent_threshold_check": true
+        },
+        "upstream": {
+          "exit": 0,
+          "stdout": "file\tformat\ttype\tnum_seqs\tsum_len\tmin_len\tavg_len\tmax_len\tQ1\tQ2\tQ3\tsum_gap\tN50\tN50_num\tQ20(%)\tQ30(%)\tAvgQual\tGC(%)\tsum_n\n-\tFASTQ\tDNA\t1\t4\t4\t4.0\t4\t4\t4\t4\t0\t4\t1\t100\t0\t29.00\t50.00\t0\n",
+          "stderr": "",
+          "independent_threshold_check": true
+        }
+      }
+    },
+    {
+      "case": "sanger-Q30",
+      "command": [
+        "stats",
+        "-a",
+        "-T",
+        "-E",
+        "sanger",
+        "-"
+      ],
+      "passed": true,
+      "observations": {
+        "rust": {
+          "exit": 0,
+          "stdout": "file\tformat\ttype\tnum_seqs\tsum_len\tmin_len\tavg_len\tmax_len\tQ1\tQ2\tQ3\tsum_gap\tN50\tN50_num\tQ20(%)\tQ30(%)\tAvgQual\tGC(%)\tsum_n\n-\tFASTQ\tDNA\t1\t4\t4\t4.0\t4\t4\t4\t4\t0\t4\t1\t100\t100\t30.00\t50.00\t0\n",
+          "stderr": "",
+          "independent_threshold_check": true
+        },
+        "upstream": {
+          "exit": 0,
+          "stdout": "file\tformat\ttype\tnum_seqs\tsum_len\tmin_len\tavg_len\tmax_len\tQ1\tQ2\tQ3\tsum_gap\tN50\tN50_num\tQ20(%)\tQ30(%)\tAvgQual\tGC(%)\tsum_n\n-\tFASTQ\tDNA\t1\t4\t4\t4.0\t4\t4\t4\t4\t0\t4\t1\t100\t100\t30.00\t50.00\t0\n",
+          "stderr": "",
+          "independent_threshold_check": true
+        }
+      }
+    },
+    {
+      "case": "sanger-Q31",
+      "command": [
+        "stats",
+        "-a",
+        "-T",
+        "-E",
+        "sanger",
+        "-"
+      ],
+      "passed": true,
+      "observations": {
+        "rust": {
+          "exit": 0,
+          "stdout": "file\tformat\ttype\tnum_seqs\tsum_len\tmin_len\tavg_len\tmax_len\tQ1\tQ2\tQ3\tsum_gap\tN50\tN50_num\tQ20(%)\tQ30(%)\tAvgQual\tGC(%)\tsum_n\n-\tFASTQ\tDNA\t1\t4\t4\t4.0\t4\t4\t4\t4\t0\t4\t1\t100\t100\t31.00\t50.00\t0\n",
+          "stderr": "",
+          "independent_threshold_check": true
+        },
+        "upstream": {
+          "exit": 0,
+          "stdout": "file\tformat\ttype\tnum_seqs\tsum_len\tmin_len\tavg_len\tmax_len\tQ1\tQ2\tQ3\tsum_gap\tN50\tN50_num\tQ20(%)\tQ30(%)\tAvgQual\tGC(%)\tsum_n\n-\tFASTQ\tDNA\t1\t4\t4\t4.0\t4\t4\t4\t4\t0\t4\t1\t100\t100\t31.00\t50.00\t0\n",
+          "stderr": "",
+          "independent_threshold_check": true
+        }
+      }
+    },
+    {
+      "case": "illumina-1.3+-Q19",
+      "command": [
+        "stats",
+        "-a",
+        "-T",
+        "-E",
+        "illumina-1.3+",
+        "-"
+      ],
+      "passed": true,
+      "observations": {
+        "rust": {
+          "exit": 0,
+          "stdout": "file\tformat\ttype\tnum_seqs\tsum_len\tmin_len\tavg_len\tmax_len\tQ1\tQ2\tQ3\tsum_gap\tN50\tN50_num\tQ20(%)\tQ30(%)\tAvgQual\tGC(%)\tsum_n\n-\tFASTQ\tDNA\t1\t4\t4\t4.0\t4\t4\t4\t4\t0\t4\t1\t0\t0\t19.00\t50.00\t0\n",
+          "stderr": "",
+          "independent_threshold_check": true
+        },
+        "upstream": {
+          "exit": 0,
+          "stdout": "file\tformat\ttype\tnum_seqs\tsum_len\tmin_len\tavg_len\tmax_len\tQ1\tQ2\tQ3\tsum_gap\tN50\tN50_num\tQ20(%)\tQ30(%)\tAvgQual\tGC(%)\tsum_n\n-\tFASTQ\tDNA\t1\t4\t4\t4.0\t4\t4\t4\t4\t0\t4\t1\t0\t0\t19.00\t50.00\t0\n",
+          "stderr": "",
+          "independent_threshold_check": true
+        }
+      }
+    },
+    {
+      "case": "illumina-1.3+-Q20",
+      "command": [
+        "stats",
+        "-a",
+        "-T",
+        "-E",
+        "illumina-1.3+",
+        "-"
+      ],
+      "passed": true,
+      "observations": {
+        "rust": {
+          "exit": 0,
+          "stdout": "file\tformat\ttype\tnum_seqs\tsum_len\tmin_len\tavg_len\tmax_len\tQ1\tQ2\tQ3\tsum_gap\tN50\tN50_num\tQ20(%)\tQ30(%)\tAvgQual\tGC(%)\tsum_n\n-\tFASTQ\tDNA\t1\t4\t4\t4.0\t4\t4\t4\t4\t0\t4\t1\t100\t0\t20.00\t50.00\t0\n",
+          "stderr": "",
+          "independent_threshold_check": true
+        },
+        "upstream": {
+          "exit": 0,
+          "stdout": "file\tformat\ttype\tnum_seqs\tsum_len\tmin_len\tavg_len\tmax_len\tQ1\tQ2\tQ3\tsum_gap\tN50\tN50_num\tQ20(%)\tQ30(%)\tAvgQual\tGC(%)\tsum_n\n-\tFASTQ\tDNA\t1\t4\t4\t4.0\t4\t4\t4\t4\t0\t4\t1\t100\t0\t20.00\t50.00\t0\n",
+          "stderr": "",
+          "independent_threshold_check": true
+        }
+      }
+    },
+    {
+      "case": "illumina-1.3+-Q21",
+      "command": [
+        "stats",
+        "-a",
+        "-T",
+        "-E",
+        "illumina-1.3+",
+        "-"
+      ],
+      "passed": true,
+      "observations": {
+        "rust": {
+          "exit": 0,
+          "stdout": "file\tformat\ttype\tnum_seqs\tsum_len\tmin_len\tavg_len\tmax_len\tQ1\tQ2\tQ3\tsum_gap\tN50\tN50_num\tQ20(%)\tQ30(%)\tAvgQual\tGC(%)\tsum_n\n-\tFASTQ\tDNA\t1\t4\t4\t4.0\t4\t4\t4\t4\t0\t4\t1\t100\t0\t21.00\t50.00\t0\n",
+          "stderr": "",
+          "independent_threshold_check": true
+        },
+        "upstream": {
+          "exit": 0,
+          "stdout": "file\tformat\ttype\tnum_seqs\tsum_len\tmin_len\tavg_len\tmax_len\tQ1\tQ2\tQ3\tsum_gap\tN50\tN50_num\tQ20(%)\tQ30(%)\tAvgQual\tGC(%)\tsum_n\n-\tFASTQ\tDNA\t1\t4\t4\t4.0\t4\t4\t4\t4\t0\t4\t1\t100\t0\t21.00\t50.00\t0\n",
+          "stderr": "",
+          "independent_threshold_check": true
+        }
+      }
+    },
+    {
+      "case": "illumina-1.3+-Q29",
+      "command": [
+        "stats",
+        "-a",
+        "-T",
+        "-E",
+        "illumina-1.3+",
+        "-"
+      ],
+      "passed": true,
+      "observations": {
+        "rust": {
+          "exit": 0,
+          "stdout": "file\tformat\ttype\tnum_seqs\tsum_len\tmin_len\tavg_len\tmax_len\tQ1\tQ2\tQ3\tsum_gap\tN50\tN50_num\tQ20(%)\tQ30(%)\tAvgQual\tGC(%)\tsum_n\n-\tFASTQ\tDNA\t1\t4\t4\t4.0\t4\t4\t4\t4\t0\t4\t1\t100\t0\t29.00\t50.00\t0\n",
+          "stderr": "",
+          "independent_threshold_check": true
+        },
+        "upstream": {
+          "exit": 0,
+          "stdout": "file\tformat\ttype\tnum_seqs\tsum_len\tmin_len\tavg_len\tmax_len\tQ1\tQ2\tQ3\tsum_gap\tN50\tN50_num\tQ20(%)\tQ30(%)\tAvgQual\tGC(%)\tsum_n\n-\tFASTQ\tDNA\t1\t4\t4\t4.0\t4\t4\t4\t4\t0\t4\t1\t100\t0\t29.00\t50.00\t0\n",
+          "stderr": "",
+          "independent_threshold_check": true
+        }
+      }
+    },
+    {
+      "case": "illumina-1.3+-Q30",
+      "command": [
+        "stats",
+        "-a",
+        "-T",
+        "-E",
+        "illumina-1.3+",
+        "-"
+      ],
+      "passed": true,
+      "observations": {
+        "rust": {
+          "exit": 0,
+          "stdout": "file\tformat\ttype\tnum_seqs\tsum_len\tmin_len\tavg_len\tmax_len\tQ1\tQ2\tQ3\tsum_gap\tN50\tN50_num\tQ20(%)\tQ30(%)\tAvgQual\tGC(%)\tsum_n\n-\tFASTQ\tDNA\t1\t4\t4\t4.0\t4\t4\t4\t4\t0\t4\t1\t100\t100\t30.00\t50.00\t0\n",
+          "stderr": "",
+          "independent_threshold_check": true
+        },
+        "upstream": {
+          "exit": 0,
+          "stdout": "file\tformat\ttype\tnum_seqs\tsum_len\tmin_len\tavg_len\tmax_len\tQ1\tQ2\tQ3\tsum_gap\tN50\tN50_num\tQ20(%)\tQ30(%)\tAvgQual\tGC(%)\tsum_n\n-\tFASTQ\tDNA\t1\t4\t4\t4.0\t4\t4\t4\t4\t0\t4\t1\t100\t100\t30.00\t50.00\t0\n",
+          "stderr": "",
+          "independent_threshold_check": true
+        }
+      }
+    },
+    {
+      "case": "illumina-1.3+-Q31",
+      "command": [
+        "stats",
+        "-a",
+        "-T",
+        "-E",
+        "illumina-1.3+",
+        "-"
+      ],
+      "passed": true,
+      "observations": {
+        "rust": {
+          "exit": 0,
+          "stdout": "file\tformat\ttype\tnum_seqs\tsum_len\tmin_len\tavg_len\tmax_len\tQ1\tQ2\tQ3\tsum_gap\tN50\tN50_num\tQ20(%)\tQ30(%)\tAvgQual\tGC(%)\tsum_n\n-\tFASTQ\tDNA\t1\t4\t4\t4.0\t4\t4\t4\t4\t0\t4\t1\t100\t100\t31.00\t50.00\t0\n",
+          "stderr": "",
+          "independent_threshold_check": true
+        },
+        "upstream": {
+          "exit": 0,
+          "stdout": "file\tformat\ttype\tnum_seqs\tsum_len\tmin_len\tavg_len\tmax_len\tQ1\tQ2\tQ3\tsum_gap\tN50\tN50_num\tQ20(%)\tQ30(%)\tAvgQual\tGC(%)\tsum_n\n-\tFASTQ\tDNA\t1\t4\t4\t4.0\t4\t4\t4\t4\t0\t4\t1\t100\t100\t31.00\t50.00\t0\n",
+          "stderr": "",
+          "independent_threshold_check": true
+        }
+      }
+    },
+    {
+      "case": "fastq-width-None",
+      "command": [
+        "fq2fa",
+        "-"
+      ],
+      "passed": true,
+      "observations": {
+        "rust": {
+          "exit": 0,
+          "stdout": ">read description\nACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGT\n",
+          "stderr": "",
+          "independent_format_check": true
+        },
+        "upstream": {
+          "exit": 0,
+          "stdout": ">read description\nACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGT\n",
+          "stderr": "",
+          "independent_format_check": true
+        }
+      }
+    },
+    {
+      "case": "fastq-width-0",
+      "command": [
+        "fq2fa",
+        "-w",
+        "0",
+        "-"
+      ],
+      "passed": true,
+      "observations": {
+        "rust": {
+          "exit": 0,
+          "stdout": ">read description\nACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGT\n",
+          "stderr": "",
+          "independent_format_check": true
+        },
+        "upstream": {
+          "exit": 0,
+          "stdout": ">read description\nACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGT\n",
+          "stderr": "",
+          "independent_format_check": true
+        }
+      }
+    },
+    {
+      "case": "fastq-width-1",
+      "command": [
+        "fq2fa",
+        "-w",
+        "1",
+        "-"
+      ],
+      "passed": true,
+      "observations": {
+        "rust": {
+          "exit": 0,
+          "stdout": ">read description\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\n",
+          "stderr": "",
+          "independent_format_check": true
+        },
+        "upstream": {
+          "exit": 0,
+          "stdout": ">read description\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\n",
+          "stderr": "",
+          "independent_format_check": true
+        }
+      }
+    },
+    {
+      "case": "fastq-width-60",
+      "command": [
+        "fq2fa",
+        "-w",
+        "60",
+        "-"
+      ],
+      "passed": true,
+      "observations": {
+        "rust": {
+          "exit": 0,
+          "stdout": ">read description\nACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGT\nACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGT\nACGTACGTACGTACGTACGTACGTACGTACGT\n",
+          "stderr": "",
+          "independent_format_check": true
+        },
+        "upstream": {
+          "exit": 0,
+          "stdout": ">read description\nACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGT\nACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGT\nACGTACGTACGTACGTACGTACGTACGTACGT\n",
+          "stderr": "",
+          "independent_format_check": true
+        }
+      }
+    },
+    {
+      "case": "fastq-width-80",
+      "command": [
+        "fq2fa",
+        "-w",
+        "80",
+        "-"
+      ],
+      "passed": true,
+      "observations": {
+        "rust": {
+          "exit": 0,
+          "stdout": ">read description\nACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGT\nACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGT\n",
+          "stderr": "",
+          "independent_format_check": true
+        },
+        "upstream": {
+          "exit": 0,
+          "stdout": ">read description\nACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGT\nACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGT\n",
+          "stderr": "",
+          "independent_format_check": true
+        }
+      }
+    },
+    {
+      "case": "fasta-width-None",
+      "command": [
+        "fq2fa",
+        "-"
+      ],
+      "passed": true,
+      "observations": {
+        "rust": {
+          "exit": 0,
+          "stdout": ">read description\nACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGT\n",
+          "stderr": "",
+          "independent_format_check": true
+        },
+        "upstream": {
+          "exit": 0,
+          "stdout": ">read description\nACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGT\n",
+          "stderr": "",
+          "independent_format_check": true
+        }
+      }
+    },
+    {
+      "case": "fasta-width-0",
+      "command": [
+        "fq2fa",
+        "-w",
+        "0",
+        "-"
+      ],
+      "passed": true,
+      "observations": {
+        "rust": {
+          "exit": 0,
+          "stdout": ">read description\nACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGT\n",
+          "stderr": "",
+          "independent_format_check": true
+        },
+        "upstream": {
+          "exit": 0,
+          "stdout": ">read description\nACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGT\n",
+          "stderr": "",
+          "independent_format_check": true
+        }
+      }
+    },
+    {
+      "case": "fasta-width-1",
+      "command": [
+        "fq2fa",
+        "-w",
+        "1",
+        "-"
+      ],
+      "passed": true,
+      "observations": {
+        "rust": {
+          "exit": 0,
+          "stdout": ">read description\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\n",
+          "stderr": "",
+          "independent_format_check": true
+        },
+        "upstream": {
+          "exit": 0,
+          "stdout": ">read description\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\nA\nC\nG\nT\n",
+          "stderr": "",
+          "independent_format_check": true
+        }
+      }
+    },
+    {
+      "case": "fasta-width-60",
+      "command": [
+        "fq2fa",
+        "-w",
+        "60",
+        "-"
+      ],
+      "passed": true,
+      "observations": {
+        "rust": {
+          "exit": 0,
+          "stdout": ">read description\nACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGT\nACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGT\nACGTACGTACGTACGTACGTACGTACGTACGT\n",
+          "stderr": "",
+          "independent_format_check": true
+        },
+        "upstream": {
+          "exit": 0,
+          "stdout": ">read description\nACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGT\nACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGT\nACGTACGTACGTACGTACGTACGTACGTACGT\n",
+          "stderr": "",
+          "independent_format_check": true
+        }
+      }
+    },
+    {
+      "case": "fasta-width-80",
+      "command": [
+        "fq2fa",
+        "-w",
+        "80",
+        "-"
+      ],
+      "passed": true,
+      "observations": {
+        "rust": {
+          "exit": 0,
+          "stdout": ">read description\nACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGT\nACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGT\n",
+          "stderr": "",
+          "independent_format_check": true
+        },
+        "upstream": {
+          "exit": 0,
+          "stdout": ">read description\nACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGT\nACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGTACGT\n",
+          "stderr": "",
+          "independent_format_check": true
+        }
+      }
+    }
+  ]
+}

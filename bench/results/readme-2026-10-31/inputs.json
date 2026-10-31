@@ -1,0 +1,154 @@
+{
+  "schema_version": 1,
+  "seed": 20261031,
+  "real_source": {
+    "run": "SRR2584863",
+    "organism": "Escherichia coli B str. REL606",
+    "instrument": "Illumina HiSeq 2500",
+    "mate": 1,
+    "url": "https://ftp.sra.ebi.ac.uk/vol1/fastq/SRR258/003/SRR2584863/SRR2584863_1.fastq.gz",
+    "md5": "4a1529a4165970302d6d8cb50b6e7a43",
+    "bytes": 183292913,
+    "records": 1553259,
+    "sha256": "c2b69fdbe3423a8ab9fb185cb57cff574874e32deb3cebd3396a0deb3eb2dcf9"
+  },
+  "generator_sha256": "ab13d23ffdc1f4df3c46b121b08566dd1a9adf846e60d5422750281e0417e7df",
+  "datasets": [
+    {
+      "id": "synthetic-100000",
+      "kind": "fastq",
+      "path": "/tmp/bioinfo-readme-benchmark/synthetic-100000.fastq",
+      "source": "synthetic",
+      "seed": 20261031,
+      "records": 100000,
+      "bases": 15000000,
+      "gc_bases": 7509641,
+      "min_length": 150,
+      "max_length": 150,
+      "sha256": "5b5567c37911fbb90eeeee9ee4cf055a06ca37ada4f5752ac9e2f082e091cd5e",
+      "bytes": 32400000,
+      "independent_fastq_validation": true
+    },
+    {
+      "id": "synthetic-1000000",
+      "kind": "fastq",
+      "path": "/tmp/bioinfo-readme-benchmark/synthetic-1000000.fastq",
+      "source": "synthetic",
+      "seed": 20261031,
+      "records": 1000000,
+      "bases": 150000000,
+      "gc_bases": 75077905,
+      "min_length": 150,
+      "max_length": 150,
+      "sha256": "cf79538d0b08dd95b659bf1ca7d284c66a2cf9635e250cb975859ccdcb2f4b1f",
+      "bytes": 324000000,
+      "independent_fastq_validation": true
+    },
+    {
+      "id": "real-100000",
+      "kind": "fastq",
+      "path": "/tmp/bioinfo-readme-benchmark/real-100000.fastq",
+      "source": "SRR2584863",
+      "sampling": "seeded uniform record indices without replacement; retained source order",
+      "seed": 20261031,
+      "records": 100000,
+      "bases": 15000000,
+      "gc_bases": 7607375,
+      "min_length": 150,
+      "max_length": 150,
+      "sha256": "75c18153184ba1574b498a362cbdd3add53baf201a85afdd1022bf3e732bb03e",
+      "bytes": 36777761,
+      "independent_fastq_validation": true
+    },
+    {
+      "id": "real-1000000",
+      "kind": "fastq",
+      "path": "/tmp/bioinfo-readme-benchmark/real-1000000.fastq",
+      "source": "SRR2584863",
+      "sampling": "seeded uniform record indices without replacement; retained source order",
+      "seed": 20261031,
+      "records": 1000000,
+      "bases": 150000000,
+      "gc_bases": 76097573,
+      "min_length": 150,
+      "max_length": 150,
+      "sha256": "e118285a9688a73f43fb420237f5d236886cb8430a265176e4ffd6a132233d04",
+      "bytes": 367775653,
+      "independent_fastq_validation": true
+    },
+    {
+      "id": "synthetic-bam-100000",
+      "kind": "bam",
+      "records": 100000,
+      "bundles": 3556,
+      "expected_dedup_records": 7112,
+      "unsorted": "/tmp/bioinfo-readme-benchmark/bam-100000/unsorted.bam",
+      "sorted": "/tmp/bioinfo-readme-benchmark/bam-100000/sorted.bam",
+      "expected_qnames": "/tmp/bioinfo-readme-benchmark/bam-100000/dedup-qnames.txt",
+      "sha256": {
+        "unsorted.bam": "1f8aac0545db0eb0f65e94eaf2d7d165160216a467bc1317ff7bf439f969cadb",
+        "sorted.bam": "023e59bd0d27178c62861ae042ad4d67fded1a0364da0a3456eb01ead57bac6c",
+        "sorted.bam.bai": "e4626890fde03c32ab095b924b8473e2ae2dcdc3ffcb0355cdfac051e63aa461",
+        "dedup-qnames.txt": "5f1084092aa979ab0153920cceea2fffeb6f0c521498080d503fa764a4510c67"
+      },
+      "generator": {
+        "seed": 20261031,
+        "bundle_scales": [
+          1,
+          10,
+          100
+        ],
+        "umi_counts_per_scale": [
+          6,
+          2,
+          1,
+          1
+        ],
+        "umi_distance_from_major": [
+          0,
+          1,
+          2,
+          10
+        ],
+        "independent_representative": "unique highest MAPQ"
+      }
+    },
+    {
+      "id": "synthetic-bam-1000000",
+      "kind": "bam",
+      "records": 1000000,
+      "bundles": 35701,
+      "expected_dedup_records": 71402,
+      "unsorted": "/tmp/bioinfo-readme-benchmark/bam-1000000/unsorted.bam",
+      "sorted": "/tmp/bioinfo-readme-benchmark/bam-1000000/sorted.bam",
+      "expected_qnames": "/tmp/bioinfo-readme-benchmark/bam-1000000/dedup-qnames.txt",
+      "sha256": {
+        "unsorted.bam": "eaa0524018871f25422bba4faa9bef377483d7a8f8fcb8618a229e9fd842cc95",
+        "sorted.bam": "f321c734856a2f4adab1e4e2aa4dd99639eaa3cf6efc8e08cd77a4305e78695c",
+        "sorted.bam.bai": "6478d0044f84f3ca38c26ad83d6923a54f1a4b490e5d323e1e5f94396267b677",
+        "dedup-qnames.txt": "7165e621e4aa7950c30772062331447f0b46efbde834372d724542f28d790f11"
+      },
+      "generator": {
+        "seed": 20261031,
+        "bundle_scales": [
+          1,
+          10,
+          100
+        ],
+        "umi_counts_per_scale": [
+          6,
+          2,
+          1,
+          1
+        ],
+        "umi_distance_from_major": [
+          0,
+          1,
+          2,
+          10
+        ],
+        "independent_representative": "unique highest MAPQ"
+      }
+    }
+  ]
+}

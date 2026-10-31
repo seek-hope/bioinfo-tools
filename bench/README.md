@@ -1,6 +1,25 @@
-# Benchmark runner
+# Benchmarks
 
-`run.py` measures the five shipped CLIs with deterministic generated inputs and a
+## Current README measurements
+
+The [2026-10-31 report](RESULTS-README.md) covers 33 conditions and 330 timed
+executions, with real/synthetic inputs, five paired repetitions, CPU affinity,
+explicit compression, and per-run correctness checks. It publishes slower results
+as well as faster ones. FastQC has a separate limited validation scope and no
+speed ratio. This run used tmpfs, not physical disk.
+
+Use [`readme_inputs.py`](readme_inputs.py),
+[`readme_benchmark.py`](readme_benchmark.py) and
+[`summarize_readme.py`](summarize_readme.py) with the
+[protocol](README-PROTOCOL.md) and reproduction commands in the report.
+[`prepare_readme_oracles.py`](prepare_readme_oracles.py) stages existing pinned
+installations; it does not download tools. The original results, input manifests,
+executed scripts and failed pilot are under
+[`results/readme-2026-10-31/`](results/readme-2026-10-31/).
+
+## Historical structural runner
+
+`run.py` measures the five native CLIs with deterministic generated inputs and a
 correctness check on the same input. It writes one JSON document conforming to
 [`schema.json`](schema.json).
 
@@ -75,6 +94,8 @@ python3 bench/upstream.py --sizes 1,10 --repeats 2 \
 
 In the recorded 1x/10x, two-repeat run, all 10 size/case combinations were
 output-equivalent ([`results/upstream-current.json`](results/upstream-current.json)).
+The recorded measured revision is `3b9bea4`; `0125a9b` is the commit that saved
+that evidence. These historical measurements are not reused as current speedups.
 `fastqc_data.txt` was byte-identical after the FastQC Adapter Content and Basic
 Statistics unit fixes; BAM cases compare records plus a header with `@PG`
 provenance lines removed, while FASTQ and TSV cases compare bytes. Upstream binaries are supplied via

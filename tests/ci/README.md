@@ -27,7 +27,10 @@ bash tests/ci/check.sh --with-fastx-qc-oracles --isolate-network
 The gate exits immediately on failure without a PASS footer. Bad
 arguments exit 2; missing prerequisites, missing oracles, or wrong versions exit 3;
 a failing check keeps its command's exit status. Base mode prints that external
-oracles were not run.
+oracles were not run. The base gate also runs the ten README-benchmark evidence
+controls; BAM-specific controls skip when the pinned local samtools is absent.
+The optional FASTX/QC gate adds 22 independent/pinned SeqKit checks for inclusive
+Q20/Q30 and `fq2fa` line wrapping, using the freshly built native binary.
 
 `cargo metadata` is used to locate the actual target directory, so
 `CARGO_TARGET_DIR` and Cargo target configuration are respected. This is a native

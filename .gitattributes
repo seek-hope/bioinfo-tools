@@ -1,0 +1,2 @@
+# Unified-diff snapshots use a single space on empty context lines.
+bench/results/readme-2026-10-31/native-source.patch -whitespace

@@ -1,0 +1,13 @@
+synthetic-100000 cutadapt_plain block=0 order=['rust', 'upstream'] ok=True wall={'rust': 0.2784, 'upstream': 0.2816}
+synthetic-100000 fx_stats block=0 order=['rust', 'upstream'] ok=False wall={'rust': 0.2334, 'upstream': 0.0614}
+synthetic-100000 fx_fq2fa block=0 order=['rust', 'upstream'] ok=False wall={'rust': 0.0261, 'upstream': 0.0238}
+synthetic-100000 fq_lint block=0 order=['rust', 'upstream'] ok=True wall={'rust': 0.0488, 'upstream': 0.0205}
+synthetic-100000 fastqc block=0 order=['rust', 'upstream'] ok=False wall={'rust': 0.8963, 'upstream': 0.0254}
+real-100000 cutadapt_plain block=0 order=['rust', 'upstream'] ok=True wall={'rust': 0.2914, 'upstream': 0.2348}
+real-100000 fx_stats block=0 order=['rust', 'upstream'] ok=False wall={'rust': 0.2337, 'upstream': 0.0738}
+real-100000 fx_fq2fa block=0 order=['rust', 'upstream'] ok=False wall={'rust': 0.0272, 'upstream': 0.0342}
+real-100000 fq_lint block=0 order=['rust', 'upstream'] ok=True wall={'rust': 0.048, 'upstream': 0.0217}
+real-100000 fastqc block=0 order=['rust', 'upstream'] ok=False wall={'rust': 0.9187, 'upstream': 0.025}
+synthetic-bam-100000 bam_flagstat block=0 order=['rust', 'upstream'] ok=True wall={'rust': 0.0104, 'upstream': 0.0077}
+synthetic-bam-100000 bam_sort block=0 order=['rust', 'upstream'] ok=True wall={'rust': 0.1714, 'upstream': 0.0483}
+synthetic-bam-100000 umi_dedup block=0 order=['rust', 'upstream'] ok=True wall={'rust': 0.045, 'upstream': 1.2862}

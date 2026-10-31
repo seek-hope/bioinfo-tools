@@ -1,0 +1,20 @@
+{
+  "recorded_utc": "2026-10-31T14:54:54.379131+00:00",
+  "recipe": [
+    "cargo build --release --workspace --bins --locked",
+    "cargo build --release --locked -p rust-fx"
+  ],
+  "measured_rust_fx_sha256": "f9c17835b6c3e8e4a37475f21e27f84fc5068492a4dceff36fa7a1a42641e50a",
+  "workspace_rust_fx_sha256": "40f20566cb0075212c42fe3bc9f1bc238e5b76a474f4626500bad985cff6101e",
+  "measured_rebuild_matches": true,
+  "shared_package_feature_differences": {
+    "memchr v2.8.3": {
+      "rust_fx_package": "alloc,std",
+      "workspace": "alloc,default,std"
+    },
+    "flate2 v1.1.10": {
+      "rust_fx_package": "any_impl,default,miniz_oxide,runtime_detection,rust_backend",
+      "workspace": "any_impl,any_zlib,default,miniz_oxide,runtime_detection,rust_backend,zlib-rs"
+    }
+  }
+}

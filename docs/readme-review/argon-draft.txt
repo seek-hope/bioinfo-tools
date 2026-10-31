@@ -1,0 +1,99 @@
+Markdown# bioinfo-tools
+
+[中文文档](README.zh-CN.md) | [Compatibility Matrix](compat/README.md) | [Benchmark Harness](bench/README.md) | [Benchmark Results](bench/RESULTS-README.md) | [Development Plan](docs/DEVELOPMENT-PLAN.md) | [CI & Verification](tests/ci/README.md) | [Distribution Notes](dist/README.md)
+
+`bioinfo-tools` is a Rust workspace (snapshot commit `aaf4ba4`) providing five native command-line utilities (`rust-cutadapt`, `rust-umitools`, `rust-bam`, `rust-fastqc`, and `rust-fx`) and two shared libraries for high-throughput sequencing preprocessing, FASTX manipulation, post-alignment BAM processing, and quality control.
+
+These tools run natively without invoking Python or Java at runtime. Upstream packages are only required when running cross-implementation verification tests or benchmarks. Rather than claiming drop-in replacement status across every upstream option, this repository targets an explicitly tracked workflow subset—covering adapter trimming, UMI extraction and deduplication, FASTX statistics and conversion, post-alignment BAM sorting/indexing/metrics, and sequence quality checks. The workspace does not include a sequence aligner; BAM workflows operate on outputs produced by external aligners.
+
+## Tools and Upstream Baselines
+
+| CLI Tool | Reference Baseline | Primary Scope in Typical Workflows | Parallelism & Runtime Notes |
+| :--- | :--- | :--- | :--- |
+| `rust-fx` | `SeqKit` 2.14.0, `fq` 0.12.0 | FASTA/FASTQ statistics, validation (`lint`), filtering, format conversion, and translation | Accepts `-j`, but currently executes single-threaded |
+| `rust-cutadapt` | `cutadapt` 4.6 | Single- and paired-end adapter trimming, quality trimming, and read length filtering | Supports multi-threading via `-j` |
+| `rust-fastqc` | `FastQC` 0.13.0 | 12-module QC statistics, custom limits/adapters/contaminants, and tabular report generation | Native execution; memory scales with read length, tiles, and distinct sequences |
+| `rust-umitools` | `UMI-tools` 1.1.6 | UMI extraction into read headers, whitelist generation, and post-alignment `dedup`/`group`/`count` | Single-core graph/window deduplication on coordinate-sorted BAMs |
+| `rust-bam` | `samtools` 1.24 | Post-alignment `view`, `sort`, `index`, `flagstat`, `depth`, and `coverage` | `sort` currently executes single-threaded |
+
+## Building from Source
+
+Building requires Rust `1.91` or newer (the repository toolchain is pinned to `1.99.1`). Existing release workflows under [`dist/README.md`](dist/README.md) only package `rust-cutadapt` and `rust-umitools`, and historical release binaries do not reflect the current workspace state. Build all five CLIs directly from source:
+
+```bash
+cargo build --release --workspace --bins --locked
+export PATH="$PWD/target/release:$PATH"
+Example WorkflowThe commands below illustrate a typical preprocessing, QC, UMI extraction, and post-alignment deduplication pipeline (adjust -p to match your library UMI structure):Bash# 1. Inspect FASTQ statistics and validate formatting
+rust-fx stats -a -T reads.fastq.gz
+rust-fx lint reads.fastq.gz
+
+# 2. Trim adapters and filter short reads using 4 threads
+rust-cutadapt -a AGATCGGAAGAGC -m 30 -j 4 -o trimmed.fastq.gz reads.fastq.gz
+
+# 3. Run quality control checks and extract report data
+mkdir -p qc
+rust-fastqc --extract -o qc reads.fastq.gz
+
+# 4. Extract 8 bp UMIs into the read identifier (adjust pattern per library)
+rust-umitools extract -p NNNNNNNN -I reads.fastq.gz -S umi.fastq.gz
+
+# 5. Align umi.fastq.gz with an external aligner (e.g., BWA / Bowtie2 / STAR)
+#    while preserving read names, producing aligned.bam, then sort and index:
+rust-bam sort -o sorted.bam aligned.bam
+rust-bam index sorted.bam
+
+# 6. Deduplicate coordinate-sorted BAM using default read_id UMI mode
+rust-umitools dedup --random-seed 1 --compresslevel 6 -I sorted.bam -S dedup.bam
+Compatibility Boundaries and Known LimitationsCompatibility is tracked across 266 cataloged feature rows in compat/README.md: 189 verified, 9 experimental, 57 unsupported, and 11 exception (plus 2 JVM startup flags marked unachievable as a separate reason column). Because rows span unequal granularity, no overall percentage is calculated.FastQC differences and report coverage: rust-fastqc computes all 12 statistic modules, and HTML/ZIP output remains experimental (full static plot graphics and bundled visual assets are not yet complete). While specific upstream counting issues have mathematical proofs documented as exception, rust-fastqc also exhibits unattributed discrepancies on 150 bp per-sequence GC distribution and 1M-read duplication degree estimation. Do not treat every numerical difference as an upstream bug or claim full report equivalence.Recent correctness fixes: Implementation bugs in rust-fx stats (Q20/Q30 calculation) and fq2fa default line wrapping have been resolved and verified against 22 independent oracle checks.Concurrency and memory: rust-bam sort is single-threaded, and rust-fx -j is accepted for CLI compatibility without parallel execution. QC state tracks per-position, tile, and distinct sequence structures rather than running in constant memory.Performance Comparison本次实测结果待填入 (Measured benchmark results pending insertion).Benchmarks are running on a local Linux laptop (Intel i7-13700H, non-exclusive environment) using inputs staged in tmpfs (warm filesystem cache), evaluated at 100k and 1M real and deterministic synthetic reads (UMI benchmarks use synthetic datasets only). Each case executes 1 warmup plus 5 randomized paired process repetitions pinned to a single physical P-core (CPU 4) or a 4 P-core set (CPUs 0,2,4,6). Preliminary runs show that several Rust commands are currently slower than upstream C/Go/Python baselines; all speedups and slowdowns will be reported transparently in bench/RESULTS-README.md.Primary Workload Table (Placeholder)Case / CommandDataset (100k / 1M)CPU AffinityUpstream Time & Peak RSSRust Time & Peak RSSOutput Verificationcutadapt trimmingPendingCPU 4 / 0,2,4,6本次实测结果待填入本次实测结果待填入Pendingumitools extract / dedupPending (Synthetic)CPU 4本次实测结果待填入本次实测结果待填入Pendingbam view / sort / flagstatPendingCPU 4本次实测结果待填入本次实测结果待填入Pendingfx stats / filteringPendingCPU 4本次实测结果待填入本次实测结果待填入PendingFastQC Separate Timing & Verification Table (Placeholder)Because rust-fastqc omits full plot rendering and differs in 150 bp GC distribution and 1M-read duplication estimation, workload is not equivalent to FastQC 0.13.0 and no equal-work speedup ratio is computed:ToolDataset (100k / 1M)CPU AffinityWall Time & Peak RSSModule Verification NotesFastQC 0.13.0 vs rust-fastqcPendingCPU 4本次实测结果待填入本次实测结果待填入RoadmapNear-term focus: Complete missing features, resolve remaining numerical discrepancies (such as FastQC 150 bp GC and 1M duplication estimation), and profile/optimize slower code paths across the existing five CLI tools. See docs/DEVELOPMENT-PLAN.md.Future candidates (no committed timeline): Interval/BED/GFF processing, expression counting, and VCF/BCF variant manipulation are recorded as long-term candidate directions without scheduled delivery dates.Testing and VerificationRun the standard workspace test and verification suite via tests/ci/README.md:Bashbash tests/ci/check.sh
+# When pinned upstream FASTX/QC oracle tools are installed locally:
+bash tests/ci/check.sh --with-fastx-qc-oracles
+
+```markdown
+# bioinfo-tools
+
+[English README](README.md) | [兼容矩阵](compat/README.md) | [基准测试说明](bench/README.md) | [实测结果报告](bench/RESULTS-README.md) | [开发计划](docs/DEVELOPMENT-PLAN.md) | [CI 与验证](tests/ci/README.md) | [分发打包说明](dist/README.md)
+
+`bioinfo-tools` 是一个原生 Rust 生信工具工作区（当前源码快照 `aaf4ba4`），包含五个命令行工具（`rust-cutadapt`、`rust-umitools`、`rust-bam`、`rust-fastqc`、`rust-fx`）与两个共享库，用于高通量测序数据的接头修剪、FASTX 统计与转换、外部比对后 BAM 处理、UMI 去重以及质量控制。
+
+所有工具在正常运行阶段均不调用 Python 或 Java 上游程序；仅在执行交叉正确性对照测试与性能基准测试时才需要安装上游环境。本仓库不宣称对上游所有参数做无差别替代，而是针对明确登记的常用生信工作流子集进行逐项验证。本仓库不包含序列比对器（aligner），BAM 与 UMI 去重流程均处理外部比对软件生成的 BAM 文件。
+
+## 工具定位与上游对照基线
+
+| CLI 工具 | 对照基线版本 | 生信流程中的主要用途 | 并行与运行时说明 |
+| :--- | :--- | :--- | :--- |
+| `rust-fx` | `SeqKit` 2.14.0, `fq` 0.12.0 | FASTA/FASTQ 统计、格式校验（`lint`）、筛选、转换与翻译 | 接收 `-j` 参数，但当前版本实际按单线程执行 |
+| `rust-cutadapt` | `cutadapt` 4.6 | 单端/双端接头修剪、质量剪切与短序列过滤 | 支持通过 `-j` 启用多线程处理 |
+| `rust-fastqc` | `FastQC` 0.13.0 | 12 个 QC 统计模块、自定义阈值/接头/污染物列表及数据表导出 | 原生单进程执行；内存随读长、tile 及不同序列数增长 |
+| `rust-umitools` | `UMI-tools` 1.1.6 | 提取 UMI 至 read 名称、白名单生成、比对后 `dedup`/`group`/`count` | 基于坐标排序 BAM 的单核窗口/图算法去重 |
+| `rust-bam` | `samtools` 1.24 | 比对后 `view`、`sort`、`index`、`flagstat`、`depth` 与 `coverage` | `sort` 子命令当前为单线程实现 |
+
+## 源码构建
+
+构建需 Rust `1.91` 及以上版本（仓库固定工具链为 `1.99.1`）。现有发布流程（见 [`dist/README.md`](dist/README.md)）仅打包 `rust-cutadapt` 与 `rust-umitools`，且历史 Release 产物不代表当前源码状态。请直接从源码编译全部五个 CLI：
+
+```bash
+cargo build --release --workspace --bins --locked
+export PATH="$PWD/target/release:$PATH"
+常用工作流命令示例以下示例展示从原始 FASTQ 质控、修剪、UMI 提取，到外部比对后排序、建索引及默认 read_id 模式 UMI 去重的完整流程（请根据实验文库结构调整 -p 模式）：Bash# 1. 统计 FASTQ 基本指标并检查格式合法性
+rust-fx stats -a -T reads.fastq.gz
+rust-fx lint reads.fastq.gz
+
+# 2. 使用 4 线程修剪接头并过滤短于 30 bp 的序列
+rust-cutadapt -a AGATCGGAAGAGC -m 30 -j 4 -o trimmed.fastq.gz reads.fastq.gz
+
+# 3. 运行质量控制并解压输出数据表目录
+mkdir -p qc
+rust-fastqc --extract -o qc reads.fastq.gz
+
+# 4. 提取 8 bp UMI 并写入 read 名称（请按实际文库修改 pattern）
+rust-umitools extract -p NNNNNNNN -I reads.fastq.gz -S umi.fastq.gz
+
+# 5. 使用外部比对器（如 BWA / Bowtie2 / STAR，需保留 read 名称）生成 aligned.bam，随后排序并建立索引：
+rust-bam sort -o sorted.bam aligned.bam
+rust-bam index sorted.bam
+
+# 6. 基于默认 read_id 模式对坐标排序后的 BAM 进行 UMI 去重
+rust-umitools dedup --random-seed 1 --compresslevel 6 -I sorted.bam -S dedup.bam
+兼容性边界与已知限制compat/README.md 按 266 行登记了当前参数与子命令状态：189 verified（已验证）、9 experimental（实验性）、57 unsupported（未支持）、11 exception（已知差异例外），另有 2 个拒绝支持的 JVM 启动参数在独立原因列标为 unachievable。因各行功能粒度不同，不计算总体兼容百分比。FastQC 差异与报告完整度： rust-fastqc 已实现 12 个统计模块的数据表计算，HTML/ZIP 导出仍处于 experimental 阶段（尚缺完整图形渲染与静态资源）。除部分有独立数学证明并登记为 exception 的上游计数修正外，当前实现针对 150 bp 数据的 GC 分布以及 100 万 reads 规模的重复度（duplication）估计仍存在未归因差异。请勿将所有数值差异归结为上游错误，亦不宣称全报告等价。近期缺陷修复： rust-fx stats 的 Q20/Q30 统计缺陷及 fq2fa 默认换行行为缺陷已完成修复，并通过 22 项独立 oracle 对照验证。并发与内存特征： rust-bam sort 为单线程；rust-fx -j 仅做参数兼容而不并行；QC 内存包含按碱基位置、tile 与不同序列（distinct sequences）维护的状态，并非恒定内存。性能对比本次实测结果待填入。性能实验正在本机 Linux 环境（Intel i7-13700H，非独占笔记本）上执行：输入置于 tmpfs（warm filesystem cache），覆盖 10 万与 100 万条真实及固定随机种子合成 reads（UMI 实验仅使用合成数据）。每个案例采用 1 次预热 + 5 次独立进程随机配对重复，绑定单物理 P 核（CPU 4）或 4 个物理 P 核（CPU 0,2,4,6）。预实验显示多项 Rust 命令当前慢于上游实现，正式结果将如实完整列入下表及 bench/RESULTS-README.md。同工作量主测试表（占位）测试案例 / 命令数据规模 (100k / 1M)CPU 绑定上游耗时与峰值 RSSRust 耗时与峰值 RSS输出验证状态cutadapt 接头修剪待填入CPU 4 / 0,2,4,6本次实测结果待填入本次实测结果待填入待填入umitools extract / dedup待填入（仅合成数据）CPU 4本次实测结果待填入本次实测结果待填入待填入bam view / sort / flagstat待填入CPU 4本次实测结果待填入本次实测结果待填入待填入fx stats / 筛选转换待填入CPU 4本次实测结果待填入本次实测结果待填入待填入FastQC 独立耗时与数据验证表（占位）由于 rust-fastqc 缺少完整图形生成，且在 150 bp GC 分布与百万 reads 重复度估计上存在未归因差异，其工作量与 FastQC 0.13.0 不等价，因此单独展示耗时与模块核对情况，不计算等工作量加速比：对照工具数据规模 (100k / 1M)CPU 绑定耗时与峰值 RSS12 模块验证与差异说明FastQC 0.13.0 vs rust-fastqc待填入CPU 4本次实测结果待填入本次实测结果待填入路线图（方案 C）近期重点： 补全现有五个工具的未完成特性，排查并收敛尚未归因的统计差异（如 FastQC 150 bp GC 与 1M reads 重复度估计），针对慢于上游的子命令开展性能剖析与优化（详见 docs/DEVELOPMENT-PLAN.md）。未来候选方向（不承诺时间表）： 基因组区间处理（BED/GFF）、表达量计数以及变异文件处理（VCF/BCF）均列为远期候选方向，当前无新增实现时间承诺。测试与验证入口通过 tests/ci/README.md 运行仓库自带的测试与验证脚本：Bashbash tests/ci/check.sh
+# 若本机已安装固定版本的上游 FASTX/QC 对照工具（oracles），可启用扩展对照验证：
+bash tests/ci/check.sh --with-fastx-qc-oracles
