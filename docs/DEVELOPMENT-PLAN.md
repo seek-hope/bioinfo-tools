@@ -16,7 +16,7 @@
 | `rust-umitools` | extract、whitelist、dedup、group、count、count_tab；`--output-stats` 的五种聚类方法与 NumPy null 模型 | gene-map 代表 read 受上游 hash 顺序影响；`--representative=stable` 是项目扩展；CRAM 缓冲有已记录限制 |
 | `rust-fx` | FASTX 统计、变换、过滤、去重、排序、翻译和区间提取等已注册命令；全局 `--compress-level` | 未实现命令和剩余选项见矩阵；部分 two-pass、输入提交策略和上游错误路径仍为 experimental |
 | `rust-bam` | view、flagstat、idxstats、quickcheck、index、sort、depth、coverage、flags、head | depth/coverage 为子集；CRAM 不支持；sort 单线程；其余 samtools 命令未覆盖 |
-| `rust-fastqc` | fastqc_data、summary、数据表 HTML 和 ZIP；10 个 QC 模块；内置/自定义 contaminant 匹配；MultiQC 消费路径 | HTML/ZIP 为 experimental；不生成图形文件；Kmer 和 tile 模块未实现 |
+| `rust-fastqc` | fastqc_data、summary、数据表 HTML 和 ZIP；12 个 QC 模块；自定义 limits/adapter/contaminant；MultiQC 消费路径 | HTML/ZIP 为 experimental；不生成完整图形和辅助资源；已证明的计算修正以 exception 登记 |
 
 发布工作流目前只打包 `rust-cutadapt` 和 `rust-umitools`。其余组件虽可从源码构建，
 但不能算作已发布。
@@ -77,7 +77,7 @@ experimental，之后已按第 4 节用户决定登记为有独立证据的 exce
 - **T4 / UMI-tools**：`--output-stats` 的五种聚类方法、单/多 bundle 和多个 seed 已完成固定版本差分；
   保留 gene-map 和 `--representative=stable` 的实验状态，除非有新的上游证据。
 - **T5 / samtools**：已完成 depth/coverage 的已登记选项和输出工件批次；CRAM、顺序 region 和其余命令仍是独立范围。
-- **T6 / FastQC**：已完成 contaminant、长度/分组选项和 HTML/ZIP 数据表批次；完整 plot、辅助资源和 Kmer/tile 仍未覆盖。
+- **T6 / FastQC**：已完成 contaminant、adapter、tile、Kmer、limits、长度/分组选项和 HTML/ZIP 数据表批次；完整 plot 与辅助资源仍未覆盖。
 - **T7 / SeqKit/fq**：已完成已实现命令的选项批次，包括 translate、subseq、sort、faidx、replace 等；
   未实现命令、压缩 two-pass 和剩余全局选项需要另行分批。
 
@@ -139,10 +139,10 @@ listing 结果。输入采用单遍读取，内存 O(最长记录和输出编码
 不能作为该模块证据；本批新增专用验证，不改写旧比较。见
 [接头配置证据](EVIDENCE-FASTQC-ADAPTERS.md)。
 
-Kmer 原先只在组件缺口说明中列出，本批补入矩阵，未删除任何原行。当前共 266 行：
-189 verified、9 experimental、59 unsupported、9 exception。`--limits` 需连同 Kmer 的真实
-计算一起关闭：验收包括配置解析、ignore 开关、所有警告/失败阈值及模块数据，不能仅接收
-参数而不执行。完整 HTML/ZIP 资源继续保持 experimental。
+Kmer 和 tile 原先只在组件缺口说明中列出，现已补入矩阵，未删除任何原行。
+当前共 266 行：189 verified、9 experimental、57 unsupported、11 exception。
+`--limits` 连同 Kmer 的真实计算已实现；配置解析、ignore 开关、警告/失败阈值及模块数据
+均有专用验收。完整 HTML/ZIP 资源继续保持 experimental。
 
 按用户后续要求，以上批次已提交并推送为 `c3c7477`，对应远端 quality 运行
 `41186678371` 通过。继续新增矩阵 `unachievable` 原因列（schema 3），仅 JVM 启动
@@ -152,12 +152,19 @@ Kmer 原先只在组件缺口说明中列出，本批补入矩阵，未删除任
 上游把缺失观测当作 Q0 的错误。专用 53 项对照包含 48 项完全一致、4 项缺失值修正和
 1 项非法 Phred64 拒绝。独立有理数模型、负向控制与工件检查验证数据正确性。
 并修复共享分组在 75 bp 和较大区间上的错误，以及科学计数法格式。
-详见 [tile 与约束列证据](EVIDENCE-FASTQC-TILES.md)。当前 266 行为：189 verified、
+详见 [tile 与约束列证据](EVIDENCE-FASTQC-TILES.md)。该批次的 266 行为：189 verified、
 9 experimental、59 unsupported、9 exception；其中 2 行具有非空 unachievable 原因。
+已推送为 `1c7ee2b`，远程质量运行 `41192242981` 通过。
 
-下一批 `--limits` 还需完整 Kmer 实现。源码核查识别了抽样计数缩放、二项分布尾部和
-位置机会数的可疑行为；须先用固定版本执行与数学反例确认，再实现并验证。它们属于
-可实现但尚未完成的计算功能，不能归为 unachievable。
+随后实现 `--limits` 与原生 Kmer，并用固定版本运行和独立 Decimal 二项概率模型证明
+抽样计数缩放、排除观测值的尾概率、依赖 read 顺序的机会数和显著性判定缺陷。
+原生实现修正这些问题，拒绝只加载一部分配置后继续产出报告；两行登记为 exception，
+不填写 unachievable。另修复变长 read 的质量百分位分组、偶数样本中位长度、空 read
+处理和长度分布分组。见 [Kmer 与 limits 证据](EVIDENCE-FASTQC-KMER-LIMITS.md)。
+本批两道工作区质量门已通过（`/tmp/bioinfo-kmer-acceptance-*.log`，退出码均为 0）。
+专用验收 141 项：111 项配置/模块一致、27 项 Kmer 修正、1 项结构性配置拒绝和
+2 项一致的路径预检拒绝；九项证明控制及十二项 CI harness 控制通过。
+后续 FastQC 重点是完整图形/资源、输入格式和并行参数。
 
 ## 5. 后续方向需要单独选择
 

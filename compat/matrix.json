@@ -1976,11 +1976,11 @@
       "upstream": "FastQC 0.13.0",
       "surface": "-l --limits",
       "kind": "option",
-      "status": "unsupported",
+      "status": "exception",
       "unachievable": "",
-      "evidence": "absent from compat/current/rust-fastqc.help.txt",
-      "deviation": "",
-      "next_action": "T6: implement or re-scope"
+      "evidence": "tests/oracle/fastqc_kmer_limits_diff.py: 141 cases (111 exact, 27 kmer corrections, 1 partial-config rejection, 2 exact preflight rejections); all switches/thresholds and Decimal/Fraction proof",
+      "deviation": "FASTQC-KMER-LIMITS-CORRECTNESS: native configuration and Kmer computation; correct sampled counts, inclusive tails, full opportunities and significance; reject partial config before output",
+      "next_action": "Maintain configuration differential and independent kmer correctness proof"
     },
     {
       "tool": "rust-fastqc",
@@ -2207,11 +2207,11 @@
       "upstream": "FastQC 0.13.0",
       "surface": "module:kmer-content",
       "kind": "feature",
-      "status": "unsupported",
+      "status": "exception",
       "unachievable": "",
-      "evidence": "rust-fastqc/src/absent.rs; FastQC 0.13.0 KmerContent module is not implemented",
-      "deviation": "",
-      "next_action": "T6: implement position-specific enrichment before enabling via --limits"
+      "evidence": "tests/oracle/fastqc_kmer_limits_diff.py: 141 cases; independent Decimal binomial/Fraction enrichment proof, permutation invariance, sampling, top-20 and artifact checks",
+      "deviation": "FASTQC-KMER-LIMITS-CORRECTNESS: correct 1-in-50 count scale, inclusive tail, position opportunities and most-significant verdict; deterministic lexical ties",
+      "next_action": "Maintain independent kmer model and upstream defect reproductions"
     },
     {
       "tool": "rust-fastqc",
@@ -2222,7 +2222,7 @@
       "unachievable": "",
       "evidence": "tests/oracle/fastqc_tile_diff.py: 53 cases (48 exact, 4 missing-data corrections, 1 invalid Phred64 rejection); rational mean proof and artifact checks",
       "deviation": "FASTQC-TILE-MISSING-QUALITY: unobserved tile/groups remain NaN and are excluded from the reference mean; measured Q0 is retained",
-      "next_action": "Maintain observed-only quality proof; custom limits and complete plots retain their separate rows"
+      "next_action": "Maintain observed-only quality proof and custom limits; complete plots retain their separate rows"
     },
     {
       "tool": "rust-fastqc",

@@ -46,9 +46,10 @@ standard Rust. It needs no external executable or new dependency. It implements:
   module ordering, `fastqc_data.txt`, summaries, ZIP data and native HTML data.
   Invalid retained Phred64 bytes below ASCII 64 exit 1 before native output.
 
-Kmer Content and `--limits` remain unsupported. Custom module enablement and
-thresholds must be completed with the Kmer implementation; they are not silently
-accepted. The full upstream plot/HTML/ZIP resources remain experimental.
+At this batch's boundary Kmer Content and `--limits` remained unsupported.
+They are implemented in the subsequent [Kmer/limits batch](EVIDENCE-FASTQC-KMER-LIMITS.md),
+including all custom thresholds and module switches. The full upstream
+plot/HTML/ZIP resources remain experimental.
 
 ## Missing observation is not a measured zero quality
 

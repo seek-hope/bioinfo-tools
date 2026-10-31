@@ -275,6 +275,14 @@ def main() -> int:
     # FastQC: all pinned CLI options plus report artifacts and modules.
     for tokens in option_groups(UPSTREAM / "fastqc.help.txt"):
         surface = " ".join(tokens)
+        if "--limits" in tokens:
+            add(
+                "rust-fastqc", surface, "option", "exception",
+                "tests/oracle/fastqc_kmer_limits_diff.py: 141 cases (111 exact, 27 kmer corrections, 1 partial-config rejection, 2 exact preflight rejections); all switches/thresholds and Decimal/Fraction proof",
+                "FASTQC-KMER-LIMITS-CORRECTNESS: native configuration and Kmer computation; correct sampled counts, inclusive tails, full opportunities and significance; reject partial config before output",
+                "Maintain configuration differential and independent kmer correctness proof",
+            )
+            continue
         if "--adapters" in tokens:
             add(
                 "rust-fastqc", surface, "option", "exception",
@@ -359,15 +367,15 @@ def main() -> int:
         ),
         (
             "module:kmer-content",
-            "unsupported",
-            "rust-fastqc/src/absent.rs; FastQC 0.13.0 KmerContent module is not implemented",
-            "T6: implement position-specific enrichment before enabling via --limits",
+            "exception",
+            "tests/oracle/fastqc_kmer_limits_diff.py: 141 cases; independent Decimal binomial/Fraction enrichment proof, permutation invariance, sampling, top-20 and artifact checks",
+            "Maintain independent kmer model and upstream defect reproductions",
         ),
         (
             "module:per-tile-quality",
             "exception",
             "tests/oracle/fastqc_tile_diff.py: 53 cases (48 exact, 4 missing-data corrections, 1 invalid Phred64 rejection); rational mean proof and artifact checks",
-            "Maintain observed-only quality proof; custom limits and complete plots retain their separate rows",
+            "Maintain observed-only quality proof and custom limits; complete plots retain their separate rows",
         ),
         (
             "module:contaminants",
@@ -389,6 +397,7 @@ def main() -> int:
             status,
             evidence,
             {
+                "module:kmer-content": "FASTQC-KMER-LIMITS-CORRECTNESS: correct 1-in-50 count scale, inclusive tail, position opportunities and most-significant verdict; deterministic lexical ties",
                 "module:adapter-content": "FASTQC-ADAPTER-CORRECTNESS: correct equal-length/read-order defect and reject empty config before report creation",
                 "module:per-tile-quality": "FASTQC-TILE-MISSING-QUALITY: unobserved tile/groups remain NaN and are excluded from the reference mean; measured Q0 is retained",
             }.get(surface, ""),

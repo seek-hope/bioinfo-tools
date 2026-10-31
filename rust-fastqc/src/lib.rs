@@ -32,7 +32,8 @@
 //! (when sampled headers contain tile IDs), Per sequence quality scores, Per base sequence content,
 //! Per base N content, Per sequence GC content,
 //! Sequence Length Distribution, Sequence Duplication Levels, Overrepresented
-//! sequences, Adapter Content (default or custom literal adapters).
+//! sequences, Adapter Content (default or custom literal adapters), and Kmer
+//! Content (enabled through `--limits`; disabled in the bundled configuration).
 //!
 //! See [`modules`] for the emitted modules and [`absent`] for the remaining gaps.
 
@@ -41,9 +42,11 @@
 
 pub mod absent;
 pub mod adapters;
+pub mod config;
 pub mod contaminants;
 pub mod error;
 pub mod grouping;
+pub mod kmer;
 pub mod limits;
 pub mod modules;
 pub mod report;
@@ -62,7 +65,7 @@ pub const FASTQC_VERSION: &str = "0.13.0";
 pub const HEADER: &str = "##FastQC\t0.13.0";
 
 /// The QC modules this implementation computes.
-pub const COMPUTED_MODULES: [&str; 11] = [
+pub const COMPUTED_MODULES: [&str; 12] = [
     "Basic Statistics",
     "Per base sequence quality",
     "Per tile sequence quality",
@@ -74,4 +77,5 @@ pub const COMPUTED_MODULES: [&str; 11] = [
     "Sequence Duplication Levels",
     "Overrepresented sequences",
     "Adapter Content",
+    "Kmer Content",
 ];

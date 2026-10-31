@@ -145,8 +145,9 @@ adapters, longest read length L, and S bytes of adapter definitions. Existing
 QC position and distinct-sequence structures still contribute to total memory;
 this does not claim constant-memory QC or a measured performance improvement.
 
-`--limits` remains unsupported because Kmer Content configuration and statistics are
-not implemented. Per tile sequence quality is now implemented natively; its
-observed-only missing-data correction and grouping evidence are recorded in
+At this batch's boundary `--limits` and Kmer Content were unsupported. The
+subsequent [Kmer/limits batch](EVIDENCE-FASTQC-KMER-LIMITS.md) implements them,
+including custom adapter thresholds. Per tile sequence quality is implemented;
+its observed-only missing-data correction and grouping evidence are recorded in
 [EVIDENCE-FASTQC-TILES.md](EVIDENCE-FASTQC-TILES.md). HTML/ZIP plot completeness
 remains experimental.

@@ -9,6 +9,7 @@ use std::process::ExitCode;
 use clap::{Arg, ArgAction, Command};
 
 use rust_fastqc::absent;
+use rust_fastqc::config::FastqcConfig;
 use rust_fastqc::contaminants::Contaminant;
 use rust_fastqc::error::{Error, EXIT_CLASSES};
 use rust_fastqc::limits::{check_read, QcLimits};
@@ -44,7 +45,7 @@ fn main() -> ExitCode {
     match run(&matches) {
         Ok(()) => ExitCode::SUCCESS,
         Err(error) => {
-            eprintln!("{}", bioinfo_common::error_line(error.message()));
+            eprintln!("{}", error.diagnostic());
             ExitCode::from(u8::try_from(error.exit_code()).unwrap_or(1))
         }
     }
@@ -181,6 +182,14 @@ fn cli() -> Command {
                 .help("adapter list in name<TAB>sequence format"),
         )
         .arg(
+            Arg::new("limits")
+                .short('l')
+                .long("limits")
+                .overrides_with("limits")
+                .value_name("LIMITS")
+                .help("custom FastQC module limits and enablement file"),
+        )
+        .arg(
             Arg::new("contaminants")
                 .short('c')
                 .long("contaminants")
@@ -213,6 +222,28 @@ fn run(matches: &clap::ArgMatches) -> Result<(), Error> {
     };
     let to_stdout = matches.get_flag("stdout");
     let outdir = matches.get_one::<String>("outdir").map(PathBuf::from);
+    let config_path = matches
+        .get_one::<String>("limits")
+        .filter(|path| !path.is_empty())
+        .map(Path::new);
+    if let Some(path) = config_path {
+        if !path.exists() {
+            return Err(Error::launcher(format!(
+                "Limits file {} does not exist",
+                path.display()
+            )));
+        }
+        if !path.is_file() {
+            return Err(Error::launcher(format!(
+                "Limits file {} isn't a file",
+                path.display()
+            )));
+        }
+    }
+    let config = FastqcConfig::load(config_path).map_err(Error::input)?;
+    for diagnostic in &config.diagnostics {
+        eprintln!("{diagnostic}");
+    }
     let adapters = match matches.get_one::<String>("adapters") {
         Some(path) => {
             let text = std::fs::read_to_string(path)
@@ -246,6 +277,7 @@ fn run(matches: &clap::ArgMatches) -> Result<(), Error> {
             AccumulateOptions {
                 quality_offset: offset,
                 limits,
+                config: &config,
                 contaminants: &contaminants,
                 adapters: &adapters,
                 min_length: matches.get_one::<usize>("min_length").copied(),
@@ -333,6 +365,7 @@ fn strip_fastq_extension(name: &str) -> String {
 struct AccumulateOptions<'a> {
     quality_offset: u8,
     limits: QcLimits,
+    config: &'a FastqcConfig,
     contaminants: &'a [Contaminant],
     adapters: &'a [rust_fastqc::adapters::Adapter],
     min_length: Option<usize>,
@@ -352,6 +385,7 @@ fn accumulate(
         input,
         AccumulateOptions {
             quality_offset,
+            config: &FastqcConfig::default(),
             limits,
             contaminants,
             adapters: &rust_fastqc::adapters::defaults(),
@@ -385,6 +419,7 @@ fn accumulate_with_options(input: &Path, options: AccumulateOptions) -> Result<Q
         .map(|value| value.to_string_lossy().into_owned())
         .unwrap_or_else(|| input.to_string_lossy().into_owned());
     let mut stats = QcStats::new(filename);
+    stats.set_config(options.config.clone());
     stats.set_contaminants(options.contaminants.to_vec());
     stats.set_adapters(options.adapters.to_vec());
     stats.set_dup_length(options.dup_length);
@@ -398,7 +433,7 @@ fn accumulate_with_options(input: &Path, options: AccumulateOptions) -> Result<Q
         loop {
             match parser.next_record() {
                 Ok(Some(record)) => {
-                    if record.qualities.is_empty() {
+                    if !record.is_fastq() {
                         return Err(Error::input(format!(
                             "{}: FASTQ input required, but a record has no quality line",
                             input.display()
@@ -437,12 +472,14 @@ fn accumulate_with_options(input: &Path, options: AccumulateOptions) -> Result<Q
                         options.limits,
                     )
                     .map_err(|message| Error::input(format!("{}: {message}", input.display())))?;
-                    if let Some(warning) = stats.tiles.add_read(
-                        record.header,
-                        record.qualities,
-                        options.quality_offset,
-                    ) {
-                        eprintln!("{warning}");
+                    if !stats.config.is_ignored("tile") {
+                        if let Some(warning) = stats.tiles.add_read(
+                            record.header,
+                            record.qualities,
+                            options.quality_offset,
+                        ) {
+                            eprintln!("{warning}");
+                        }
                     }
                     stats.add_read(record.sequence, record.qualities, options.quality_offset);
                 }

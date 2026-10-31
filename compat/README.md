@@ -70,7 +70,11 @@ command can become an exception merely to reduce the unsupported count.
   corrections, one invalid Phred64 rejection). Missing observations remain `NaN`
   and are excluded from the reference mean; observed Q0 is retained. See
   [tile evidence and grouping fixes](../docs/EVIDENCE-FASTQC-TILES.md).
-  Kmer and `--limits` remain open. The JVM launcher options `-j/--java` and `--debug` are
+  Native Kmer and `--limits` now have independent probability/counting proofs,
+  full module switches and thresholds; see [configuration and Kmer evidence](../docs/EVIDENCE-FASTQC-KMER-LIMITS.md).
+  Corrected counts, inclusive tails, full opportunity denominators, verdict selection,
+  and early rejection of partial configuration remain explicit exceptions.
+  The JVM launcher options `-j/--java` and `--debug` are
   explicit native-runtime exceptions: they fail before input/output access with
   exit 2, while ordinary QC requires no JVM or upstream executable.
 - **SeqKit/fq**: `common`, `head`, `grep`, `sort`, `fa2fq`, `faidx`, `rmdup`,

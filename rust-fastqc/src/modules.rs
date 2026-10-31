@@ -15,13 +15,13 @@
 //! | Sequence Duplication Levels | **yes** | 50bp truncation, FastQC's default |
 //! | Overrepresented sequences | **yes** | threshold 0.1% of reads |
 //! | Adapter Content | **yes** | Configured literal adapters, cumulative BaseGroup rows; documented counting corrections |
+//! | Kmer Content | **yes** | Sampled positional enrichment; corrected counts, opportunities and inclusive binomial tails |
 //!
 //! ## Status verdicts
 //!
 //! FastQC labels each module `pass`, `warn` or `fail` using thresholds from its
-//! `Configuration/limits.txt`. This implementation covers the verdicts used by
-//! the measured fixtures, not the whole limits file; the thresholds are recorded
-//! in [`Thresholds`].
+//! `Configuration/limits.txt`. Custom files override thresholds and module
+//! visibility; the thresholds are recorded in [`Thresholds`].
 
 use crate::stats::{java_double, QcStats, BASE_ORDER};
 
@@ -49,8 +49,9 @@ impl Status {
 
 /// The thresholds used to assign [`Status`].
 ///
-/// Only the ones needed by the implemented modules are present. FastQC's full
-/// `limits.txt` covers every module and is not reproduced.
+/// Defaults correspond to the bundled file. Custom-file fallback differences
+/// are applied by [`crate::config::FastqcConfig`].
+#[derive(Clone, Debug)]
 pub struct Thresholds {
     /// `quality_base_lower warn`: lower-quartile warn threshold.
     pub quality_lower_warn: f64,
@@ -84,6 +85,22 @@ pub struct Thresholds {
     pub overrepresented_warn: f64,
     /// `overrepresented error`.
     pub overrepresented_fail: f64,
+    /// `sequence_length warn`: zero disables the variable-length warning.
+    pub length_warn: f64,
+    /// `sequence_length error`: zero disables the empty-read failure.
+    pub length_fail: f64,
+    /// `kmer warn`: minimum `-log10(p)` to warn.
+    pub kmer_warn: f64,
+    /// `kmer error`.
+    pub kmer_fail: f64,
+    /// `tile warn`: maximum absolute deviation.
+    pub tile_warn: f64,
+    /// `tile error`.
+    pub tile_fail: f64,
+    /// `adapter warn`: percentage threshold.
+    pub adapter_warn: f64,
+    /// `adapter error`.
+    pub adapter_fail: f64,
 }
 
 impl Default for Thresholds {
@@ -110,6 +127,14 @@ impl Default for Thresholds {
             quality_sequence_fail: 20.0,
             overrepresented_warn: 0.1,
             overrepresented_fail: 1.0,
+            length_warn: 1.0,
+            length_fail: 1.0,
+            kmer_warn: 2.0,
+            kmer_fail: 5.0,
+            tile_warn: 5.0,
+            tile_fail: 10.0,
+            adapter_warn: 5.0,
+            adapter_fail: 10.0,
         }
     }
 }
@@ -188,7 +213,14 @@ pub fn basic_statistics(stats: &QcStats) -> ModuleResult {
         lines: vec![
             "#Measure\tValue".to_string(),
             format!("Filename\t{}", stats.filename),
-            "File type\tConventional base calls".to_string(),
+            format!(
+                "File type\t{}",
+                if stats.total_sequences == 0 {
+                    "null"
+                } else {
+                    "Conventional base calls"
+                }
+            ),
             "Encoding\tSanger / Illumina 1.9".to_string(),
             format!("Total Sequences\t{}", stats.total_sequences),
             format!("Total Bases\t{}", format_bases(stats.total_bases)),
@@ -229,33 +261,28 @@ pub fn per_base_quality(stats: &QcStats, thresholds: &Thresholds) -> ModuleResul
     let mut worst_lower = f64::INFINITY;
     let mut worst_median = f64::INFINITY;
     for group in &groups {
-        let column = stats.quality_in_range(group.start, group.end);
-        let column = &column;
-        let mean = column.mean();
-        // For a GROUP of positions every column is the AVERAGE of the per-position
-        // values, not the percentile of the pooled histogram. Measured: positions
-        // 10 and 11 have median 36 and 35 individually; the `10-11` row prints
-        // 35.5 in every column. Pooling the histogram instead yields 35, which is
-        // wrong for equalsized groups and badly wrong for the truncated last one.
-        let averaged = |percent: u32| -> f64 {
-            let width = group.end - group.start + 1;
-            if width <= 1 {
-                return column.percentile(percent);
-            }
+        let average = |value: &dyn Fn(&crate::stats::QualityCounts) -> f64| -> f64 {
             let mut sum = 0.0;
-            let mut count = 0u32;
-            for position in group.start..=group.end {
-                if let Some(single) = stats.quality_by_position.get(position - 1) {
-                    sum += single.percentile(percent);
-                    count += 1;
+            let mut count = 0;
+            for position in group.start - 1..group.end {
+                if let Some(column) = stats.quality_by_position.get(position) {
+                    let v = value(column);
+                    if !v.is_nan() {
+                        sum += v;
+                        count += 1;
+                    }
                 }
             }
             if count == 0 {
                 f64::NAN
             } else {
-                sum / count as f64
+                sum / f64::from(count)
             }
         };
+        let mean = average(&|column| column.mean());
+        // Each position has equal weight; only positions with >100 observations
+        // contribute a percentile. An absent percentile must not poison its group.
+        let averaged = |percent| average(&|column| column.percentile(percent));
         let median = averaged(50);
         let lower = averaged(25);
         let upper = averaged(75);
@@ -349,7 +376,7 @@ pub fn per_sequence_quality(stats: &QcStats, thresholds: &Thresholds) -> ModuleR
 /// column rather than `NaN`. Columns print in FastQC's order: G, A, T, C.
 pub fn per_base_sequence_content(stats: &QcStats) -> ModuleResult {
     let mut lines = vec!["#Base\tG\tA\tT\tC".to_string()];
-    let mut max_deviation: f64 = 0.0;
+    let mut max_deviation: f64 = f64::NEG_INFINITY;
     for group in &crate::grouping::base_groups(stats.max_length(), stats.nogroup) {
         let counts = &stats.bases_in_range(group.start, group.end);
         // counts is [A, C, G, T]
@@ -389,9 +416,9 @@ pub fn per_base_sequence_content(stats: &QcStats) -> ModuleResult {
             java_double(c),
         ));
     }
-    let status = if max_deviation > 20.0 {
+    let status = if max_deviation > stats.config.thresholds.sequence_fail {
         Status::Fail
-    } else if max_deviation > 10.0 {
+    } else if max_deviation > stats.config.thresholds.sequence_warn {
         Status::Warn
     } else {
         Status::Pass
@@ -406,7 +433,7 @@ pub fn per_base_sequence_content(stats: &QcStats) -> ModuleResult {
 /// Per base N content.
 pub fn per_base_n_content(stats: &QcStats, thresholds: &Thresholds) -> ModuleResult {
     let mut lines = vec!["#Base\tN-Count".to_string()];
-    let mut worst: f64 = 0.0;
+    let mut worst: f64 = f64::NEG_INFINITY;
     for group in &crate::grouping::base_groups(stats.max_length(), stats.nogroup) {
         let n_count = &stats.n_in_range(group.start, group.end);
         // Denominator is the number of reads that reached these positions.
@@ -579,8 +606,13 @@ pub fn gc_deviation_percent(observed: &[f64], total: f64) -> Option<f64> {
     }
     variance /= total - 1.0;
     let stdev = variance.sqrt();
-    if !stdev.is_finite() || stdev <= 0.0 {
-        return Some(0.0);
+    if stdev.is_infinite() {
+        // An infinite scale yields zero density at every finite GC bin in the
+        // pinned arithmetic, so all observed mass contributes to deviation.
+        return Some(100.0);
+    }
+    if stdev.is_nan() || stdev <= 0.0 {
+        return None;
     }
 
     // 4. Sum of absolute deviations from the normal density, scaled to a percent.
@@ -599,17 +631,61 @@ pub fn gc_deviation_percent(observed: &[f64], total: f64) -> Option<f64> {
 /// Sequence Length Distribution.
 pub fn sequence_length_distribution(stats: &QcStats) -> ModuleResult {
     let mut lines = vec!["#Length\tCount".to_string()];
-    for (length, count) in stats.length_distribution() {
-        lines.push(format!("{}\t{}", length, java_double(count as f64)));
+    let minimum = stats
+        .lengths
+        .keys()
+        .next()
+        .copied()
+        .unwrap_or(0)
+        .saturating_sub(1);
+    let maximum = stats
+        .lengths
+        .keys()
+        .next_back()
+        .copied()
+        .unwrap_or(0)
+        .saturating_add(1);
+    let mut interval = 1;
+    if !stats.nogroup {
+        let mut base = 1;
+        'select: loop {
+            for multiplier in [1, 2, 5] {
+                let candidate = base * multiplier;
+                if (maximum - minimum) / candidate <= 50 {
+                    interval = candidate;
+                    break 'select;
+                }
+            }
+            base *= 10;
+        }
+    }
+    let start = minimum / interval * interval;
+    for lower in (start..=maximum).step_by(interval) {
+        let upper = (lower + interval - 1).min(maximum);
+        let count: u64 = stats
+            .lengths
+            .range(lower..=upper)
+            .map(|(_, count)| *count)
+            .sum();
+        // Padding is retained in graph data but omitted at an empty end row.
+        if count == 0 && (lower == start || upper == maximum) {
+            continue;
+        }
+        let label = if interval == 1 {
+            lower.to_string()
+        } else {
+            format!("{lower}-{upper}")
+        };
+        lines.push(format!("{label}\t{}", java_double(count as f64)));
     }
     // `limits.txt`: "The actual tests warn if you have sequences of different
     // length, and error if you have sequences of zero length." The values (1/1)
     // are just on/off switches.
     let distinct = stats.lengths.len();
     let has_zero = stats.lengths.contains_key(&0);
-    let status = if has_zero {
+    let status = if has_zero && stats.config.thresholds.length_fail != 0.0 {
         Status::Fail
-    } else if distinct > 1 {
+    } else if distinct > 1 && stats.config.thresholds.length_warn != 0.0 {
         Status::Warn
     } else {
         Status::Pass
@@ -624,10 +700,14 @@ pub fn sequence_length_distribution(stats: &QcStats) -> ModuleResult {
 /// Sequence Duplication Levels.
 pub fn sequence_duplication(stats: &QcStats, thresholds: &Thresholds) -> ModuleResult {
     // FastQC buckets duplication by "how many times was this sequence seen".
-    let total = stats.total_sequences.max(1) as f64;
+    let total = stats.total_sequences as f64;
     let unique = stats.sequences.len() as f64;
     // `unique / total * 100`, divide first, to match Java's bit pattern.
-    let deduplicated = unique / total * 100.0;
+    let deduplicated = if stats.total_sequences == 0 {
+        100.0
+    } else {
+        unique / total * 100.0
+    };
 
     let mut buckets: [f64; 16] = [0.0; 16];
     for count in stats.sequences.values() {
@@ -680,11 +760,7 @@ pub fn sequence_duplication(stats: &QcStats, thresholds: &Thresholds) -> ModuleR
         // Divide first: Java computes `value / total * 100`, which yields
         // 62.66666666666667 where `value * 100 / total` yields ...664. The bit
         // pattern is part of the byte comparison.
-        let percent = if total == 0.0 {
-            0.0
-        } else {
-            value / total * 100.0
-        };
+        let percent = value / total * 100.0;
         lines.push(format!("{}\t{}", label, java_double(percent)));
     }
 
@@ -847,9 +923,9 @@ pub fn adapter_content(stats: &QcStats) -> ModuleResult {
             }
             lines.push(row.join("\t"));
         }
-        let status = if worst > 10.0 {
+        let status = if worst > stats.config.thresholds.adapter_fail {
             Status::Fail
-        } else if worst > 5.0 {
+        } else if worst > stats.config.thresholds.adapter_warn {
             Status::Warn
         } else {
             Status::Pass
@@ -870,24 +946,51 @@ pub fn adapter_content(stats: &QcStats) -> ModuleResult {
 
 /// Build every module result, in FastQC's order.
 pub fn all_modules(stats: &QcStats) -> Vec<ModuleResult> {
-    let thresholds = Thresholds::default();
-    let mut modules = vec![
-        basic_statistics(stats),
-        per_base_quality(stats, &thresholds),
-    ];
-    if let Some(tile) = stats.tiles.report(stats.nogroup, 5.0, 10.0) {
-        modules.push(tile);
+    let thresholds = &stats.config.thresholds;
+    let mut modules = vec![basic_statistics(stats)];
+    let mut append = |key, render: &dyn Fn() -> ModuleResult| {
+        if !stats.config.is_ignored(key) {
+            modules.push(render());
+        }
+    };
+    if !stats.quality_by_position.is_empty() {
+        append("quality_base", &|| per_base_quality(stats, thresholds));
     }
-    modules.extend([
-        per_sequence_quality(stats, &thresholds),
-        per_base_sequence_content(stats),
-        per_sequence_gc_content(stats, &thresholds),
-        per_base_n_content(stats, &thresholds),
-        sequence_length_distribution(stats),
-        sequence_duplication(stats, &thresholds),
-        overrepresented_sequences(stats, &thresholds),
-        adapter_content(stats),
-    ]);
+    if !stats.config.is_ignored("tile") {
+        if let Some(tile) =
+            stats
+                .tiles
+                .report(stats.nogroup, thresholds.tile_warn, thresholds.tile_fail)
+        {
+            modules.push(tile);
+        }
+    }
+    let mut append = |key, render: &dyn Fn() -> ModuleResult| {
+        if !stats.config.is_ignored(key) {
+            modules.push(render());
+        }
+    };
+    if !stats.quality_distribution.is_empty() {
+        append("quality_sequence", &|| {
+            per_sequence_quality(stats, thresholds)
+        });
+    }
+    append("sequence", &|| per_base_sequence_content(stats));
+    append("gc_sequence", &|| {
+        per_sequence_gc_content(stats, thresholds)
+    });
+    append("n_content", &|| per_base_n_content(stats, thresholds));
+    append("sequence_length", &|| sequence_length_distribution(stats));
+    append("duplication", &|| sequence_duplication(stats, thresholds));
+    append("overrepresented", &|| {
+        overrepresented_sequences(stats, thresholds)
+    });
+    append("adapter", &|| adapter_content(stats));
+    append("kmer", &|| {
+        stats
+            .kmers
+            .report(stats.nogroup, thresholds.kmer_warn, thresholds.kmer_fail)
+    });
     modules
 }
 

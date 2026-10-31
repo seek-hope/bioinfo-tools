@@ -56,6 +56,14 @@
       "rule": "Do not invent zero quality for an unobserved tile/group. Report NaN and exclude absent observations from the reference mean, while retaining actual measured Q0. Preserve the pinned sampling, grouping and header-detection contract.",
       "proof": "docs/EVIDENCE-FASTQC-TILES.md",
       "verifier": "tests/oracle/fastqc_tile_diff.py"
+    },
+    {
+      "id": "FASTQC-KMER-LIMITS-CORRECTNESS",
+      "category": "upstream-defect",
+      "surfaces": [["rust-fastqc", "-l --limits"], ["rust-fastqc", "module:kmer-content"]],
+      "rule": "Use the actual 1-in-50 sampling scale, inclusive binomial upper tails, full positional opportunities independent of word storage and read order, and the most significant qualifying word for verdicts. Keep log probabilities through verdict selection. Resolve equal enrichment scores lexically. Fail before input/output on structurally truncated limits rather than producing reports from a partially loaded configuration.",
+      "proof": "docs/EVIDENCE-FASTQC-KMER-LIMITS.md",
+      "verifier": "tests/oracle/fastqc_kmer_limits_diff.py"
     }
   ]
 }

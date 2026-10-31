@@ -24,6 +24,7 @@
 
 use crate::adapters::Adapter;
 pub use crate::adapters::ADAPTERS;
+use crate::config::FastqcConfig;
 use crate::contaminants::Contaminant;
 use std::collections::BTreeMap;
 
@@ -62,6 +63,35 @@ pub fn java_double(value: f64) -> String {
         text
     } else {
         // Java always shows a fractional part for a double.
+        format!("{text}.0")
+    }
+}
+
+/// Format a 32-bit float like Java's `Float.toString` for report fields.
+pub fn java_float(value: f32) -> String {
+    if value.is_nan() {
+        return "NaN".into();
+    }
+    if value.is_infinite() {
+        return if value.is_sign_positive() {
+            "Infinity"
+        } else {
+            "-Infinity"
+        }
+        .into();
+    }
+    if value != 0.0 && !(1e-3..1e7).contains(&value.abs()) {
+        let scientific = format!("{value:e}");
+        let (mantissa, exponent) = scientific.split_once('e').expect("scientific format");
+        return format!(
+            "{mantissa}{}E{exponent}",
+            if mantissa.contains('.') { "" } else { ".0" }
+        );
+    }
+    let text = format!("{value}");
+    if text.contains('.') {
+        text
+    } else {
         format!("{text}.0")
     }
 }
@@ -257,6 +287,10 @@ pub struct QcStats {
     pub quality_distribution: BTreeMap<u8, u64>,
     /// Duplication: sequence (truncated) → count.
     pub sequences: BTreeMap<Vec<u8>, u64>,
+    /// Parsed limits and module configuration.
+    pub config: FastqcConfig,
+    /// Sampled positional k-mer statistics.
+    pub kmers: crate::kmer::KmerStats,
     /// Optional sampled quality statistics from Illumina tile headers.
     pub tiles: crate::tile::TileQuality,
     /// Configured adapters, in report column order.
@@ -289,6 +323,8 @@ impl QcStats {
             gc_distribution: vec![0.0; 101],
             quality_distribution: BTreeMap::new(),
             sequences: BTreeMap::new(),
+            config: FastqcConfig::default(),
+            kmers: crate::kmer::KmerStats::new(7),
             tiles: crate::tile::TileQuality::default(),
             adapters: crate::adapters::defaults(),
             adapter_hits: vec![Vec::new(); ADAPTERS.len()],
@@ -296,6 +332,12 @@ impl QcStats {
             nogroup: false,
             dup_length: 50,
         }
+    }
+
+    /// Install parsed limits, resetting sampled module state.
+    pub fn set_config(&mut self, config: FastqcConfig) {
+        self.kmers = crate::kmer::KmerStats::new(7);
+        self.config = config;
     }
 
     /// Set adapters before adding reads; this resets the adapter counters.
@@ -329,6 +371,10 @@ impl QcStats {
     /// `qualities` is the raw ASCII quality string; the Phred offset is applied by
     /// the caller because it is an input-level property, not a per-read one.
     pub fn add_read(&mut self, sequence: &[u8], qualities: &[u8], quality_offset: u8) {
+        if !self.config.is_ignored("kmer") {
+            self.kmers.add_read(sequence);
+        }
+
         self.total_sequences += 1;
         self.total_bases += sequence.len() as u64;
 
@@ -370,12 +416,14 @@ impl QcStats {
         }
 
         // Per-read GC content, spread over bins by FastQC's model.
-        for (bin, increment) in gc_model(sequence.len())
-            .get(gc as usize)
-            .map(|values| values.as_slice())
-            .unwrap_or(&[])
-        {
-            self.gc_distribution[*bin] += *increment;
+        if !sequence.is_empty() {
+            for (bin, increment) in gc_model(sequence.len())
+                .get(gc as usize)
+                .map(|values| values.as_slice())
+                .unwrap_or(&[])
+            {
+                self.gc_distribution[*bin] += *increment;
+            }
         }
 
         // Per-read mean quality, floored to an integer the way FastQC groups it.
@@ -510,7 +558,7 @@ impl QcStats {
         if self.total_sequences == 0 {
             return 0.0;
         }
-        let half = self.total_sequences.div_ceil(2);
+        let half = self.total_sequences / 2 + 1;
         let mut running = 0u64;
         for (length, count) in &self.lengths {
             running += *count;
@@ -710,17 +758,14 @@ mod tests {
 
     #[test]
     fn median_length_reports_a_real_length() {
-        // FastQC reports Median Length 8 for 6 reads of 4,8,4,8,4,8; with
-        // `div_ceil(2)` the 3rd of 6 sorted lengths (4,4,4,8,8,8) is 4, so this
-        // pins the value the implementation actually produces and the oracle
-        // agrees with on the fixture where median == mean.
+        // FastQC uses the upper middle observation for an even read count.
         let mut stats = QcStats::new("x");
         for length in [4usize, 8, 4, 8, 4, 8] {
             let seq = vec![b'A'; length];
             let qual = vec![b'I'; length];
             stats.add_read(&seq, &qual, 33);
         }
-        assert_eq!(stats.median_length(), 4.0);
+        assert_eq!(stats.median_length(), 8.0);
     }
 
     #[test]

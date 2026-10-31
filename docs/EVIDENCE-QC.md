@@ -257,16 +257,13 @@ attempt guessed and got the semantics backwards:
 
 ## 6. Modules intentionally absent
 
-Recorded in `rust-fastqc/src/absent.rs` as data, so the omission is checkable rather
-than prose. Kmer Content remains the only absent FastQC analysis module; Adapter
-Content and Per tile sequence quality are implemented and covered by dedicated
-oracles. Plot images and auxiliary FastQC resources remain separate report gaps.
+`rust-fastqc/src/absent.rs` now contains no absent analysis modules. Adapter,
+tile and Kmer implementations each have dedicated evidence beyond this historical
+baseline; Kmer is disabled by the bundled limits and enabled by a custom file.
+See [Kmer and limits evidence](EVIDENCE-FASTQC-KMER-LIMITS.md). Plot images and
+auxiliary FastQC resources remain separate report gaps.
 
-| Module | Why absent |
-| --- | --- |
-| **Kmer Content** | Position-specific k-mer enrichment with a binomial test, sampling, grouping and multiple-testing correction; the native implementation and independent mathematical proof are still pending. |
-
-Notes on the two remaining differences from FastQC's default output:
+Additional grouping behavior:
 
 * **Long-read grouping exists and includes the tile module.** Grouping follows the
   pinned 75 bp boundary and large-interval alignment; dedicated 660/1400/4000 bp
@@ -341,9 +338,10 @@ itself evidence the comparison has teeth.
 * **HTML reports, plots and the zip archive.** Data-table HTML and stored ZIP
   artifacts are produced and the tile oracle checks their data propagation, but
   FastQC plot images and auxiliary assets are not emitted.
-* **Kmer Content and custom `--limits`.** The Kmer module and limits-file
-  configuration remain unsupported. Adapter Content, Per tile sequence quality,
-  `--adapters`, contaminant sources and `--nogroup` are implemented with their
+* **Kmer/limits verification by this baseline.** This historical suite does not
+  exercise Kmer or custom limits. Their later native implementation and independent
+  probability/counting evidence are in [the dedicated batch](EVIDENCE-FASTQC-KMER-LIMITS.md).
+  Adapter Content, Per tile sequence quality and contaminant sources also have
   dedicated evidence.
 * **Contaminant matching.** One fixture surfaced a real difference: FastQC labelled
   a read `RNA PCR Primer, Index 14 (100% over 10bp)` because it matched its

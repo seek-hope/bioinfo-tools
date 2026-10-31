@@ -9,6 +9,7 @@ use bioinfo_common::ExitClass;
 pub struct Error {
     class: ExitClass,
     message: String,
+    launcher_prefix: bool,
 }
 
 impl Error {
@@ -17,6 +18,7 @@ impl Error {
         Error {
             class: ExitClass::Runtime,
             message: message.into(),
+            launcher_prefix: false,
         }
     }
 
@@ -25,6 +27,7 @@ impl Error {
         Error {
             class: ExitClass::Usage,
             message: message.into(),
+            launcher_prefix: false,
         }
     }
 
@@ -33,6 +36,7 @@ impl Error {
         Error {
             class: ExitClass::Input,
             message: message.into(),
+            launcher_prefix: false,
         }
     }
 
@@ -41,6 +45,23 @@ impl Error {
         Error {
             class: ExitClass::Io,
             message: message.into(),
+            launcher_prefix: false,
+        }
+    }
+
+    /// Pinned FastQC launcher preflight failure (exit 1, `[ERROR]` prefix).
+    pub fn launcher(message: impl Into<String>) -> Error {
+        let mut error = Self::runtime(message);
+        error.launcher_prefix = true;
+        error
+    }
+
+    /// Render the diagnostic with the appropriate CLI prefix.
+    pub fn diagnostic(&self) -> String {
+        if self.launcher_prefix {
+            format!("[ERROR] {}", self.message)
+        } else {
+            bioinfo_common::error_line(&self.message)
         }
     }
 

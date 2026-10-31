@@ -15,14 +15,7 @@ pub struct AbsentModule {
 }
 
 /// FastQC 0.13.0 modules that are not implemented.
-pub const ABSENT_MODULES: [AbsentModule; 1] = [AbsentModule {
-    name: "Kmer Content",
-    reason: "Native positional k-mer enrichment is not yet implemented. Pinned source \
-             inspection identifies sampling, count scaling, binomial-tail and opportunity \
-             denominator behavior that still require executable independent validation.",
-    requirement: "Implement sampled word counts and validated binomial upper tails, \
-                  then compare configuration, tables and thresholds against the pinned executable.",
-}];
+pub const ABSENT_MODULES: [AbsentModule; 0] = [];
 
 /// The names of the absent modules, for a quick assertion.
 pub fn absent_module_names() -> Vec<&'static str> {

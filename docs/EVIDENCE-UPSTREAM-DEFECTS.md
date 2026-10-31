@@ -234,6 +234,18 @@ adapter exceptions above. The column is nonempty only for the two approved
 native-runtime JVM launcher surfaces; the tile correction is an upstream-defect
 exception with an empty `unachievable` value.
 
+## 9. FastQC Kmer and partial limits loading
+
+[Native Kmer/limits evidence](EVIDENCE-FASTQC-KMER-LIMITS.md) independently
+reproduces the wrong sampling scale, exclusive binomial tail, order-dependent
+opportunity denominator, and first-row significance selection. It also shows
+that an incomplete configuration can still yield a successful upstream report
+with requested later settings ignored. `FASTQC-KMER-LIMITS-CORRECTNESS` requires
+native computation with corrected probabilities/counts and fail-closed
+configuration loading. Both matrix surfaces remain exceptions with empty
+`unachievable` values. The dedicated verifier preserves raw observations and
+checks them against separate correct and defective numerical models.
+
 ## Negative controls and validation boundary
 
 The independent suite was run against the preceding release binary that copied
@@ -249,7 +261,7 @@ reversed input order. Reports are removed before every child run, and a regressi
 control proves an aborted comparison cannot reuse a previous report. All six
 validator controls and all four matrix-policy controls pass.
 
-Final local validation after the adapter histogram and CR-line fixes ran:
+Final local validation of the tile batch after the adapter and grouping fixes ran:
 
 ```sh
 bash tests/ci/check.sh
@@ -280,11 +292,12 @@ process tests and two native-runtime tests. The separately run CI harness tests
 passed 12/12. The full unrelated UMI, samtools and cutadapt differential suites
 were not rerun for this batch; their older evidence is not presented as a current run.
 
-Logs: `/tmp/bioinfo-policy-adapters-final-base.log` and
-`/tmp/bioinfo-policy-adapters-final-oracles.log`, with matching `.status` files
-containing 0. Those logs apply to the earlier adapter batch; the current tile
-batch has not yet completed the two full workspace gates. The matrix has 266 rows:
-189 verified, 9 experimental, 59 unsupported, 9 exception. The two nonempty
+Logs: `/tmp/bioinfo-tile-gate-final2-base.log` and
+`/tmp/bioinfo-tile-gate-final2-oracles.log`, with matching `.status` files
+containing 0. Tile commit `1c7ee2b` also passed remote quality run `41192242981`.
+These results precede the Kmer/limits work; its separate evidence records its own
+validation. The tile matrix had 266 rows: 189 verified, 9 experimental,
+59 unsupported and 9 exception. The two nonempty
 `unachievable` values are the JVM launcher constraints; no unfinished biological
 capability is classified that way.
 

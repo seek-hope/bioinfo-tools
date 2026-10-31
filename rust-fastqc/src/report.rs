@@ -234,7 +234,9 @@ mod tests {
 
     #[test]
     fn modules_appear_in_fastqc_order() {
-        let stats = QcStats::new("x.fq");
+        let mut stats = QcStats::new("x.fq");
+        // Quality modules are present only when some quality was observed.
+        stats.add_read(b"ACGT", b"5555", 33);
         let report = Report::from_stats(&stats);
         assert_eq!(
             report.module_names(),
