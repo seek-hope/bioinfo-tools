@@ -1,0 +1,22 @@
+Validation after reviewing the Argon High README drafts, 2026-11-01.
+
+Commands:
+  python3 /tmp/bioinfo-argon-readme-validate/smoke.py
+  python3 tests/ci/check_docs.py
+  node /tmp/bioinfo-argon-readme-validate/check.mjs README.md README.zh-CN.md
+  git diff --check -- README.md README.zh-CN.md
+  Python assertions for five top-level sections, local Markdown links,
+  empty pending input/time cells, equal English/Chinese Bash blocks,
+  and bash -n for each block.
+
+Observed output:
+PASS README smoke: 13 commands; 4 reads; 2 representatives in both UMI modes
+PASS documentation constraints (21 current files, 11 historical files)
+PASS rust-umitools protection documented (manifest generator exception recorded)
+PASS README.md Mermaid 1: flowchart-v2
+PASS README.zh-CN.md Mermaid 1: flowchart-v2
+PASS README.md : section order reviewed, five sections, links, blank pending measurements
+PASS README.zh-CN.md : section order reviewed, five sections, links, blank pending measurements
+PASS bilingual shell blocks identical; bash -n: 6 blocks
+
+git diff --check exited 0 with no output.

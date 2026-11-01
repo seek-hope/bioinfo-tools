@@ -1,40 +1,84 @@
 # bioinfo-tools
 
-[English](README.md) | [简体中文](README.zh-CN.md)
+English | [简体中文](README.zh-CN.md)
 
-Native Rust command-line tools for sequencing data preparation, sequence-file
-operations and quality control. Five CLIs share FASTX parsing, compression and
-reporting infrastructure, with behavior checked against pinned upstream tools.
-Performance varies by command; the [local benchmarks](bench/RESULTS-README.md)
-include both faster and slower results.
+## Overview
 
-## Tools and their place in an analysis
+`bioinfo-tools` is a Rust monorepo containing five command-line tools and two shared libraries for sequencing data preprocessing, sequence file manipulation, quality control, and alignment file processing. Reference software packages at fixed versions are used during development to compare command behavior and outputs.
 
-FASTQ stores reads and their quality scores; FASTA stores sequences without
-qualities. SAM/BAM stores alignments. A UMI is a sequence tag used to identify
-original molecules and distinguish them from amplification duplicates.
+### Command-Line Tools
 
-A typical workflow checks reads, extracts UMIs when the library uses them,
-removes adapters, aligns reads with an **external aligner**, then sorts, indexes
-and summarizes alignments or deduplicates molecules. This repository supplies
-selected data-processing steps; it does not include an aligner.
+- **`rust-cutadapt`** (reference: cutadapt 4.6): Adapter removal, quality and length filtering, paired-end read processing, and sample demultiplexing.
+- **`rust-umitools`** (reference: UMI-tools 1.1.6): UMI extraction, barcode whitelist generation, and alignment deduplication, grouping, and counting.
+- **`rust-bam`** (reference: samtools 1.24): SAM/BAM format conversion, coordinate sorting, indexing, and `flagstat`, `idxstats`, `quickcheck`, `depth`, `coverage`, `flags`, and `head`.
+- **`rust-fastqc`** (reference: FastQC 0.13.0): Implements 12 analysis modules with configurable thresholds, adapters, and contaminant lists; outputs `fastqc_data.txt`, `summary.txt`, HTML, and ZIP archives. The HTML report currently displays data tables; plots are in development.
+- **`rust-fx`** (reference: SeqKit 2.14.0, fq 0.12.0): FASTA/FASTQ statistics, format conversion, filtering, sequence transformation, and validation through SeqKit- and fq-style subcommands.
 
-| CLI | Typical work | Compatibility target |
-| --- | --- | --- |
-| `rust-cutadapt` | Adapter trimming, quality/length filtering, paired reads and demultiplexing | [cutadapt](https://cutadapt.readthedocs.io/) 4.6 |
-| `rust-umitools` | UMI extraction, whitelists, deduplication, grouping and counting | [UMI-tools](https://umi-tools.readthedocs.io/) 1.1.6 |
-| `rust-bam` | SAM/BAM conversion, coordinate sorting, indexing, flag statistics and selected depth/coverage operations | [samtools](https://www.htslib.org/) 1.24 |
-| `rust-fastqc` | Twelve analysis modules, configurable thresholds/adapters/contaminants, data and summary reports | [FastQC](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/) 0.13.0 |
-| `rust-fx` | FASTA/FASTQ statistics, conversion, filtering, sequence transformations and validation | [SeqKit](https://bioinf.shenwei.me/seqkit/) 2.14.0 / [fq](https://github.com/stjude-rust-labs/fq) 0.12.0 |
+### Shared Libraries
 
-`bioinfo-fastx` provides shared sequence I/O and codecs; `bioinfo-common` provides
-shared diagnostics, exit-code helpers and provenance. Native commands do not
-invoke the upstream Python or Java programs. Development and comparison tests
-use those programs as references.
+- **`bioinfo-fastx`**: Shared FASTA/FASTQ parsing, reading, writing, and compression handling.
+- **`bioinfo-common`**: Shared diagnostics, exit codes, and build information.
 
-## Build and install
+See [compat/README.md](compat/README.md) for command-by-command support status and [HISTORY.md](HISTORY.md) for project history.
 
-Build all five CLIs from this source tree:
+## Sequencing Workflows
+
+The workflow below uses these formats and molecular tags:
+
+- **FASTQ**: Reads with a quality score for each base, used for preprocessing and alignment.
+- **FASTA**: Sequences without quality scores, used for references and sequence exports.
+- **UMI (Unique Molecular Identifier)**: A short sequence tag added before amplification. Deduplication uses UMIs and alignment positions to identify PCR duplicates.
+- **SAM/BAM**: Stores read alignments against a reference genome in text (SAM) or compressed binary (BAM) format.
+
+```mermaid
+flowchart TD
+    raw["Raw reads (FASTQ / FASTQ.GZ)"]
+    inspect["Raw read inspection & initial QC<br/><b>rust-fx</b> (stats, lint) / <b>rust-fastqc</b>"]
+    fa_export["Standalone sequence export (FASTA)<br/><b>rust-fx</b> (fq2fa)"]
+    umi["UMI extraction (for UMI libraries)<br/><b>rust-umitools</b> (extract)"]
+    trim["Adapter trimming & quality/length filtering (FASTQ)<br/><b>rust-cutadapt</b>"]
+    postqc["Post-trimming QC<br/><b>rust-fastqc</b>"]
+    align["Sequence alignment on FASTQ (External software)<br/>DNA: BWA / minimap2<br/>RNA: STAR / HISAT2"]
+    bam["SAM/BAM sorting, indexing & alignment stats<br/><b>rust-bam</b> (sort, index, flagstat)"]
+    dedup["UMI deduplication & grouping<br/><b>rust-umitools</b> (dedup, group)"]
+    assign["Gene assignment (External software)<br/>Write gene assignment tags to BAM"]
+    count["Gene-level UMI counting<br/><b>rust-umitools</b> (count)"]
+    down["Variant calling and other alignment analyses<br/>External software"]
+    expression["Expression analysis<br/>External software"]
+
+    raw --> inspect
+    raw -.->|"Sequence-only export"| fa_export
+    inspect -->|"UMI library (FASTQ)"| umi
+    umi -->|"FASTQ with UMI in read name"| trim
+    inspect -->|"Standard library (FASTQ)"| trim
+    trim --> postqc
+    trim -->|"Trimmed FASTQ (with quality scores)"| align
+    align -->|"SAM / unsorted BAM"| bam
+    bam -->|"UMI library (coordinate-sorted BAM)"| dedup
+    bam -->|"UMI counting workflow"| assign
+    assign -->|"BAM with gene tags"| count
+    dedup --> down
+    count --> expression
+    bam -->|"Standard library"| down
+```
+
+### Workflow Steps
+
+1. **Raw Read Inspection and Initial QC**: `rust-fx lint` checks FASTQ syntax and read record integrity, `rust-fx stats` summarizes read counts and lengths, and `rust-fastqc` evaluates per-base quality, GC content, sequence duplication, and adapter content. When sequences are needed without quality scores for external tasks, `rust-fx fq2fa` exports FASTQ records to FASTA as a separate step.
+2. **UMI Extraction**: For UMI libraries, `rust-umitools extract` extracts the UMI bases according to the library pattern (for example, moving an 8-bp 5' UMI from the read sequence into the read name). When a barcode whitelist is required prior to extraction, `rust-umitools whitelist` derives it from the raw reads.
+3. **Adapter Trimming and Filtering**: `rust-cutadapt` trims adapter sequences and low-quality ends and filters out reads shorter than the specified threshold, outputting trimmed FASTQ files with quality scores preserved.
+4. **Post-Trimming QC**: `rust-fastqc` runs on the trimmed FASTQ files to verify adapter removal and read quality distribution.
+5. **Alignment (External Software)**: External aligners such as BWA or minimap2 (for DNA data) or STAR or HISAT2 (for RNA data) map the trimmed FASTQ reads to a reference genome. In UMI workflows, the aligner preserves the read names containing the extracted UMIs.
+6. **SAM/BAM Processing and UMI Deduplication**: `rust-bam` sorts alignments by coordinate (`sort`), builds indexes (`index`), and inspects alignments (`flagstat`, `idxstats`, `quickcheck`, `depth`, `coverage`). For UMI libraries, `rust-umitools dedup` selects representative reads using alignment positions and UMIs; `group` assigns reads to UMI groups. Both use coordinate-sorted BAM.
+7. **Gene Assignment and Further Analysis**: For gene-level UMI counting, an external gene assignment tool first annotates the BAM alignments with gene tags, after which `rust-umitools count` tabulates UMI counts per gene. Variant calling and differential expression analysis follow as downstream steps according to the experimental design.
+
+See [examples/umi-workflow/README.md](examples/umi-workflow/README.md) for a runnable UMI workflow example. That directory includes a synthetic demo with pre-generated SAM/BAM files and also supports execution with external aligners.
+
+## Installation and Usage
+
+### Build from Source
+
+Building from source requires a C compiler toolchain and Rust `1.91` or newer (`rust-toolchain.toml` pins `1.99.1` for repository development). Build using the repository's `Cargo.lock`:
 
 ```bash
 git clone https://github.com/seek-hope/bioinfo-tools.git
@@ -43,22 +87,13 @@ cargo build --release --workspace --bins --locked
 export PATH="$PWD/target/release:$PATH"
 ```
 
-The workspace declares Rust **1.91** as its minimum and pins **1.99.1** in
-`rust-toolchain.toml`. A C build toolchain is also needed for codec dependencies.
-`Cargo.lock` fixes dependencies; normal builds may download missing packages.
+### Prebuilt Binaries
 
-The [distribution repository](https://github.com/seek-hope/bioinfo-tools-dist)
-and [installation guide](dist/README.md) cover prebuilt `rust-cutadapt` and
-`rust-umitools`. The current release workflow packages those two tools; build
-the other three from source. A published binary may predate the changes and
-measurements documented here.
+Prebuilt binary distributions currently include `rust-cutadapt` and `rust-umitools`. See [dist/README.md](dist/README.md) and [seek-hope/bioinfo-tools-dist](https://github.com/seek-hope/bioinfo-tools-dist) for installation details. The remaining CLIs are built from source.
 
-## Quick start
+### Usage Examples
 
-These examples use your own input files. Check each command's `--help` and the
-[compatibility matrix](compat/README.md) before replacing an existing pipeline step.
-
-### Inspect, validate and convert reads
+#### Sequence Statistics, Validation, and FASTA Export (`rust-fx`)
 
 ```bash
 rust-fx stats -a -T reads.fastq.gz
@@ -66,9 +101,9 @@ rust-fx lint reads.fastq.gz
 rust-fx fq2fa -w 0 reads.fastq.gz -o reads.fasta
 ```
 
-### Trim adapters and create a QC report
+#### Adapter Trimming and Post-Trimming QC (`rust-cutadapt`, `rust-fastqc`)
 
-Use the adapter sequence appropriate for your library; this sequence is an example.
+Set the adapter sequence and length threshold according to your library design:
 
 ```bash
 rust-cutadapt -a AGATCGGAAGAGC -m 30 -j 4 \
@@ -77,14 +112,9 @@ mkdir -p qc
 rust-fastqc --extract -o qc trimmed.fastq.gz
 ```
 
-FastQC output includes `fastqc_data.txt`, `summary.txt`, HTML and ZIP artifacts.
-The native HTML currently presents data tables; full plot resources remain a
-compatibility gap. Optional modules depend on input and configuration.
+#### UMI Extraction and Adapter Trimming (`rust-umitools`, `rust-cutadapt`)
 
-### Extract UMIs, then process alignments
-
-This example places an eight-base UMI from the start of each read into its name.
-Change the barcode pattern to match your library design.
+This example moves the first 8 bases of each read into the read name as the UMI and then trims adapters (adjust the UMI pattern and adapter sequence for your library):
 
 ```bash
 rust-umitools extract -p NNNNNNNN -I reads.fastq.gz -S umi.fastq.gz
@@ -92,8 +122,9 @@ rust-cutadapt -a AGATCGGAAGAGC -m 30 -j 4 \
   -o umi.trimmed.fastq.gz umi.fastq.gz
 ```
 
-Align `umi.trimmed.fastq.gz` using an external aligner that preserves those read names,
-producing `aligned.bam`. Then run:
+#### BAM Sorting, Indexing, and UMI Deduplication (`rust-bam`, `rust-umitools`)
+
+After aligning `umi.trimmed.fastq.gz` into `aligned.bam` with an external aligner that preserves read names, sort, index, check alignment statistics, and deduplicate:
 
 ```bash
 rust-bam sort -o sorted.bam aligned.bam
@@ -103,154 +134,55 @@ rust-umitools dedup --random-seed 1 --compresslevel 6 \
   -I sorted.bam -S dedup.bam
 ```
 
-Deduplication here uses UMIs in read names. For an existing BAM with UMIs in a
-`UB` tag, use `--extract-umi-method=tag --umi-tag=UB` instead. The repository also
-contains a [small executable UMI workflow](examples/umi-workflow/README.md).
+This `dedup` command reads UMIs from the read name. For BAM files where the UMI is stored in the `UB` tag, pass `--extract-umi-method=tag --umi-tag=UB`.
 
-## Compatibility and current limits
+### Development Checks
 
-Support is versioned and command-specific. The [matrix](compat/README.md) has
-266 rows: **189 verified, 9 experimental, 57 unsupported and 11 exception**.
-Rows cover different kinds of behavior and are not a completion percentage.
-
-- `verified` means the named inputs and comparison rules have executable evidence.
-- `experimental` records implemented behavior with remaining gaps;
-  `unsupported` records absent or rejected capabilities.
-- `exception` records a reviewed behavior difference with a rule and proof. The
-  separate `unachievable` column contains reasons only for two JVM launcher options
-  excluded by the native-runtime policy.
-
-Known limits include incomplete samtools/SeqKit command coverage, no CRAM in
-`rust-bam`, single-threaded `rust-bam sort`, and an accepted but currently unused
-`rust-fx -j` thread count. FastQC HTML/ZIP resources are incomplete. The new
-150 bp benchmark also exposes unresolved FastQC GC-distribution and duplication
-estimate differences; its complete reports are **not** established as equivalent.
-
-Some upstream defects have been independently demonstrated and corrected; see the
-[proofs and registered exceptions](docs/EVIDENCE-UPSTREAM-DEFECTS.md). Newly
-observed mismatches require investigation before they can use that policy.
-Streaming input does not guarantee fixed total memory: QC retains data by read
-position, tile and distinct sequence, while sorting and grouping have their own
-memory and temporary-storage requirements.
-
-## Measured performance
-
-### Optimization after e125519
-
-A follow-up compares the **exact original binaries** with the optimized build on
-the same SRR2584863/synthetic inputs (150 bp FASTQ), pinned to one logical P-core
-CPU, with five measured blocks per condition. The
-accepted population covers 13 conditions and 195 timed executions. Times below
-are medians; ratios are medians of paired **before/after native** times.
-
-<!-- README_OPTIMIZATION_START -->
-| Operation and input | Before s | After s | Upstream s | Paired before/after |
-| --- | ---: | ---: | ---: | ---: |
-| stats -a -T, 1M real reads | 1.972 | 0.621 | 0.501 | 3.17× |
-| fq2fa, 10M synthetic reads | 1.843 | 1.470 | 1.197 | 1.25× |
-| lint, 10M synthetic reads | 5.614 | 2.140 | 1.789 | 2.62× |
-| flagstat, 10M synthetic BAM records | 0.815 | 0.703 | 0.319 | 1.16× |
-| sort (32 MiB chunks), 1M synthetic BAM records | 1.406 | 1.246 | 0.533 | 1.13× |
-| FastQC, 1M real reads* | 8.025 | 4.479 | 6.171 | 1.79× |
-<!-- README_OPTIMIZATION_END -->
-
-For the 10M single-file lint case, peak RSS fell from **829.0 to 4.9 MiB** after
-removing an unused name set. Paired lint still retains read-one headers. Several
-optimized commands remain slower than upstream. *FastQC preserves every native
-report/HTML/ZIP byte; its upstream timing remains descriptive because report work
-and unresolved module values differ. See the [optimization report](bench/OPTIMIZATION.md)
-for all conditions, ranges, correctness checks, the resource-failure retry and
-reproduction. Inputs, outputs and temporary files remained on tmpfs.
-
-### Earlier upstream comparison
-
-The following measurements describe the build **before these optimizations**;
-the original observations remain unchanged.
-
-<!-- README_BENCHMARK_START -->
-Measured on **2026-10-31**: Linux, i7-13700H, 31.1 GiB visible RAM, with inputs,
-outputs and temporary files on **tmpfs**. Commands and descendants used one P-core
-logical CPU; only the labeled four-CPU case used four distinct P cores. Each
-condition had one warm-up and five paired fresh-process repetitions. The shared
-laptop was not frequency-locked; recorded package temperatures reached 100°C.
-The measured `rust-fx` used a per-package release rebuild after the workspace
-build; [build details](bench/RESULTS-README.md#source-failed-pilot-and-review)
-identify the exact artifacts.
-
-The first six rows use **1M real 150 bp reads** from SRR2584863; the last three use
-**1M synthetic BAM records**. Times are medians. Ratios are medians of paired
-upstream/native times: **above 1 favors native; below 1 means native is slower**.
-RSS is the maximum GNU time value across five runs, not process-tree total memory.
-
-| Operation | Native s | Upstream s | Paired ratio | Peak RSS MiB native/upstream |
-| --- | ---: | ---: | ---: | ---: |
-| cutadapt, plain, 1 CPU | 2.872 | 1.840 | 0.64× | 9.7 / 18.7 |
-| cutadapt, plain, 4 CPUs | 0.779 | 0.772 | 0.99× | 13.2 / 36.3 |
-| cutadapt, gzip level 6 | 9.438 | 8.573 | 0.91× | 13.0 / 19.0 |
-| SeqKit stats -a -T | 2.225 | 0.566 | 0.25× | 5.6 / 36.6 |
-| SeqKit fq2fa | 0.212 | 0.270 | 1.29× | 5.4 / 34.3 |
-| fq lint | 0.581 | 0.201 | 0.34× | 150.2 / 4.4 |
-| samtools flagstat | 0.093 | 0.038 | 0.41× | 4.2 / 4.2 |
-| samtools sort (32 MiB chunks) | 1.701 | 0.614 | 0.36× | 43.5 / 54.8 |
-| UMI-tools directional dedup | 0.453 | 5.116 | 11.20× | 256.3 / 326.8 |
-
-The prespecified **10M synthetic-record extension** checks short streaming cases:
-
-| Operation | Native s | Upstream s | Paired ratio | Peak RSS MiB native/upstream |
-| --- | ---: | ---: | ---: | ---: |
-| SeqKit fq2fa | 1.980 | 1.289 | 0.65× | 5.4 / 34.7 |
-| fq lint | 6.467 | 1.959 | 0.30× | 829.4 / 4.4 |
-| samtools flagstat | 0.960 | 0.374 | 0.39× | 4.1 / 4.1 |
-
-The UMI advantage applies to this synthetic four-UMI-per-bundle workload. Several
-commands are slower, and native lint retains substantially more memory here.
-Timings include startup, compression and file I/O; they do not isolate algorithms.
-All 100k/1M synthetic cases and observed min–max ranges are in the full report.
-
-**FastQC has unequal report work and unresolved GC/duplication differences**, so
-these are descriptive timings without a speed ratio. Independent benchmark checks
-cover total reads, displayed total bases and length, not complete QC equivalence.
-
-| FastQC input | Native s | Upstream s | Peak RSS MiB native/upstream |
-| --- | ---: | ---: | ---: |
-| 1M real reads | 9.306 | 6.197 | 92.1 / 322.9 |
-| 1M synthetic reads | 9.290 | 6.188 | 110.0 / 298.4 |
-<!-- README_BENCHMARK_END -->
-
-Full commands, individual observations, data hashes, resource measurements and
-reproduction instructions are in the [benchmark report](bench/RESULTS-README.md)
-and [benchmark guide](bench/README.md). FastQC is reported separately because its
-report work and some module values differ. Results apply to the measured inputs,
-binaries and machine; they do not establish a suite-wide speedup.
-
-## Roadmap
-
-The near-term priority is to complete and verify the existing tools: remaining
-command/argument/format coverage, complete FastQC graphics and resources, and the
-GC/duplication discrepancies exposed by these benchmarks. Performance work will
-use profiling and same-input correctness checks to guide optimization. Packaging
-additional CLIs follows their validation and release review.
-
-Future candidates include genomic interval operations (BED/GFF and overlaps),
-feature counting and expression-data utilities, and VCF/BCF queries, filtering
-and statistics. These are candidates, with no committed implementation dates.
-See the [development plan](docs/DEVELOPMENT-PLAN.md) for scope and priorities.
-
-## Test and contribute
+Run the repository verification scripts:
 
 ```bash
 bash tests/ci/check.sh
-# After installing the pinned external references:
 bash tests/ci/check.sh --with-fastx-qc-oracles
 ```
 
-The base gate checks documentation, compatibility policy, formatting, lint,
-release tests/builds and a cutadapt smoke test. The optional gate adds the pinned
-FASTX/QC comparisons; it is not a rerun of every historical component oracle.
-See [CI setup and coverage](tests/ci/README.md). Contributions should include
-reproducible cases and respect the [workspace rules](AGENTS.md).
+The second command runs checks against locally installed, pinned versions of the reference tools. See [tests/ci/README.md](tests/ci/README.md) for details.
 
-This monorepo is the canonical source tree; sibling checkouts are unnecessary.
-[HISTORY.md](HISTORY.md) records the original repositories and their archives.
-Historical `docs/EVIDENCE-*.md` files describe particular builds and are not
-substitutes for current support or performance evidence.
+## Performance Comparison with Reference Software
+
+A new round of single-core and multi-core benchmarks on large inputs is still running. Previous benchmark records and optimization notes are available in [bench/RESULTS-README.md](bench/RESULTS-README.md) and [bench/OPTIMIZATION.md](bench/OPTIMIZATION.md), with benchmark methodology documented in [bench/README.md](bench/README.md).
+
+| Tool / Reference | Operation | Input Size | CPU Budget | Reference Time (s) | Current Implementation Time (s) |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| `rust-cutadapt` / cutadapt 4.6 | Adapter trimming (FASTQ) | | 1 / 2 / 4 | | |
+| `rust-cutadapt` / cutadapt 4.6 | Adapter trimming (gzip output) | | 1 / 2 / 4 | | |
+| `rust-umitools` / UMI-tools 1.1.6 | `dedup` | | 1 / 4 | | |
+| `rust-bam` / samtools 1.24 | `sort` | | 1 / 2 / 4 | | |
+| `rust-bam` / samtools 1.24 | `flagstat` | | 1 / 4 | | |
+| `rust-fx` / SeqKit 2.14.0 | `stats -a -T` | | 1 / 2 / 4 | | |
+| `rust-fx` / SeqKit 2.14.0 | `fq2fa` | | 1 / 4 | | |
+| `rust-fx` / fq 0.12.0 | `lint` | | 1 / 4 | | |
+
+### FastQC Runtime
+
+FastQC timings are listed separately while GC and duplication statistics are compared and plots are added.
+
+| Tool / Reference | Operation | Input Size | CPU Budget | Reference Time (s) | Current Implementation Time (s) |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| `rust-fastqc` vs. FastQC 0.13.0 | QC report | | 1 | | |
+| `rust-fastqc` vs. FastQC 0.13.0 | QC report | | 4 | | |
+
+## Development Roadmap
+
+Near-term priorities:
+
+- Complete subcommand, option, and file format support across the existing tools.
+- Finish GC and duplication statistics verification and HTML graphical reports in `rust-fastqc`.
+- Continue optimizing runtime hotspots and expand prebuilt binary distributions.
+
+Future directions:
+
+- **BED/GFF Interval Operations**: Genomic interval manipulation and overlap statistics.
+- **Feature Counting and Expression Data**: Read-to-feature counting and expression matrix processing.
+- **VCF/BCF Processing**: Variant querying, filtering, and summary statistics.
+
+See [docs/DEVELOPMENT-PLAN.md](docs/DEVELOPMENT-PLAN.md) for the full development plan.

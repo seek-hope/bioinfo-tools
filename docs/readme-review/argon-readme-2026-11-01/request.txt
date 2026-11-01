@@ -1,0 +1,71 @@
+请为公开仓库 https://github.com/seek-hope/bioinfo-tools 撰写新的 README.md（英文）和 README.zh-CN.md（中文）。当前页面使用的模型是 Argon。
+
+以下是维护者的原话，请直接按这段要求组织两份文档：
+“请按照仓库内容概述、测序数据处理标准/常见pipeline以及各工具在pipeline中的作用（pipeline请使用mermaid图绘制）、安装与使用说明、和参考软件的性能对比、后续开发路线图的顺序为该仓库撰写README”
+
+维护者还要求：性能对比中尚未完成的部分先留白。文字应当自然、具体，像熟悉项目的开发者写给使用者。中英文分别使用本语言的正常表达。介绍工具、步骤和操作即可；用具体事实说明功能，少用抽象评价、宣传语、模板式转折和反复自我辩护。
+
+下面是从仓库核实的项目资料，可直接据此写作：
+
+1. 仓库是 Rust 生物信息学工具 monorepo，包含五个 CLI 和两个共享库。原生程序用于测序数据预处理、序列文件操作、质控及比对结果处理。参考软件用于开发与行为对照。
+- rust-cutadapt：接头去除、质量/长度过滤、双端 reads、拆分样本。参考 cutadapt 4.6。
+- rust-umitools：UMI 提取、白名单、去重、分组与计数。参考 UMI-tools 1.1.6。
+- rust-bam：SAM/BAM 格式转换、坐标排序、索引、flagstat、idxstats、quickcheck、depth、coverage、flags、head。参考 samtools 1.24。
+- rust-fastqc：12 个分析模块，支持配置阈值、接头、污染物；输出 fastqc_data.txt、summary.txt、HTML 和 ZIP。当前 HTML 展示数据表，图形报告继续开发。参考 FastQC 0.13.0。
+- rust-fx：FASTA/FASTQ 统计、格式转换、筛选、序列变换及校验，提供 SeqKit/fq 风格子命令。参考 SeqKit 2.14.0、fq 0.12.0。
+- bioinfo-fastx：共享 FASTX 解析、读写与压缩。
+- bioinfo-common：共享诊断、退出码与构建信息。
+逐命令支持情况可以链接 compat/README.md。项目历史在 HISTORY.md。
+
+2. Pipeline 部分请解释主要文件和处理步骤：FASTQ 包含序列及质量分数；FASTA 保存序列；SAM/BAM 保存比对结果；UMI 标记原始分子。用 Mermaid 画出常见测序数据处理流程，标明上面各工具的具体位置。
+- 原始 reads 检查/质控 → 按文库设计提取 UMI（UMI 文库）→ 修剪接头及过滤 → 处理后质控 → 比对 → SAM/BAM 排序、索引、统计 → 按实验目标继续分析。
+- 比对使用外部软件，例如 DNA 数据用 BWA/minimap2，RNA 数据用 STAR/HISAT2。图中把外部软件与仓库工具标清楚。
+- UMI 示例把 read 起始 8 个碱基移到名称中，然后修剪，再由比对器保留 read 名称，最后对坐标排序后的 BAM 去重。
+- 后续基因计数需要基因分配信息；变异检测、差异表达属于流程的后续分析步骤。
+- 可链接 examples/umi-workflow/README.md 作为可执行示例。这个示例目录有一个预先生成 SAM/BAM 的合成演示，也支持外部比对器运行。
+
+3. 安装资料：Rust 最低版本 1.91；rust-toolchain.toml 固定开发工具链 1.99.1；需要 C 编译工具链。构建使用 Cargo.lock：
+```bash
+git clone https://github.com/seek-hope/bioinfo-tools.git
+cd bioinfo-tools
+cargo build --release --workspace --bins --locked
+export PATH="$PWD/target/release:$PATH"
+```
+预编译分发当前包含 rust-cutadapt 和 rust-umitools；安装链接 dist/README.md 与 https://github.com/seek-hope/bioinfo-tools-dist 。其余 CLI 通过源码构建。
+
+以下命令已经在仓库示例中使用，请保留其有效参数，可以按章节重新组织：
+```bash
+rust-fx stats -a -T reads.fastq.gz
+rust-fx lint reads.fastq.gz
+rust-fx fq2fa -w 0 reads.fastq.gz -o reads.fasta
+
+rust-cutadapt -a AGATCGGAAGAGC -m 30 -j 4 \
+  -o trimmed.fastq.gz reads.fastq.gz
+mkdir -p qc
+rust-fastqc --extract -o qc trimmed.fastq.gz
+
+rust-umitools extract -p NNNNNNNN -I reads.fastq.gz -S umi.fastq.gz
+rust-cutadapt -a AGATCGGAAGAGC -m 30 -j 4 \
+  -o umi.trimmed.fastq.gz umi.fastq.gz
+```
+接头序列和 UMI 模式按文库设计填写。然后用外部比对器把 umi.trimmed.fastq.gz 比对为 aligned.bam，保留 read 名称：
+```bash
+rust-bam sort -o sorted.bam aligned.bam
+rust-bam index sorted.bam
+rust-bam flagstat sorted.bam
+rust-umitools dedup --random-seed 1 --compresslevel 6 \
+  -I sorted.bam -S dedup.bam
+```
+这组去重命令读取名称中的 UMI。对于 UMI 保存在 UB 标签的 BAM，使用 --extract-umi-method=tag --umi-tag=UB。
+开发检查可以放在安装与使用说明的最后：
+```bash
+bash tests/ci/check.sh
+bash tests/ci/check.sh --with-fastx-qc-oracles
+```
+第二条使用已安装的固定版本参考软件。细节链接 tests/ci/README.md。
+
+4. 性能对比：新一轮大输入、单核与多核测试仍在运行。表格主要列为“参考软件耗时”和“当前实现耗时”；未完成的数值单元格留空，不填估算值、TBD 或宣传文字。可以先保留操作、输入规模、核心数、参考软件秒、当前实现秒的表头和相应空白行。历史完整记录在 bench/RESULTS-README.md 和 bench/OPTIMIZATION.md，方法入口为 bench/README.md。FastQC 的统计和图形报告仍在核对，耗时单独列示即可。
+
+5. 后续开发路线：优先完善现有工具的命令、参数和格式支持，完成 FastQC 的 GC/重复度统计核对与图形报告，继续优化热点并扩展预编译分发。后续方向包括 BED/GFF 区间操作与重叠统计、特征计数和表达数据处理、VCF/BCF 查询/过滤/统计。计划入口 docs/DEVELOPMENT-PLAN.md。
+
+请直接输出两份完整 Markdown 文件，先 README.md，再 README.zh-CN.md。使用独立的四反引号 markdown 代码块包住各文件，以便内部正常使用三反引号 Mermaid/Bash 代码块。两份文档的章节顺序按维护者原话安排，顶部相互链接。先写内容，不附写作过程或评语。

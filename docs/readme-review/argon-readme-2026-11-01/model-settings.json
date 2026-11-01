@@ -1,0 +1,10 @@
+{
+  "verified_utc": "2026-11-01T13:56:51.631568+00:00",
+  "service": "https://gemini.google.com/app",
+  "model_selection": "Selected 4 Argon Complex tasks",
+  "thinking_selection": "Selected High Extra thorough",
+  "previous_draft_thinking": "Low",
+  "final_request": "request-high.txt",
+  "completed_utc": "2026-11-01T13:59:19.490618+00:00",
+  "verified_after_response": "Open mode picker, currently Argon High"
+}
