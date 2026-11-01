@@ -1,0 +1,23 @@
+	Command being timed: "taskset -c 4 /home/rimuru/Projects/Code/for_fun/bioinfo-tools/tests/ci/env/bin/seqkit stats -a -T -j 1 -o /home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/scale-benchmark/calibration-2/real-stats-c1/-1-upstream/out/stats.tsv /home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/scale-benchmark/enlarged-inputs/real-1000000-x30.fastq"
+	User time (seconds): 14.31
+	System time (seconds): 1.20
+	Percent of CPU this job got: 98%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:15.71
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 35596
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 0
+	Minor (reclaiming a frame) page faults: 1050
+	Voluntary context switches: 3426
+	Involuntary context switches: 3125
+	Swaps: 0
+	File system inputs: 21533096
+	File system outputs: 8
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0

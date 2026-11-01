@@ -1,0 +1,23 @@
+	Command being timed: "taskset -c 4,6 /home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/scale-benchmark/sealed/rust-bam sort --max-memory 512MiB --threads 2 -o /home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/scale-benchmark/base-calibration/bam-sort-c2/-1-current/out/sorted.bam /home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/scale-benchmark/base-inputs/synthetic-bam-1000000-x1/unsorted.bam"
+	User time (seconds): 1.07
+	System time (seconds): 0.16
+	Percent of CPU this job got: 123%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:01.01
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 694820
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 0
+	Minor (reclaiming a frame) page faults: 120173
+	Voluntary context switches: 997
+	Involuntary context switches: 12048
+	Swaps: 0
+	File system inputs: 8
+	File system outputs: 41496
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0

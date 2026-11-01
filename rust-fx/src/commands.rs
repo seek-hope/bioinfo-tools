@@ -5,11 +5,13 @@
 //! behaviour (and fq 0.12.0's for `lint`). Direct per-command differential
 //! evidence and remaining gaps are recorded in `compat/matrix.tsv`.
 
-use crate::io::{CommandError, InputFormat, LintReader, Output, OwnedRecord, RecordReader};
+use crate::io::{
+    CommandError, InputFormat, LintReader, Output, OwnedRecord, RecordReader, RecordView,
+};
 use crate::lint::{Level, LintRecord, Linter};
 use crate::sample::{Sampler, Strategy};
 use crate::split::{self, SplitBy};
-use crate::stats::{GcSkewCounts, Merge, QualStats, SeqStats, DEFAULT_GAP_LETTERS};
+use crate::stats::{GcSkewCounts, Merge, QualStats, QualityDecoder, SeqStats, DEFAULT_GAP_LETTERS};
 use crate::table::{self, Layout as TableLayout, StatsRow};
 use crate::transform::{self, Transforms};
 use bioinfo_fastx::writer::Layout;
@@ -33,29 +35,35 @@ struct InputStats {
     sum_gap: u64,
     sum_n: u64,
     gc: u64,
-    at: u64,
     qual: QualStats,
     format: Option<InputFormat>,
 }
 
 impl InputStats {
-    fn absorb(&mut self, record: &OwnedRecord, gap_letters: &[u8], quality_base: u8) {
-        let sequence = SeqStats::from_sequence(&record.sequence, gap_letters);
+    fn absorb(
+        &mut self,
+        record: RecordView<'_>,
+        gaps: &[bool; 256],
+        quality: Option<&QualityDecoder>,
+    ) {
+        let length = record.sequence.len() as u64;
         self.records += 1;
-        *self.lengths.entry(sequence.length).or_insert(0) += 1;
-        self.sum_len += sequence.length;
+        self.sum_len += length;
         self.min_len = Some(match self.min_len {
-            Some(current) => current.min(sequence.length),
-            None => sequence.length,
+            Some(current) => current.min(length),
+            None => length,
         });
-        self.max_len = self.max_len.max(sequence.length);
+        self.max_len = self.max_len.max(length);
+        let Some(quality) = quality else {
+            return;
+        };
+        *self.lengths.entry(length).or_insert(0) += 1;
+        let sequence = SeqStats::from_gap_table(record.sequence, gaps);
         self.sum_gap += sequence.gap_count;
         self.sum_n += sequence.n_count;
         self.gc += sequence.gc;
-        self.at += sequence.at;
         if record.is_fastq() {
-            self.qual
-                .merge(&QualStats::from_qualities(&record.qualities, quality_base));
+            self.qual.merge(&quality.stats(record.qualities));
         }
     }
 
@@ -66,8 +74,13 @@ impl InputStats {
         } else {
             self.sum_len as f64 / num_seqs as f64
         };
-        let (n50, n50_num) = table::n50_from_histogram(&self.lengths);
-        let (q1, q2, q3) = table::quartiles_from_histogram(&self.lengths);
+        let (n50, n50_num, q1, q2, q3) = if all {
+            let (n50, n50_num) = table::n50_from_histogram(&self.lengths);
+            let (q1, q2, q3) = table::quartiles_from_histogram(&self.lengths);
+            (n50, n50_num, q1, q2, q3)
+        } else {
+            (0, 0, 0, 0, 0)
+        };
         StatsRow {
             file: label,
             format: self.format.unwrap_or(InputFormat::Fastq).label(),
@@ -174,14 +187,24 @@ fn collect_stats(
     // "guessed from the leading subsequences of the first sequences".
     let mut seq_type = "Unlimit";
     let mut first = true;
-    let mut record = OwnedRecord::default();
-    while reader.read_record(&mut record)? {
-        if first {
-            seq_type = transform::guess_seq_type(&record.sequence);
-            first = false;
-        }
-        stats.absorb(&record, &options.gap_letters, options.quality_base);
+    let quality = options
+        .all
+        .then(|| QualityDecoder::new(options.quality_base));
+    let mut gaps = [false; 256];
+    for &byte in &options.gap_letters {
+        gaps[byte as usize] = true;
     }
+    let mut record = OwnedRecord::default();
+    while reader
+        .visit_record(&mut record, |record| {
+            if first {
+                seq_type = transform::guess_seq_type(record.sequence);
+                first = false;
+            }
+            stats.absorb(record, &gaps, quality.as_ref());
+        })?
+        .is_some()
+    {}
     let label = if input == "-" {
         options.stdin_label.clone()
     } else if options.basename {
@@ -1922,8 +1945,10 @@ pub fn fq2fa(options: Fq2faOptions) -> Result<(), CommandError> {
     for input in &inputs {
         let mut reader = RecordReader::open(input)?;
         let mut record = OwnedRecord::default();
-        while reader.read_record(&mut record)? {
-            record.write_to(&mut out, Layout::Fasta, options.line_width)?;
+        while let Some(result) = reader.visit_record(&mut record, |record| {
+            record.write_to(&mut out, Layout::Fasta, options.line_width)
+        })? {
+            result?;
         }
     }
     out.finish()
@@ -2701,39 +2726,41 @@ pub fn lint(options: LintOptions) -> Result<(), CommandError> {
     {
         let mut reader = LintReader::open(&options.r1)?;
         let mut record = OwnedRecord::default();
-        while reader.read_record(&mut record)? {
-            if !record.is_fastq() {
-                return Err(CommandError::input(format!(
-                    "{}: fq lint validates FASTQ, but this input is FASTA",
-                    options.r1
-                )));
-            }
-            let lint_record = LintRecord {
-                header: &record.name,
-                raw_header: &record.raw_header,
-                sequence: &record.sequence,
-                plus: &record.plus,
-                qualities: record
-                    .has_quality_line
-                    .then_some(record.qualities.as_slice()),
-            };
-            let found = linter1.check_record(&lint_record);
-            records_seen += 1;
-            if options.r2.is_some() {
-                // Raw header, with its '@', because fq quotes it verbatim in a P001
-                // message: expected '@other', got '@p2'.
-                read1_names.push(record.raw_header.clone());
-            }
-            for error in found {
-                errors += 1;
-                if options.log_mode {
-                    println!("{}", fq_log_line("ERROR", &options.r1, &error));
+        while let Some(stop) =
+            reader.visit_record(&mut record, |record| -> Result<bool, CommandError> {
+                if !record.is_fastq() {
+                    return Err(CommandError::input(format!(
+                        "{}: fq lint validates FASTQ, but this input is FASTA",
+                        options.r1
+                    )));
                 }
-                if first_error.is_none() {
-                    first_error = Some(error);
+                let lint_record = LintRecord {
+                    header: record.name,
+                    raw_header: record.raw_header,
+                    sequence: record.sequence,
+                    plus: record.plus,
+                    qualities: record.has_quality_line.then_some(record.qualities),
+                };
+                let found = linter1.check_record(&lint_record);
+                records_seen += 1;
+                if options.r2.is_some() {
+                    // Raw header, with its '@', because fq quotes it verbatim in a P001
+                    // message: expected '@other', got '@p2'.
+                    read1_names.push(record.raw_header.to_vec());
                 }
-            }
-            if !options.log_mode && errors > 0 {
+                for error in found {
+                    errors += 1;
+                    if options.log_mode {
+                        println!("{}", fq_log_line("ERROR", &options.r1, &error));
+                    }
+                    if first_error.is_none() {
+                        first_error = Some(error);
+                    }
+                }
+                Ok(!options.log_mode && errors > 0)
+            })?
+        {
+            if stop? {
                 break;
             }
         }
@@ -2743,43 +2770,45 @@ pub fn lint(options: LintOptions) -> Result<(), CommandError> {
         let mut reader = LintReader::open(r2)?;
         let mut index = 0usize;
         let mut record = OwnedRecord::default();
-        while reader.read_record(&mut record)? {
-            if !record.is_fastq() {
-                return Err(CommandError::input(format!(
-                    "{r2}: fq lint validates FASTQ, but this input is FASTA"
-                )));
-            }
-            let lint_record = LintRecord {
-                header: &record.name,
-                raw_header: &record.raw_header,
-                sequence: &record.sequence,
-                plus: &record.plus,
-                qualities: record
-                    .has_quality_line
-                    .then_some(record.qualities.as_slice()),
-            };
-            let mut found = linter2.check_record(&lint_record);
-            if let Some(first) = read1_names.get(index) {
-                found.extend(linter2.check_pair(index as u64 + 1, first, &record.raw_header));
-            }
-            index += 1;
-            for error in found {
-                errors += 1;
-                if options.log_mode {
-                    // A pair-name mismatch is reported against read 1's file, which
-                    // is where fq reads the naming convention from.
-                    let file = if error.report_against_read1 {
-                        options.r1.as_str()
-                    } else {
-                        r2.as_str()
-                    };
-                    println!("{}", fq_log_line("ERROR", file, &error));
+        while let Some(stop) =
+            reader.visit_record(&mut record, |record| -> Result<bool, CommandError> {
+                if !record.is_fastq() {
+                    return Err(CommandError::input(format!(
+                        "{r2}: fq lint validates FASTQ, but this input is FASTA"
+                    )));
                 }
-                if first_error.is_none() {
-                    first_error = Some(error);
+                let lint_record = LintRecord {
+                    header: record.name,
+                    raw_header: record.raw_header,
+                    sequence: record.sequence,
+                    plus: record.plus,
+                    qualities: record.has_quality_line.then_some(record.qualities),
+                };
+                let mut found = linter2.check_record(&lint_record);
+                if let Some(first) = read1_names.get(index) {
+                    found.extend(linter2.check_pair(index as u64 + 1, first, record.raw_header));
                 }
-            }
-            if !options.log_mode && errors > 0 {
+                index += 1;
+                for error in found {
+                    errors += 1;
+                    if options.log_mode {
+                        // A pair-name mismatch is reported against read 1's file, which
+                        // is where fq reads the naming convention from.
+                        let file = if error.report_against_read1 {
+                            options.r1.as_str()
+                        } else {
+                            r2.as_str()
+                        };
+                        println!("{}", fq_log_line("ERROR", file, &error));
+                    }
+                    if first_error.is_none() {
+                        first_error = Some(error);
+                    }
+                }
+                Ok(!options.log_mode && errors > 0)
+            })?
+        {
+            if stop? {
                 break;
             }
         }

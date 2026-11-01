@@ -1,0 +1,124 @@
+[
+  {
+    "command": [
+      "/tmp/bioinfo-readme-repro-oracles/bin/samtools",
+      "cat",
+      "--no-PG",
+      "-o",
+      "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/scale-benchmark/enlarged-inputs/synthetic-bam-1000000-x37/unsorted.bam",
+      "/tmp/bioinfo-readme-benchmark/bam-1000000/unsorted.bam",
+      "/tmp/bioinfo-readme-benchmark/bam-1000000/unsorted.bam",
+      "/tmp/bioinfo-readme-benchmark/bam-1000000/unsorted.bam",
+      "/tmp/bioinfo-readme-benchmark/bam-1000000/unsorted.bam",
+      "/tmp/bioinfo-readme-benchmark/bam-1000000/unsorted.bam",
+      "/tmp/bioinfo-readme-benchmark/bam-1000000/unsorted.bam",
+      "/tmp/bioinfo-readme-benchmark/bam-1000000/unsorted.bam",
+      "/tmp/bioinfo-readme-benchmark/bam-1000000/unsorted.bam",
+      "/tmp/bioinfo-readme-benchmark/bam-1000000/unsorted.bam",
+      "/tmp/bioinfo-readme-benchmark/bam-1000000/unsorted.bam",
+      "/tmp/bioinfo-readme-benchmark/bam-1000000/unsorted.bam",
+      "/tmp/bioinfo-readme-benchmark/bam-1000000/unsorted.bam",
+      "/tmp/bioinfo-readme-benchmark/bam-1000000/unsorted.bam",
+      "/tmp/bioinfo-readme-benchmark/bam-1000000/unsorted.bam",
+      "/tmp/bioinfo-readme-benchmark/bam-1000000/unsorted.bam",
+      "/tmp/bioinfo-readme-benchmark/bam-1000000/unsorted.bam",
+      "/tmp/bioinfo-readme-benchmark/bam-1000000/unsorted.bam",
+      "/tmp/bioinfo-readme-benchmark/bam-1000000/unsorted.bam",
+      "/tmp/bioinfo-readme-benchmark/bam-1000000/unsorted.bam",
+      "/tmp/bioinfo-readme-benchmark/bam-1000000/unsorted.bam",
+      "/tmp/bioinfo-readme-benchmark/bam-1000000/unsorted.bam",
+      "/tmp/bioinfo-readme-benchmark/bam-1000000/unsorted.bam",
+      "/tmp/bioinfo-readme-benchmark/bam-1000000/unsorted.bam",
+      "/tmp/bioinfo-readme-benchmark/bam-1000000/unsorted.bam",
+      "/tmp/bioinfo-readme-benchmark/bam-1000000/unsorted.bam",
+      "/tmp/bioinfo-readme-benchmark/bam-1000000/unsorted.bam",
+      "/tmp/bioinfo-readme-benchmark/bam-1000000/unsorted.bam",
+      "/tmp/bioinfo-readme-benchmark/bam-1000000/unsorted.bam",
+      "/tmp/bioinfo-readme-benchmark/bam-1000000/unsorted.bam",
+      "/tmp/bioinfo-readme-benchmark/bam-1000000/unsorted.bam",
+      "/tmp/bioinfo-readme-benchmark/bam-1000000/unsorted.bam",
+      "/tmp/bioinfo-readme-benchmark/bam-1000000/unsorted.bam",
+      "/tmp/bioinfo-readme-benchmark/bam-1000000/unsorted.bam",
+      "/tmp/bioinfo-readme-benchmark/bam-1000000/unsorted.bam",
+      "/tmp/bioinfo-readme-benchmark/bam-1000000/unsorted.bam",
+      "/tmp/bioinfo-readme-benchmark/bam-1000000/unsorted.bam",
+      "/tmp/bioinfo-readme-benchmark/bam-1000000/unsorted.bam"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/tmp/bioinfo-readme-repro-oracles/bin/samtools",
+      "quickcheck",
+      "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/scale-benchmark/enlarged-inputs/synthetic-bam-1000000-x37/unsorted.bam"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/tmp/bioinfo-readme-repro-oracles/bin/samtools",
+      "view",
+      "-c",
+      "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/scale-benchmark/enlarged-inputs/synthetic-bam-1000000-x37/unsorted.bam"
+    ],
+    "exit": 0,
+    "stdout": "37000000\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/tmp/bioinfo-readme-repro-oracles/bin/samtools",
+      "sort",
+      "--no-PG",
+      "-@",
+      "3",
+      "-m",
+      "128M",
+      "-l",
+      "6",
+      "-T",
+      "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/scale-benchmark/enlarged-inputs/synthetic-bam-1000000-x37/tmp/sort",
+      "-o",
+      "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/scale-benchmark/enlarged-inputs/synthetic-bam-1000000-x37/sorted.bam",
+      "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/scale-benchmark/enlarged-inputs/synthetic-bam-1000000-x37/unsorted.bam"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": "[bam_sort_core] merging from 18 files and 3 in-memory blocks...\n"
+  },
+  {
+    "command": [
+      "/tmp/bioinfo-readme-repro-oracles/bin/samtools",
+      "quickcheck",
+      "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/scale-benchmark/enlarged-inputs/synthetic-bam-1000000-x37/sorted.bam"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/tmp/bioinfo-readme-repro-oracles/bin/samtools",
+      "index",
+      "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/scale-benchmark/enlarged-inputs/synthetic-bam-1000000-x37/sorted.bam"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/tmp/bioinfo-readme-repro-oracles/bin/samtools",
+      "view",
+      "-c",
+      "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/scale-benchmark/enlarged-inputs/synthetic-bam-1000000-x37/sorted.bam"
+    ],
+    "exit": 0,
+    "stdout": "37000000\n",
+    "stderr": ""
+  }
+]

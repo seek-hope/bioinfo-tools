@@ -1,0 +1,147 @@
+{
+  "schema_version": 1,
+  "seed": 20261102,
+  "repeats": 3,
+  "warmups": 1,
+  "target_fastest_seconds": 15,
+  "minimum_desired_seconds": 10,
+  "affinities": {
+    "1": "4",
+    "2": "4,6",
+    "4": "0,2,4,6"
+  },
+  "workloads": [
+    {
+      "id": "real-cutadapt",
+      "source_id": "real-1000000",
+      "case": "cutadapt_plain",
+      "cpu_budgets": [
+        1,
+        2,
+        4
+      ],
+      "multiplicity": 54
+    },
+    {
+      "id": "synthetic-cutadapt",
+      "source_id": "synthetic-1000000",
+      "case": "cutadapt_plain",
+      "cpu_budgets": [
+        1,
+        2,
+        4
+      ],
+      "multiplicity": 46
+    },
+    {
+      "id": "real-cutadapt-gzip",
+      "source_id": "real-1000000",
+      "case": "cutadapt_gzip",
+      "cpu_budgets": [
+        1,
+        2,
+        4
+      ],
+      "multiplicity": 8
+    },
+    {
+      "id": "real-stats",
+      "source_id": "real-1000000",
+      "case": "fx_stats",
+      "cpu_budgets": [
+        1,
+        2,
+        4
+      ],
+      "multiplicity": 30
+    },
+    {
+      "id": "synthetic-stats",
+      "source_id": "synthetic-1000000",
+      "case": "fx_stats",
+      "cpu_budgets": [
+        1,
+        2,
+        4
+      ],
+      "multiplicity": 41
+    },
+    {
+      "id": "synthetic-fq2fa",
+      "source_id": "synthetic-1000000",
+      "case": "fx_fq2fa",
+      "cpu_budgets": [
+        1,
+        4
+      ],
+      "multiplicity": 146
+    },
+    {
+      "id": "synthetic-lint",
+      "source_id": "synthetic-1000000",
+      "case": "fq_lint",
+      "cpu_budgets": [
+        1,
+        4
+      ],
+      "multiplicity": 102
+    },
+    {
+      "id": "bam-flagstat",
+      "source_id": "synthetic-bam-1000000",
+      "case": "bam_flagstat",
+      "cpu_budgets": [
+        1,
+        4
+      ],
+      "multiplicity": 755
+    },
+    {
+      "id": "bam-sort",
+      "source_id": "synthetic-bam-1000000",
+      "case": "bam_sort",
+      "cpu_budgets": [
+        1,
+        2,
+        4
+      ],
+      "multiplicity": 86
+    },
+    {
+      "id": "umi-dedup",
+      "source_id": "synthetic-bam-1000000",
+      "case": "umi_dedup",
+      "cpu_budgets": [
+        1,
+        4
+      ],
+      "multiplicity": 71
+    },
+    {
+      "id": "real-fastqc",
+      "source_id": "real-1000000",
+      "case": "fastqc",
+      "cpu_budgets": [
+        1,
+        4
+      ],
+      "multiplicity": 9
+    }
+  ],
+  "calibration_minima_seconds": {
+    "real-cutadapt": 73.44502326799557,
+    "synthetic-cutadapt": 40.48916978799389,
+    "real-cutadapt-gzip": 17.047553492011502,
+    "real-stats": 15.313476687006187,
+    "synthetic-stats": 15.871945744002005,
+    "synthetic-fq2fa": 85.09192126899143,
+    "synthetic-lint": 18.04575491999276,
+    "bam-flagstat": 15.63476918800734,
+    "bam-sort": 23.325556443014648,
+    "umi-dedup": 14.700760072999401,
+    "real-fastqc": 15.0910972780257
+  },
+  "frozen_for_formal_run": true,
+  "calibration_report": "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/scale-benchmark/calibration-2/report.json",
+  "calibration_report_sha256": "1717553c4decbc0bc8a40fe65a6c0fcfada87a39adc705c02931096b5b2b4ae4"
+}

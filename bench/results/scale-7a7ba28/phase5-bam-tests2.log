@@ -1,0 +1,128 @@
+   Compiling rust-bam v0.1.0 (/home/rimuru/Projects/Code/for_fun/bioinfo-tools/rust-bam)
+    Finished `release` profile [optimized] target(s) in 14.23s
+     Running unittests src/lib.rs (target/release/deps/rust_bam-14663c43e2253428)
+
+running 51 tests
+test commands::tests::flagstat_percentages_use_two_decimals ... ok
+test commands::tests::the_bgzf_eof_marker_is_the_28_byte_htslib_pattern ... ok
+test commands::tests::buffered_sort_index_propagates_deferred_write_failure ... ok
+test error::tests::declared_codes_are_the_shared_ones ... ok
+test commands::tests::flagstat_prints_na_when_the_denominator_is_zero ... ok
+test commands::tests::quickcheck_exit_code_is_16_on_failure_and_0_on_success ... ok
+test error::tests::the_message_survives_display ... ok
+test error::tests::malformed_input_is_a_data_error_but_a_missing_file_is_io ... ok
+test commands::tests::flagstat_renders_all_sixteen_lines_in_samtools_order ... ok
+test commands::tests::idxstats_renders_a_trailing_star_line ... ok
+test commands::tests::idxstats_numbers_appear_in_mapped_then_unmapped_order ... ok
+test format::tests::a_bgzf_wrapped_bam_is_detected_as_bam ... ok
+test error::tests::classes_map_to_the_shared_contract ... ok
+test format::tests::bam_magic_is_detected ... ok
+test format::tests::cram_magic_is_detected_so_it_can_be_rejected_clearly ... ok
+test format::tests::format_names_match_the_diagnostics ... ok
+test format::tests::empty_input_is_an_input_error ... ok
+test format::tests::sam_header_is_detected ... ok
+test format::tests::sam_record_without_header_is_detected ... ok
+test commands::tests::final_merge_retains_read_ahead_before_writing_popped_record ... ok
+test commands::tests::intermediate_merge_writes_index_before_refilling_record ... ok
+test index_util::tests::the_bai_path_appends_to_the_bam_name ... ok
+test io_util::tests::records_alias_is_the_sam_buffer_type ... ok
+test sort_order::tests::a_record_missing_a_position_is_unplaced_even_without_the_flag ... ok
+test sort_order::tests::a_record_missing_a_reference_is_unplaced ... ok
+test sort_order::tests::a_single_record_and_an_empty_list_are_sorted ... ok
+test sort_order::tests::forward_strand_sorts_before_reverse_at_the_same_position ... ok
+test sort_order::tests::is_sorted_detects_a_permutation ... ok
+test sort_order::tests::ordering_is_by_reference_then_start ... ok
+test sort_order::tests::placed_records_come_before_unmapped_ones ... ok
+test sort_order::tests::the_order_is_total_so_output_is_reproducible ... ok
+test sort_order::tests::sorting_is_stable_across_repeated_runs ... ok
+test sort_order::tests::reference_order_follows_the_header_not_the_name ... ok
+test sort_order::tests::updating_a_key_preserves_all_fields_and_reuses_name_storage ... ok
+test stats::tests::a_plain_mapped_record_counts_as_mapped_and_nothing_else ... ok
+test stats::tests::a_secondary_duplicate_counts_toward_duplicates_but_not_primary_duplicates ... ok
+test stats::tests::an_unmapped_mate_is_not_mapped_to_a_different_chromosome ... ok
+test stats::tests::an_unmapped_record_is_not_mapped ... ok
+test stats::tests::duplicates_are_counted_for_both_columns ... ok
+test format::tests::gzip_that_is_not_bam_is_rejected ... ok
+test stats::tests::idxstats_counts_mapped_records_on_their_reference ... ok
+test stats::tests::idxstats_puts_a_mate_placed_unmapped_read_on_its_reference ... ok
+test stats::tests::idxstats_tracks_the_star_line_for_records_with_no_reference ... ok
+test stats::tests::mate_on_a_different_chromosome_does_not_require_proper_pairing ... ok
+test stats::tests::properly_paired_requires_paired_proper_and_mapped ... ok
+test stats::tests::read1_and_read2_require_the_paired_bit ... ok
+test stats::tests::references_keep_header_order ... ok
+test stats::tests::secondary_and_supplementary_are_counted_separately_from_primary ... ok
+test stats::tests::singletons_are_paired_mapped_reads_whose_mate_is_unmapped ... ok
+test stats::tests::the_mapq5_variant_excludes_low_quality_alignments ... ok
+test commands::tests::reused_run_reader_preserves_partial_index_and_index_eof_policy ... ok
+
+test result: ok. 51 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/main.rs (target/release/deps/rust_bam-efb4b9687330afbb)
+
+running 7 tests
+test tests::exit_codes_come_from_the_shared_contract ... ok
+test tests::sort_size_parser_accepts_binary_suffixes ... ok
+test tests::the_provenance_block_names_the_oracle_and_the_library ... ok
+test tests::verbose_version_is_detected_only_with_both_flags ... ok
+test tests::every_command_requires_an_input ... ok
+test tests::the_cli_declares_all_commands ... ok
+test tests::a_missing_subcommand_is_a_usage_error ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/coverage.rs (target/release/deps/coverage-84d857a7648a5254)
+
+running 10 tests
+test default_coverage_matches_samtools_shape ... ok
+test histogram_keeps_region_tail_in_summary ... ok
+test output_file_contains_the_same_text ... ok
+test region_is_restricted_and_formatted_like_samtools ... ok
+test minimum_depth_is_applied_after_merging_inputs ... ok
+test depth_cap_is_per_alignment_start_not_final_depth ... ok
+test multiple_inputs_and_bam_list_merge_by_position ... ok
+test histogram_and_ascii_depth_plot_match_samtools ... ok
+test no_header_and_filters_match_samtools_shape ... ok
+test required_and_filter_flags_follow_coverage_semantics ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/depth.rs (target/release/deps/depth-0b7401bc181357ce)
+
+running 10 tests
+test all_positions_and_header_match_samtools_shape ... ok
+test default_depth_matches_samtools_shape ... ok
+test output_file_contains_the_same_text ... ok
+test bed_intervals_match_samtools_shape ... ok
+test multiple_inputs_have_one_depth_column_each ... ok
+test quality_mapq_and_read_length_filters ... ok
+test overlap_removal_counts_one_mate_and_preserves_quality_filters ... ok
+test all_positions_distinguishes_used_and_unused_references ... ok
+test deletions_and_regions_match_samtools_shape ... ok
+test flag_filters_match_samtools ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/external_sort.rs (target/release/deps/external_sort-39a8507f580851f1)
+
+running 5 tests
+test invalid_memory_size_is_rejected_before_opening_output ... ok
+test encoded_runs_preserve_auxiliary_fields_long_cigar_and_buffer_clearing ... FAILED
+test malformed_input_fails_without_output_or_temp_runs ... ok
+test external_sort_is_byte_identical_to_in_memory_sort_and_cleans_temp ... ok
+test parallel_compression_is_byte_identical_across_spill_and_worker_counts ... ok
+
+failures:
+
+---- encoded_runs_preserve_auxiliary_fields_long_cigar_and_buffer_clearing stdout ----
+
+thread 'encoded_runs_preserve_auxiliary_fields_long_cigar_and_buffer_clearing' (1677131) panicked at rust-bam/tests/external_sort.rs:195:5:
+Output { status: ExitStatus(unix_wait_status(1024)), stdout: "", stderr: "ERROR: cannot write BAM record: invalid name\n" }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    encoded_runs_preserve_auxiliary_fields_long_cigar_and_buffer_clearing
+
+test result: FAILED. 4 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.12s
+
+error: test failed, to rerun pass `-p rust-bam --test external_sort`

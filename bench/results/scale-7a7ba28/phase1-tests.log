@@ -1,0 +1,197 @@
+   Compiling rust-cutadapt v0.1.0 (/home/rimuru/Projects/Code/for_fun/bioinfo-tools/rust-cutadapt)
+    Finished `release` profile [optimized] target(s) in 9.78s
+     Running unittests src/lib.rs (target/release/deps/rust_cutadapt-07f4892603ac8b7f)
+
+running 166 tests
+test adapter::matcher::tests::absolute_error_rate_allows_two_errors ... ok
+test adapter::matcher::tests::anchored_five_prime_requires_prefix ... ok
+test adapter::matcher::tests::anchored_three_prime_requires_suffix ... ok
+test adapter::matcher::tests::anywhere_behaves_like_five_prime_at_start ... ok
+test adapter::matcher::tests::anywhere_behaves_like_three_prime_at_end ... ok
+test adapter::matcher::tests::best_match_prefers_more_aligned_adapter_bases ... ok
+test adapter::matcher::tests::indels_are_off_by_default ... ok
+test adapter::matcher::tests::no_match_returns_none ... ok
+test adapter::matcher::tests::linked_removes_both_parts_when_both_match ... ok
+test adapter::matcher::tests::linked_partial_five_prime_only ... ok
+test adapter::matcher::tests::regular_three_prime_full ... ok
+test adapter::matcher::tests::regular_three_prime_internal ... ok
+test adapter::matcher::tests::regular_five_prime_trims_prefix_and_before_itself ... ok
+test adapter::matcher::tests::regular_three_prime_partial ... ok
+test adapter::matcher::tests::min_overlap_is_respected ... ok
+test adapter::matcher::tests::zero_error_rate_rejects_single_mismatch ... ok
+test adapter::tests::every_type_reports_its_end ... ok
+test adapter::tests::match_ordering_falls_back_to_adapter_order ... ok
+test adapter::tests::match_ordering_prefers_more_aligned_adapter_bases ... ok
+test adapter::tests::parses_anchored_five_prime ... ok
+test adapter::tests::parses_anchored_three_prime ... ok
+test adapter::tests::parses_anywhere ... ok
+test adapter::tests::parses_linked_adapter ... ok
+test adapter::tests::parses_read2_option_letters_like_their_read1_spelling ... ok
+test adapter::tests::parses_regular_five_prime ... ok
+test adapter::tests::parses_regular_three_prime ... ok
+test adapter::tests::read2_option_letters_keep_their_anchors ... ok
+test adapter::tests::rejects_bad_input ... ok
+test adapter::tests::retained_is_saturating ... ok
+test adapter::tests::unknown_option_letter_is_an_error_not_a_three_prime_adapter ... ok
+test adapter::tests::uppercases_and_converts_uracil ... ok
+test align::tests::empty_in_empty ... ok
+test align::tests::illumina_adapter_partial_match ... ok
+test align::tests::indels_penalized ... ok
+test align::tests::lowercase_query_is_matched ... ok
+test align::tests::no_indels_exact_partial ... ok
+test align::tests::no_indels_min_overlap_boundary ... ok
+test align::tests::no_indels_rejects_two_mismatches_in_13 ... ok
+test align::tests::no_indels_shorter_adapter_prefix_still_matches ... ok
+test align::tests::no_indels_single_mismatch_full_length ... ok
+test align::tests::no_match ... ok
+test align::tests::poly_a ... ok
+test align::tests::poly_t ... ok
+test align::tests::poly_t_partial ... ok
+test auxout::tests::info_line_for_three_prime_match ... ok
+test auxout::tests::info_line_for_unmatched_read ... ok
+test auxout::tests::rest_line_is_rest_then_name ... ok
+test auxout::tests::writes_fastq_and_fasta ... ok
+test cli::tests::allows_a_run_without_adapters ... ok
+test cli::tests::accepts_attached_short_values ... ok
+test cli::tests::indels_on_by_default_and_off_with_flag ... ok
+test cli::tests::minimal_invocation ... ok
+test cli::tests::parses_all_adapter_options_in_order ... ok
+test cli::tests::parses_anchored_and_linked ... ok
+test cli::tests::parses_paired_end_options ... ok
+test cli::tests::parses_error_rate_forms ... ok
+test cli::tests::parses_signed_cuts ... ok
+test compress::tests::extensions_match_the_pre_migration_behaviour ... ok
+test cli::tests::parses_output_options ... ok
+test compress::tests::levels_follow_the_zmapping ... ok
+test compress::tests::detection_matches_the_pre_migration_behaviour ... ok
+test compress::tests::stdout_is_never_compressed ... ok
+test engine::tests::anywhere_adapter_trims_both_ends ... ok
+test engine::tests::empty_input_produces_empty_output ... ok
+test engine::tests::filters_short_reads_after_trimming ... ok
+test cli::tests::parses_length_pairs ... ok
+test engine::tests::five_prime_adapter_trims_the_prefix ... ok
+test cli::tests::rejects_invalid_enum_values ... ok
+test engine::tests::keeps_plus_and_quality_lines ... ok
+test engine::tests::keeps_reads_equal_to_minimum_length_exact ... ok
+test cli::tests::parses_quality_cutoffs ... ok
+test engine::tests::linked_adapter_trims_both_parts ... ok
+test cli::tests::parses_actions ... ok
+test engine::tests::malformed_input_reports_error ... ok
+test engine::tests::times_removes_multiple_adapters ... ok
+test cli::tests::help_and_version_are_successful_requests ... ok
+test engine::tests::untrimmed_quality_is_preserved_byte_for_byte ... ok
+test filter::tests::casava_filter_reads_the_second_field ... ok
+test filter::tests::defaults_are_empty ... ok
+test filter::tests::discard_trimmed_and_untrimmed ... ok
+test filter::tests::empty_read_with_average_rate_filter_is_fatal ... ok
+test filter::tests::expected_error_and_average_rate_filters ... ok
+test filter::tests::expected_errors_uses_phred ... ok
+test filter::tests::first_failing_filter_wins ... ok
+test filter::tests::length_filters ... ok
+test filter::tests::n_filter_counts_absolute_and_fractional_limits ... ok
+test modify::tests::cut_removes_from_both_ends ... ok
+test modify::tests::length_keeps_first_or_last_bases ... ok
+test modify::tests::modifications_default_is_empty ... ok
+test modify::tests::poly_a_ignores_short_runs_and_internal_runs ... ok
+test modify::tests::poly_a_matches_oracle_on_ambiguous_short_tails ... ok
+test modify::tests::poly_a_tolerates_mismatches_in_the_tail ... ok
+test modify::tests::poly_a_trims_a_trailing_run ... ok
+test modify::tests::quality_base_64_is_respected ... ok
+test modify::tests::quality_trims_both_ends ... ok
+test modify::tests::quality_trims_only_below_the_cutoff ... ok
+test modify::tests::trim_n_removes_only_leading_and_trailing_ns ... ok
+test modify::tests::zero_cap_clamps_negative_qualities ... ok
+test pair::tests::adapter_numbering_continues_across_reads ... ok
+test pair::tests::count_records_checked_reports_malformed_input ... ok
+test pair::tests::pair_decision_zeroes_both_counts_when_discarded ... ok
+test pair::tests::pair_filter_matches_oracle_counts ... ok
+test pair::tests::pair_filter_truth_table ... ok
+test pair::tests::split_records_ignores_trailing_partial_record ... ok
+test pair::tests::split_records_keeps_lockstep_ranges ... ok
+test report::fmt::tests::comma_u64_groups_at_every_third_digit ... ok
+test report::fmt::tests::comma_u64_matches_python_width_and_grouping ... ok
+test report::fmt::tests::fraction_uses_zero_for_missing_values_and_zero_denominator ... ok
+test report::fmt::tests::fixed1_matches_python_half_even_rounding ... ok
+test report::fmt::tests::json_float_matches_python_for_typical_values ... ok
+test report::fmt::tests::json_float_switches_to_scientific_at_one_e16 ... ok
+test report::fmt::tests::json_string_escapes_quotes_and_backslashes ... ok
+test report::fmt::tests::percent_1_matches_python ... ok
+test report::fmt::tests::round1_matches_python ... ok
+test report::json::tests::adjacent_bases_uses_empty_string_key_for_none ... ok
+test report::json::tests::document_ends_with_exactly_one_newline ... ok
+test report::json::tests::error_lengths_and_trimmed_lengths_are_one_line ... ok
+test report::json::tests::indels_flag_is_serialised ... ok
+test report::json::tests::json_matches_oracle_structure_for_plain_invocation ... ok
+test report::json::tests::json_reports_reverse_complemented_when_rc_used ... ok
+test report::json::tests::json_reports_zero_quality_trimmed_when_q_used ... ok
+test report::json::tests::json_sets_filter_counter_when_option_used ... ok
+test report::json::tests::json_string_escaping_is_applied_to_names_and_paths ... ok
+test report::json::tests::paired_end_sets_read2_fields ... ok
+test report::json::tests::poly_a_lengths_are_one_line_objects ... ok
+test report::json::tests::schema_version_is_one_line ... ok
+test report::stats::tests::adjacent_bases_warnbase_is_none_for_the_empty_key ... ok
+test report::stats::tests::adjacent_bases_warnbase_needs_twenty_removals ... ok
+test report::stats::tests::error_lengths_match_cutadapt_docstring ... ok
+test report::stats::tests::error_lengths_match_oracle_error_rate_025 ... ok
+test report::stats::tests::error_lengths_match_oracle_ten_base_adapter ... ok
+test report::stats::tests::error_lengths_zero_error_rate ... ok
+test report::stats::tests::error_ranges_text_matches_cutadapt_docstrings ... ok
+test report::stats::tests::filter_counts_total_and_present_skip_none ... ok
+test report::stats::tests::stats_aggregates_optional_counters ... ok
+test report::text::tests::anchored_adapter_reports_absolute_error_count ... ok
+test report::text::tests::filter_label_field_is_27_characters ... ok
+test report::text::tests::filter_breakdown_uses_cutadapt_label_padding ... ok
+test report::text::tests::full_report_includes_quality_trimmed_line_when_option_used ... ok
+test report::text::tests::full_report_includes_reverse_complemented_lines ... ok
+test report::text::tests::full_report_matches_oracle_plain ... ok
+test report::text::tests::histogram_expect_uses_random_match_probabilities ... ok
+test report::text::tests::full_report_matches_oracle_with_min_length_filter ... ok
+test report::text::tests::history_grammar_is_header_plus_rows_and_blank_line ... ok
+test report::text::tests::minimal_report_matches_oracle_with_filter ... ok
+test report::text::tests::minimal_report_matches_oracle_without_filter ... ok
+test report::text::tests::minimal_report_status_is_warn_when_a_base_dominates ... ok
+test report::text::tests::no_reads_processed_message ... ok
+test runreport::tests::builds_a_single_adapter_report ... ok
+test runreport::tests::five_prime_adapter_gets_front_statistics ... ok
+test runreport::tests::too_short_counter_only_reported_when_min_length_is_set ... ok
+test trim::tests::adapter_at_start_yields_empty_read ... ok
+test trim::tests::adapter_shorter_than_min_overlap_never_matches ... ok
+test trim::tests::exact_full_adapter_is_removed ... ok
+test trim::tests::internal_adapter_truncates_read ... ok
+test trim::tests::long_read_is_cut_before_adapter ... ok
+test trim::tests::lowercase_adapter_and_read_are_supported ... ok
+test trim::tests::no_adapter_leaves_read_untouched ... ok
+test trim::tests::one_mismatch_in_full_adapter_is_removed ... ok
+test trim::tests::partial_3_prime_adapter_is_removed ... ok
+test trim::tests::prefilter_kmers_match_cutadapt_heuristic ... ok
+test trim::tests::reverse_complement_is_not_matched ... ok
+test trim::tests::short_read_with_partial_adapter_is_trimmed ... ok
+test compress::tests::every_format_round_trips_through_the_shared_helpers ... ok
+test align::tests::rejection_filter_preserves_exhaustive_short_alignments ... ok
+test align::tests::rejection_filter_preserves_long_words_and_fallbacks ... ok
+
+test result: ok. 166 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.99s
+
+   Compiling rust-fx v0.1.0 (/home/rimuru/Projects/Code/for_fun/bioinfo-tools/rust-fx)
+error[E0308]: `if` and `else` have incompatible types
+  --> rust-fx/src/commands.rs:76:13
+   |
+71 |           let (n50, n50_num, q1, q2, q3) = if all {
+   |  __________________________________________-
+72 | |             let (n50, n50_num) = table::n50_from_histogram(&self.lengths);
+73 | |             let (q1, q2, q3) = table::quartiles_from_histogram(&self.lengths);
+74 | |             (n50, n50_num, q1, q2, q3)
+   | |             -------------------------- expected because of this
+75 | |         } else {
+76 | |             (0, 0, 0.0, 0.0, 0.0)
+   | |             ^^^^^^^^^^^^^^^^^^^^^ expected `(u64, u64, u64, u64, u64)`, found `({integer}, {integer}, {float}, {float}, {float})`
+77 | |         };
+   | |_________- `if` and `else` have incompatible types
+   |
+   = note: expected tuple `(u64, u64, u64, u64, u64)`
+              found tuple `({integer}, {integer}, {float}, {float}, {float})`
+
+For more information about this error, try `rustc --explain E0308`.
+error: could not compile `rust-fx` (lib) due to 1 previous error
+warning: build failed, waiting for other jobs to finish...
+error: could not compile `rust-fx` (lib test) due to 1 previous error

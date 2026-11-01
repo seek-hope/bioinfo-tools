@@ -1,0 +1,8 @@
+[2m2026-11-01T09:15:16.370031Z[0m [32m INFO[0m [2mfq::commands::lint[0m[2m:[0m fq-lint start
+[2m2026-11-01T09:15:16.370050Z[0m [32m INFO[0m [2mfq::commands::lint[0m[2m:[0m validating single end read
+[2m2026-11-01T09:15:16.370052Z[0m [32m INFO[0m [2mfq::validators[0m[2m:[0m disabled validators: []
+[2m2026-11-01T09:15:16.370055Z[0m [32m INFO[0m [2mfq::validators[0m[2m:[0m enabled single read validators: ["[S003] NameValidator", "[S004] CompleteValidator", "[S002] AlphabetValidator", "[S001] PlusLineValidator", "[S005] ConsistentSeqQualValidator", "[S006] QualityStringValidator"]
+[2m2026-11-01T09:15:16.370060Z[0m [32m INFO[0m [2mfq::validators[0m[2m:[0m enabled paired read validators: []
+[2m2026-11-01T09:15:16.370061Z[0m [32m INFO[0m [2mfq::commands::lint[0m[2m:[0m starting validation
+[2m2026-11-01T09:15:16.544838Z[0m [32m INFO[0m [2mfq::commands::lint[0m[2m:[0m read 1000000 records
+[2m2026-11-01T09:15:16.544857Z[0m [32m INFO[0m [2mfq::commands::lint[0m[2m:[0m fq-lint end

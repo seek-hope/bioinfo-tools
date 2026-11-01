@@ -149,27 +149,71 @@ The second command runs checks against locally installed, pinned versions of the
 
 ## Performance Comparison with Reference Software
 
-A new round of single-core and multi-core benchmarks on large inputs is still running. Previous benchmark records and optimization notes are available in [bench/RESULTS-README.md](bench/RESULTS-README.md) and [bench/OPTIMIZATION.md](bench/OPTIMIZATION.md), with benchmark methodology documented in [bench/README.md](bench/README.md).
+Measured on 2026-11-01 (UTC) on an i7-13700H laptop with 31.1 GiB RAM and NVMe storage.
+The table shows the median [minimum–maximum] of three runs after a warm-up.
+Ratios are the median of the paired reference/current times; values above 1
+mean the current implementation is faster.
 
-| Tool / Reference | Operation | Input Size | CPU Budget | Reference Time (s) | Current Implementation Time (s) |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| `rust-cutadapt` / cutadapt 4.6 | Adapter trimming (FASTQ) | | 1 / 2 / 4 | | |
-| `rust-cutadapt` / cutadapt 4.6 | Adapter trimming (gzip output) | | 1 / 2 / 4 | | |
-| `rust-umitools` / UMI-tools 1.1.6 | `dedup` | | 1 / 4 | | |
-| `rust-bam` / samtools 1.24 | `sort` | | 1 / 2 / 4 | | |
-| `rust-bam` / samtools 1.24 | `flagstat` | | 1 / 4 | | |
-| `rust-fx` / SeqKit 2.14.0 | `stats -a -T` | | 1 / 2 / 4 | | |
-| `rust-fx` / SeqKit 2.14.0 | `fq2fa` | | 1 / 4 | | |
-| `rust-fx` / fq 0.12.0 | `lint` | | 1 / 4 | | |
+Inputs repeat fixed one-million-record populations: real 150 bp reads from
+SRR2584863, synthetic 150 bp FASTQ, and synthetic 50 bp BAM. M denotes million
+records. Repetition increases processing work while retaining the source
+sequence diversity. The same input is used for each core budget.
+
+<!-- README_SCALE_START -->
+| Operation | Input | CPU Budget | Reference Time (s) | Current Implementation Time (s) | Reference / Current |
+| --- | --- | ---: | ---: | ---: | ---: |
+| cutadapt plain | Real FASTQ, 54M | 1 | 127.21 [120.21–141.27] | 145.22 [142.22–157.21] | 0.89× |
+| cutadapt plain | Real FASTQ, 54M | 2 | 99.02 [95.21–108.38] | 147.06 [143.26–175.30] | 0.66× |
+| cutadapt plain | Real FASTQ, 54M | 4 | 106.41 [78.99–106.69] | 138.99 [113.83–156.92] | 0.69× |
+| cutadapt plain | Synthetic FASTQ, 46M | 1 | 125.39 [113.53–132.81] | 112.06 [94.95–119.51] | 1.05× |
+| cutadapt plain | Synthetic FASTQ, 46M | 2 | 84.83 [66.85–92.55] | 121.61 [105.32–149.98] | 0.63× |
+| cutadapt plain | Synthetic FASTQ, 46M | 4 | 65.63 [61.38–72.03] | 72.77 [65.97–130.40] | 0.84× |
+| cutadapt gzip6 output | Real FASTQ, 8M | 1 | 65.34 [65.16–65.40] | 58.41 [58.32–58.62] | 1.12× |
+| cutadapt gzip6 output | Real FASTQ, 8M | 2 | 53.84 [53.60–53.85] | 29.47 [29.38–29.53] | 1.83× |
+| cutadapt gzip6 output | Real FASTQ, 8M | 4 | 21.63 [21.52–21.75] | 16.83 [16.76–16.87] | 1.28× |
+| SeqKit stats -a -T | Real FASTQ, 30M | 1 | 15.61 [15.51–15.69] | 15.47 [15.47–15.54] | 1.00× |
+| SeqKit stats -a -T | Real FASTQ, 30M | 2 | 15.36 [15.21–15.37] | 15.68 [15.55–15.68] | 0.98× |
+| SeqKit stats -a -T | Real FASTQ, 30M | 4 | 15.37 [15.36–15.44] | 15.92 [15.92–15.99] | 0.96× |
+| SeqKit stats -a -T | Synthetic FASTQ, 41M | 1 | 16.13 [15.91–16.15] | 21.21 [21.18–21.22] | 0.76× |
+| SeqKit stats -a -T | Synthetic FASTQ, 41M | 2 | 15.99 [15.72–16.11] | 21.47 [21.37–21.58] | 0.74× |
+| SeqKit stats -a -T | Synthetic FASTQ, 41M | 4 | 15.85 [15.82–16.15] | 21.93 [21.86–22.44] | 0.72× |
+| SeqKit fq2fa | Synthetic FASTQ, 146M | 1 | 155.21 [138.19–179.92] | 134.25 [119.64–138.81] | 1.16× |
+| SeqKit fq2fa | Synthetic FASTQ, 146M | 4 | 106.11 [103.83–132.82] | 135.81 [110.02–139.59] | 0.95× |
+| fq lint | Synthetic FASTQ, 102M | 1 | 28.35 [26.81–29.14] | 23.06 [22.60–23.28] | 1.23× |
+| fq lint | Synthetic FASTQ, 102M | 4 | 29.53 [29.41–30.40] | 27.34 [25.07–27.74] | 1.11× |
+| samtools flagstat | Synthetic BAM, 755M | 1 | 34.51 [28.53–34.66] | 69.57 [65.09–76.03] | 0.45× |
+| samtools flagstat | Synthetic BAM, 755M | 4 | 16.38 [16.35–16.43] | 60.60 [60.33–61.01] | 0.27× |
+| samtools sort | Synthetic BAM, 86M | 1 | 43.66 [42.45–44.77] | 94.89 [93.55–97.71] | 0.46× |
+| samtools sort | Synthetic BAM, 86M | 2 | 52.44 [52.40–52.47] | 91.77 [91.50–91.93] | 0.57× |
+| samtools sort | Synthetic BAM, 86M | 4 | 23.18 [23.14–23.18] | 91.61 [91.11–91.68] | 0.25× |
+| UMI-tools directional dedup | Synthetic BAM, 71M | 1 | 228.66 [223.20–237.04] | 15.27 [15.26–15.29] | 14.98× |
+| UMI-tools directional dedup | Synthetic BAM, 71M | 4 | 215.23 [215.09–216.18] | 14.80 [14.76–14.83] | 14.54× |
+<!-- README_SCALE_END -->
+
+Core budgets allocate 1, 2 or 4 physical P cores. Current FX and flagstat
+processing are serial; BAM sort workers compress the final BAM output.
+The [full results](bench/SCALE.md) include input bytes, commands, CPU usage,
+peak RSS, temporary storage and output checks. Timings include startup and
+ordinary I/O; post-exit fsync is recorded separately. Plain-output trimming
+and conversion showed wide variation and low CPU use. Gzip trimming and lint
+were faster in this run; synthetic statistics and the BAM operations remain
+optimization priorities. The UMI result applies to the specified synthetic
+four-UMI population.
 
 ### FastQC Runtime
 
-FastQC timings are listed separately while GC and duplication statistics are compared and plots are added.
+The implementations differ in GC and duplication statistics and report
+graphics, so these timings are listed without a speed ratio. The current
+implementation processes one input serially.
 
-| Tool / Reference | Operation | Input Size | CPU Budget | Reference Time (s) | Current Implementation Time (s) |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| `rust-fastqc` vs. FastQC 0.13.0 | QC report | | 1 | | |
-| `rust-fastqc` vs. FastQC 0.13.0 | QC report | | 4 | | |
+| Operation | Input | CPU Budget | Reference Time (s) | Current Implementation Time (s) |
+| --- | --- | ---: | ---: | ---: |
+| FastQC (descriptive) | Real FASTQ, 9M | 1 | 34.31 [34.29–34.31] | 40.15 [40.13–40.19] |
+| FastQC (descriptive) | Real FASTQ, 9M | 4 | 15.09 [15.09–15.11] | 41.24 [41.02–41.45] |
+
+See [bench/README.md](bench/README.md) for the measurement methods.
+Earlier measurements remain available in [bench/RESULTS-README.md](bench/RESULTS-README.md)
+and [bench/OPTIMIZATION.md](bench/OPTIMIZATION.md).
 
 ## Development Roadmap
 

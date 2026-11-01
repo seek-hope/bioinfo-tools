@@ -1,0 +1,17 @@
+{
+  "passed": true,
+  "conditions": 28,
+  "measured": 168,
+  "warmups": 56,
+  "pairs": 112,
+  "minimum_formal_seconds": 14.759773495985428,
+  "below_10_seconds": 0,
+  "independent_median_and_paired_ratio_checks": true,
+  "identity_files_rehashed": 151,
+  "qc_checks": 8,
+  "qc_equal_modules": 9,
+  "qc_modules_compared": 11,
+  "runtime_routes_unchanged": true,
+  "started_utc": "2026-11-01T12:19:10.636636+00:00",
+  "completed_utc": "2026-11-01T18:05:08.187394+00:00"
+}

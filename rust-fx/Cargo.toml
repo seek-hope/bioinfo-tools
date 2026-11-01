@@ -32,3 +32,6 @@ clap = { version = "4", features = ["derive"] }
 # upstream; this is the workspace-pinned regex crate already used by
 # rust-umitools, not a new package in Cargo.lock.
 regex = "1"
+# Reuse the locked byte-search implementation for borrowed FASTQ parsing.
+# See docs/ADR-FASTX-BYTE-SEARCH.md at the workspace root.
+memchr = { version = "=2.8.3", default-features = false, features = ["std"] }

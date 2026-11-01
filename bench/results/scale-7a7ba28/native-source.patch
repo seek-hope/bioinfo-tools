@@ -1,0 +1,1980 @@
+diff --git a/Cargo.lock b/Cargo.lock
+index 84c9a53..c2e9aca 100644
+--- a/Cargo.lock
++++ b/Cargo.lock
+@@ -780,6 +780,7 @@ dependencies = [
+  "bioinfo-common",
+  "bioinfo-fastx",
+  "clap",
++ "memchr",
+  "regex",
+ ]
+ 
+diff --git a/rust-bam/src/commands.rs b/rust-bam/src/commands.rs
+index e5f800b..5618df1 100644
+--- a/rust-bam/src/commands.rs
++++ b/rust-bam/src/commands.rs
+@@ -1878,7 +1878,7 @@ pub struct SortOptions {
+     pub max_memory: Option<u64>,
+     /// Maximum number of run files opened during one merge pass.
+     pub max_open_files: usize,
+-    /// `-@`: only 1 is currently supported by sort.
++    /// `-@`: worker threads for final BAM compression; 0/1 use the serial writer.
+     pub threads: usize,
+ }
+ 
+@@ -1947,6 +1947,15 @@ fn record_memory(record: &Record) -> u64 {
+     (std::mem::size_of::<Record>() + name + sequence + qualities + 256) as u64
+ }
+ 
++fn sorted_indices(chunk: &[(SortKey, Record)]) -> Vec<usize> {
++    let mut order: Vec<_> = (0..chunk.len()).collect();
++    // Keys include the unique input index, so unstable sorting of these small
++    // indices yields the same total order without moving large RecordBufs or
++    // allocating a stable-sort scratch array of records.
++    order.sort_unstable_by(|&a, &b| chunk[a].0.cmp(&chunk[b].0));
++    order
++}
++
+ fn write_index(file: &mut impl Write, index: usize) -> Result<()> {
+     let index = u64::try_from(index)
+         .map_err(|_| Error::runtime("record index does not fit in u64".to_string()))?;
+@@ -1968,8 +1977,7 @@ fn spill_run(
+ ) -> Result<PathBuf> {
+     let path = temp.run_path();
+     let index_path = path.with_extension("idx");
+-    let mut sorted = std::mem::take(chunk);
+-    sorted.sort_by(|a, b| a.0.cmp(&b.0));
++    let order = sorted_indices(chunk);
+ 
+     let file = File::create(&path)
+         .map_err(|error| Error::io(format!("cannot create {}: {error}", path.display())))?;
+@@ -1980,7 +1988,8 @@ fn spill_run(
+     let mut index_file = BufWriter::with_capacity(64 * 1024, index_file);
+     let mut writer = BamWriter::new_fast(file);
+     writer.write_header(header)?;
+-    for (key, record) in &sorted {
++    for position in order {
++        let (key, record) = &chunk[position];
+         writer.write_record(header, record)?;
+         write_index(&mut index_file, key.input_index)?;
+     }
+@@ -1988,12 +1997,84 @@ fn spill_run(
+     file.sync_all()
+         .map_err(|error| Error::io(format!("cannot sync {}: {error}", path.display())))?;
+     flush_index(&mut index_file)?;
++    // Drop record storage, but keep the chunk's backing allocation for the
++    // next spill. Run boundaries and write/sync error order remain unchanged.
++    chunk.clear();
+     Ok(path)
+ }
+ 
++// Capture the exact bytes consumed by the full decoder. Internal runs were
++// serialized once by BamWriter, so validated frames can be forwarded without
++// repeating field encoding. This is deliberately confined to sort run readers:
++// public inputs (including flagstat) retain their existing reader and checks.
++const MAX_CACHED_SORT_FRAME: usize = 64 * 1024;
++
++struct CaptureReader<R> {
++    inner: R,
++    frame: Vec<u8>,
++    capture: bool,
++}
++
++impl<R: Read> Read for CaptureReader<R> {
++    fn read(&mut self, buffer: &mut [u8]) -> std::io::Result<usize> {
++        let count = self.inner.read(buffer)?;
++        if self.capture {
++            let prefix = (4usize.saturating_sub(self.frame.len())).min(count);
++            self.frame.extend_from_slice(&buffer[..prefix]);
++            if self.frame.len() >= 4 {
++                let size =
++                    u32::from_le_bytes(self.frame[..4].try_into().expect("four bytes")) as u64 + 4;
++                if size > MAX_CACHED_SORT_FRAME as u64
++                    || self.frame.len() + count - prefix > MAX_CACHED_SORT_FRAME
++                {
++                    self.capture = false;
++                    self.frame.clear();
++                }
++            }
++            if self.capture {
++                self.frame.extend_from_slice(&buffer[prefix..count]);
++            }
++        }
++        Ok(count)
++    }
++}
++
++type CapturedBamReader = noodles::bam::io::Reader<
++    CaptureReader<noodles::bgzf::io::Reader<BufReader<Box<dyn Read + Send>>>>,
++>;
++
++enum RunInput {
++    Bam(CapturedBamReader),
++    Other(AlignmentReader),
++}
++
++impl RunInput {
++    fn read_record(
++        &mut self,
++        header: &sam::Header,
++        record: &mut Record,
++        frame: &mut Vec<u8>,
++    ) -> Result<usize> {
++        frame.clear();
++        match self {
++            Self::Bam(reader) => {
++                std::mem::swap(frame, &mut reader.get_mut().frame);
++                reader.get_mut().frame.clear();
++                reader.get_mut().capture = true;
++                // Keep the full decoder, including auxiliary-tag duplicates,
++                // long-CIGAR validation, and diagnostic precedence.
++                let result = reader.read_record_buf(header, record);
++                std::mem::swap(frame, &mut reader.get_mut().frame);
++                result.map_err(|error| Error::runtime(format!("cannot read BAM record: {error}")))
++            }
++            Self::Other(reader) => reader.read_record(header, record),
++        }
++    }
++}
++
+ struct RunReader {
+     label: PathBuf,
+-    reader: AlignmentReader,
++    reader: RunInput,
+     header: sam::Header,
+     indices: BufReader<File>,
+ }
+@@ -2001,6 +2082,16 @@ struct RunReader {
+ fn open_run(path: &Path) -> Result<RunReader> {
+     let mut reader = AlignmentReader::open(path)?;
+     let header = reader.read_header()?;
++    let reader = match reader {
++        AlignmentReader::Bam(reader) => {
++            RunInput::Bam(noodles::bam::io::Reader::from(CaptureReader {
++                inner: reader.into_inner(),
++                frame: Vec::new(),
++                capture: true,
++            }))
++        }
++        other => RunInput::Other(other),
++    };
+     let index_path = path.with_extension("idx");
+     let file = File::open(&index_path)
+         .map_err(|error| Error::io(format!("cannot open {}: {error}", index_path.display())))?;
+@@ -2012,7 +2103,12 @@ fn open_run(path: &Path) -> Result<RunReader> {
+     })
+ }
+ 
+-fn next_from_run(run: &mut RunReader) -> Result<Option<(SortKey, Record)>> {
++fn next_from_run(
++    run: &mut RunReader,
++    record: &mut Record,
++    key: &mut SortKey,
++    frame: &mut Vec<u8>,
++) -> Result<bool> {
+     let mut bytes = [0u8; 8];
+     let mut filled = 0;
+     while filled < bytes.len() {
+@@ -2029,7 +2125,7 @@ fn next_from_run(run: &mut RunReader) -> Result<Option<(SortKey, Record)>> {
+         }
+     }
+     if filled == 0 {
+-        return Ok(None);
++        return Ok(false);
+     }
+     if filled != bytes.len() {
+         return Err(Error::runtime(format!(
+@@ -2039,20 +2135,26 @@ fn next_from_run(run: &mut RunReader) -> Result<Option<(SortKey, Record)>> {
+     }
+     let index = usize::try_from(u64::from_le_bytes(bytes))
+         .map_err(|_| Error::runtime("sort index does not fit in usize".to_string()))?;
+-    let mut record = Record::default();
+-    if run.reader.read_record(&run.header, &mut record)? == 0 {
++    if run.reader.read_record(&run.header, record, frame)? == 0 {
+         return Err(Error::runtime(format!(
+             "sort run {} ended before its index",
+             run.label.display()
+         )));
+     }
+-    let key = key_for(&record, index);
+-    Ok(Some((key, record)))
++    key.update(
++        record.flags(),
++        tolerant_reference_id(record),
++        record.alignment_start().map(usize::from),
++        record.name().map(|name| name.as_ref()).unwrap_or(&[]),
++        index,
++    );
++    Ok(true)
+ }
+ 
+ struct MergeItem {
+     key: SortKey,
+     record: Record,
++    frame: Vec<u8>,
+     run: usize,
+ }
+ 
+@@ -2085,8 +2187,16 @@ fn open_runs(paths: &[PathBuf]) -> Result<(Vec<RunReader>, BinaryHeap<MergeItem>
+     let mut heap = BinaryHeap::new();
+     for (run, path) in paths.iter().enumerate() {
+         let mut reader = open_run(path)?;
+-        if let Some((key, record)) = next_from_run(&mut reader)? {
+-            heap.push(MergeItem { key, record, run });
++        let mut record = Record::default();
++        let mut key = key_for(&record, 0);
++        let mut frame = Vec::new();
++        if next_from_run(&mut reader, &mut record, &mut key, &mut frame)? {
++            heap.push(MergeItem {
++                key,
++                record,
++                frame,
++                run,
++            });
+         }
+         readers.push(reader);
+     }
+@@ -2104,15 +2214,25 @@ fn merge_to_run(temp: &mut TempDir, paths: &[PathBuf], header: &sam::Header) ->
+     let mut index_file = BufWriter::with_capacity(64 * 1024, index_file);
+     let mut writer = BamWriter::new_fast(file);
+     writer.write_header(header)?;
+-    while let Some(item) = heap.pop() {
+-        writer.write_record(header, &item.record)?;
++    while let Some(mut item) = heap.pop() {
++        if item.frame.is_empty() {
++            writer.write_record(header, &item.record)?;
++        } else {
++            writer.write_encoded_record(&item.frame)?;
++        }
+         write_index(&mut index_file, item.key.input_index)?;
+-        if let Some((key, record)) = next_from_run(&mut readers[item.run])? {
+-            heap.push(MergeItem {
+-                key,
+-                record,
+-                run: item.run,
+-            });
++        if item.frame.is_empty() {
++            // Large records use the ordinary encoder; do not retain their
++            // allocations in run buffers after they have been written.
++            item.record = Record::default();
++        }
++        if next_from_run(
++            &mut readers[item.run],
++            &mut item.record,
++            &mut item.key,
++            &mut item.frame,
++        )? {
++            heap.push(item);
+         }
+     }
+     let file = writer.finish()?;
+@@ -2149,26 +2269,69 @@ fn reduce_runs(
+ 
+ fn write_records<F>(options: &SortOptions, header: &sam::Header, mut next: F) -> Result<()>
+ where
+-    F: FnMut() -> Result<Option<Record>>,
++    F: FnMut(&mut Record, &mut Vec<u8>) -> Result<bool>,
+ {
++    let mut record = Record::default();
++    let mut frame = Vec::new();
+     if options.sam_output {
+         let mut out = open_writer(options.output.as_deref())?;
+         {
+             let mut writer = SamWriter::new(&mut out);
+             writer.write_header(header)?;
+-            while let Some(record) = next()? {
++            while next(&mut record, &mut frame)? {
+                 writer.write_record(header, &record)?;
++                if frame.is_empty() {
++                    record = Record::default();
++                }
+             }
+             writer.finish()?;
+         }
+         out.flush()
+             .map_err(|error| Error::io(format!("cannot flush output: {error}")))?;
++    } else if options.threads > 1 {
++        let out = open_writer_send(options.output.as_deref())?;
++        let workers = NonZero::new(options.threads).expect("threads > 1");
++        let mt = noodles::bgzf::io::multithreaded_writer::Builder::default()
++            .set_worker_count(workers)
++            .build_from_writer(out);
++        let mut writer = noodles::bam::io::Writer::from(mt);
++        writer
++            .write_header(header)
++            .map_err(|error| Error::io(format!("cannot write BAM header: {error}")))?;
++        while next(&mut record, &mut frame)? {
++            if frame.is_empty() {
++                writer
++                    .write_alignment_record(header, &record)
++                    .map_err(|error| Error::io(format!("cannot write BAM record: {error}")))?;
++            } else {
++                writer
++                    .get_mut()
++                    .write_all(&frame)
++                    .map_err(|error| Error::io(format!("cannot write BAM record: {error}")))?;
++            }
++            if frame.is_empty() {
++                record = Record::default();
++            }
++        }
++        let mut mt = writer.into_inner();
++        let mut out = mt
++            .finish()
++            .map_err(|error| Error::io(format!("cannot finish BGZF stream: {error}")))?;
++        out.flush()
++            .map_err(|error| Error::io(format!("cannot flush output: {error}")))?;
+     } else {
+         let out = open_writer(options.output.as_deref())?;
+         let mut writer = BamWriter::new(out);
+         writer.write_header(header)?;
+-        while let Some(record) = next()? {
+-            writer.write_record(header, &record)?;
++        while next(&mut record, &mut frame)? {
++            if frame.is_empty() {
++                writer.write_record(header, &record)?;
++            } else {
++                writer.write_encoded_record(&frame)?;
++            }
++            if frame.is_empty() {
++                record = Record::default();
++            }
+         }
+         let mut out = writer.finish()?;
+         out.flush()
+@@ -2185,11 +2348,6 @@ where
+ /// merged with a bounded number of open files. The sidecar preserves the
+ /// documented final input-index tie-break exactly.
+ pub fn sort(options: SortOptions) -> Result<u64> {
+-    if options.threads > 1 {
+-        return Err(Error::usage(
+-            "sort currently supports -@ 1 only; BAM sort itself is single-threaded",
+-        ));
+-    }
+     let mut reader = AlignmentReader::open(&options.input)?;
+     let header = reader.read_header()?;
+     let final_header = header_with_coordinate_sort(header.clone());
+@@ -2210,7 +2368,7 @@ pub fn sort(options: SortOptions) -> Result<u64> {
+         }
+         let key = key_for(&record, index);
+         chunk_bytes = chunk_bytes.saturating_add(record_memory(&record));
+-        chunk.push((key, record.clone()));
++        chunk.push((key, std::mem::take(&mut record)));
+         index += 1;
+         if chunk_bytes >= budget {
+             if temp.is_none() {
+@@ -2224,9 +2382,15 @@ pub fn sort(options: SortOptions) -> Result<u64> {
+ 
+     let total = index as u64;
+     if runs.is_empty() {
+-        chunk.sort_by(|a, b| a.0.cmp(&b.0));
+-        let mut sorted = chunk.into_iter().map(|(_, record)| record);
+-        write_records(&options, &final_header, || Ok(sorted.next()))?;
++        let mut order = sorted_indices(&chunk).into_iter();
++        write_records(&options, &final_header, |record, _frame| {
++            if let Some(position) = order.next() {
++                *record = std::mem::take(&mut chunk[position].1);
++                Ok(true)
++            } else {
++                Ok(false)
++            }
++        })?;
+         return Ok(total);
+     }
+ 
+@@ -2234,6 +2398,9 @@ pub fn sort(options: SortOptions) -> Result<u64> {
+         let workspace = temp.as_mut().expect("runs exist, so the workspace exists");
+         runs.push(spill_run(workspace, &header, &mut chunk)?);
+     }
++    // No further input chunks are needed; release their retained allocation
++    // before allocating merge buffers.
++    drop(chunk);
+     let mut workspace = temp.expect("runs exist, so the workspace exists");
+     let runs = reduce_runs(&mut workspace, runs, max_open, &header)?;
+     merge_to_output(&options, &runs, &final_header)?;
+@@ -2242,19 +2409,23 @@ pub fn sort(options: SortOptions) -> Result<u64> {
+ 
+ fn merge_to_output(options: &SortOptions, paths: &[PathBuf], header: &sam::Header) -> Result<()> {
+     let (mut readers, mut heap) = open_runs(paths)?;
+-    write_records(options, header, || {
+-        if let Some(item) = heap.pop() {
+-            let record = item.record;
+-            if let Some((key, next)) = next_from_run(&mut readers[item.run])? {
+-                heap.push(MergeItem {
+-                    key,
+-                    record: next,
+-                    run: item.run,
+-                });
++    write_records(options, header, |record, frame| {
++        if let Some(mut item) = heap.pop() {
++            // Keep read-ahead before output: a malformed replacement must
++            // still prevent the popped record from being written.
++            std::mem::swap(record, &mut item.record);
++            std::mem::swap(frame, &mut item.frame);
++            if next_from_run(
++                &mut readers[item.run],
++                &mut item.record,
++                &mut item.key,
++                &mut item.frame,
++            )? {
++                heap.push(item);
+             }
+-            Ok(Some(record))
++            Ok(true)
+         } else {
+-            Ok(None)
++            Ok(false)
+         }
+     })
+ }
+@@ -2303,6 +2474,135 @@ fn header_with_coordinate_sort(header: sam::Header) -> sam::Header {
+ mod tests {
+     use super::*;
+ 
++    fn run_with_extra_index() -> (TempDir, PathBuf, sam::Header) {
++        let mut temp = TempDir::new().unwrap();
++        let header = sam::Header::default();
++        let record = Record::builder().set_name(b"kept".to_vec()).build();
++        let mut chunk = vec![(key_for(&record, 0), record)];
++        let path = spill_run(&mut temp, &header, &mut chunk).unwrap();
++        File::options()
++            .append(true)
++            .open(path.with_extension("idx"))
++            .unwrap()
++            .write_all(&1u64.to_le_bytes())
++            .unwrap();
++        (temp, path, header)
++    }
++
++    #[test]
++    fn captured_frames_are_bounded_and_large_records_use_the_encoder() {
++        for payload_size in [
++            0usize,
++            1,
++            31,
++            MAX_CACHED_SORT_FRAME - 4,
++            MAX_CACHED_SORT_FRAME - 3,
++            1024 * 1024,
++        ] {
++            let mut bytes = (payload_size as u32).to_le_bytes().to_vec();
++            bytes.resize(payload_size + 4, 0x41);
++            let mut reader = CaptureReader {
++                inner: std::io::Cursor::new(bytes.clone()),
++                frame: Vec::new(),
++                capture: true,
++            };
++            // A single read can include both prefix and payload. Check the
++            // announced size before extending the capture with a large body.
++            let mut decoded = vec![0; bytes.len()];
++            reader.read_exact(&mut decoded).unwrap();
++            assert_eq!(decoded, bytes);
++            if bytes.len() <= MAX_CACHED_SORT_FRAME {
++                assert_eq!(reader.frame, bytes);
++            } else {
++                assert!(reader.frame.is_empty());
++                assert!(!reader.capture);
++            }
++            assert!(reader.frame.capacity() <= 2 * MAX_CACHED_SORT_FRAME);
++        }
++    }
++
++    #[test]
++    fn captured_frames_still_validate_every_auxiliary_field() {
++        for invalid in [
++            b"XXi\x01\x00\x00\x00XXi\x02\x00\x00\x00".as_slice(),
++            b"XXZunterminated",
++            b"XX?",
++        ] {
++            let (_temp, path, header) = run_with_extra_index();
++            let (_, mut heap) = open_runs(std::slice::from_ref(&path)).unwrap();
++            let mut frame = heap.pop().unwrap().frame;
++            frame.extend_from_slice(invalid);
++            let size = u32::try_from(frame.len() - 4).unwrap();
++            frame[..4].copy_from_slice(&size.to_le_bytes());
++            // Deliberately corrupt an internal run while retaining valid BGZF
++            // framing/CRC, so skipping the full decoder would miss this error.
++            let mut writer = BamWriter::new(File::create(&path).unwrap());
++            writer.write_header(&header).unwrap();
++            writer.write_encoded_record(&frame).unwrap();
++            writer.finish().unwrap();
++            std::fs::write(path.with_extension("idx"), 0u64.to_le_bytes()).unwrap();
++            let mut ordinary = AlignmentReader::open(&path).unwrap();
++            let ordinary_header = ordinary.read_header().unwrap();
++            let expected = ordinary
++                .read_record(&ordinary_header, &mut Record::default())
++                .unwrap_err();
++            let actual = open_runs(&[path])
++                .err()
++                .expect("malformed auxiliary data must fail");
++            assert_eq!(actual.message(), expected.message());
++            assert_eq!(actual.exit_code(), expected.exit_code());
++        }
++    }
++
++    #[test]
++    fn final_merge_retains_read_ahead_before_writing_popped_record() {
++        let (_temp, path, header) = run_with_extra_index();
++        let output = path.with_extension("sam");
++        let options = SortOptions {
++            input: path.clone(),
++            output: Some(output.clone()),
++            sam_output: true,
++            max_memory: None,
++            max_open_files: 2,
++            threads: 1,
++        };
++        let error = merge_to_output(&options, &[path], &header).unwrap_err();
++        assert!(error.message().contains("ended before its index"));
++        assert!(!std::fs::read(output)
++            .unwrap()
++            .windows(4)
++            .any(|w| w == b"kept"));
++    }
++
++    #[test]
++    fn intermediate_merge_writes_index_before_refilling_record() {
++        let (mut temp, path, header) = run_with_extra_index();
++        let error = merge_to_run(&mut temp, &[path], &header).unwrap_err();
++        assert!(error.message().contains("ended before its index"));
++        let written = std::fs::read(temp.path.join("run-1.idx")).unwrap();
++        assert_eq!(written, 0u64.to_le_bytes());
++    }
++
++    #[test]
++    fn reused_run_reader_preserves_partial_index_and_index_eof_policy() {
++        for count in 0..8 {
++            let (_temp, path, _) = run_with_extra_index();
++            std::fs::write(path.with_extension("idx"), vec![0; count]).unwrap();
++            let mut run = open_run(&path).unwrap();
++            let mut record = Record::default();
++            let mut key = key_for(&record, 0);
++            let result = next_from_run(&mut run, &mut record, &mut key, &mut Vec::new());
++            if count == 0 {
++                assert!(!result.unwrap());
++            } else {
++                assert!(result
++                    .unwrap_err()
++                    .message()
++                    .starts_with("truncated sort index"));
++            }
++        }
++    }
++
+     #[test]
+     fn buffered_sort_index_propagates_deferred_write_failure() {
+         struct FullDisk;
+diff --git a/rust-bam/src/io_util.rs b/rust-bam/src/io_util.rs
+index cc54f20..5070a8c 100644
+--- a/rust-bam/src/io_util.rs
++++ b/rust-bam/src/io_util.rs
+@@ -13,7 +13,7 @@
+ //! bounded number of open files.
+ 
+ use std::fs::File;
+-use std::io::{self, BufReader, Read};
++use std::io::{self, BufReader, Read, Write};
+ use std::path::Path;
+ 
+ use noodles::bam;
+@@ -279,6 +279,15 @@ impl<W: io::Write> BamWriter<W> {
+             .map_err(|error| Error::io(format!("cannot write BAM record: {error}")))
+     }
+ 
++    /// Write a complete, already validated uncompressed BAM frame from an
++    /// internal sort run, including its four-byte block-size prefix.
++    pub(crate) fn write_encoded_record(&mut self, frame: &[u8]) -> Result<()> {
++        self.inner
++            .get_mut()
++            .write_all(frame)
++            .map_err(|error| Error::io(format!("cannot write BAM record: {error}")))
++    }
++
+     /// Write one raw alignment record (for an indexed query iterator).
+     pub fn write_alignment_record(
+         &mut self,
+diff --git a/rust-bam/src/main.rs b/rust-bam/src/main.rs
+index e209202..f09656b 100644
+--- a/rust-bam/src/main.rs
++++ b/rust-bam/src/main.rs
+@@ -527,7 +527,7 @@ fn cli() -> Command {
+                         .value_name("INT")
+                         .value_parser(clap::value_parser!(usize))
+                         .default_value("1")
+-                        .help("sort is single-threaded; only 1 is accepted"),
++                        .help("worker threads for final BAM compression; sorting and SAM output remain serial"),
+                 ),
+         )
+ }
+diff --git a/rust-bam/src/sort_order.rs b/rust-bam/src/sort_order.rs
+index 3ec107b..8985f45 100644
+--- a/rust-bam/src/sort_order.rs
++++ b/rust-bam/src/sort_order.rs
+@@ -27,8 +27,8 @@
+ //! ## Stability
+ //!
+ //! The comparator is a total order over records that carry distinct input
+-//! indices, so `sort_by` cannot produce run-to-run variation. There is no
+-//! parallelism and no hash iteration anywhere in the sort path.
++//! indices, so `sort_by` cannot produce run-to-run variation. Comparisons and
++//! tie resolution remain serial; final BGZF compression may use worker threads.
+ 
+ use noodles::sam::alignment::record::Flags;
+ 
+@@ -80,6 +80,22 @@ impl SortKey {
+         }
+     }
+ 
++    /// Replace key fields while retaining the name buffer's allocation.
++    pub fn update(
++        &mut self,
++        flags: Flags,
++        reference_id: Option<usize>,
++        start: Option<usize>,
++        name: &[u8],
++        input_index: usize,
++    ) {
++        let mut next = Self::new(flags, reference_id, start, &[], input_index);
++        std::mem::swap(&mut next.name, &mut self.name);
++        next.name.clear();
++        next.name.extend_from_slice(name);
++        *self = next;
++    }
++
+     /// True when this record sorts after every placed record.
+     pub fn is_unplaced(&self) -> bool {
+         self.unmapped_rank == 1
+@@ -123,6 +139,26 @@ mod tests {
+         )
+     }
+ 
++    #[test]
++    fn updating_a_key_preserves_all_fields_and_reuses_name_storage() {
++        let mut updated = key(0, Some(0), Some(1), &"long".repeat(1024), 0);
++        let capacity = updated.name.capacity();
++        for flags in [0, 4, 16, 20] {
++            for reference in [None, Some(0), Some(7)] {
++                for start in [None, Some(1), Some(100)] {
++                    for name in [b"".as_slice(), b"a", b"name/1"] {
++                        updated.update(Flags::from(flags), reference, start, name, 42);
++                        assert_eq!(
++                            updated,
++                            SortKey::new(Flags::from(flags), reference, start, name, 42)
++                        );
++                        assert_eq!(updated.name.capacity(), capacity);
++                    }
++                }
++            }
++        }
++    }
++
+     #[test]
+     fn placed_records_come_before_unmapped_ones() {
+         let unmapped = key(UNMAPPED, None, None, "z", 0);
+diff --git a/rust-bam/tests/external_sort.rs b/rust-bam/tests/external_sort.rs
+index 38f96db..622989e 100644
+--- a/rust-bam/tests/external_sort.rs
++++ b/rust-bam/tests/external_sort.rs
+@@ -110,6 +110,112 @@ fn external_sort_is_byte_identical_to_in_memory_sort_and_cleans_temp() {
+     assert_eq!(scratch.leftover_workdirs(), Vec::<PathBuf>::new());
+ }
+ 
++#[test]
++fn parallel_compression_is_byte_identical_across_spill_and_worker_counts() {
++    let scratch = Scratch::new();
++    let input = scratch.input(4000, None);
++    let expected = scratch.0.join("serial.bam");
++    let result = scratch.command(&[
++        "sort",
++        "-o",
++        expected.to_str().unwrap(),
++        input.to_str().unwrap(),
++    ]);
++    assert!(result.status.success(), "{result:?}");
++    let expected = fs::read(expected).unwrap();
++    for budget in ["8KiB", "32MiB"] {
++        for workers in ["0", "1", "2", "4"] {
++            let output = scratch.0.join(format!("out-{budget}-{workers}.bam"));
++            let result = scratch.command(&[
++                "sort",
++                "--max-memory",
++                budget,
++                "--max-open-files",
++                "2",
++                "-@",
++                workers,
++                "-o",
++                output.to_str().unwrap(),
++                input.to_str().unwrap(),
++            ]);
++            assert!(result.status.success(), "{result:?}");
++            assert_eq!(
++                fs::read(output).unwrap(),
++                expected,
++                "budget={budget} workers={workers}"
++            );
++            assert!(scratch.leftover_workdirs().is_empty());
++        }
++    }
++}
++
++#[test]
++fn encoded_runs_preserve_auxiliary_fields_long_cigar_and_buffer_clearing() {
++    let scratch = Scratch::new();
++    let input = scratch.0.join("fields.sam");
++    let mut sam = String::from("@HD\tVN:1.6\tSO:unsorted\n@SQ\tSN:c\tLN:1000000\n");
++    for i in 0..200 {
++        if i % 5 == 0 {
++            sam.push_str("*\t4\t*\t0\t0\t*\t*\t0\t0\t*\t*\n");
++        } else {
++            let len = i % 75 + 1;
++            let name = if i % 3 == 0 {
++                "name".repeat(60)
++            } else {
++                "same".into()
++            };
++            let tags = if i % 2 == 0 {
++                format!("\tAA:A:x\tAC:B:c,-1,2\tAS:B:s,-300,400\tAI:B:i,-100000,200000\tAU:B:C,0,255\tAV:B:S,0,65535\tAW:B:I,0,4294967295\tAF:B:f,1.5,-2.25\tZZ:Z:{i}\tHH:H:00FF\tNM:i:{i}\tFF:f:NaN")
++            } else {
++                String::new()
++            };
++            sam.push_str(&format!(
++                "{name}\t0\tc\t{}\t60\t{len}M\t*\t0\t0\t{}\t{}{tags}\n",
++                i % 10 + 1,
++                "A".repeat(len),
++                "I".repeat(len)
++            ));
++        }
++    }
++    // This requires BAM's CG representation and crosses BGZF block boundaries.
++    sam.push_str(&format!(
++        "long\t0\tc\t7\t60\t{}\t*\t0\t0\t{}\t{}\tZZ:Z:end\n",
++        "1M".repeat(65536),
++        "C".repeat(65536),
++        "I".repeat(65536)
++    ));
++    fs::write(&input, sam).unwrap();
++    let memory = scratch.0.join("memory.bam");
++    let result = scratch.command(&[
++        "sort",
++        "-o",
++        memory.to_str().unwrap(),
++        input.to_str().unwrap(),
++    ]);
++    assert!(result.status.success(), "{result:?}");
++    let expected = fs::read(&memory).unwrap();
++    for source in [&input, &memory] {
++        for threads in ["1", "4"] {
++            let output = scratch.0.join("external.bam");
++            let result = scratch.command(&[
++                "sort",
++                "--max-memory",
++                "8KiB",
++                "--max-open-files",
++                "2",
++                "-@",
++                threads,
++                "-o",
++                output.to_str().unwrap(),
++                source.to_str().unwrap(),
++            ]);
++            assert!(result.status.success(), "{result:?}");
++            assert_eq!(fs::read(output).unwrap(), expected);
++            assert!(scratch.leftover_workdirs().is_empty());
++        }
++    }
++}
++
+ #[test]
+ fn malformed_input_fails_without_output_or_temp_runs() {
+     let scratch = Scratch::new();
+diff --git a/rust-bam/tests/view_filters.rs b/rust-bam/tests/view_filters.rs
+index a68cebd..444a3a8 100644
+--- a/rust-bam/tests/view_filters.rs
++++ b/rust-bam/tests/view_filters.rs
+@@ -212,7 +212,7 @@ fn threaded_bam_output_is_readable() {
+ }
+ 
+ #[test]
+-fn sort_rejects_threads_above_one_explicitly() {
++fn sort_accepts_parallel_bam_compression() {
+     let scratch = Scratch::new();
+     let input = scratch.sam();
+     let output = scratch.0.join("sorted.bam");
+@@ -224,5 +224,14 @@ fn sort_rejects_threads_above_one_explicitly() {
+         output.to_str().unwrap(),
+         input.to_str().unwrap(),
+     ]);
+-    assert_eq!(result.status.code(), Some(2), "{result:?}");
++    assert!(result.status.success(), "{result:?}");
++    let serial = scratch.0.join("serial.bam");
++    let result = scratch.run(&[
++        "sort",
++        "-o",
++        serial.to_str().unwrap(),
++        input.to_str().unwrap(),
++    ]);
++    assert!(result.status.success(), "{result:?}");
++    assert_eq!(fs::read(output).unwrap(), fs::read(serial).unwrap());
+ }
+diff --git a/rust-cutadapt/src/align.rs b/rust-cutadapt/src/align.rs
+index c482047..7f8e4e4 100644
+--- a/rust-cutadapt/src/align.rs
++++ b/rust-cutadapt/src/align.rs
+@@ -56,6 +56,77 @@ struct Best {
+     query_stop: usize,
+ }
+ 
++/// A rejection-only edit-distance screen. All scoring and tie decisions stay
++/// in the scalar aligner. Bit i encodes D(i+1,j)-D(i,j), with D(0,j)=0
++/// (a free read prefix). Full-adapter endpoints and final-column prefixes are
++/// the only possible BACK endpoints, so absence of both proves no match.
++#[derive(Clone, Debug)]
++struct BackFilter {
++    equality: [u64; 256],
++    allowed: Vec<i32>,
++    min_overlap: usize,
++}
++
++impl BackFilter {
++    fn new(reference: &[u8], rate: f64, min_overlap: usize) -> Option<Self> {
++        if !(1..=64).contains(&reference.len())
++            || min_overlap == 0
++            || !reference
++                .iter()
++                .all(|b| matches!(b, b'A' | b'C' | b'G' | b'T'))
++        {
++            return None;
++        }
++        let mut equality = [0; 256];
++        for (i, &base) in reference.iter().enumerate() {
++            equality[base as usize] |= 1 << i;
++            equality[base.to_ascii_lowercase() as usize] |= 1 << i;
++        }
++        Some(Self {
++            equality,
++            // Costs are nonnegative integers. Flooring the same binary64
++            // product is exactly equivalent to the original <= predicate.
++            allowed: (1..=reference.len())
++                .map(|i| (i as f64 * rate) as i32)
++                .collect(),
++            min_overlap,
++        })
++    }
++
++    fn may_match(&self, query: &[u8]) -> bool {
++        let m = self.allowed.len();
++        if self.min_overlap > m {
++            return false;
++        }
++        let high = 1u64 << (m - 1);
++        let mut positive = !0u64;
++        let mut negative = 0u64;
++        let mut distance = m as i32;
++        for &base in query {
++            let equal = self.equality[base as usize];
++            let vertical = equal | negative;
++            let horizontal = ((equal & positive).wrapping_add(positive) ^ positive) | equal;
++            let plus = negative | !(horizontal | positive);
++            let minus = positive & horizontal;
++            distance += i32::from(plus & high != 0) - i32::from(minus & high != 0);
++            if distance <= self.allowed[m - 1] {
++                return true;
++            }
++            // No low-bit injection: the free-prefix boundary remains zero.
++            positive = (minus << 1) | !(vertical | (plus << 1));
++            negative = (plus << 1) & vertical;
++        }
++        let mut prefix_distance = 0;
++        for (i, &allowed) in self.allowed.iter().enumerate() {
++            prefix_distance += ((positive >> i) & 1) as i32 - ((negative >> i) & 1) as i32;
++            if i + 1 >= self.min_overlap && prefix_distance <= allowed {
++                return true;
++            }
++        }
++        false
++    }
++}
++
+ /// Semiglobal aligner with cutadapt-compatible scoring and tie-breaking.
+ #[derive(Clone, Debug)]
+ pub struct Aligner {
+@@ -74,6 +145,7 @@ pub struct Aligner {
+     deletion_cost: i32,
+     min_overlap: usize,
+     column: Vec<Entry>,
++    back_filter: Option<Box<BackFilter>>,
+ }
+ 
+ /// Effective maximum error rate used by cutadapt (`--error-rate` default).
+@@ -98,8 +170,14 @@ impl Aligner {
+         assert!(indel_cost >= 1);
+         assert!((0.0..=1.0).contains(&max_error_rate));
+         let m = reference.len();
++        let reference = reference.to_ascii_uppercase();
++        let back_filter = if flags == BACK && indel_cost == 1 {
++            BackFilter::new(&reference, max_error_rate, min_overlap).map(Box::new)
++        } else {
++            None
++        };
+         Self {
+-            reference: reference.to_ascii_uppercase(),
++            reference,
+             m,
+             max_error_rate,
+             start_in_reference: flags & REFERENCE_START != 0,
+@@ -112,6 +190,7 @@ impl Aligner {
+             match_read_wildcards: false,
+             adapter_wildcards_literal: false,
+             column: vec![Entry::default(); m + 1],
++            back_filter,
+         }
+     }
+ 
+@@ -143,6 +222,14 @@ impl Aligner {
+     /// Find the query within the reference. Returns `None` if no alignment
+     /// within the allowed error rate exists.
+     pub fn locate(&mut self, query: &[u8]) -> Option<Alignment> {
++        if !self.match_read_wildcards
++            && self
++                .back_filter
++                .as_ref()
++                .is_some_and(|filter| !filter.may_match(query))
++        {
++            return None;
++        }
+         let m = self.m;
+         let n = query.len();
+         // cutadapt compares uppercased query characters against the reference.
+@@ -386,6 +473,81 @@ impl Aligner {
+ mod tests {
+     use super::*;
+ 
++    #[test]
++    fn rejection_filter_preserves_exhaustive_short_alignments() {
++        fn word(length: usize, bits: usize) -> Vec<u8> {
++            (0..length)
++                .map(|i| if bits & (1 << i) == 0 { b'A' } else { b'C' })
++                .collect()
++        }
++        for m in 1..=6 {
++            for bits in 0..(1 << m) {
++                let reference = word(m, bits);
++                for rate in [0.0, 0.1, 0.3333333333333333, 0.5, 1.0] {
++                    for overlap in [1, 3, m, m + 1] {
++                        let mut screened = Aligner::new(&reference, rate, BACK, 1, overlap);
++                        let mut scalar = screened.clone();
++                        scalar.back_filter = None;
++                        for n in 0..=8 {
++                            for query_bits in 0..(1 << n) {
++                                let query = word(n, query_bits);
++                                assert_eq!(screened.locate(&query), scalar.locate(&query),
++                                    "reference={reference:?} query={query:?} rate={rate} overlap={overlap}");
++                            }
++                        }
++                    }
++                }
++            }
++        }
++    }
++
++    #[test]
++    fn rejection_filter_preserves_long_words_and_fallbacks() {
++        let mut state = 20261101u64;
++        for m in [1, 8, 31, 32, 33, 63, 64, 65] {
++            let reference: Vec<_> = (0..m).map(|i| b"ACGT"[(i * 7 + i / 3) % 4]).collect();
++            for rate in [0.0, 0.099999999999, 0.1, 0.2, 0.5, 1.0] {
++                for flags in [BACK, QUERY_START | QUERY_STOP | REFERENCE_START] {
++                    let mut screened = Aligner::new(&reference, rate, flags, 1, 3);
++                    let mut scalar = screened.clone();
++                    scalar.back_filter = None;
++                    for iteration in 0..1000 {
++                        let n = iteration % 160;
++                        let mut query: Vec<_> = (0..n)
++                            .map(|_| {
++                                state ^= state << 13;
++                                state ^= state >> 7;
++                                state ^= state << 17;
++                                b"ACGTNacgtnU?"[state as usize % 12]
++                            })
++                            .collect();
++                        if iteration % 3 == 0 {
++                            query.extend_from_slice(&reference[..(iteration % m + 1)]);
++                        }
++                        if iteration % 5 == 0 {
++                            query.extend_from_slice(&reference);
++                            query.extend_from_slice(b"NNAC");
++                        }
++                        assert_eq!(screened.locate(&query), scalar.locate(&query));
++                    }
++                }
++            }
++        }
++        // Wildcard behavior remains the scalar implementation, including -N.
++        for reference in [b"ACNGT".as_slice(), b"ACGT".as_slice()] {
++            for literal in [true, false] {
++                let mut screened = Aligner::new(reference, 0.1, BACK, 1, 3)
++                    .with_read_wildcards(true)
++                    .with_literal_adapter(literal);
++                let mut scalar = screened.clone();
++                scalar.back_filter = None;
++                for query in [b"ACNGT".as_slice(), b"NNNN".as_slice(), b"ACGT".as_slice()] {
++                    assert_eq!(screened.locate(query), scalar.locate(query));
++                }
++            }
++        }
++    }
++
+     fn locate(reference: &str, query: &str, rate: f64, flags: u32) -> Option<Alignment> {
+         Aligner::new(reference.as_bytes(), rate, flags, 1, 1).locate(query.as_bytes())
+     }
+diff --git a/rust-fx/Cargo.toml b/rust-fx/Cargo.toml
+index 309e3d3..e46b93e 100644
+--- a/rust-fx/Cargo.toml
++++ b/rust-fx/Cargo.toml
+@@ -32,3 +32,6 @@ clap = { version = "4", features = ["derive"] }
+ # upstream; this is the workspace-pinned regex crate already used by
+ # rust-umitools, not a new package in Cargo.lock.
+ regex = "1"
++# Reuse the locked byte-search implementation for borrowed FASTQ parsing.
++# See docs/ADR-FASTX-BYTE-SEARCH.md at the workspace root.
++memchr = { version = "=2.8.3", default-features = false, features = ["std"] }
+diff --git a/rust-fx/src/commands.rs b/rust-fx/src/commands.rs
+index 10b6fb1..ae6f44f 100644
+--- a/rust-fx/src/commands.rs
++++ b/rust-fx/src/commands.rs
+@@ -5,11 +5,13 @@
+ //! behaviour (and fq 0.12.0's for `lint`). Direct per-command differential
+ //! evidence and remaining gaps are recorded in `compat/matrix.tsv`.
+ 
+-use crate::io::{CommandError, InputFormat, LintReader, Output, OwnedRecord, RecordReader};
++use crate::io::{
++    CommandError, InputFormat, LintReader, Output, OwnedRecord, RecordReader, RecordView,
++};
+ use crate::lint::{Level, LintRecord, Linter};
+ use crate::sample::{Sampler, Strategy};
+ use crate::split::{self, SplitBy};
+-use crate::stats::{GcSkewCounts, Merge, QualStats, SeqStats, DEFAULT_GAP_LETTERS};
++use crate::stats::{GcSkewCounts, Merge, QualStats, QualityDecoder, SeqStats, DEFAULT_GAP_LETTERS};
+ use crate::table::{self, Layout as TableLayout, StatsRow};
+ use crate::transform::{self, Transforms};
+ use bioinfo_fastx::writer::Layout;
+@@ -33,29 +35,35 @@ struct InputStats {
+     sum_gap: u64,
+     sum_n: u64,
+     gc: u64,
+-    at: u64,
+     qual: QualStats,
+     format: Option<InputFormat>,
+ }
+ 
+ impl InputStats {
+-    fn absorb(&mut self, record: &OwnedRecord, gap_letters: &[u8], quality_base: u8) {
+-        let sequence = SeqStats::from_sequence(&record.sequence, gap_letters);
++    fn absorb(
++        &mut self,
++        record: RecordView<'_>,
++        gaps: &[bool; 256],
++        quality: Option<&QualityDecoder>,
++    ) {
++        let length = record.sequence.len() as u64;
+         self.records += 1;
+-        *self.lengths.entry(sequence.length).or_insert(0) += 1;
+-        self.sum_len += sequence.length;
++        self.sum_len += length;
+         self.min_len = Some(match self.min_len {
+-            Some(current) => current.min(sequence.length),
+-            None => sequence.length,
++            Some(current) => current.min(length),
++            None => length,
+         });
+-        self.max_len = self.max_len.max(sequence.length);
++        self.max_len = self.max_len.max(length);
++        let Some(quality) = quality else {
++            return;
++        };
++        *self.lengths.entry(length).or_insert(0) += 1;
++        let sequence = SeqStats::from_gap_table(record.sequence, gaps);
+         self.sum_gap += sequence.gap_count;
+         self.sum_n += sequence.n_count;
+         self.gc += sequence.gc;
+-        self.at += sequence.at;
+         if record.is_fastq() {
+-            self.qual
+-                .merge(&QualStats::from_qualities(&record.qualities, quality_base));
++            self.qual.merge(&quality.stats(record.qualities));
+         }
+     }
+ 
+@@ -66,8 +74,13 @@ impl InputStats {
+         } else {
+             self.sum_len as f64 / num_seqs as f64
+         };
+-        let (n50, n50_num) = table::n50_from_histogram(&self.lengths);
+-        let (q1, q2, q3) = table::quartiles_from_histogram(&self.lengths);
++        let (n50, n50_num, q1, q2, q3) = if all {
++            let (n50, n50_num) = table::n50_from_histogram(&self.lengths);
++            let (q1, q2, q3) = table::quartiles_from_histogram(&self.lengths);
++            (n50, n50_num, q1, q2, q3)
++        } else {
++            (0, 0, 0, 0, 0)
++        };
+         StatsRow {
+             file: label,
+             format: self.format.unwrap_or(InputFormat::Fastq).label(),
+@@ -174,14 +187,24 @@ fn collect_stats(
+     // "guessed from the leading subsequences of the first sequences".
+     let mut seq_type = "Unlimit";
+     let mut first = true;
+-    let mut record = OwnedRecord::default();
+-    while reader.read_record(&mut record)? {
+-        if first {
+-            seq_type = transform::guess_seq_type(&record.sequence);
+-            first = false;
+-        }
+-        stats.absorb(&record, &options.gap_letters, options.quality_base);
++    let quality = options
++        .all
++        .then(|| QualityDecoder::new(options.quality_base));
++    let mut gaps = [false; 256];
++    for &byte in &options.gap_letters {
++        gaps[byte as usize] = true;
+     }
++    let mut record = OwnedRecord::default();
++    while reader
++        .visit_record(&mut record, |record| {
++            if first {
++                seq_type = transform::guess_seq_type(record.sequence);
++                first = false;
++            }
++            stats.absorb(record, &gaps, quality.as_ref());
++        })?
++        .is_some()
++    {}
+     let label = if input == "-" {
+         options.stdin_label.clone()
+     } else if options.basename {
+@@ -1922,8 +1945,10 @@ pub fn fq2fa(options: Fq2faOptions) -> Result<(), CommandError> {
+     for input in &inputs {
+         let mut reader = RecordReader::open(input)?;
+         let mut record = OwnedRecord::default();
+-        while reader.read_record(&mut record)? {
+-            record.write_to(&mut out, Layout::Fasta, options.line_width)?;
++        while let Some(result) = reader.visit_record(&mut record, |record| {
++            record.write_to(&mut out, Layout::Fasta, options.line_width)
++        })? {
++            result?;
+         }
+     }
+     out.finish()
+@@ -2701,39 +2726,41 @@ pub fn lint(options: LintOptions) -> Result<(), CommandError> {
+     {
+         let mut reader = LintReader::open(&options.r1)?;
+         let mut record = OwnedRecord::default();
+-        while reader.read_record(&mut record)? {
+-            if !record.is_fastq() {
+-                return Err(CommandError::input(format!(
+-                    "{}: fq lint validates FASTQ, but this input is FASTA",
+-                    options.r1
+-                )));
+-            }
+-            let lint_record = LintRecord {
+-                header: &record.name,
+-                raw_header: &record.raw_header,
+-                sequence: &record.sequence,
+-                plus: &record.plus,
+-                qualities: record
+-                    .has_quality_line
+-                    .then_some(record.qualities.as_slice()),
+-            };
+-            let found = linter1.check_record(&lint_record);
+-            records_seen += 1;
+-            if options.r2.is_some() {
+-                // Raw header, with its '@', because fq quotes it verbatim in a P001
+-                // message: expected '@other', got '@p2'.
+-                read1_names.push(record.raw_header.clone());
+-            }
+-            for error in found {
+-                errors += 1;
+-                if options.log_mode {
+-                    println!("{}", fq_log_line("ERROR", &options.r1, &error));
++        while let Some(stop) =
++            reader.visit_record(&mut record, |record| -> Result<bool, CommandError> {
++                if !record.is_fastq() {
++                    return Err(CommandError::input(format!(
++                        "{}: fq lint validates FASTQ, but this input is FASTA",
++                        options.r1
++                    )));
+                 }
+-                if first_error.is_none() {
+-                    first_error = Some(error);
++                let lint_record = LintRecord {
++                    header: record.name,
++                    raw_header: record.raw_header,
++                    sequence: record.sequence,
++                    plus: record.plus,
++                    qualities: record.has_quality_line.then_some(record.qualities),
++                };
++                let found = linter1.check_record(&lint_record);
++                records_seen += 1;
++                if options.r2.is_some() {
++                    // Raw header, with its '@', because fq quotes it verbatim in a P001
++                    // message: expected '@other', got '@p2'.
++                    read1_names.push(record.raw_header.to_vec());
+                 }
+-            }
+-            if !options.log_mode && errors > 0 {
++                for error in found {
++                    errors += 1;
++                    if options.log_mode {
++                        println!("{}", fq_log_line("ERROR", &options.r1, &error));
++                    }
++                    if first_error.is_none() {
++                        first_error = Some(error);
++                    }
++                }
++                Ok(!options.log_mode && errors > 0)
++            })?
++        {
++            if stop? {
+                 break;
+             }
+         }
+@@ -2743,43 +2770,45 @@ pub fn lint(options: LintOptions) -> Result<(), CommandError> {
+         let mut reader = LintReader::open(r2)?;
+         let mut index = 0usize;
+         let mut record = OwnedRecord::default();
+-        while reader.read_record(&mut record)? {
+-            if !record.is_fastq() {
+-                return Err(CommandError::input(format!(
+-                    "{r2}: fq lint validates FASTQ, but this input is FASTA"
+-                )));
+-            }
+-            let lint_record = LintRecord {
+-                header: &record.name,
+-                raw_header: &record.raw_header,
+-                sequence: &record.sequence,
+-                plus: &record.plus,
+-                qualities: record
+-                    .has_quality_line
+-                    .then_some(record.qualities.as_slice()),
+-            };
+-            let mut found = linter2.check_record(&lint_record);
+-            if let Some(first) = read1_names.get(index) {
+-                found.extend(linter2.check_pair(index as u64 + 1, first, &record.raw_header));
+-            }
+-            index += 1;
+-            for error in found {
+-                errors += 1;
+-                if options.log_mode {
+-                    // A pair-name mismatch is reported against read 1's file, which
+-                    // is where fq reads the naming convention from.
+-                    let file = if error.report_against_read1 {
+-                        options.r1.as_str()
+-                    } else {
+-                        r2.as_str()
+-                    };
+-                    println!("{}", fq_log_line("ERROR", file, &error));
++        while let Some(stop) =
++            reader.visit_record(&mut record, |record| -> Result<bool, CommandError> {
++                if !record.is_fastq() {
++                    return Err(CommandError::input(format!(
++                        "{r2}: fq lint validates FASTQ, but this input is FASTA"
++                    )));
+                 }
+-                if first_error.is_none() {
+-                    first_error = Some(error);
++                let lint_record = LintRecord {
++                    header: record.name,
++                    raw_header: record.raw_header,
++                    sequence: record.sequence,
++                    plus: record.plus,
++                    qualities: record.has_quality_line.then_some(record.qualities),
++                };
++                let mut found = linter2.check_record(&lint_record);
++                if let Some(first) = read1_names.get(index) {
++                    found.extend(linter2.check_pair(index as u64 + 1, first, record.raw_header));
+                 }
+-            }
+-            if !options.log_mode && errors > 0 {
++                index += 1;
++                for error in found {
++                    errors += 1;
++                    if options.log_mode {
++                        // A pair-name mismatch is reported against read 1's file, which
++                        // is where fq reads the naming convention from.
++                        let file = if error.report_against_read1 {
++                            options.r1.as_str()
++                        } else {
++                            r2.as_str()
++                        };
++                        println!("{}", fq_log_line("ERROR", file, &error));
++                    }
++                    if first_error.is_none() {
++                        first_error = Some(error);
++                    }
++                }
++                Ok(!options.log_mode && errors > 0)
++            })?
++        {
++            if stop? {
+                 break;
+             }
+         }
+diff --git a/rust-fx/src/io.rs b/rust-fx/src/io.rs
+index 3754774..fcc9e24 100644
+--- a/rust-fx/src/io.rs
++++ b/rust-fx/src/io.rs
+@@ -1,16 +1,13 @@
+ //! Shared input/output plumbing for every subcommand.
+ //!
+ //! The FASTX parsing and compression live in `bioinfo-fastx`; this module only
+-//! adapts them to the shape the commands want: an iterator of owned records, and
+-//! a writer that knows SeqKit's `-w/--line-width` FASTA wrapping rule.
++//! adapts them to owned records or short-lived borrowed views, and a writer
++//! that knows SeqKit's `-w/--line-width` FASTA wrapping rule.
+ //!
+-//! # Why records are owned here
+-//!
+-//! `seq` and `fx2tab` need to look at a record more than once (compute an
+-//! average quality, then print the sequence), and `split` must buffer a whole
+-//! part. Borrowing from a chunk would force those commands to re-parse or copy
+-//! anyway, so the adapter owns each record. The parser itself still operates
+-//! zero-copy on chunks; only the per-record hand-off copies.
++//! Transforming and reordering commands retain owned records. Streaming stats,
++//! conversion and lint callbacks inspect complete four-line records directly
++//! in the read buffer. Boundary-spanning records and FASTA/wrapped assembly
++//! retain the owned parser, including its validation and failure boundaries.
+ 
+ use bioinfo_common::exit::ExitClass;
+ use bioinfo_fastx::parser::{Mode, ParseError};
+@@ -62,7 +59,39 @@ pub struct OwnedRecord {
+     pub index: u64,
+ }
+ 
++/// A record borrowed for the duration of a reader callback.
++#[derive(Clone, Copy, Debug, PartialEq, Eq)]
++pub struct RecordView<'a> {
++    /// Header without its marker.
++    pub name: &'a [u8],
++    /// Header including its marker.
++    pub raw_header: &'a [u8],
++    /// Sequence bases.
++    pub sequence: &'a [u8],
++    /// Separator line.
++    pub plus: &'a [u8],
++    /// Quality bytes.
++    pub qualities: &'a [u8],
++    /// Whether a fourth line was present, even if empty.
++    pub has_quality_line: bool,
++    /// One-based input record number.
++    pub index: u64,
++}
++
+ impl OwnedRecord {
++    /// Borrow all fields without copying their bytes.
++    pub fn borrowed(&self) -> RecordView<'_> {
++        RecordView {
++            name: &self.name,
++            raw_header: &self.raw_header,
++            sequence: &self.sequence,
++            plus: &self.plus,
++            qualities: &self.qualities,
++            has_quality_line: self.has_quality_line,
++            index: self.index,
++        }
++    }
++
+     /// True when the record carries qualities.
+     pub fn is_fastq(&self) -> bool {
+         !self.plus.is_empty() || !self.qualities.is_empty()
+@@ -77,6 +106,23 @@ impl OwnedRecord {
+     ///
+     /// SeqKit's `-w` default is 60 and applies to FASTA sequence lines. FASTQ is
+     /// always four lines: wrapping it would make it unparseable.
++    pub fn write_to<W: Write + ?Sized>(
++        &self,
++        out: &mut W,
++        layout: Layout,
++        width: usize,
++    ) -> io::Result<()> {
++        self.borrowed().write_to(out, layout, width)
++    }
++}
++
++impl RecordView<'_> {
++    /// Use the same format inference as the owned representation.
++    pub fn is_fastq(&self) -> bool {
++        !self.plus.is_empty() || !self.qualities.is_empty()
++    }
++
++    /// Write borrowed fields with the existing layout and wrapping rules.
+     pub fn write_to<W: Write + ?Sized>(
+         &self,
+         out: &mut W,
+@@ -86,23 +132,23 @@ impl OwnedRecord {
+         match layout {
+             Layout::Fastq => bioinfo_fastx::writer::write_record(
+                 out,
+-                &self.raw_header,
+-                &self.sequence,
+-                &self.plus,
+-                &self.qualities,
++                self.raw_header,
++                self.sequence,
++                self.plus,
++                self.qualities,
+                 Layout::Fastq,
+             ),
+             Layout::Fasta => {
+                 // Header: `>` plus the name with any existing marker removed.
+                 let name = match self.name.first() {
+                     Some(b'@') | Some(b'>') => &self.name[1..],
+-                    _ => &self.name[..],
++                    _ => self.name,
+                 };
+                 out.write_all(b">")?;
+                 out.write_all(name)?;
+                 out.write_all(b"\n")?;
+                 if width == 0 {
+-                    out.write_all(&self.sequence)?;
++                    out.write_all(self.sequence)?;
+                     out.write_all(b"\n")?;
+                 } else {
+                     for chunk in self.sequence.chunks(width) {
+@@ -304,6 +350,29 @@ impl RecordReader {
+         }
+     }
+ 
++    /// Visit a complete four-line FASTQ record directly in the input buffer.
++    /// Other formats, split records and all strict errors use the owned path.
++    pub fn visit_record<T>(
++        &mut self,
++        record: &mut OwnedRecord,
++        visit: impl FnOnce(RecordView<'_>) -> T,
++    ) -> Result<Option<T>, CommandError> {
++        let mut visit = Some(visit);
++        if self.format == InputFormat::Fastq && !self.wrapped_fastq && self.peeked.is_none() {
++            if let Some(value) = self.lines.visit_four(self.index + 1, true, &mut visit)? {
++                self.index += 1;
++                return Ok(Some(value));
++            }
++        }
++        if self.read_record(record)? {
++            Ok(Some(visit.take().expect("unconsumed visitor")(
++                record.borrowed(),
++            )))
++        } else {
++            Ok(None)
++        }
++    }
++
+     /// Read a complete record, reusing the supplied buffers for four-line FASTQ.
+     /// Returns false at EOF. A failed read must not be emitted by the caller.
+     pub fn read_record(&mut self, record: &mut OwnedRecord) -> Result<bool, CommandError> {
+@@ -535,14 +604,13 @@ impl RecordReader {
+ /// Compression is detected by content, so a gzip FASTA and a plain one are read
+ /// the same way.
+ struct LineReader {
+-    inner: Box<dyn std::io::BufRead + Send>,
++    inner: std::io::BufReader<Box<dyn std::io::Read + Send>>,
+     line: u64,
+     label: String,
+ }
+ 
+ impl LineReader {
+     fn open(path: &str) -> Result<LineReader, CommandError> {
+-        use std::io::BufRead;
+         let raw: Box<dyn std::io::Read + Send> = if path == "-" {
+             Box::new(std::io::stdin())
+         } else {
+@@ -553,8 +621,7 @@ impl LineReader {
+         };
+         let decompressed = bioinfo_fastx::decompress(raw)
+             .map_err(|error| CommandError::io(format!("cannot read {path}: {error}")))?;
+-        let inner: Box<dyn BufRead + Send> =
+-            Box::new(std::io::BufReader::with_capacity(64 * 1024, decompressed));
++        let inner = std::io::BufReader::with_capacity(64 * 1024, decompressed);
+         Ok(LineReader {
+             inner,
+             line: 0,
+@@ -566,6 +633,54 @@ impl LineReader {
+         })
+     }
+ 
++    fn visit_four<T, F: FnOnce(RecordView<'_>) -> T>(
++        &mut self,
++        index: u64,
++        strict: bool,
++        visit: &mut Option<F>,
++    ) -> Result<Option<T>, CommandError> {
++        use std::io::BufRead;
++        let buffer = self
++            .inner
++            .fill_buf()
++            .map_err(|error| CommandError::io(format!("cannot read {}: {error}", self.label)))?;
++        let mut ranges = [(0, 0); 4];
++        let mut consumed = 0;
++        for range in &mut ranges {
++            let Some(relative) = memchr::memchr(b'\n', &buffer[consumed..]) else {
++                return Ok(None);
++            };
++            let newline = consumed + relative;
++            let end = newline - usize::from(newline > consumed && buffer[newline - 1] == b'\r');
++            *range = (consumed, end);
++            consumed = newline + 1;
++        }
++        let [header, sequence, plus, qualities] = ranges.map(|(start, end)| &buffer[start..end]);
++        if strict
++            && (!header.starts_with(b"@")
++                || !plus.starts_with(b"+")
++                || sequence.len() != qualities.len())
++        {
++            return Ok(None);
++        }
++        let name = match header.first() {
++            Some(b'@') | Some(b'>') => &header[1..],
++            _ => header,
++        };
++        let value = visit.take().expect("unconsumed visitor")(RecordView {
++            name,
++            raw_header: header,
++            sequence,
++            plus,
++            qualities,
++            has_quality_line: true,
++            index,
++        });
++        self.inner.consume(consumed);
++        self.line += 4;
++        Ok(Some(value))
++    }
++
+     /// The 1-based number of the most recently returned line.
+     fn line_number(&self) -> u64 {
+         self.line.max(1)
+@@ -632,6 +747,27 @@ impl LintReader {
+         }
+     }
+ 
++    /// Visit complete groups without copying fields; retain incomplete groups
++    /// through the same lenient owned parser used by `read_record`.
++    pub fn visit_record<T>(
++        &mut self,
++        record: &mut OwnedRecord,
++        visit: impl FnOnce(RecordView<'_>) -> T,
++    ) -> Result<Option<T>, CommandError> {
++        let mut visit = Some(visit);
++        if let Some(value) = self.lines.visit_four(self.index + 1, false, &mut visit)? {
++            self.index += 1;
++            return Ok(Some(value));
++        }
++        if self.read_record(record)? {
++            Ok(Some(visit.take().expect("unconsumed visitor")(
++                record.borrowed(),
++            )))
++        } else {
++            Ok(None)
++        }
++    }
++
+     /// Reuse record storage while retaining incomplete groups for validation.
+     pub fn read_record(&mut self, record: &mut OwnedRecord) -> Result<bool, CommandError> {
+         record.raw_header.clear();
+@@ -808,6 +944,90 @@ pub const MODE: Mode = Mode::Strict;
+ #[cfg(test)]
+ mod tests {
+     use super::*;
++
++    #[test]
++    fn borrowed_records_preserve_owned_parser_at_every_buffer_boundary() {
++        fn copy(record: RecordView<'_>) -> OwnedRecord {
++            OwnedRecord {
++                name: record.name.to_vec(),
++                raw_header: record.raw_header.to_vec(),
++                sequence: record.sequence.to_vec(),
++                plus: record.plus.to_vec(),
++                qualities: record.qualities.to_vec(),
++                has_quality_line: record.has_quality_line,
++                index: record.index,
++            }
++        }
++        fn collect(
++            bytes: &[u8],
++            capacity: usize,
++            lenient: bool,
++            borrowed: bool,
++        ) -> (Vec<OwnedRecord>, Option<(i32, String)>) {
++            let lines = || LineReader {
++                inner: io::BufReader::with_capacity(
++                    capacity,
++                    Box::new(io::Cursor::new(bytes.to_vec())) as Box<dyn io::Read + Send>,
++                ),
++                line: 0,
++                label: "input".into(),
++            };
++            let mut strict = RecordReader {
++                lines: lines(),
++                format: InputFormat::Fastq,
++                wrapped_fastq: false,
++                peeked: None,
++                index: 0,
++                label: "input".into(),
++            };
++            let mut lint = LintReader {
++                lines: lines(),
++                index: 0,
++            };
++            let mut reusable = OwnedRecord::default();
++            let mut records = Vec::new();
++            loop {
++                let result = match (lenient, borrowed) {
++                    (false, false) => strict.next_record().transpose(),
++                    (false, true) => strict.visit_record(&mut reusable, copy),
++                    (true, false) => lint.next_record().transpose(),
++                    (true, true) => lint.visit_record(&mut reusable, copy),
++                };
++                match result {
++                    Ok(Some(record)) => records.push(record),
++                    Ok(None) => return (records, None),
++                    Err(error) => return (records, Some((error.exit_code(), error.message))),
++                }
++            }
++        }
++        let prefix = b"@first comment\r\nACGT\r\n+first\r\nIIII\r\n@empty\n\n+\n\n";
++        for tail in [
++            b"@last\nAC\n+\nII\n".as_slice(),
++            b"@last\nAC\n+\nII",
++            b"@last\nAC\n+\n",
++            b"@last\nAC\n",
++            b"@last",
++            b"\n\n\n",
++            b"\n@last\nAC\n+\nII\n",
++            b"bad\nAC\n+\nII\n",
++            b"@last\nAC\nbad\nII\n",
++            b"@last\nAC\n+\nI\n",
++            b"@\xff\r\r\nA\x00\r\r\n+\nIIJ\n",
++            b">fasta\nAC\n\n\n",
++        ] {
++            let bytes = [prefix.as_slice(), tail].concat();
++            for lenient in [false, true] {
++                let expected = collect(&bytes, 1, lenient, false);
++                for capacity in 1..=bytes.len() + 4 {
++                    assert_eq!(
++                        collect(&bytes, capacity, lenient, true),
++                        expected,
++                        "capacity={capacity} lenient={lenient} tail={tail:?}"
++                    );
++                }
++            }
++        }
++    }
+     use std::io::Read;
+ 
+     fn temp(name: &str) -> std::path::PathBuf {
+@@ -992,7 +1212,7 @@ mod tests {
+         }
+         let mut reader = RecordReader {
+             lines: LineReader {
+-                inner: Box::new(io::BufReader::new(ErrorAtEof(io::Cursor::new(
++                inner: io::BufReader::new(Box::new(ErrorAtEof(io::Cursor::new(
+                     b"AA\n>second\n".to_vec(),
+                 )))),
+                 line: 1,
+diff --git a/rust-fx/src/lint.rs b/rust-fx/src/lint.rs
+index 2600871..8f4aee7 100644
+--- a/rust-fx/src/lint.rs
++++ b/rust-fx/src/lint.rs
+@@ -279,6 +279,7 @@ pub struct Linter {
+     disabled: Vec<Validator>,
+     single_ceiling: Level,
+     paired_ceiling: Level,
++    enabled_single: u16,
+     record: u64,
+ }
+ 
+@@ -286,12 +287,22 @@ impl Linter {
+     /// A linter with the documented defaults (`high` for both levels, nothing
+     /// disabled).
+     pub fn new() -> Linter {
+-        Linter {
++        let mut linter = Linter {
+             disabled: Vec::new(),
+             single_ceiling: Level::High,
+             paired_ceiling: Level::High,
++            enabled_single: 0,
+             record: 0,
+-        }
++        };
++        linter.refresh_single();
++        linter
++    }
++
++    fn refresh_single(&mut self) {
++        self.enabled_single = Validator::SINGLE
++            .into_iter()
++            .filter(|v| v.is_enabled(&self.disabled, self.single_ceiling))
++            .fold(0, |mask, v| mask | (1 << v as u16));
+     }
+ 
+     /// Disable validators by code, as `--disable-validator` does.
+@@ -310,12 +321,14 @@ impl Linter {
+                 None => unknown.push(code.clone()),
+             }
+         }
++        self.refresh_single();
+         unknown
+     }
+ 
+     /// Set the single-read validation level ceiling.
+     pub fn with_single_level(mut self, level: Level) -> Linter {
+         self.single_ceiling = level;
++        self.refresh_single();
+         self
+     }
+ 
+@@ -349,7 +362,7 @@ impl Linter {
+         self.record += 1;
+         let index = self.record;
+         let mut errors = Vec::new();
+-        let enabled = |v: Validator| v.is_enabled(&self.disabled, self.single_ceiling);
++        let enabled = |v: Validator| self.enabled_single & (1 << v as u16) != 0;
+ 
+         if enabled(Validator::Complete) && record.qualities.is_none() {
+             errors.push(LintError {
+@@ -391,11 +404,7 @@ impl Linter {
+             });
+         }
+         if enabled(Validator::Alphabet) {
+-            if let Some((offset, bad)) = record
+-                .sequence
+-                .iter()
+-                .enumerate()
+-                .find(|(_, byte)| !is_documented_alphabet_byte(**byte))
++            if let Some((offset, bad)) = first_invalid(record.sequence, is_documented_alphabet_byte)
+             {
+                 errors.push(LintError {
+                     validator: Validator::Alphabet,
+@@ -414,10 +423,8 @@ impl Linter {
+         }
+         if enabled(Validator::QualityString) {
+             if let Some(qualities) = record.qualities {
+-                if let Some((offset, bad)) = qualities
+-                    .iter()
+-                    .enumerate()
+-                    .find(|(_, byte)| !(b'!'..=b'~').contains(byte))
++                if let Some((offset, bad)) =
++                    first_invalid(qualities, |byte| (b'!'..=b'~').contains(&byte))
+                 {
+                     errors.push(LintError {
+                         validator: Validator::QualityString,
+@@ -480,7 +487,7 @@ impl Linter {
+         if !Validator::PairedNames.is_enabled(&self.disabled, self.paired_ceiling) {
+             return Vec::new();
+         }
+-        if normalise_pair_name(first) == normalise_pair_name(second) {
++        if pair_name(first) == pair_name(second) {
+             Vec::new()
+         } else {
+             vec![LintError {
+@@ -519,34 +526,46 @@ impl Default for Linter {
+     }
+ }
+ 
++// Reduce validity over the full slice so the ordinary all-valid case can be
++// vectorized. Only malformed records need the second scan to locate the exact
++// first bad byte for the existing diagnostic.
++fn first_invalid(bytes: &[u8], valid: impl Fn(u8) -> bool) -> Option<(usize, &u8)> {
++    let invalid = bytes
++        .iter()
++        .fold(false, |invalid, &byte| invalid | !valid(byte));
++    if invalid {
++        bytes.iter().enumerate().find(|(_, byte)| !valid(**byte))
++    } else {
++        None
++    }
++}
++
+ /// The documented S002 alphabet: `ACGTN`, case-insensitive.
+-///
+-/// An ambiguous IUPAC letter outside `N` therefore fails S002. DR-5 records that
+-/// the documentation says "one of ACGTN" while real data often carries more
+-/// codes, so this is faithful-to-the-text rather than permissive.
++/// Other IUPAC letters fail S002; DR-5 records the upstream boundary.
+ fn is_documented_alphabet_byte(byte: u8) -> bool {
+     matches!(byte.to_ascii_uppercase(), b'A' | b'C' | b'G' | b'T' | b'N')
+ }
+ 
+-/// Strip a trailing `/1`, `/2`, `_1`, `_2` or a CASAVA `N:` prefix, so a pair's
+-/// two names compare equal.
++/// Strip the description after a literal space and a trailing `/1` or `/2`.
+ pub fn normalise_pair_name(name: &[u8]) -> Vec<u8> {
+-    let mut value = name.to_vec();
++    pair_name(name).to_vec()
++}
++
++fn pair_name(name: &[u8]) -> &[u8] {
++    let mut value = name;
+     // CASAVAv1.8 writes `@instrument:... 1:N:0:INDEX`; the part before the first
+     // space is shared by both mates.
+     if let Some(space) = value.iter().position(|&b| b == b' ') {
+-        value.truncate(space);
++        value = &value[..space];
+     }
+     // `name/1` and `name/2`.
+     if value.len() > 2
+         && value[value.len() - 2] == b'/'
+         && matches!(value[value.len() - 1], b'1' | b'2')
+     {
+-        value.truncate(value.len() - 2);
+-        return value;
++        return &value[..value.len() - 2];
+     }
+-    // `name_1` and `name_2` are NOT stripped: an underscore is a normal name
+-    // character and stripping it would merge genuinely distinct names.
++    // Underscores remain significant.
+     value
+ }
+ 
+@@ -554,6 +573,37 @@ pub fn normalise_pair_name(name: &[u8]) -> Vec<u8> {
+ mod tests {
+     use super::*;
+ 
++    #[test]
++    fn reduced_validation_keeps_the_first_invalid_byte() {
++        for len in [0, 1, 31, 32, 33, 150, 4097] {
++            let mut bytes = vec![b'A'; len];
++            assert_eq!(first_invalid(&bytes, is_documented_alphabet_byte), None);
++            if len == 0 {
++                continue;
++            }
++            for offset in [0, len / 2, len - 1] {
++                for byte in 0..=255 {
++                    bytes[offset] = byte;
++                    assert_eq!(
++                        first_invalid(&bytes, is_documented_alphabet_byte),
++                        bytes
++                            .iter()
++                            .enumerate()
++                            .find(|(_, b)| !is_documented_alphabet_byte(**b))
++                    );
++                    assert_eq!(
++                        first_invalid(&bytes, |b| (b'!'..=b'~').contains(&b)),
++                        bytes
++                            .iter()
++                            .enumerate()
++                            .find(|(_, b)| !(b'!'..=b'~').contains(*b))
++                    );
++                }
++                bytes[offset] = b'A';
++            }
++        }
++    }
++
+     fn record<'a>(
+         header: &'a [u8],
+         sequence: &'a [u8],
+diff --git a/rust-fx/src/stats.rs b/rust-fx/src/stats.rs
+index 317bfc5..005add9 100644
+--- a/rust-fx/src/stats.rs
++++ b/rust-fx/src/stats.rs
+@@ -60,14 +60,18 @@ pub struct SeqStats {
+ impl SeqStats {
+     /// Accumulate one sequence.
+     pub fn from_sequence(sequence: &[u8], gap_letters: &[u8]) -> SeqStats {
+-        let mut stats = SeqStats {
+-            length: sequence.len() as u64,
+-            ..SeqStats::default()
+-        };
+         let mut gaps = [false; 256];
+         for &byte in gap_letters {
+             gaps[byte as usize] = true;
+         }
++        Self::from_gap_table(sequence, &gaps)
++    }
++
++    pub(crate) fn from_gap_table(sequence: &[u8], gaps: &[bool; 256]) -> SeqStats {
++        let mut stats = SeqStats {
++            length: sequence.len() as u64,
++            ..SeqStats::default()
++        };
+         for &byte in sequence {
+             // Boolean counters avoid unpredictable branches on mixed bases.
+             // The byte table keeps arbitrary (including repeated) gap symbols
+@@ -169,6 +173,46 @@ pub struct QualStats {
+     error_sum: f64,
+ }
+ 
++/// Per-file quality decoding: offset subtraction and probability lookup are
++/// prepared once. Integer counts can be reduced separately; floating-point
++/// additions still occur in their original per-base, per-record order.
++pub(crate) struct QualityDecoder {
++    probabilities: [f64; 256],
++    q20: u16,
++    q30: u16,
++}
++
++impl QualityDecoder {
++    pub(crate) fn new(base: u8) -> Self {
++        let probabilities = &*ERROR_PROBABILITIES;
++        Self {
++            probabilities: std::array::from_fn(|byte| {
++                probabilities[(byte as u8).saturating_sub(base) as usize]
++            }),
++            q20: base as u16 + 20,
++            q30: base as u16 + 30,
++        }
++    }
++
++    pub(crate) fn stats(&self, qualities: &[u8]) -> QualStats {
++        let (q20, q30) = qualities.iter().fold((0, 0), |(q20, q30), &byte| {
++            (
++                q20 + u64::from(byte as u16 >= self.q20),
++                q30 + u64::from(byte as u16 >= self.q30),
++            )
++        });
++        let error_sum = qualities
++            .iter()
++            .fold(0.0, |sum, &byte| sum + self.probabilities[byte as usize]);
++        QualStats {
++            bases: qualities.len() as u64,
++            q20,
++            q30,
++            error_sum,
++        }
++    }
++}
++
+ impl QualStats {
+     /// Accumulate one quality string. `base` is the ASCII offset (33 for
+     /// Phred+33).
+@@ -267,6 +311,29 @@ mod tests {
+         }
+     }
+ 
++    #[test]
++    fn prepared_quality_decoder_is_bitwise_identical_for_every_offset() {
++        let ascending: Vec<u8> = (0..=255).collect();
++        let descending: Vec<u8> = ascending.iter().rev().copied().collect();
++        for base in 0..=255 {
++            let decoder = QualityDecoder::new(base);
++            for quality in [
++                ascending.as_slice(),
++                descending.as_slice(),
++                b"",
++                b"IIIIIIII55555555",
++            ] {
++                let expected = QualStats::from_qualities(quality, base);
++                let actual = decoder.stats(quality);
++                assert_eq!(
++                    (actual.bases, actual.q20, actual.q30),
++                    (expected.bases, expected.q20, expected.q30)
++                );
++                assert_eq!(actual.error_sum.to_bits(), expected.error_sum.to_bits());
++            }
++        }
++    }
++
+     #[test]
+     fn cached_error_probabilities_preserve_every_score_and_sum_bitwise() {
+         let ascending: Vec<u8> = (0..=255).collect();

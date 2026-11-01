@@ -1,0 +1,21 @@
+   Compiling rust-bam v0.1.0 (/home/rimuru/Projects/Code/for_fun/bioinfo-tools/rust-bam)
+error[E0061]: this method takes 2 arguments but 1 argument was supplied
+    --> rust-bam/src/commands.rs:2036:37
+     |
+2036 |                 let result = reader.read_record_buf(record);
+     |                                     ^^^^^^^^^^^^^^^ ------ argument #1 of type `&noodles::noodles_sam::Header` is missing
+     |
+note: method defined here
+    --> /home/rimuru/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/noodles-bam-0.97.0/src/io/reader.rs:221:12
+     |
+ 221 |     pub fn read_record_buf(
+     |            ^^^^^^^^^^^^^^^
+help: provide the argument
+     |
+2036 |                 let result = reader.read_record_buf(/* &Header */, record);
+     |                                                     ++++++++++++++
+
+For more information about this error, try `rustc --explain E0061`.
+error: could not compile `rust-bam` (lib) due to 1 previous error
+warning: build failed, waiting for other jobs to finish...
+error: could not compile `rust-bam` (lib test) due to 1 previous error

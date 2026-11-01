@@ -1,0 +1,4 @@
+PASS independent audit: 28 medians, 26 paired ratios, 224 invocations, 112 checks
+PASS final identities: 151 files rehashed
+Minimum formal seconds: 14.759773495985428; below 10 s: 0
+FastQC: 8 checks each retain 9/11 equal data modules; no speed ratio

@@ -1,0 +1,1778 @@
+cargo 1.99.1 (5f94df478 2026-08-27)
+Quality gate (online; host network): rustc 1.99.1 (58cf8f9c3 2026-10-13)
+Oracle: seqkit v2.14.0
+Oracle: fq v0.12.0 (51779f50e 2024-07-08)
+Oracle: FastQC v0.13.0
+Oracle: multiqc, version 1.35
+
+==> python3 tests/ci/check_docs.py
+PASS documentation constraints (21 current files, 11 historical files)
+PASS rust-umitools protection documented (manifest generator exception recorded)
+
+==> python3 tests/ci/check_compat.py
+PASS compatibility matrix: 266 rows, 5 tools, 36 upstream snapshots
+
+==> python3 tests/ci/test_compat_exceptions.py
+.........
+----------------------------------------------------------------------
+Ran 9 tests in 0.018s
+
+OK
+
+==> python3 tests/ci/test_seqkit_exception_gate.py
+......
+----------------------------------------------------------------------
+Ran 6 tests in 0.002s
+
+OK
+
+==> python3 tests/ci/test_tile_proof.py
+.......
+----------------------------------------------------------------------
+Ran 7 tests in 0.001s
+
+OK
+
+==> python3 tests/ci/test_kmer_proof.py
+.........
+----------------------------------------------------------------------
+Ran 9 tests in 0.041s
+
+OK
+
+==> python3 bench/test_readme_benchmark.py
+..........
+----------------------------------------------------------------------
+Ran 10 tests in 0.175s
+
+OK
+
+==> python3 -W error::ResourceWarning bench/test_optimization_benchmark.py
+........
+----------------------------------------------------------------------
+Ran 8 tests in 0.006s
+
+OK
+
+==> python3 -W error::ResourceWarning bench/test_scale_benchmark.py
+...........
+----------------------------------------------------------------------
+Ran 11 tests in 0.009s
+
+OK
+
+==> python3 -W error::ResourceWarning bench/test_scale_inputs.py
+.....
+----------------------------------------------------------------------
+Ran 5 tests in 0.001s
+
+OK
+
+==> python3 -W error::ResourceWarning bench/test_scale_validation.py
+.....
+----------------------------------------------------------------------
+Ran 5 tests in 0.580s
+
+OK
+
+==> python3 tests/gate/test_acceptance.py
+.........
+----------------------------------------------------------------------
+Ran 9 tests in 0.077s
+
+OK
+
+==> rustup run 1.99.1 cargo fmt --all -- --check
+
+==> rustup run 1.99.1 cargo clippy --workspace --all-targets --locked -- -D warnings
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.06s
+
+==> rustup run 1.99.1 cargo doc --workspace --no-deps --locked
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.05s
+   Generated /home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/doc/bioinfo_common/index.html and 7 other files
+
+==> rustup run 1.99.1 cargo test --workspace --release --locked
+    Finished `release` profile [optimized] target(s) in 0.03s
+     Running unittests src/lib.rs (target/release/deps/bioinfo_common-ff9ea16b55424d54)
+
+running 39 tests
+test diagnostic::tests::display_is_the_body_without_a_prefix ... ok
+test diagnostic::tests::empty_message_still_renders_the_prefix ... ok
+test diagnostic::tests::hints_may_contain_newlines_and_are_passed_through ... ok
+test diagnostic::tests::hint_is_indented_to_the_message_column ... ok
+test diagnostic::tests::multiline_messages_are_not_reindented ... ok
+test diagnostic::tests::plain_message_has_no_hint_line ... ok
+test diagnostic::tests::warnings_use_the_warning_prefix ... ok
+test exit::tests::classes_are_distinct_and_ordered_by_code ... ok
+test exit::tests::codes_match_the_documented_contract ... ok
+test exit::tests::codes_outside_the_contract_have_no_class ... ok
+test exit::tests::describe_renders_any_subset_in_the_order_given ... ok
+test exit::tests::display_is_code_then_label ... ok
+test exit::tests::every_code_round_trips_through_its_class ... ok
+test exit::tests::umitools_declared_classes_render_exactly ... ok
+test provenance::tests::a_block_with_no_fields_is_just_the_version_line ... ok
+test provenance::tests::exit_codes_field_follows_the_declared_classes ... ok
+test provenance::tests::a_longer_label_does_not_move_the_other_colons ... ok
+test provenance::tests::program_record_carries_all_four_tags_in_order ... ok
+test provenance::tests::program_record_joins_arguments_with_single_spaces ... ok
+test provenance::tests::render_ends_with_one_newline_per_line_and_no_blank_line ... ok
+test provenance::tests::renders_the_current_umitools_block_exactly ... ok
+test provenance::tests::separator_column_is_fixed_for_every_label ... ok
+test summary::tests::a_quoted_path_stays_inside_its_string ... ok
+test summary::tests::byte_budgets_render_as_whole_mib_rounded_down ... ok
+test summary::tests::directory_of_handles_bare_names_and_paths ... ok
+test summary::tests::document_ends_with_exactly_one_newline ... ok
+test summary::tests::empty_lists_render_as_empty_containers ... ok
+test summary::tests::entries_keep_insertion_order ... ok
+test summary::tests::escaping_passes_utf8_through ... ok
+test summary::tests::escaping_uses_four_digit_escapes_for_other_controls ... ok
+test summary::tests::escaping_uses_the_shipped_short_forms ... ok
+test summary::tests::renders_the_exact_contract_bytes ... ok
+test summary::tests::timings_use_exactly_three_decimals ... ok
+test summary::tests::write_atomic_hands_over_the_rendered_bytes_and_staging_directory ... ok
+test summary::tests::matches_the_recorded_pre_refactor_bytes ... ok
+test summary::tests::write_atomic_propagates_the_writer_error ... ok
+test summary::tests::write_atomic_uses_dot_for_a_bare_file_name ... ok
+test tests::reexports_are_usable_from_the_crate_root ... ok
+test tests::contract_text_lists_every_class_in_order ... ok
+
+test result: ok. 39 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/release/deps/bioinfo_fastx-20039c10ac922577)
+
+running 97 tests
+test bgzf::tests::a_block_inflates_to_its_payload ... ok
+test bgzf::tests::block_size_at_finds_the_size ... ok
+test bgzf::tests::empty_input_yields_only_the_eof_marker ... ok
+test bgzf::tests::block_header_is_the_documented_layout ... ok
+test bgzf::tests::explicit_flush_emits_a_block ... ok
+test bgzf::tests::block_size_at_rejects_non_bgzf ... ok
+test bgzf::tests::the_eof_marker_is_byte_identical_to_htslibs ... ok
+test bgzf::tests::finish_is_idempotent_in_effect ... ok
+test chunker::tests::a_trailing_partial_record_is_handed_on ... ok
+test chunker::tests::empty_input_produces_no_chunks ... ok
+test chunker::tests::fewer_than_four_lines_has_no_boundary ... ok
+test chunker::tests::errors_from_the_callback_are_propagated ... ok
+test chunker::tests::ignores_a_trailing_partial_record ... ok
+test chunker::tests::finds_the_last_complete_record_boundary ... ok
+test bgzf::tests::output_is_reproducible ... ok
+test bgzf::tests::the_eof_marker_is_a_28_byte_empty_block ... ok
+test bgzf::tests::xfl_is_zero_at_every_level ... ok
+test chunker::tests::record_range_helpers ... ok
+test chunker::tests::a_tiny_chunk_size_is_clamped_rather_than_hanging ... ok
+test chunker::tests::split_records_returns_every_complete_record ... ok
+test chunker::tests::split_records_omits_a_partial_tail ... ok
+test compress::tests::empty_input_decompresses_to_empty ... ok
+test bgzf::tests::streaming_writes_are_readable ... ok
+test chunker::tests::chunks_reassemble_to_the_input_exactly ... ok
+test compress::tests::each_member_is_independently_a_gzip_stream ... ok
+test chunker::tests::chunk_offsets_and_line_numbers_are_exact ... ok
+test chunker::tests::every_chunk_but_the_last_ends_on_a_record_boundary ... ok
+test compress::tests::a_single_member_matches_a_plain_gzip_encoder ... ok
+test compress::tests::empty_members_are_valid_and_concatenate_cleanly ... ok
+test bgzf::tests::incompressible_payload_is_rejected_instead_of_overflowing_bsize ... ok
+test compress::tests::levels_match_cutadapt ... ok
+test compress::tests::plain_input_passes_through_untouched ... ok
+test compress::tests::multi_member_round_trips_through_decompress ... ok
+test compress::tests::zero_members_is_an_empty_stream ... ok
+test compress::tests::raw_deflate_produces_a_stream_that_inflates ... ok
+test compress::tests::multi_member_gzip_reads_back_as_the_concatenation ... ok
+test format::tests::a_dotted_directory_does_not_confuse_the_extension ... ok
+test format::tests::a_truncated_magic_is_not_guessed ... ok
+test format::tests::bgzf_is_not_mistaken_for_gzip ... ok
+test bgzf::tests::every_block_but_the_eof_marker_carries_at_most_the_block_limit ... ok
+test format::tests::bgzf_magic_reports_plain_gzip ... ok
+test format::tests::detects_every_extension ... ok
+test format::tests::detects_every_magic_sequence ... ok
+test format::tests::extension_round_trips_through_the_name ... ok
+test format::tests::short_input_is_plain_and_never_panics ... ok
+test compress::tests::detection_is_by_content_not_name ... ok
+test parser::tests::crlf_is_accepted ... ok
+test parser::tests::defaults_are_strict_fastq ... ok
+test parser::tests::empty_chunk_at_a_nonzero_base_reports_no_records ... ok
+test parser::tests::empty_input_has_no_records ... ok
+test parser::tests::fasta_rejects_a_fastq_header ... ok
+test parser::tests::fasta_rejects_a_header_without_sequence ... ok
+test parser::tests::fasta_reports_multiline_records_instead_of_truncating_them ... ok
+test parser::tests::keeps_second_header ... ok
+test parser::tests::lenient_accepts_a_missing_final_newline ... ok
+test parser::tests::lenient_accepts_high_bit_quality_bytes ... ok
+test parser::tests::lenient_still_rejects_a_bad_header ... ok
+test parser::tests::lenient_still_rejects_a_bad_separator ... ok
+test parser::tests::lenient_still_rejects_a_length_mismatch ... ok
+test parser::tests::rejects_length_mismatch_with_exact_wording ... ok
+test parser::tests::offsets_and_lines_are_relative_to_the_whole_input ... ok
+test parser::tests::parses_single_line_fasta_records ... ok
+test parser::tests::record_name_strips_the_marker ... ok
+test parser::tests::rejects_truncated_record ... ok
+test parser::tests::rejects_bad_header_with_cutadapt_wording ... ok
+test parser::tests::rejects_bad_plus ... ok
+test reader::tests::a_missing_file_is_an_io_error ... ok
+test parser::tests::rejects_non_ascii_quality_in_strict_mode ... ok
+test parser::tests::parses_records_without_allocating_a_copy ... ok
+test parser::tests::rejects_non_ascii_sequence_in_strict_mode ... ok
+test reader::tests::empty_input_yields_no_chunks ... ok
+test parser::tests::rejects_record_without_trailing_newline_in_strict_mode ... ok
+test reader::tests::parser_reads_what_the_reader_delivers ... ok
+test reader::tests::a_trailing_partial_record_is_still_delivered ... ok
+test reader::tests::chunked_reading_preserves_every_byte_and_every_position ... ok
+test reader::tests::reads_and_parses_a_plain_file ... ok
+test compress::tests::zstd_round_trips_through_decompress ... ok
+test reader::tests::writer_and_parser_agree_on_both_layouts ... ok
+test writer::tests::a_header_without_a_marker_gets_one ... ok
+test writer::tests::a_record_without_qualities_renders_as_empty_lines ... ok
+test writer::tests::an_empty_sequence_still_writes_both_lines ... ok
+test writer::tests::fasta_layout_drops_the_separator_and_relabels_the_header ... ok
+test writer::tests::fastq_layout_is_four_lines ... ok
+test writer::tests::fastq_layout_relabels_a_fasta_header ... ok
+test writer::tests::layout_capabilities ... ok
+test reader::tests::reads_a_gzip_file_by_content_even_with_a_plain_name ... ok
+test writer::tests::named_records_get_the_right_marker ... ok
+test writer::tests::only_the_first_marker_is_stripped ... ok
+test writer::tests::the_separator_line_is_preserved_verbatim ... ok
+test reader::tests::writer_selects_format_from_the_extension ... ok
+test writer::tests::write_then_parse_round_trips ... ok
+test compress::tests::finish_propagates_buffered_sink_write_and_flush_failures ... ok
+test reader::tests::writes_and_reads_back_every_format ... ok
+test bgzf::tests::large_input_spans_multiple_blocks ... ok
+test compress::tests::explicit_levels_round_trip_without_changing_default_levels ... ok
+test compress::tests::every_format_round_trips_at_fast_level ... ok
+test compress::tests::every_format_round_trips_at_default_level ... ok
+
+test result: ok. 97 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+
+     Running unittests src/bin/fastx-fuzz.rs (target/release/deps/fastx_fuzz-f4a138004c5e68fd)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/release/deps/rust_bam-d059c446b107d19e)
+
+running 53 tests
+test commands::tests::flagstat_percentages_use_two_decimals ... ok
+test commands::tests::buffered_sort_index_propagates_deferred_write_failure ... ok
+test commands::tests::idxstats_renders_a_trailing_star_line ... ok
+test commands::tests::flagstat_renders_all_sixteen_lines_in_samtools_order ... ok
+test commands::tests::quickcheck_exit_code_is_16_on_failure_and_0_on_success ... ok
+test commands::tests::idxstats_numbers_appear_in_mapped_then_unmapped_order ... ok
+test commands::tests::flagstat_prints_na_when_the_denominator_is_zero ... ok
+test commands::tests::final_merge_retains_read_ahead_before_writing_popped_record ... ok
+test error::tests::malformed_input_is_a_data_error_but_a_missing_file_is_io ... ok
+test commands::tests::the_bgzf_eof_marker_is_the_28_byte_htslib_pattern ... ok
+test error::tests::the_message_survives_display ... ok
+test error::tests::classes_map_to_the_shared_contract ... ok
+test error::tests::declared_codes_are_the_shared_ones ... ok
+test format::tests::bam_magic_is_detected ... ok
+test format::tests::cram_magic_is_detected_so_it_can_be_rejected_clearly ... ok
+test format::tests::empty_input_is_an_input_error ... ok
+test format::tests::format_names_match_the_diagnostics ... ok
+test format::tests::sam_header_is_detected ... ok
+test format::tests::sam_record_without_header_is_detected ... ok
+test index_util::tests::the_bai_path_appends_to_the_bam_name ... ok
+test sort_order::tests::a_record_missing_a_position_is_unplaced_even_without_the_flag ... ok
+test sort_order::tests::a_record_missing_a_reference_is_unplaced ... ok
+test io_util::tests::records_alias_is_the_sam_buffer_type ... ok
+test sort_order::tests::a_single_record_and_an_empty_list_are_sorted ... ok
+test sort_order::tests::forward_strand_sorts_before_reverse_at_the_same_position ... ok
+test sort_order::tests::is_sorted_detects_a_permutation ... ok
+test sort_order::tests::ordering_is_by_reference_then_start ... ok
+test format::tests::a_bgzf_wrapped_bam_is_detected_as_bam ... ok
+test sort_order::tests::placed_records_come_before_unmapped_ones ... ok
+test sort_order::tests::reference_order_follows_the_header_not_the_name ... ok
+test sort_order::tests::sorting_is_stable_across_repeated_runs ... ok
+test sort_order::tests::the_order_is_total_so_output_is_reproducible ... ok
+test sort_order::tests::updating_a_key_preserves_all_fields_and_reuses_name_storage ... ok
+test commands::tests::reused_run_reader_preserves_partial_index_and_index_eof_policy ... ok
+test commands::tests::intermediate_merge_writes_index_before_refilling_record ... ok
+test format::tests::gzip_that_is_not_bam_is_rejected ... ok
+test stats::tests::a_plain_mapped_record_counts_as_mapped_and_nothing_else ... ok
+test stats::tests::a_secondary_duplicate_counts_toward_duplicates_but_not_primary_duplicates ... ok
+test stats::tests::an_unmapped_mate_is_not_mapped_to_a_different_chromosome ... ok
+test stats::tests::an_unmapped_record_is_not_mapped ... ok
+test stats::tests::duplicates_are_counted_for_both_columns ... ok
+test stats::tests::idxstats_counts_mapped_records_on_their_reference ... ok
+test stats::tests::idxstats_puts_a_mate_placed_unmapped_read_on_its_reference ... ok
+test stats::tests::idxstats_tracks_the_star_line_for_records_with_no_reference ... ok
+test stats::tests::mate_on_a_different_chromosome_does_not_require_proper_pairing ... ok
+test stats::tests::properly_paired_requires_paired_proper_and_mapped ... ok
+test stats::tests::read1_and_read2_require_the_paired_bit ... ok
+test stats::tests::references_keep_header_order ... ok
+test stats::tests::secondary_and_supplementary_are_counted_separately_from_primary ... ok
+test commands::tests::captured_frames_still_validate_every_auxiliary_field ... ok
+test stats::tests::singletons_are_paired_mapped_reads_whose_mate_is_unmapped ... ok
+test stats::tests::the_mapq5_variant_excludes_low_quality_alignments ... ok
+test commands::tests::captured_frames_are_bounded_and_large_records_use_the_encoder ... ok
+
+test result: ok. 53 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/main.rs (target/release/deps/rust_bam-d52ab22d71f0dac0)
+
+running 7 tests
+test tests::every_command_requires_an_input ... ok
+test tests::a_missing_subcommand_is_a_usage_error ... ok
+test tests::sort_size_parser_accepts_binary_suffixes ... ok
+test tests::exit_codes_come_from_the_shared_contract ... ok
+test tests::verbose_version_is_detected_only_with_both_flags ... ok
+test tests::the_provenance_block_names_the_oracle_and_the_library ... ok
+test tests::the_cli_declares_all_commands ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/coverage.rs (target/release/deps/coverage-d2a39f31162e1228)
+
+running 10 tests
+test output_file_contains_the_same_text ... ok
+test default_coverage_matches_samtools_shape ... ok
+test histogram_keeps_region_tail_in_summary ... ok
+test region_is_restricted_and_formatted_like_samtools ... ok
+test minimum_depth_is_applied_after_merging_inputs ... ok
+test depth_cap_is_per_alignment_start_not_final_depth ... ok
+test multiple_inputs_and_bam_list_merge_by_position ... ok
+test histogram_and_ascii_depth_plot_match_samtools ... ok
+test no_header_and_filters_match_samtools_shape ... ok
+test required_and_filter_flags_follow_coverage_semantics ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/depth.rs (target/release/deps/depth-ff45724997525a52)
+
+running 10 tests
+test default_depth_matches_samtools_shape ... ok
+test output_file_contains_the_same_text ... ok
+test all_positions_and_header_match_samtools_shape ... ok
+test bed_intervals_match_samtools_shape ... ok
+test quality_mapq_and_read_length_filters ... ok
+test overlap_removal_counts_one_mate_and_preserves_quality_filters ... ok
+test multiple_inputs_have_one_depth_column_each ... ok
+test deletions_and_regions_match_samtools_shape ... ok
+test all_positions_distinguishes_used_and_unused_references ... ok
+test flag_filters_match_samtools ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/external_sort.rs (target/release/deps/external_sort-431d7a98f7af4698)
+
+running 5 tests
+test invalid_memory_size_is_rejected_before_opening_output ... ok
+test malformed_input_fails_without_output_or_temp_runs ... ok
+test external_sort_is_byte_identical_to_in_memory_sort_and_cleans_temp ... ok
+test encoded_runs_preserve_auxiliary_fields_long_cigar_and_buffer_clearing ... ok
+test parallel_compression_is_byte_identical_across_spill_and_worker_counts ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.11s
+
+     Running tests/flags.rs (target/release/deps/flags-4dae85c01156b042)
+
+running 5 tests
+test no_arguments_prints_the_samtools_flags_usage ... ok
+test numeric_prefixes_and_an_empty_argument_match_samtools ... ok
+test numeric_flags_support_decimal_hex_octal_and_unknown_bits ... ok
+test named_flags_are_case_insensitive_deduplicated_and_bit_ordered ... ok
+test malformed_names_numbers_and_help_are_rejected ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/head.rs (target/release/deps/head-12d4050b7b41fb64)
+
+running 5 tests
+test limits_larger_than_the_input_emit_the_complete_sam ... ok
+test sam_and_bam_standard_input_are_streamed_without_reopening ... ok
+test default_prints_all_sam_and_bam_headers_without_records ... ok
+test explicit_stdin_path_supports_truncated_headers ... ok
+test header_and_record_limits_are_independent ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/view_filters.rs (target/release/deps/view_filters-7b7f3c2b228b40c6)
+
+running 6 tests
+test sort_accepts_parallel_bam_compression ... ok
+test filters_apply_to_bam_output_too ... ok
+test threaded_bam_output_is_readable ... ok
+test csi_index_supports_region_queries ... ok
+test flag_and_mapq_filters_apply_to_counts ... ok
+test region_query_uses_bai_and_filters ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running unittests src/lib.rs (target/release/deps/rust_cutadapt-bfc72ecdd1d2e70a)
+
+running 166 tests
+test adapter::matcher::tests::absolute_error_rate_allows_two_errors ... ok
+test adapter::matcher::tests::anchored_five_prime_requires_prefix ... ok
+test adapter::matcher::tests::anchored_three_prime_requires_suffix ... ok
+test adapter::matcher::tests::anywhere_behaves_like_five_prime_at_start ... ok
+test adapter::matcher::tests::indels_are_off_by_default ... ok
+test adapter::matcher::tests::anywhere_behaves_like_three_prime_at_end ... ok
+test adapter::matcher::tests::linked_partial_five_prime_only ... ok
+test adapter::matcher::tests::best_match_prefers_more_aligned_adapter_bases ... ok
+test adapter::matcher::tests::linked_removes_both_parts_when_both_match ... ok
+test adapter::matcher::tests::min_overlap_is_respected ... ok
+test adapter::matcher::tests::regular_five_prime_trims_prefix_and_before_itself ... ok
+test adapter::matcher::tests::no_match_returns_none ... ok
+test adapter::matcher::tests::regular_three_prime_internal ... ok
+test adapter::matcher::tests::regular_three_prime_full ... ok
+test adapter::matcher::tests::regular_three_prime_partial ... ok
+test adapter::matcher::tests::zero_error_rate_rejects_single_mismatch ... ok
+test adapter::tests::every_type_reports_its_end ... ok
+test adapter::tests::match_ordering_falls_back_to_adapter_order ... ok
+test adapter::tests::match_ordering_prefers_more_aligned_adapter_bases ... ok
+test adapter::tests::parses_anchored_five_prime ... ok
+test adapter::tests::parses_anchored_three_prime ... ok
+test adapter::tests::parses_anywhere ... ok
+test adapter::tests::parses_linked_adapter ... ok
+test adapter::tests::parses_read2_option_letters_like_their_read1_spelling ... ok
+test adapter::tests::parses_regular_five_prime ... ok
+test adapter::tests::parses_regular_three_prime ... ok
+test adapter::tests::read2_option_letters_keep_their_anchors ... ok
+test adapter::tests::rejects_bad_input ... ok
+test adapter::tests::retained_is_saturating ... ok
+test adapter::tests::unknown_option_letter_is_an_error_not_a_three_prime_adapter ... ok
+test align::tests::empty_in_empty ... ok
+test adapter::tests::uppercases_and_converts_uracil ... ok
+test align::tests::illumina_adapter_partial_match ... ok
+test align::tests::indels_penalized ... ok
+test align::tests::lowercase_query_is_matched ... ok
+test align::tests::no_indels_exact_partial ... ok
+test align::tests::no_indels_min_overlap_boundary ... ok
+test align::tests::no_indels_rejects_two_mismatches_in_13 ... ok
+test align::tests::no_indels_shorter_adapter_prefix_still_matches ... ok
+test align::tests::no_indels_single_mismatch_full_length ... ok
+test align::tests::no_match ... ok
+test align::tests::poly_a ... ok
+test align::tests::poly_t ... ok
+test align::tests::poly_t_partial ... ok
+test auxout::tests::info_line_for_three_prime_match ... ok
+test auxout::tests::info_line_for_unmatched_read ... ok
+test auxout::tests::rest_line_is_rest_then_name ... ok
+test auxout::tests::writes_fastq_and_fasta ... ok
+test cli::tests::allows_a_run_without_adapters ... ok
+test cli::tests::accepts_attached_short_values ... ok
+test cli::tests::minimal_invocation ... ok
+test cli::tests::parses_all_adapter_options_in_order ... ok
+test cli::tests::indels_on_by_default_and_off_with_flag ... ok
+test cli::tests::parses_length_pairs ... ok
+test compress::tests::detection_matches_the_pre_migration_behaviour ... ok
+test cli::tests::parses_anchored_and_linked ... ok
+test compress::tests::extensions_match_the_pre_migration_behaviour ... ok
+test cli::tests::parses_signed_cuts ... ok
+test cli::tests::parses_paired_end_options ... ok
+test compress::tests::levels_follow_the_zmapping ... ok
+test cli::tests::parses_error_rate_forms ... ok
+test compress::tests::stdout_is_never_compressed ... ok
+test cli::tests::parses_output_options ... ok
+test cli::tests::rejects_invalid_enum_values ... ok
+test engine::tests::anywhere_adapter_trims_both_ends ... ok
+test cli::tests::parses_actions ... ok
+test engine::tests::empty_input_produces_empty_output ... ok
+test cli::tests::parses_quality_cutoffs ... ok
+test engine::tests::filters_short_reads_after_trimming ... ok
+test engine::tests::five_prime_adapter_trims_the_prefix ... ok
+test engine::tests::keeps_plus_and_quality_lines ... ok
+test engine::tests::malformed_input_reports_error ... ok
+test engine::tests::keeps_reads_equal_to_minimum_length_exact ... ok
+test engine::tests::linked_adapter_trims_both_parts ... ok
+test engine::tests::untrimmed_quality_is_preserved_byte_for_byte ... ok
+test engine::tests::times_removes_multiple_adapters ... ok
+test cli::tests::help_and_version_are_successful_requests ... ok
+test filter::tests::empty_read_with_average_rate_filter_is_fatal ... ok
+test filter::tests::discard_trimmed_and_untrimmed ... ok
+test filter::tests::expected_error_and_average_rate_filters ... ok
+test filter::tests::expected_errors_uses_phred ... ok
+test filter::tests::first_failing_filter_wins ... ok
+test filter::tests::length_filters ... ok
+test filter::tests::n_filter_counts_absolute_and_fractional_limits ... ok
+test modify::tests::cut_removes_from_both_ends ... ok
+test filter::tests::casava_filter_reads_the_second_field ... ok
+test modify::tests::length_keeps_first_or_last_bases ... ok
+test filter::tests::defaults_are_empty ... ok
+test modify::tests::modifications_default_is_empty ... ok
+test modify::tests::poly_a_ignores_short_runs_and_internal_runs ... ok
+test modify::tests::poly_a_matches_oracle_on_ambiguous_short_tails ... ok
+test modify::tests::poly_a_tolerates_mismatches_in_the_tail ... ok
+test modify::tests::poly_a_trims_a_trailing_run ... ok
+test modify::tests::quality_base_64_is_respected ... ok
+test modify::tests::quality_trims_both_ends ... ok
+test modify::tests::quality_trims_only_below_the_cutoff ... ok
+test modify::tests::trim_n_removes_only_leading_and_trailing_ns ... ok
+test modify::tests::zero_cap_clamps_negative_qualities ... ok
+test pair::tests::adapter_numbering_continues_across_reads ... ok
+test pair::tests::count_records_checked_reports_malformed_input ... ok
+test pair::tests::pair_decision_zeroes_both_counts_when_discarded ... ok
+test pair::tests::pair_filter_matches_oracle_counts ... ok
+test pair::tests::pair_filter_truth_table ... ok
+test pair::tests::split_records_ignores_trailing_partial_record ... ok
+test pair::tests::split_records_keeps_lockstep_ranges ... ok
+test report::fmt::tests::comma_u64_groups_at_every_third_digit ... ok
+test report::fmt::tests::comma_u64_matches_python_width_and_grouping ... ok
+test report::fmt::tests::fixed1_matches_python_half_even_rounding ... ok
+test report::fmt::tests::fraction_uses_zero_for_missing_values_and_zero_denominator ... ok
+test report::fmt::tests::json_float_matches_python_for_typical_values ... ok
+test report::fmt::tests::json_float_switches_to_scientific_at_one_e16 ... ok
+test report::fmt::tests::json_string_escapes_quotes_and_backslashes ... ok
+test report::fmt::tests::percent_1_matches_python ... ok
+test report::fmt::tests::round1_matches_python ... ok
+test report::json::tests::adjacent_bases_uses_empty_string_key_for_none ... ok
+test report::json::tests::document_ends_with_exactly_one_newline ... ok
+test report::json::tests::error_lengths_and_trimmed_lengths_are_one_line ... ok
+test report::json::tests::indels_flag_is_serialised ... ok
+test report::json::tests::json_matches_oracle_structure_for_plain_invocation ... ok
+test report::json::tests::json_reports_reverse_complemented_when_rc_used ... ok
+test report::json::tests::json_reports_zero_quality_trimmed_when_q_used ... ok
+test report::json::tests::json_sets_filter_counter_when_option_used ... ok
+test report::json::tests::json_string_escaping_is_applied_to_names_and_paths ... ok
+test report::json::tests::paired_end_sets_read2_fields ... ok
+test report::json::tests::poly_a_lengths_are_one_line_objects ... ok
+test report::json::tests::schema_version_is_one_line ... ok
+test report::stats::tests::adjacent_bases_warnbase_is_none_for_the_empty_key ... ok
+test report::stats::tests::adjacent_bases_warnbase_needs_twenty_removals ... ok
+test report::stats::tests::error_lengths_match_cutadapt_docstring ... ok
+test report::stats::tests::error_lengths_match_oracle_error_rate_025 ... ok
+test report::stats::tests::error_lengths_match_oracle_ten_base_adapter ... ok
+test report::stats::tests::error_lengths_zero_error_rate ... ok
+test report::stats::tests::error_ranges_text_matches_cutadapt_docstrings ... ok
+test report::stats::tests::filter_counts_total_and_present_skip_none ... ok
+test report::stats::tests::stats_aggregates_optional_counters ... ok
+test report::text::tests::anchored_adapter_reports_absolute_error_count ... ok
+test report::text::tests::filter_label_field_is_27_characters ... ok
+test report::text::tests::filter_breakdown_uses_cutadapt_label_padding ... ok
+test report::text::tests::full_report_includes_reverse_complemented_lines ... ok
+test report::text::tests::full_report_matches_oracle_plain ... ok
+test report::text::tests::full_report_includes_quality_trimmed_line_when_option_used ... ok
+test report::text::tests::full_report_matches_oracle_with_min_length_filter ... ok
+test report::text::tests::histogram_expect_uses_random_match_probabilities ... ok
+test report::text::tests::history_grammar_is_header_plus_rows_and_blank_line ... ok
+test report::text::tests::minimal_report_matches_oracle_with_filter ... ok
+test report::text::tests::minimal_report_matches_oracle_without_filter ... ok
+test report::text::tests::minimal_report_status_is_warn_when_a_base_dominates ... ok
+test report::text::tests::no_reads_processed_message ... ok
+test runreport::tests::builds_a_single_adapter_report ... ok
+test compress::tests::every_format_round_trips_through_the_shared_helpers ... ok
+test runreport::tests::five_prime_adapter_gets_front_statistics ... ok
+test runreport::tests::too_short_counter_only_reported_when_min_length_is_set ... ok
+test trim::tests::adapter_at_start_yields_empty_read ... ok
+test trim::tests::adapter_shorter_than_min_overlap_never_matches ... ok
+test trim::tests::exact_full_adapter_is_removed ... ok
+test trim::tests::internal_adapter_truncates_read ... ok
+test trim::tests::long_read_is_cut_before_adapter ... ok
+test trim::tests::lowercase_adapter_and_read_are_supported ... ok
+test trim::tests::no_adapter_leaves_read_untouched ... ok
+test trim::tests::one_mismatch_in_full_adapter_is_removed ... ok
+test trim::tests::partial_3_prime_adapter_is_removed ... ok
+test trim::tests::prefilter_kmers_match_cutadapt_heuristic ... ok
+test trim::tests::reverse_complement_is_not_matched ... ok
+test trim::tests::short_read_with_partial_adapter_is_trimmed ... ok
+test align::tests::rejection_filter_preserves_exhaustive_short_alignments ... ok
+test align::tests::rejection_filter_preserves_long_words_and_fallbacks ... ok
+
+test result: ok. 166 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.10s
+
+     Running unittests src/main.rs (target/release/deps/rust_cutadapt-4293cb8eeeaafc37)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/cli.rs (target/release/deps/cli-348193571b2f6ef6)
+
+running 14 tests
+test accepts_long_option_forms ... ok
+test parses_documented_subset ... ok
+test parses_enums ... ok
+test rejects_negative_error_rate ... ok
+test rejects_both_streams_being_stdin_stdout ... ok
+test all_adapter_notations_parse ... ok
+test errors_exit_with_code_two ... ok
+test allows_missing_adapter ... ok
+test defaults_match_documented_values ... ok
+test rejects_empty_adapter ... ok
+test accepts_iupac_wildcards_but_rejects_other_characters ... ok
+test rejects_unknown_option ... ok
+test help_and_version_are_successful_requests ... ok
+test every_documented_option_parses ... ok
+
+test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/cli_e2e.rs (target/release/deps/cli_e2e-30a63c877110c811)
+
+running 21 tests
+test missing_input_file_fails_without_creating_output ... ok
+test malformed_input_does_not_leave_a_valid_looking_output ... ok
+test corrupt_gzip_input_fails_cleanly ... ok
+test gzip_stdin_input_is_detected ... ok
+test minimum_length_zero_keeps_everything ... ok
+test stdout_output_is_supported ... ok
+test unknown_flag_exits_2 ... ok
+test plain_in_gzip_out ... ok
+test stdin_input_is_supported ... ok
+test gzip_in_gzip_out ... ok
+test plain_in_plain_out ... ok
+test empty_input_gives_empty_output_and_exit_zero ... ok
+test help_and_version_exit_zero ... ok
+test malformed_fastq_fails_cleanly ... ok
+test supported_adapter_options_now_work ... ok
+test gzip_in_plain_out ... ok
+test empty_gzip_input_gives_empty_output ... ok
+test parallel_and_single_threaded_outputs_are_identical ... ok
+test no_documented_option_is_silently_refused ... ok
+test multiple_chunks_are_processed_in_order ... ok
+test read_modifications_and_filters_are_applied ... ok
+
+test result: ok. 21 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running tests/differential.rs (target/release/deps/differential-6a4493b9a202396a)
+
+running 1 test
+test prefilter_never_changes_the_alignment_decision ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.59s
+
+     Running unittests src/lib.rs (target/release/deps/rust_fastqc-8f5f963d38b84ef9)
+
+running 65 tests
+test absent::tests::absent_modules_are_not_also_computed ... ok
+test absent::tests::the_summary_mentions_every_module ... ok
+test absent::tests::every_absent_module_has_a_reason_and_a_requirement ... ok
+test error::tests::classes_map_to_the_shared_contract ... ok
+test contaminants::tests::short_queries_match_both_strands_but_short_contaminants_do_not_invent_a_hit ... ok
+test absent::tests::adapter_content_is_no_longer_absent ... ok
+test grouping::tests::an_eighty_base_read_matches_fastqc ... ok
+test config::tests::limits_follow_java_number_syntax_and_last_assignment ... ok
+test contaminants::tests::parser_requires_tab_separated_names_and_acgt ... ok
+test grouping::tests::grouping_starts_after_75_bases ... ok
+test grouping::tests::interval_selection_keeps_group_count_under_75 ... ok
+test grouping::tests::large_intervals_align_to_round_position_boundaries ... ok
+test kmer::tests::inclusive_tail_handles_all_successes ... ok
+test kmer::tests::n_windows_extend_the_domain_without_becoming_opportunities ... ok
+test kmer::tests::samples_every_fiftieth_read_and_extrapolates_count ... ok
+test kmer::tests::report_is_repeatable_and_has_no_table_when_empty ... ok
+test modules::tests::base_content_of_all_n_prints_nan_not_zeros ... ok
+test modules::tests::format_bases_promotes_kbp_mbp_gbp_with_truncation ... ok
+test grouping::tests::nogroup_reports_every_position ... ok
+test modules::tests::basic_statistics_has_all_nine_fields ... ok
+test modules::tests::length_distribution_includes_gap_bins ... ok
+test modules::tests::gc_content_prints_one_hundred_and_one_bins ... ok
+test modules::tests::n_content_prints_two_decimal_places ... ok
+test modules::tests::round_to_keeps_the_requested_places ... ok
+test modules::tests::a_module_renders_with_its_header_and_end_marker ... ok
+test config::tests::malformed_limits_fail_before_later_overrides_are_ignored ... ok
+test modules::tests::base_content_columns_are_g_a_t_c ... ok
+test grouping::tests::reads_up_to_75_bases_are_never_grouped ... ok
+test kmer::tests::no_enrichment_passes_even_with_negative_limits ... ok
+test modules::tests::per_sequence_quality_prints_floating_counts ... ok
+test config::tests::default_and_custom_files_use_distinct_upstream_defaults ... ok
+test report::tests::every_module_block_is_terminated ... ok
+test report::tests::modules_appear_in_fastqc_order ... ok
+test kmer::tests::direct_small_binomial_sums_match_log_recurrence ... ok
+test stats::tests::gc_model_matches_a_single_all_a_read_of_length_four ... ok
+test stats::tests::gc_model_matches_a_single_all_g_read ... ok
+test stats::tests::a_position_with_fewer_than_101_observations_reports_nan_percentiles ... ok
+test report::tests::summary_and_html_include_every_module ... ok
+test report::tests::the_report_starts_with_the_fastqc_version_line ... ok
+test stats::tests::java_round_matches_math_round ... ok
+test stats::tests::length_range_and_distribution_include_empty_bins ... ok
+test stats::tests::base_order_matches_fastqc_column_order ... ok
+test stats::tests::duplication_truncates_at_fifty_bases_and_ignores_case ... ok
+test kmer::tests::significance_survives_raw_probability_underflow ... ok
+test stats::tests::java_double_always_shows_a_fraction ... ok
+test stats::tests::gc_model_spreads_each_count_over_its_own_bins ... ok
+test contaminants::tests::exact_longer_and_one_mismatch_matches_follow_fastqc ... ok
+test stats::tests::java_double_uses_scientific_notation_at_java_boundaries ... ok
+test grouping::tests::groups_tile_the_read_for_many_lengths ... ok
+test stats::tests::mean_quality_is_the_plain_average ... ok
+test error::tests::malformed_data_is_a_runtime_error_not_an_input_precondition ... ok
+test stats::tests::median_length_reports_a_real_length ... ok
+test stats::tests::n_bases_are_counted_separately_from_acgt ... ok
+test stats::tests::percentile_uses_integer_target_arithmetic ... ok
+test stats::tests::percent_gc_is_rounded_and_zero_for_empty_input ... ok
+test tile::tests::an_observed_zero_contributes_to_the_reference_mean ... ok
+test tile::tests::no_observation_is_not_zero_quality ... ok
+test tile::tests::reporting_is_repeatable_and_does_not_destroy_counts ... ok
+test tile::tests::unicode_tile_ids_preserve_java_integer_bounds ... ok
+test zip::tests::archive_has_local_central_and_end_headers ... ok
+test zip::tests::crc32_matches_known_value ... ok
+test stats::tests::cached_gc_model_preserves_mixed_length_distribution_bitwise ... ok
+test kmer::tests::exact_ratios_do_not_cross_thresholds_or_split_ties ... ok
+test modules::tests::overrepresented_uses_the_point_one_percent_threshold ... ok
+test tile::tests::sampling_skips_headers_and_quality_together ... ok
+
+test result: ok. 65 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/main.rs (target/release/deps/rust_fastqc-d59294a1170a3919)
+
+running 7 tests
+test tests::a_missing_input_is_an_io_error ... ok
+test tests::provenance_names_the_reference_and_the_absent_modules ... ok
+test tests::sample_name_strips_compression_and_fastq_extensions ... ok
+test tests::report_path_mirrors_fastqc_layout ... ok
+test tests::accumulating_counts_reads_and_bases ... ok
+test tests::verbose_version_needs_both_flags ... ok
+test tests::the_cli_requires_at_least_one_input ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/adapters.rs (target/release/deps/adapters-02f7e2ed100e281d)
+
+running 6 tests
+test mixed_adapter_lengths_preserve_hits_when_the_reported_range_grows ... ok
+test equal_length_adapter_hits_do_not_depend_on_read_order ... ok
+test an_empty_adapter_config_fails_before_creating_artifacts ... ok
+test short_reads_warn_without_an_invented_zero_table ... ok
+test mixed_length_custom_adapters_use_the_longest_motif_boundary ... ok
+test a_complete_adapter_matches_an_equal_length_read ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/input_integrity.rs (target/release/deps/input_integrity-7d014bf2f908f95d)
+
+running 22 tests
+test extract_delete_keeps_the_directory_and_removes_only_the_zip ... ok
+test compressed_report_uses_the_expected_sample_directory ... ok
+test default_output_has_html_and_zip_without_an_extracted_directory ... ok
+test delete_without_extract_keeps_the_zip ... ok
+test quiet_suppresses_progress_but_keeps_artifacts ... ok
+test file_output_writes_summary_html_and_zip_bundle ... ok
+test multi_member_gzip_consumes_every_member ... ok
+test corrupt_or_truncated_gzip_does_not_write_a_report_file ... ok
+test read_length_limit_fails_before_emitting_a_report ... ok
+test distinct_sequence_limit_allows_duplicates_and_rejects_new_prefixes ... ok
+test built_in_contaminants_are_used_when_no_custom_list_is_given ... ok
+test dup_length_changes_the_duplicate_prefix_without_changing_read_counts ... ok
+test adapter_content_reports_a_known_adapter ... ok
+test a_record_larger_than_one_chunk_is_reassembled ... ok
+test nogroup_disables_long_read_position_grouping ... ok
+test min_and_max_length_filter_reads_before_qc_statistics ... ok
+test custom_contaminant_source_matches_a_tab_separated_list ... ok
+test malformed_or_truncated_fastq_never_emits_a_success_report ... ok
+test compressed_empty_inputs_match_plain_empty_input ... ok
+test plain_and_all_shared_compression_formats_have_identical_reports ... ok
+test malformed_tail_after_a_chunk_keeps_global_diagnostic_positions ... ok
+test records_straddling_chunks_are_not_lost_or_double_counted ... ok
+
+test result: ok. 22 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/limits.rs (target/release/deps/limits-8c661e629c28bf86)
+
+running 5 tests
+test zero_length_warning_and_error_switches_reach_the_library ... ok
+test malformed_config_precedes_input_access_and_output ... ok
+test ignoring_overrepresentation_keeps_duplication_available ... ok
+test missing_config_fails_without_a_report ... ok
+test kmer_sampling_state_is_per_file ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/native_runtime.rs (target/release/deps/native_runtime-d6e122795ebc4e49)
+
+running 2 tests
+test native_qc_runs_without_java_or_other_executables_on_path ... ok
+test jvm_options_fail_explicitly_before_input_or_output_access ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/tile.rs (target/release/deps/tile-ada329d59120ec92)
+
+running 4 tests
+test invalid_phred64_is_rejected_before_report_creation ... ok
+test malformed_tail_does_not_emit_accumulated_tile_results ... ok
+test length_filtering_precedes_header_detection ... ok
+test optional_tile_state_is_reset_for_each_input ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (target/release/deps/rust_fx-765ad9e2b86c42b1)
+
+running 184 tests
+test cli::tests::an_invalid_lint_mode_is_rejected ... ok
+test cli::tests::fx2tab_has_the_documented_flags ... ok
+test cli::tests::seq_has_the_documented_flags ... ok
+test cli::tests::no_subcommand_is_an_error_rather_than_a_silent_no_op ... ok
+test commands::tests::fx2tab_base_content_and_count ... ok
+test commands::tests::fx2tab_name_only_drops_the_sequence_columns ... ok
+test commands::tests::fx2tab_length_and_gc ... ok
+test commands::tests::fx2tab_average_quality_is_blank_for_fasta ... ok
+test cli::tests::lint_validates_the_three_enumerated_options ... ok
+test cli::tests::sample_takes_a_seed_with_the_documented_default ... ok
+test cli::tests::stats_has_the_documented_flags ... ok
+test commands::tests::fx2tab_sequence_hash_is_md5_of_the_sequence ... ok
+test commands::tests::fx2tab_header_line_lists_the_selected_metrics ... ok
+test commands::tests::lint_accepts_a_duplicate_name ... ok
+test commands::tests::lint_rejects_an_unknown_validator_code ... ok
+test commands::tests::lint_can_disable_a_failing_validator ... ok
+test commands::tests::fq2fa_converts_and_is_idempotent_on_fasta ... ok
+test commands::tests::lint_accepts_a_valid_pair ... ok
+test commands::tests::lint_rejects_a_length_mismatch_with_exit_1 ... ok
+test cli::tests::split_defaults_the_part_width_to_three ... ok
+test commands::tests::lint_rejects_fasta_input ... ok
+test commands::tests::sample_rejects_both_or_neither_selection ... ok
+test commands::tests::lint_rejects_mismatched_pair_names ... ok
+test commands::tests::fx2tab_no_qual_drops_the_quality_column ... ok
+test commands::tests::seq_length_filter_is_inclusive ... ok
+test commands::tests::seq_only_prints_sequences ... ok
+test commands::tests::seq_passes_records_through_unchanged ... ok
+test commands::tests::sample_is_reproducible_for_a_fixed_seed ... ok
+test commands::tests::fx2tab_emits_three_columns_by_default ... ok
+test commands::tests::seq_name_and_only_id ... ok
+test commands::tests::seq_rejects_both_case_flags ... ok
+test commands::tests::seq_rejects_contradictory_output_selections ... ok
+test commands::tests::seq_reverse_complement ... ok
+test commands::tests::seq_removes_gaps_and_uppercases ... ok
+test commands::tests::sample_by_number_is_approximately_the_requested_count ... ok
+test commands::tests::split_by_part_distributes_evenly ... ok
+test commands::tests::split_by_size_writes_numbered_parts_in_order ... ok
+test commands::tests::split_dry_run_creates_nothing ... ok
+test commands::tests::split_rejects_stdin ... ok
+test commands::tests::stats_all_adds_the_extra_columns ... ok
+test commands::tests::stats_detects_rna_and_protein ... ok
+test commands::tests::stats_reports_the_documented_columns ... ok
+test grep::tests::iupac_and_hamming_matching_are_distinct ... ok
+test io::tests::an_empty_sequence_still_writes_a_line ... ok
+test io::tests::an_invalid_magic_is_rejected ... ok
+test io::tests::error_classes_map_to_the_shared_contract ... ok
+test io::tests::fasta_accepts_a_header_without_a_sequence ... ok
+test io::tests::detects_fastq_and_fasta_from_the_first_line ... ok
+test io::tests::fasta_tolerates_blank_lines_between_records ... ok
+test io::tests::fasta_wrapping_uses_the_line_width ... ok
+test io::tests::label_mapping ... ok
+test io::tests::malformed_input_is_an_input_error ... ok
+test cli::tests::unimplemented_seqkit_flags_are_absent_not_ignored ... ok
+test io::tests::owned_fallback_releases_previous_record_before_reading_next ... ok
+test io::tests::output_writes_and_finishes_a_plain_file ... ok
+test io::tests::reads_multiline_fasta_records ... ok
+test io::tests::reads_records_from_a_plain_file ... ok
+test io::tests::reusable_lint_reader_does_not_fill_truncated_records_from_previous_read ... ok
+test io::tests::writing_fasta_relabels_and_drops_qualities ... ok
+test io::tests::writing_fastq_is_four_lines ... ok
+test io::tests::output_compresses_by_extension ... ok
+test lint::tests::a_valid_record_passes_every_validator ... ok
+test lint::tests::an_unknown_validator_code_is_reported_not_ignored ... ok
+test io::tests::reads_a_fasta_record_with_many_sequence_lines ... ok
+test lint::tests::disabling_a_validator_suppresses_only_that_one ... ok
+test lint::tests::error_rendering_includes_code_name_and_record ... ok
+test lint::tests::every_code_round_trips ... ok
+test lint::tests::level_parse_and_ordering ... ok
+test lint::tests::levels_gate_the_validators ... ok
+test lint::tests::normalise_pair_name_handles_every_documented_shape ... ok
+test lint::tests::p001_accepts_casava_pair_suffixes ... ok
+test lint::tests::p001_accepts_matching_pair_names ... ok
+test io::tests::reusable_reader_keeps_long_empty_and_short_records_separate ... ok
+test lint::tests::p001_accepts_slash_suffixes ... ok
+test lint::tests::p001_can_be_disabled ... ok
+test lint::tests::p001_does_not_strip_underscore_suffixes ... ok
+test lint::tests::p001_rejects_genuinely_different_names ... ok
+test lint::tests::records_are_numbered_from_one ... ok
+test lint::tests::s001_rejects_a_plus_line_without_plus ... ok
+test lint::tests::s002_accepts_lower_case_and_n ... ok
+test lint::tests::s002_rejects_a_base_outside_acgtn ... ok
+test lint::tests::s002_rejects_iupac_codes_beyond_n ... ok
+test lint::tests::s003_rejects_a_header_without_at ... ok
+test lint::tests::s004_rejects_a_truncated_record ... ok
+test lint::tests::s005_rejects_a_length_mismatch ... ok
+test lint::tests::s006_accepts_the_documented_boundaries ... ok
+test lint::tests::s006_rejects_a_quality_outside_the_printable_range ... ok
+test lint::tests::s007_compares_full_headers_not_just_ids ... ok
+test lint::tests::s007_does_not_run_by_default ... ok
+test lint::tests::several_failures_are_all_reported ... ok
+test lint::tests::validator_identity_matches_the_published_table ... ok
+test io::tests::reads_across_a_chunk_boundary ... ok
+test md5::tests::block_boundary_lengths_are_padded_correctly ... ok
+test md5::tests::case_changes_the_digest ... ok
+test md5::tests::default_matches_new ... ok
+test md5::tests::digest_of_a_realistic_sequence_is_well_formed ... ok
+test md5::tests::rfc1321_test_vectors ... ok
+test md5::tests::update_with_empty_slices_is_a_no_op ... ok
+test sample::tests::a_fixed_seed_selects_a_pinned_set ... ok
+test md5::tests::streaming_matches_one_shot ... ok
+test cli::tests::the_command_tree_parses_every_subcommand ... ok
+test sample::tests::a_probability_of_one_keeps_everything ... ok
+test sample::tests::a_probability_of_zero_keeps_nothing ... ok
+test sample::tests::a_zero_seed_still_produces_a_valid_stream ... ok
+test sample::tests::an_empty_input_yields_an_empty_sample_without_dividing_by_zero ... ok
+test sample::tests::decisions_do_not_depend_on_chunking ... ok
+test sample::tests::different_seeds_give_different_streams ... ok
+test sample::tests::floats_are_in_the_unit_interval ... ok
+test sample::tests::number_sampling_may_return_fewer_than_requested ... ok
+test sample::tests::out_of_range_probabilities_are_clamped ... ok
+test sample::tests::proportion_and_number_agree_on_probability ... ok
+test sample::tests::a_half_probability_keeps_about_half ... ok
+test sample::tests::requesting_more_records_than_exist_keeps_everything ... ok
+test sample::tests::sampling_is_reproducible_across_instances ... ok
+test sample::tests::selected_positions_are_unique_and_ordered ... ok
+test sample::tests::the_same_seed_gives_the_same_stream ... ok
+test sort::tests::natural_order_compares_numeric_runs_without_losing_leading_zero_ties ... ok
+test split::tests::a_larger_width_pads_further ... ok
+test split::tests::a_wider_counter_than_the_width_is_not_truncated ... ok
+test split::tests::an_explicit_extension_overrides_the_input_extension ... ok
+test split::tests::by_size_edge_cases ... ok
+test split::tests::by_size_matches_the_published_example ... ok
+test io::tests::borrowed_records_preserve_owned_parser_at_every_buffer_boundary ... ok
+test split::tests::default_out_dir_is_input_dot_split ... ok
+test split::tests::extension_keeps_both_suffixes ... ok
+test split::tests::part_numbers_are_zero_padded_to_the_width ... ok
+test split::tests::part_path_matches_the_published_naming ... ok
+test split::tests::partition_by_parts_edge_cases ... ok
+test split::tests::partition_by_parts_handles_more_parts_than_records ... ok
+test split::tests::partition_by_parts_is_even_and_ordered ... ok
+test split::tests::partition_covers_every_record_exactly_once ... ok
+test split::tests::stem_strips_compression_then_format ... ok
+test stats::tests::average_quality_is_the_mean_error_round_trip ... ok
+test stats::tests::empty_qualities_have_no_defined_averages ... ok
+test stats::tests::cached_error_probabilities_preserve_every_score_and_sum_bitwise ... ok
+test stats::tests::fx2tab_gc_uses_the_unambiguous_denominator ... ok
+test stats::tests::gap_letters_are_configurable ... ok
+test stats::tests::gaps_and_ambiguous_bases_are_disjoint ... ok
+test stats::tests::gc_is_case_insensitive ... ok
+test stats::tests::gc_skew_is_g_minus_c_over_g_plus_c ... ok
+test sample::tests::floats_are_reasonably_uniform ... ok
+test stats::tests::length_counts_every_byte_including_gaps ... ok
+test stats::tests::merging_is_associative_for_both_accumulators ... ok
+test stats::tests::phred64_shifts_the_scores ... ok
+test stats::tests::pinned_example_matches_a_hand_computation ... ok
+test stats::tests::quality_percentages_include_threshold_scores ... ok
+test stats::tests::rna_uracil_counts_toward_the_denominator ... ok
+test stats::tests::scores_below_the_base_do_not_underflow ... ok
+test stats::tests::sequence_counts_cover_all_bytes_and_overlapping_gap_symbols ... ok
+test stats::tests::stats_gc_is_defined_without_unambiguous_bases_but_fx2tab_gc_is_not ... ok
+test stats::tests::stats_gc_uses_the_length_denominator ... ok
+test table::tests::an_empty_row_set_still_renders_a_header ... ok
+test table::tests::cells_include_all_optionals_when_all_is_set ... ok
+test table::tests::header_has_eight_columns_by_default ... ok
+test table::tests::header_has_nineteen_columns_with_all ... ok
+test table::tests::histogram_statistics_match_the_sorted_path ... ok
+test table::tests::human_float_drops_an_integral_decimal ... ok
+test table::tests::human_layout_groups_digits_and_aligns ... ok
+test table::tests::human_layout_pads_columns_to_the_widest_cell ... ok
+test table::tests::n50_handles_one_dominant_sequence ... ok
+test table::tests::n50_matches_the_definition ... ok
+test table::tests::percentages_always_show_two_decimals ... ok
+test table::tests::quartiles_are_monotonic_and_bounded ... ok
+test table::tests::tabular_float_always_has_a_decimal ... ok
+test table::tests::tabular_layout_is_tab_separated_without_separators ... ok
+test table::tests::thousands_separators_group_by_three ... ok
+test transform::tests::case_conversion_and_transcription ... ok
+test transform::tests::complement_covers_the_iupac_set ... ok
+test transform::tests::complement_is_an_involution ... ok
+test transform::tests::empty_and_unknown_are_unlimit ... ok
+test stats::tests::prepared_quality_decoder_is_bitwise_identical_for_every_offset ... ok
+test transform::tests::gap_removal_happens_before_case_change ... ok
+test transform::tests::gap_removal_is_configurable ... ok
+test transform::tests::gap_removal_uses_the_documented_default_set ... ok
+test transform::tests::guanine_rich_dna_is_detected ... ok
+test transform::tests::lower_case_wins_over_upper_when_both_are_set ... ok
+test transform::tests::no_transforms_is_the_identity ... ok
+test transform::tests::protein_is_detected_from_non_nucleotide_letters ... ok
+test transform::tests::reverse_complement_is_reverse_after_complement ... ok
+test transform::tests::reverse_complement_matches_the_two_step_definition ... ok
+test transform::tests::reverse_is_its_own_inverse ... ok
+test transform::tests::rna_requires_uracil_and_no_thymine ... ok
+test transform::tests::sequence_id_is_the_leading_non_space_run ... ok
+test lint::tests::reduced_validation_keeps_the_first_invalid_byte ... ok
+
+test result: ok. 184 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running unittests src/main.rs (target/release/deps/rust_fx-c785116d5c646a83)
+
+running 5 tests
+test tests::declared_classes_render_the_shared_line ... ok
+test tests::provenance_records_the_unverified_status ... ok
+test tests::provenance_lists_every_command ... ok
+test tests::verbose_version_detection ... ok
+test tests::quality_encoding_maps_to_the_documented_bases ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/benchmark_boundaries.rs (target/release/deps/benchmark_boundaries-a2449d7db0da2188)
+
+running 2 tests
+test fq2fa_default_is_unwrapped_and_explicit_width_is_respected ... ok
+test quality_thresholds_include_q20_and_q30 ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/common.rs (target/release/deps/common-0f2c0f861623d97e)
+
+running 8 tests
+test embedded_multiple_candidates_are_sorted_by_coordinate ... ok
+test embedded_subsequence_uses_coordinates_and_comment ... ok
+test embedded_skips_shorter_common_sequences ... ok
+test embedded_three_files_uses_first_occurrence ... ok
+test embedded_positive_only_does_not_match_reverse_complement ... ok
+test sequence_intersection_is_empty_for_different_sequences ... ok
+test embedded_requires_by_seq_and_rejects_by_name ... ok
+test id_and_name_intersection_match_seqkit ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/compression.rs (target/release/deps/compression-0c0f3bcc4729d463)
+
+running 3 tests
+test split_and_duplicate_reports_use_the_same_level ... ok
+test invalid_levels_use_seqkit_exit_code_and_leave_no_file ... ok
+test numeric_levels_cover_all_compression_formats ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/duplicate.rs (target/release/deps/duplicate-9b59b9e344f39192)
+
+running 2 tests
+test fastq_duplication_keeps_quality ... ok
+test default_and_explicit_duplication_match_seqkit ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/fa2fq.rs (target/release/deps/fa2fq-98cd6051eb57a7ab)
+
+running 3 tests
+test fasta_names_select_fastq_records ... ok
+test only_positive_strand_flag_is_accepted ... ok
+test subsequence_and_reverse_complement_matches_include_quality_orientation ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/faidx.rs (target/release/deps/faidx-2fe5c3c989e4275a)
+
+running 4 tests
+test regexp_ids_extract_full_records_and_create_fai ... ok
+test full_head_uses_seqkit_index_and_update_rebuilds_a_stale_fai ... ok
+test full_header_and_case_insensitive_id_match_seqkit ... ok
+test positional_regions_and_region_file_match_seqkit ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/grep.rs (target/release/deps/grep-2e2cea315216167c)
+
+running 7 tests
+test id_regexp_requires_a_capture_group ... ok
+test missing_pattern_is_a_usage_error ... ok
+test duplicated_patterns_and_delete_matched_control_output_multiplicity ... ok
+test region_circular_and_empty_patterns_follow_seqkit ... ok
+test id_name_and_sequence_modes ... ok
+test invert_count_case_and_pattern_file ... ok
+test sequence_strands_mismatch_degenerate_and_regexp_work_together ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/head.rs (target/release/deps/head-65ef6ff8ac60e7e3)
+
+running 5 tests
+test infile_list_and_raw_output_global_flags_are_supported ... ok
+test output_file_contains_the_same_text ... ok
+test zero_number_uses_seqkits_exit_code ... ok
+test fasta_width_zero_keeps_sequences_unwrapped ... ok
+test number_and_length_limits_match_seqkit_shape ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/input_integrity.rs (target/release/deps/input_integrity-49765dd42d9d9023)
+
+running 5 tests
+test valid_empty_reads_and_multiple_records_are_not_mistaken_for_blank_headers ... ok
+test truncated_records_and_garbage_after_padding_are_not_clean_eof ... ok
+test empty_input_and_existing_edge_padding_remain_supported ... ok
+test interior_blanks_are_rejected_with_crlf_gzip_and_more_than_one_blank ... ok
+test shared_reader_commands_reject_an_interior_blank_instead_of_succeeding_with_a_prefix ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/range.rs (target/release/deps/range-8feeee48e3dbfca1)
+
+running 6 tests
+test mixed_files_never_reuse_another_records_quality ... ok
+test wrapped_fastq_and_explicit_output_width_match_seqkit ... ok
+test multiple_files_have_independent_ranges_and_bounded_negative_tails ... ok
+test positive_and_negative_record_ranges_match_seqkit ... ok
+test short_negative_ranges_follow_the_upstream_circular_tail ... ok
+test invalid_ranges_fail_before_output_is_created ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/rename.rs (target/release/deps/rename-e862014379303415)
+
+running 3 tests
+test multiple_outfiles_share_duplicate_counters_and_honor_force ... ok
+test duplicate_ids_are_renamed_and_comments_preserved ... ok
+test first_record_separator_and_start_number_are_honored ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/replace.rs (target/release/deps/replace-88da217e0463deb3)
+
+running 4 tests
+test sequence_replacement_and_ignore_case_match_seqkit ... ok
+test name_replacement_and_capture_variables_match_seqkit ... ok
+test filters_are_applied_before_editing_and_sequence_kv_is_rejected ... ok
+test special_symbols_and_key_value_fallbacks_work ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/restart.rs (target/release/deps/restart-191df53b7f6f6f53)
+
+running 2 tests
+test positive_and_negative_starts_rotate_circularly ... ok
+test start_with_searches_both_strands_and_rotates_qualities ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/rmdup.rs (target/release/deps/rmdup-5b4afcef58f9e206)
+
+running 3 tests
+test duplicate_reports_preserve_first_occurrence_groups ... ok
+test id_and_name_modes_keep_first_occurrence ... ok
+test sequence_mode_compares_both_strands_and_ignore_case ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/seqkit_streaming.rs (target/release/deps/seqkit_streaming-02c76dd7a91af7fc)
+
+running 2 tests
+test tab2fx_streams_stdin_with_a_fixed_output_commit_buffer ... ok
+test range_start_to_end_streams_stdin_without_counting_or_spooling ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/sliding.rs (target/release/deps/sliding-6c062e7549294d11)
+
+running 5 tests
+test infile_list_is_expanded_before_windowing ... ok
+test greedy_emits_all_trailing_short_windows ... ok
+test sliding_fastq_slices_quality_with_sequence ... ok
+test sliding_windows_and_coordinates_match_seqkit ... ok
+test circular_windows_wrap_coordinates_and_preserve_quality ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/sort.rs (target/release/deps/sort-2cd607ca41780baf)
+
+running 7 tests
+test conflicting_sort_modes_are_a_usage_error ... ok
+test two_pass_rejects_by_bases_before_output ... ok
+test reverse_reverses_the_result ... ok
+test natural_order_and_sequence_prefix_match_seqkit ... ok
+test two_pass_writes_seqkit_index_and_reuses_offsets ... ok
+test two_pass_rejects_multiple_inputs_and_fastq ... ok
+test sorts_by_id_name_length_and_sequence ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/streaming.rs (target/release/deps/streaming-1ac488ae0ef8e185)
+
+running 4 tests
+test empty_input_produces_no_parts_and_no_directory ... ok
+test stats_all_matches_exact_sorted_statistics_on_a_large_input ... ok
+test split_by_size_streams_every_record_in_order ... ok
+test split_by_part_streams_every_record_in_order ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/subseq.rs (target/release/deps/subseq-8bbc69fddfdf8e3b)
+
+running 3 tests
+test fastq_sequence_and_quality_are_sliced_together ... ok
+test region_coord_appends_the_requested_bounds ... ok
+test positive_negative_and_full_regions_match_seqkit ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/subseq_bed.rs (target/release/deps/subseq_bed-028078179086adef)
+
+running 2 tests
+test bed_interval_and_chromosome_filter ... ok
+test upstream_and_downstream_flanks_match_seqkit ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/subseq_gtf.rs (target/release/deps/subseq_gtf-2dd8c79a0d696e3f)
+
+running 1 test
+test gtf_features_and_negative_strand_match_seqkit ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/subseq_gtf_flank.rs (target/release/deps/subseq_gtf_flank-d34219aa7a086ab3)
+
+running 2 tests
+test gtf_only_flank_and_negative_strand_are_supported ... ok
+test gtf_up_and_down_flanks_are_transcript_aware ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/tab2fx.rs (target/release/deps/tab2fx-8c21afea50dd4600)
+
+running 9 tests
+test custom_comment_prefixes_replace_the_defaults ... ok
+test byte_fields_extra_columns_and_per_file_fastq_state ... ok
+test two_and_three_column_tables_match_seqkit ... ok
+test comment_lines_and_unvalidated_quality_lengths_match_seqkit ... ok
+test same_file_and_hardlink_outputs_are_rejected_before_truncation ... ok
+test csv_comment_prefixes_and_fractional_buffer_sizes ... ok
+test scanner_limit_discards_uncommitted_output ... ok
+test fatal_input_keeps_committed_blocks_but_drops_pending_output ... ok
+test compression_roundtrips_and_early_failure_does_not_finalize ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/translate.rs (target/release/deps/translate-3237210e9dbdf002)
+
+running 7 tests
+test fastq_translation_is_fasta_and_appends_frame ... ok
+test skip_errors_writes_a_blank_record_with_a_trailing_space ... ok
+test unknown_codon_and_init_m_flags_are_accepted ... ok
+test ambiguous_codons_clean_orfs_and_error_output_match_seqkit ... ok
+test standard_frames_match_seqkit ... ok
+test genetic_code_tables_use_their_own_codon_mappings ... ok
+test table_specific_stops_and_listing_metadata_match_seqkit ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/translate_errors.rs (target/release/deps/translate_errors-2b22701a3759bd51)
+
+running 10 tests
+test excess_wrapped_quality_is_rejected_before_committing_the_record ... ok
+test negative_frames_complement_rna_and_ambiguous_bases ... ok
+test wrapped_fastq_and_nonstandard_header_bytes_are_preserved ... ok
+test short_sequences_can_all_be_skipped_successfully ... ok
+test orf_coordinates_include_frame_and_keep_description ... ok
+test fatal_input_discards_only_pending_output ... ok
+test repeated_header_separators_do_not_delete_description_letters ... ok
+test trim_preserves_internal_residues_and_init_m_uses_table_starts ... ok
+test frames_are_ordered_repeatable_and_validated_before_output ... ok
+test first_record_alphabet_check_is_distinct_from_codon_errors ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running unittests src/lib.rs (target/release/deps/rust_umitools-bc08c5e28eefb570)
+
+running 69 tests
+test commands::dedup_stats::tests::edit_distance_bins_use_right_closed_digitize_semantics ... ok
+test compat::pyrng::tests::matches_cpython_random_sequences ... ok
+test compat::pyrng::tests::negative_seeds_use_the_absolute_value ... ok
+test compat::pyrng::tests::stable_rng_is_reproducible_and_in_range ... ok
+test core::cluster::tests::adjacency_covers_the_whole_component_when_one_lead_suffices ... ok
+test core::cluster::tests::adjacency_splits_by_lead_umi_coverage ... ok
+test core::cluster::tests::cluster_uses_undirected_components ... ok
+test core::cluster::tests::count_only_matches_full_cluster_for_all_methods ... ok
+test core::cluster::tests::count_only_matches_union_find_fixture ... ok
+test core::cluster::tests::directional_collapses_singletons_at_distance_one ... ok
+test core::cluster::tests::directional_is_not_symmetric ... ok
+test core::cluster::tests::directional_requires_two_to_one_support ... ok
+test core::cluster::tests::equal_counts_do_not_collapse_in_directional ... ok
+test core::cluster::tests::mixed_lengths_are_rejected ... ok
+test core::cluster::tests::percentile_keeps_umis_above_one_percent_of_median ... ok
+test core::cluster::tests::percentile_single_umi_is_retained ... ok
+test core::cluster::tests::representative_is_highest_count_then_lowest_bytes ... ok
+test core::cluster::tests::unique_keeps_insertion_order ... ok
+test core::cluster::tests::union_find_matches_traversal_components ... ok
+test core::distance::tests::counts_symbol_substitutions ... ok
+test core::distance::tests::different_lengths_have_no_distance ... ok
+test core::distance::tests::n_is_an_ordinary_symbol ... ok
+test core::distance::tests::packed_and_byte_paths_agree ... ok
+test core::neighbors::tests::mixed_lengths_never_pair ... ok
+test core::neighbors::tests::all_strategies_agree_on_small_inputs ... ok
+test core::neighbors::tests::threshold_larger_than_length_pairs_everything ... ok
+test core::neighbors::tests::substitute_handles_all_positions_and_n ... ok
+test core::rng::tests::strategies_parse_and_label ... ok
+test core::distance::tests::packed_distance_matches_per_lane_count ... ok
+test core::umi::tests::non_canonical_bytes_fall_back_without_normalisation ... ok
+test core::umi::tests::packed_order_matches_byte_order ... ok
+test core::umi::tests::packs_acgtn_and_roundtrips ... ok
+test core::umi::tests::with_symbol_replaces_exactly_one_position ... ok
+test error::tests::declared_classes_render_the_historical_verbose_line ... ok
+test core::umi::tests::long_umi_falls_back_to_bytes ... ok
+test error::tests::each_variant_maps_onto_its_documented_class ... ok
+test error::tests::re_exported_codes_match_the_shared_contract ... ok
+test error::tests::recorded_diagnostics_are_unchanged ... ok
+test error::tests::usage_hint_renders_through_the_shared_diagnostic ... ok
+test io::fastq::tests::a_missing_file_is_an_io_error ... ok
+test io::bam::tests::finish_propagates_open_errors ... ok
+test io::fastq::tests::empty_input_yields_no_records ... ok
+test io::fastq::tests::rejects_a_bad_header_with_this_crates_diagnostic ... ok
+test io::fastq::tests::rejects_a_length_mismatch_with_this_crates_diagnostic ... ok
+test io::fastq::tests::reads_a_plain_file ... ok
+test io::fastq::tests::rejects_a_missing_separator ... ok
+test io::fastq::tests::seek_is_untouched_by_reading ... ok
+test io::fastq::tests::the_reader_tolerates_a_trailing_crlf ... ok
+test io::fastq::tests::write_to_produces_the_pre_migration_bytes ... ok
+test io::fastq::tests::write_to_keeps_an_empty_record ... ok
+test io::fastq::tests::write_to_without_a_comment ... ok
+test io::fastq::tests::rejects_a_truncated_record ... ok
+test io::fastq::tests::writer_and_reader_agree ... ok
+test io::fastq::tests::gzip_detection_is_by_extension_here ... ok
+test io::fastq::tests::reads_a_gzip_file ... ok
+test runtime::budget::tests::parses_sizes ... ok
+test runtime::budget::tests::chunk_stays_inside_the_declared_budget ... ok
+test runtime::summary::tests::contract_view_carries_program_and_version ... ok
+test runtime::summary::tests::matches_the_recorded_pre_refactor_document ... ok
+test runtime::budget::tests::parses_container_limits ... ok
+test runtime::summary::tests::rejects_unknown_progress_mode ... ok
+test runtime::budget::tests::rejects_zero_threads_and_tiny_budget ... ok
+test runtime::summary::tests::renders_valid_json_shapes ... ok
+test runtime::summary::tests::write_into_a_missing_directory_fails_and_leaves_nothing ... ok
+test runtime::summary::tests::write_produces_the_rendered_bytes_on_disk ... ok
+test io::fastq::tests::writer_round_trips_plain_and_gzip ... ok
+test core::neighbors::tests::partition_is_exact_for_larger_sets ... ok
+test commands::dedup_stats::tests::numpy_seed_and_weighted_choice_match_reference ... ok
+test core::disk_bundle::tests::disk_matches_memory ... ok
+
+test result: ok. 69 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running unittests src/main.rs (target/release/deps/rust_umitools-0f804b7c5a15cd62)
+
+running 2 tests
+test tests::provenance_block_is_byte_identical_to_the_recorded_output ... ok
+test tests::provenance_lists_every_command_that_exists ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/cli_contract.rs (target/release/deps/cli_contract-1c937cbc0b9e8ad3)
+
+running 5 tests
+test group_help_uses_generic_output_description ... ok
+test count_help_describes_tsv_output ... ok
+test dedup_help_matches_implemented_features ... ok
+test invalid_progress_is_rejected_before_reading_input ... ok
+test command_help_snapshots_match ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/empty_input.rs (target/release/deps/empty_input-44a7ea4ac343a156)
+
+running 1 test
+test empty_input_writes_valid_bam_on_both_paths ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/output_stats.rs (target/release/deps/output_stats-4e8286923dbe6b04)
+
+running 1 test
+test unique_stats_match_pinned_umitools ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+   Doc-tests bioinfo_common
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests bioinfo_fastx
+
+running 1 test
+test bioinfo-fastx/src/reader.rs - reader (line 5) - compile ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+   Doc-tests rust_bam
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests rust_cutadapt
+
+running 1 test
+test rust-cutadapt/src/report/mod.rs - report (line 19) ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.32s
+
+   Doc-tests rust_fastqc
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests rust_fx
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests rust_umitools
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+==> rustup run 1.99.1 cargo build --workspace --bins --release --locked
+    Finished `release` profile [optimized] target(s) in 0.02s
+
+==> python3 -W error::ResourceWarning bench/test_canonical_sam.py
+...
+----------------------------------------------------------------------
+Ran 3 tests in 0.267s
+
+OK
+
+==> python3 rust-cutadapt/tests/check.py --bin /home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/release/rust-cutadapt
+PASS simple.fastq -> .fastq
+PASS simple.fastq.gz -> .fastq
+PASS simple.fastq.gz -> .fastq.gz
+all visible conformance cases passed
+
+==> bash tests/oracle/run_w13_oracle.sh --rust /home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/release/rust-fx
+rust-fx : /home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/release/rust-fx
+seqkit  : /home/rimuru/Projects/Code/for_fun/bioinfo-tools/tests/ci/env/bin/seqkit
+fq      : /home/rimuru/Projects/Code/for_fun/bioinfo-tools/tests/ci/env/bin/fq
+seqkit v2.14.0
+fq v0.12.0 (51779f50e 2024-07-08)
+
+rust-fx: /home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/release/rust-fx
+seqkit : /home/rimuru/Projects/Code/for_fun/bioinfo-tools/tests/ci/env/bin/seqkit
+fq     : /home/rimuru/Projects/Code/for_fun/bioinfo-tools/tests/ci/env/bin/fq
+cases  : 50
+
+PASS  stats    stats_default_fastq          the 8 documented columns, human layout
+PASS  stats    stats_default_fasta          FASTA detection and type
+PASS  stats    stats_tabular                -T: tabs, no digit grouping
+PASS  stats    stats_all                    -a adds quartiles/N50/quality columns
+PASS  stats    stats_all_tabular            every modelled metric in machine-readable form
+PASS  stats    stats_basename               -b prints only the base name
+PASS  stats    stats_multiple_inputs        several inputs in one table
+PASS  stats    stats_gap_letters            -G changes the gap set
+PASS  seq      seq_passthrough              identity output is byte-identical
+PASS  seq      seq_name                     -n prints full headers
+PASS  seq      seq_only_id                  -n -i prints IDs
+PASS  seq      seq_seq_only                 -s prints sequences only
+PASS  seq      seq_reverse_complement       -r -p: reverse then complement
+PASS  seq      seq_complement_only          -p alone: complement without reversing
+PASS  seq      seq_upper                    -u: uppercase output
+PASS  seq      seq_lower                    -l: lowercase output
+PASS  seq      seq_min_len                  -m inclusive length filter
+PASS  seq      seq_max_len                  -M inclusive length filter
+PASS  seq      seq_gap_removal              -g removes the -G gap set
+PASS  seq      seq_fasta_wrap               -w controls FASTA line width
+PASS  seq      seq_dna2rna                  --dna2rna: T becomes U
+PASS  fq2fa    fq2fa_default                @ becomes >, qualities dropped
+PASS  fq2fa    fq2fa_wrap                   -w wraps the FASTA sequence
+PASS  fq2fa    fq2fa_on_fasta               FASTA input is unchanged (idempotent)
+PASS  fx2tab   fx2tab_default               three fixed columns for either format
+PASS  fx2tab   fx2tab_fasta_empty_qual      FASTA still prints an empty quality column
+PASS  fx2tab   fx2tab_length_gc             -l and -g: length and (G+C)/(G+C+A+T)
+PASS  fx2tab   fx2tab_header                -H names the metrics
+PASS  fx2tab   fx2tab_avg_qual              -q mean-error average quality
+PASS  fx2tab   fx2tab_no_qual               -Q drops the quality column
+PASS  fx2tab   fx2tab_seq_hash              -s MD5 of the sequence
+PASS  fx2tab   fx2tab_base_content          -B and -C: base content and count columns
+PASS  fx2tab   fx2tab_alphabet              -a: the alphabet column
+PASS  sample   sample_proportion_bytes      output is a subset of the input, exit 0
+PASS  split    split_by_size                part naming, contents and order
+PASS  split    split_by_part                even partition into N parts
+PASS  split    split_by_size_fasta          FASTA split
+PASS  lint     lint_valid                   a valid file exits 0
+PASS  lint     lint_valid_pair              a valid pair exits 0 (P001 passes)
+PASS  lint     lint_pair_name_mismatch      P001 fires on a name mismatch
+PASS  lint     lint_S002                    S002: alphabet outside ACGTN
+PASS  lint     lint_S003                    S003: header does not start with @
+PASS  lint     lint_S005                    S005: sequence/quality length mismatch
+PASS  lint     lint_S006                    S006: quality outside !..~
+PASS  lint     lint_S007                    S007: duplicate name
+PASS  lint     lint_disable_s005            --disable-validator S005 suppresses it
+PASS  lint     lint_level_low               --single-read-validation-level low runs only S001/S004
+PASS  sample   sample_reproducible          the same seed reproduces the same selection
+PASS  sample   sample_seed_changes_selection a different seed changes the selection
+PASS  sample   sample_number                -n samples approximately N
+
+50/50 cases passed
+
+==> python3 bench/check_boundaries.py --rust /home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/release/rust-fx --seqkit /home/rimuru/Projects/Code/for_fun/bioinfo-tools/tests/ci/env/bin/seqkit --out /home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/readme-boundaries.json
+README boundary oracle: 22/22
+
+==> python3 tests/oracle/check_seqkit_exceptions.py --seqkit /home/rimuru/Projects/Code/for_fun/bioinfo-tools/tests/ci/env/bin/seqkit --fq /home/rimuru/Projects/Code/for_fun/bioinfo-tools/tests/ci/env/bin/fq --rust /home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/release/rust-fx
+PASS SeqKit corrected semantics: 434 checks
+translate raw: 710/756 exact; 46 reviewed differences with matching hashes
+range raw: 203/206 exact; 3 approved quality-provenance differences
+tab2fx raw: 99/99 exact
+PASS approved exceptions: independent correctness + unchanged raw comparisons
+
+==> bash tests/oracle/run_qc_oracle.sh --rust /home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/release/rust-fastqc
+rust-fastqc : /home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/release/rust-fastqc
+fastqc      : /home/rimuru/Projects/Code/for_fun/bioinfo-tools/tests/ci/env/bin/fastqc
+multiqc     : /home/rimuru/Projects/Code/for_fun/bioinfo-tools/tests/ci/env/bin/multiqc
+FastQC v0.13.0
+multiqc, version 1.35
+
+rust-fastqc : /home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/release/rust-fastqc
+fastqc      : /home/rimuru/Projects/Code/for_fun/bioinfo-tools/tests/ci/env/bin/fastqc
+multiqc     : /home/rimuru/Projects/Code/for_fun/bioinfo-tools/tests/ci/env/bin/multiqc
+FastQC v0.13.0
+fixtures    : 22
+
+PASS  basic_uniform        uniform reads, quality 40, mixed bases
+PASS  low_quality          all qualities at Q2, should fail base quality
+PASS  high_quality         all qualities at Q40
+PASS  declining_quality    quality falls along the read
+PASS  gc_rich              GC-only reads
+PASS  at_rich              AT-only reads
+PASS  with_ns              reads containing N bases
+PASS  variable_length      reads of several lengths
+PASS  single_read          one read only
+PASS  duplicates           many identical reads
+PASS  exactly_100          100 reads: the quartile NaN threshold boundary
+PASS  exactly_101          101 reads: one past the quartile NaN threshold
+PASS  long_reads           reads longer than 50bp (base grouping territory)
+PASS  short_reads          very short reads
+PASS  mixed_case           lowercase bases should be treated as bases
+PASS  phred_shifted        qualities spanning the full printable range
+PASS  all_same_base        every read identical, all A
+PASS  mostly_n             reads that are mostly N
+PASS  large_2000           2000 reads, exercises the >100 path throughout
+PASS  zero_gc              reads with no G or C at all
+PASS  one_base_reads       single-base reads
+PASS  high_dup_ratio       half the reads are one sequence
+
+22/22 fixtures passed
+PASS  multiqc            parses our fastqc_data.txt without warnings
+
+==> python3 tests/oracle/fastqc_adapters_diff.py --fastqc /home/rimuru/Projects/Code/for_fun/bioinfo-tools/tests/ci/env/bin/fastqc --rust /home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/release/rust-fastqc
+PASS default-length-1: exact
+PASS default-length-4: exact
+PASS default-length-11: exact
+PASS default-length-13: exact
+PASS default-length-14: exact
+PASS default-length-20: exact
+PASS default-length-74: exact
+PASS default-length-75: exact
+PASS default-length-80: exact
+PASS default-length-150: exact
+PASS default-hit-13: exact
+PASS default-hit-20: exact
+PASS default-hit-80: exact
+PASS default-hit-150: exact
+PASS default-equal-AGATCGGAAGAG: approved-counting-difference
+PASS default-equal-ACGTACGTACGT: approved-counting-difference
+PASS equal-before-long: approved-counting-difference
+PASS long-before-equal: exact
+PASS read-order invariant: Rust is unchanged; upstream incorrectly depends on order
+PASS nogroup-long: exact
+PASS small-custom: exact
+PASS custom-short: exact
+PASS custom-equal-hit: approved-counting-difference
+PASS custom-equal-none: approved-counting-difference
+PASS custom-mixed-lengths: exact
+PASS mixed-growing: approved-counting-difference
+PASS mixed-growing-reversed: exact
+PASS short-late-hit-clipped: exact
+PASS case-sensitive-config: exact
+PASS literal-N: exact
+PASS repeated-names: exact
+PASS tabs-comments: exact
+PASS cr-final: exact
+PASS cr-two-entries: exact
+PASS crlf-mixed: exact
+PASS non-ascii-blank-row: exact
+PASS malformed-rows: exact
+PASS empty-name: exact
+PASS config-spaces: exact
+PASS unicode-name: exact
+PASS custom-growth: exact
+PASS custom-growth-reverse: exact
+PASS invalid-empty: approved-config-rejection
+PASS invalid-comments-only: approved-config-rejection
+PASS invalid-invalid-only: approved-config-rejection
+PASS FastQC adapters: 44 cases; {'exact': 35, 'approved-counting-difference': 6, 'approved-config-rejection': 3}
+
+==> python3 tests/oracle/fastqc_tile_diff.py --fastqc /home/rimuru/Projects/Code/for_fun/bioinfo-tools/tests/ci/env/bin/fastqc --rust /home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/release/rust-fastqc
+PASS modern-headers: exact
+PASS legacy-headers: exact
+PASS single-tile: exact
+PASS no-tile: exact
+PASS invalid-late: exact
+PASS overflow-id: exact
+PASS modern-to-legacy: exact
+PASS legacy-to-modern: exact
+PASS trailing-empty-fields: exact
+PASS signed-ids: exact
+PASS extra-fields: exact
+PASS unicode-instrument: exact
+PASS unicode-arabic-digits: exact
+PASS unicode-fullwidth-digits: exact
+PASS unicode-supplementary-digit: exact
+PASS threshold-9: exact
+PASS threshold-10: exact
+PASS threshold-11: exact
+PASS threshold-19: exact
+PASS threshold-20: exact
+PASS threshold-21: exact
+PASS unequal-tile-counts: exact
+PASS fractional-means: exact
+PASS tiny-roundoff: exact
+PASS group-74: exact
+PASS group-75: exact
+PASS group-76: exact
+PASS group-86: exact
+PASS group-87: exact
+PASS group-150: exact
+PASS long-group-660: exact
+PASS long-group-1400: exact
+PASS long-group-4000: exact
+PASS nogroup: exact
+PASS phred64: exact
+PASS gzip: exact
+PASS missing-tail: corrected-missing-observation
+PASS missing-tail-reversed: corrected-missing-observation
+PASS observed-zero: exact
+PASS missing-group: corrected-missing-observation
+PASS missing-long-group: corrected-missing-observation
+PASS extract-delete: exact
+PASS min-length-before-header: exact
+PASS max-length-before-header: exact
+PASS all-filtered: exact
+PASS sampling-unsampled-header: exact
+PASS sampling-invalid-header: exact
+PASS sampling-unsampled-length: exact
+PASS sampling-10000: exact
+PASS sampling-10010: exact
+PASS tile-cap-2501: exact
+PASS tile-cap-2502: exact
+PASS invalid-phred64: invalid-quality-rejected
+PASS FastQC tiles: 53 cases; {'exact': 48, 'corrected-missing-observation': 4, 'invalid-quality-rejected': 1}
+
+==> python3 tests/oracle/fastqc_kmer_limits_diff.py --fastqc /home/rimuru/Projects/Code/for_fun/bioinfo-tools/tests/ci/env/bin/fastqc --rust /home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/release/rust-fastqc
+PASS repeated-limits-option: exact
+PASS empty-limits-option: exact
+PASS all-filtered-negative-limits: exact
+PASS all-n-negative-limits: exact
+PASS ignore-quality_base: exact
+PASS ignore-tile: exact
+PASS ignore-quality_sequence: exact
+PASS ignore-sequence: exact
+PASS ignore-gc_sequence: exact
+PASS ignore-n_content: exact
+PASS ignore-sequence_length: exact
+PASS ignore-duplication: exact
+PASS ignore-overrepresented: exact
+PASS ignore-adapter: exact
+PASS ignore-kmer: exact
+PASS ignore-all: exact
+PASS ignore-value-0: exact
+PASS ignore-value--1: exact
+PASS ignore-value-NaN: exact
+PASS ignore-value-0.1: exact
+PASS last-override: exact
+PASS empty-custom-defaults: exact
+PASS bundled-defaults: exact
+PASS cr-lines: exact
+PASS tabs-and-comments: exact
+PASS unknown-key: exact
+PASS invalid-level: exact
+PASS short-invalid-level: exact
+PASS invalid-number: exact
+PASS extra-field: exact
+PASS float-suffix: exact
+PASS hex-zero: exact
+PASS hex-fraction: exact
+PASS special-values: exact
+PASS limit-quality_base_lower-warn--1: exact
+PASS limit-quality_base_lower-error--1: exact
+PASS limit-quality_base_lower-warn-0: exact
+PASS limit-quality_base_lower-error-0: exact
+PASS limit-quality_base_lower-warn-1: exact
+PASS limit-quality_base_lower-error-1: exact
+PASS limit-quality_base_median-warn--1: exact
+PASS limit-quality_base_median-error--1: exact
+PASS limit-quality_base_median-warn-0: exact
+PASS limit-quality_base_median-error-0: exact
+PASS limit-quality_base_median-warn-1: exact
+PASS limit-quality_base_median-error-1: exact
+PASS limit-quality_sequence-warn--1: exact
+PASS limit-quality_sequence-error--1: exact
+PASS limit-quality_sequence-warn-0: exact
+PASS limit-quality_sequence-error-0: exact
+PASS limit-quality_sequence-warn-1: exact
+PASS limit-quality_sequence-error-1: exact
+PASS limit-n_content-warn--1: exact
+PASS limit-n_content-error--1: exact
+PASS limit-n_content-warn-0: exact
+PASS limit-n_content-error-0: exact
+PASS limit-n_content-warn-1: exact
+PASS limit-n_content-error-1: exact
+PASS limit-sequence-warn--1: exact
+PASS limit-sequence-error--1: exact
+PASS limit-sequence-warn-0: exact
+PASS limit-sequence-error-0: exact
+PASS limit-sequence-warn-1: exact
+PASS limit-sequence-error-1: exact
+PASS limit-gc_sequence-warn--1: exact
+PASS limit-gc_sequence-error--1: exact
+PASS limit-gc_sequence-warn-0: exact
+PASS limit-gc_sequence-error-0: exact
+PASS limit-gc_sequence-warn-1: exact
+PASS limit-gc_sequence-error-1: exact
+PASS limit-duplication-warn--1: exact
+PASS limit-duplication-error--1: exact
+PASS limit-duplication-warn-0: exact
+PASS limit-duplication-error-0: exact
+PASS limit-duplication-warn-1: exact
+PASS limit-duplication-error-1: exact
+PASS limit-overrepresented-warn--1: exact
+PASS limit-overrepresented-error--1: exact
+PASS limit-overrepresented-warn-0: exact
+PASS limit-overrepresented-error-0: exact
+PASS limit-overrepresented-warn-1: exact
+PASS limit-overrepresented-error-1: exact
+PASS limit-adapter-warn--1: exact
+PASS limit-adapter-error--1: exact
+PASS limit-adapter-warn-0: exact
+PASS limit-adapter-error-0: exact
+PASS limit-adapter-warn-1: exact
+PASS limit-adapter-error-1: exact
+PASS limit-tile-warn--1: exact
+PASS limit-tile-error--1: exact
+PASS limit-tile-warn-0: exact
+PASS limit-tile-error-0: exact
+PASS limit-tile-warn-1: exact
+PASS limit-tile-error-1: exact
+PASS gc-explicit-warn: exact
+PASS gc-explicit-error: exact
+PASS length-switch-0: exact
+PASS length-switch-1: exact
+PASS length-switch--1: exact
+PASS length-switch-NaN: exact
+PASS empty-length-error-0: exact
+PASS empty-length-error-1: exact
+PASS empty-length-error--1: exact
+PASS empty-length-error-NaN: exact
+PASS grouped-quality-observations: exact
+PASS strict-fivefold-boundary: exact
+PASS rational-ties-different-counts: proved-kmer-correction
+PASS significance-before-top20: proved-kmer-correction
+PASS sample-0: exact
+PASS sample-1: proved-kmer-correction
+PASS sample-2: proved-kmer-correction
+PASS sample-3: proved-kmer-correction
+PASS sample-4: proved-kmer-correction
+PASS sample-8: proved-kmer-correction
+PASS sample-49: exact
+PASS sample-99: proved-kmer-correction
+PASS sample-only-fiftieth: proved-kmer-correction
+PASS constant-no-enrichment: exact
+PASS all-n: exact
+PASS lowercase-n: proved-kmer-correction
+PASS shorter-than-word: exact
+PASS prefix-81: proved-kmer-correction
+PASS prefix-82: proved-kmer-correction
+PASS prefix-500: proved-kmer-correction
+PASS prefix-501: proved-kmer-correction
+PASS prefix-660: proved-kmer-correction
+PASS top-20-ties: proved-kmer-correction
+PASS nogroup: proved-kmer-correction
+PASS gzip: proved-kmer-correction
+PASS extract-delete: proved-kmer-correction
+PASS filter-before-sampling: proved-kmer-correction
+PASS max-filter-before-sampling: proved-kmer-correction
+PASS opportunities-forward: proved-kmer-correction
+PASS opportunities-reverse: proved-kmer-correction
+PASS kmer-limits-2-5: proved-kmer-correction
+PASS kmer-limits-4-5: proved-kmer-correction
+PASS kmer-limits-1-2: proved-kmer-correction
+PASS kmer-limits-320-323: proved-kmer-correction
+PASS partial-config: proved-config-rejection
+PASS missing-config: exact-preflight-rejection
+PASS directory-config: exact-preflight-rejection
+PASS FastQC limits/kmer: 141 cases; {'exact': 111, 'proved-kmer-correction': 27, 'proved-config-rejection': 1, 'exact-preflight-rejection': 2}
+
+==> bash tests/oracle/run_qc_oracle.sh --self-test
+SELFTEST PASS
+
+QUALITY PASS (base + FASTX/QC oracles)

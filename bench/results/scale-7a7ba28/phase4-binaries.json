@@ -1,0 +1,7 @@
+{
+  "rust-fx": "dc128e37b4bbeb45248322cba7a9ac65ae867f51ad35456d3c66c0a2a3b3c570",
+  "rust-bam": "b18553a1d71c4452eb183e9b6aaadee94b3060dd1f86cf1dfd7788bb2e6e49eb",
+  "rust-cutadapt": "a712b28dc2dcfdc42369dec7ff6c7ad2774d0b11d7233c822e151b87760b455e",
+  "rust-fastqc": "b618708f0f5ce7b70794bfcc7688d78ec97743f43901db48fff10b317725bba7",
+  "rust-umitools": "8ae59b6732ac93d69dd19bde403ebc9198e8cf8a3c9330f8cb5ef0672ca169c0"
+}

@@ -1,0 +1,5 @@
+["cargo", "build", "--release", "--workspace", "--bins", "--locked"]
+    Finished `release` profile [optimized] target(s) in 0.03s
+["cargo", "build", "--release", "--locked", "-p", "rust-fx"]
+    Finished `release` profile [optimized] target(s) in 0.01s
+["rustc", "--edition", "2021", "-O", "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/bench/canonical_sam.rs", "-o", "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/scale-benchmark/sealed/canonical-sam"]

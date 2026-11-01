@@ -1,0 +1,23 @@
+	Command being timed: "taskset -c 4,6 /home/rimuru/.conda/envs/ta-cutadapt/bin/cutadapt --quiet -a AGATCGGAAGAGC -m 30 -j 2 -o /home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/scale-benchmark/calibration-1/synthetic-cutadapt-c2/-1-upstream/out/trimmed.fastq /home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/scale-benchmark/enlarged-inputs/synthetic-1000000-x46.fastq --compression-level=6"
+	User time (seconds): 103.71
+	System time (seconds): 18.66
+	Percent of CPU this job got: 147%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 1:23.01
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 38228
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 0
+	Minor (reclaiming a frame) page faults: 6874211
+	Voluntary context switches: 910230
+	Involuntary context switches: 14295
+	Swaps: 0
+	File system inputs: 29076736
+	File system outputs: 27748616
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0

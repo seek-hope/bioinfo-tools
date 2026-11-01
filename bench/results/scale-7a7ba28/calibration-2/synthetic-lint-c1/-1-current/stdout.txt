@@ -1,0 +1,8 @@
+2026-11-01T11:41:35.845135Z  INFO fq::commands::lint: fq-lint start
+2026-11-01T11:41:35.845150Z  INFO fq::commands::lint: validating single end read
+2026-11-01T11:41:35.845152Z  INFO fq::validators: disabled validators: []
+2026-11-01T11:41:35.845155Z  INFO fq::validators: enabled single read validators: ["[S003] NameValidator", "[S004] CompleteValidator", "[S002] AlphabetValidator", "[S001] PlusLineValidator", "[S005] ConsistentSeqQualValidator", "[S006] QualityStringValidator"]
+2026-11-01T11:41:35.845156Z  INFO fq::validators: enabled paired read validators: []
+2026-11-01T11:41:35.845157Z  INFO fq::commands::lint: starting validation
+2026-11-01T11:41:53.888962Z  INFO fq::commands::lint: read 102000000 records
+2026-11-01T11:41:53.888975Z  INFO fq::commands::lint: fq-lint end

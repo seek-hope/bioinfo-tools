@@ -60,14 +60,18 @@ pub struct SeqStats {
 impl SeqStats {
     /// Accumulate one sequence.
     pub fn from_sequence(sequence: &[u8], gap_letters: &[u8]) -> SeqStats {
-        let mut stats = SeqStats {
-            length: sequence.len() as u64,
-            ..SeqStats::default()
-        };
         let mut gaps = [false; 256];
         for &byte in gap_letters {
             gaps[byte as usize] = true;
         }
+        Self::from_gap_table(sequence, &gaps)
+    }
+
+    pub(crate) fn from_gap_table(sequence: &[u8], gaps: &[bool; 256]) -> SeqStats {
+        let mut stats = SeqStats {
+            length: sequence.len() as u64,
+            ..SeqStats::default()
+        };
         for &byte in sequence {
             // Boolean counters avoid unpredictable branches on mixed bases.
             // The byte table keeps arbitrary (including repeated) gap symbols
@@ -169,6 +173,46 @@ pub struct QualStats {
     error_sum: f64,
 }
 
+/// Per-file quality decoding: offset subtraction and probability lookup are
+/// prepared once. Integer counts can be reduced separately; floating-point
+/// additions still occur in their original per-base, per-record order.
+pub(crate) struct QualityDecoder {
+    probabilities: [f64; 256],
+    q20: u16,
+    q30: u16,
+}
+
+impl QualityDecoder {
+    pub(crate) fn new(base: u8) -> Self {
+        let probabilities = &*ERROR_PROBABILITIES;
+        Self {
+            probabilities: std::array::from_fn(|byte| {
+                probabilities[(byte as u8).saturating_sub(base) as usize]
+            }),
+            q20: base as u16 + 20,
+            q30: base as u16 + 30,
+        }
+    }
+
+    pub(crate) fn stats(&self, qualities: &[u8]) -> QualStats {
+        let (q20, q30) = qualities.iter().fold((0, 0), |(q20, q30), &byte| {
+            (
+                q20 + u64::from(byte as u16 >= self.q20),
+                q30 + u64::from(byte as u16 >= self.q30),
+            )
+        });
+        let error_sum = qualities
+            .iter()
+            .fold(0.0, |sum, &byte| sum + self.probabilities[byte as usize]);
+        QualStats {
+            bases: qualities.len() as u64,
+            q20,
+            q30,
+            error_sum,
+        }
+    }
+}
+
 impl QualStats {
     /// Accumulate one quality string. `base` is the ASCII offset (33 for
     /// Phred+33).
@@ -264,6 +308,29 @@ mod tests {
             assert_eq!(stats.n_count, 4);
             let distinct: std::collections::BTreeSet<u8> = gaps.iter().copied().collect();
             assert_eq!(stats.gap_count, distinct.len() as u64);
+        }
+    }
+
+    #[test]
+    fn prepared_quality_decoder_is_bitwise_identical_for_every_offset() {
+        let ascending: Vec<u8> = (0..=255).collect();
+        let descending: Vec<u8> = ascending.iter().rev().copied().collect();
+        for base in 0..=255 {
+            let decoder = QualityDecoder::new(base);
+            for quality in [
+                ascending.as_slice(),
+                descending.as_slice(),
+                b"",
+                b"IIIIIIII55555555",
+            ] {
+                let expected = QualStats::from_qualities(quality, base);
+                let actual = decoder.stats(quality);
+                assert_eq!(
+                    (actual.bases, actual.q20, actual.q30),
+                    (expected.bases, expected.q20, expected.q30)
+                );
+                assert_eq!(actual.error_sum.to_bits(), expected.error_sum.to_bits());
+            }
         }
     }
 

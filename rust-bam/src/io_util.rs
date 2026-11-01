@@ -13,7 +13,7 @@
 //! bounded number of open files.
 
 use std::fs::File;
-use std::io::{self, BufReader, Read};
+use std::io::{self, BufReader, Read, Write};
 use std::path::Path;
 
 use noodles::bam;
@@ -276,6 +276,15 @@ impl<W: io::Write> BamWriter<W> {
     pub fn write_record(&mut self, header: &sam::Header, record: &Record) -> Result<()> {
         self.inner
             .write_alignment_record(header, record)
+            .map_err(|error| Error::io(format!("cannot write BAM record: {error}")))
+    }
+
+    /// Write a complete, already validated uncompressed BAM frame from an
+    /// internal sort run, including its four-byte block-size prefix.
+    pub(crate) fn write_encoded_record(&mut self, frame: &[u8]) -> Result<()> {
+        self.inner
+            .get_mut()
+            .write_all(frame)
             .map_err(|error| Error::io(format!("cannot write BAM record: {error}")))
     }
 

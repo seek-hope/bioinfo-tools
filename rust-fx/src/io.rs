@@ -1,16 +1,13 @@
 //! Shared input/output plumbing for every subcommand.
 //!
 //! The FASTX parsing and compression live in `bioinfo-fastx`; this module only
-//! adapts them to the shape the commands want: an iterator of owned records, and
-//! a writer that knows SeqKit's `-w/--line-width` FASTA wrapping rule.
+//! adapts them to owned records or short-lived borrowed views, and a writer
+//! that knows SeqKit's `-w/--line-width` FASTA wrapping rule.
 //!
-//! # Why records are owned here
-//!
-//! `seq` and `fx2tab` need to look at a record more than once (compute an
-//! average quality, then print the sequence), and `split` must buffer a whole
-//! part. Borrowing from a chunk would force those commands to re-parse or copy
-//! anyway, so the adapter owns each record. The parser itself still operates
-//! zero-copy on chunks; only the per-record hand-off copies.
+//! Transforming and reordering commands retain owned records. Streaming stats,
+//! conversion and lint callbacks inspect complete four-line records directly
+//! in the read buffer. Boundary-spanning records and FASTA/wrapped assembly
+//! retain the owned parser, including its validation and failure boundaries.
 
 use bioinfo_common::exit::ExitClass;
 use bioinfo_fastx::parser::{Mode, ParseError};
@@ -62,7 +59,39 @@ pub struct OwnedRecord {
     pub index: u64,
 }
 
+/// A record borrowed for the duration of a reader callback.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct RecordView<'a> {
+    /// Header without its marker.
+    pub name: &'a [u8],
+    /// Header including its marker.
+    pub raw_header: &'a [u8],
+    /// Sequence bases.
+    pub sequence: &'a [u8],
+    /// Separator line.
+    pub plus: &'a [u8],
+    /// Quality bytes.
+    pub qualities: &'a [u8],
+    /// Whether a fourth line was present, even if empty.
+    pub has_quality_line: bool,
+    /// One-based input record number.
+    pub index: u64,
+}
+
 impl OwnedRecord {
+    /// Borrow all fields without copying their bytes.
+    pub fn borrowed(&self) -> RecordView<'_> {
+        RecordView {
+            name: &self.name,
+            raw_header: &self.raw_header,
+            sequence: &self.sequence,
+            plus: &self.plus,
+            qualities: &self.qualities,
+            has_quality_line: self.has_quality_line,
+            index: self.index,
+        }
+    }
+
     /// True when the record carries qualities.
     pub fn is_fastq(&self) -> bool {
         !self.plus.is_empty() || !self.qualities.is_empty()
@@ -83,26 +112,43 @@ impl OwnedRecord {
         layout: Layout,
         width: usize,
     ) -> io::Result<()> {
+        self.borrowed().write_to(out, layout, width)
+    }
+}
+
+impl RecordView<'_> {
+    /// Use the same format inference as the owned representation.
+    pub fn is_fastq(&self) -> bool {
+        !self.plus.is_empty() || !self.qualities.is_empty()
+    }
+
+    /// Write borrowed fields with the existing layout and wrapping rules.
+    pub fn write_to<W: Write + ?Sized>(
+        &self,
+        out: &mut W,
+        layout: Layout,
+        width: usize,
+    ) -> io::Result<()> {
         match layout {
             Layout::Fastq => bioinfo_fastx::writer::write_record(
                 out,
-                &self.raw_header,
-                &self.sequence,
-                &self.plus,
-                &self.qualities,
+                self.raw_header,
+                self.sequence,
+                self.plus,
+                self.qualities,
                 Layout::Fastq,
             ),
             Layout::Fasta => {
                 // Header: `>` plus the name with any existing marker removed.
                 let name = match self.name.first() {
                     Some(b'@') | Some(b'>') => &self.name[1..],
-                    _ => &self.name[..],
+                    _ => self.name,
                 };
                 out.write_all(b">")?;
                 out.write_all(name)?;
                 out.write_all(b"\n")?;
                 if width == 0 {
-                    out.write_all(&self.sequence)?;
+                    out.write_all(self.sequence)?;
                     out.write_all(b"\n")?;
                 } else {
                     for chunk in self.sequence.chunks(width) {
@@ -301,6 +347,29 @@ impl RecordReader {
             Ok(true) => Some(Ok(record)),
             Ok(false) => None,
             Err(error) => Some(Err(error)),
+        }
+    }
+
+    /// Visit a complete four-line FASTQ record directly in the input buffer.
+    /// Other formats, split records and all strict errors use the owned path.
+    pub fn visit_record<T>(
+        &mut self,
+        record: &mut OwnedRecord,
+        visit: impl FnOnce(RecordView<'_>) -> T,
+    ) -> Result<Option<T>, CommandError> {
+        let mut visit = Some(visit);
+        if self.format == InputFormat::Fastq && !self.wrapped_fastq && self.peeked.is_none() {
+            if let Some(value) = self.lines.visit_four(self.index + 1, true, &mut visit)? {
+                self.index += 1;
+                return Ok(Some(value));
+            }
+        }
+        if self.read_record(record)? {
+            Ok(Some(visit.take().expect("unconsumed visitor")(
+                record.borrowed(),
+            )))
+        } else {
+            Ok(None)
         }
     }
 
@@ -535,14 +604,13 @@ impl RecordReader {
 /// Compression is detected by content, so a gzip FASTA and a plain one are read
 /// the same way.
 struct LineReader {
-    inner: Box<dyn std::io::BufRead + Send>,
+    inner: std::io::BufReader<Box<dyn std::io::Read + Send>>,
     line: u64,
     label: String,
 }
 
 impl LineReader {
     fn open(path: &str) -> Result<LineReader, CommandError> {
-        use std::io::BufRead;
         let raw: Box<dyn std::io::Read + Send> = if path == "-" {
             Box::new(std::io::stdin())
         } else {
@@ -553,8 +621,7 @@ impl LineReader {
         };
         let decompressed = bioinfo_fastx::decompress(raw)
             .map_err(|error| CommandError::io(format!("cannot read {path}: {error}")))?;
-        let inner: Box<dyn BufRead + Send> =
-            Box::new(std::io::BufReader::with_capacity(64 * 1024, decompressed));
+        let inner = std::io::BufReader::with_capacity(64 * 1024, decompressed);
         Ok(LineReader {
             inner,
             line: 0,
@@ -564,6 +631,54 @@ impl LineReader {
                 path.to_string()
             },
         })
+    }
+
+    fn visit_four<T, F: FnOnce(RecordView<'_>) -> T>(
+        &mut self,
+        index: u64,
+        strict: bool,
+        visit: &mut Option<F>,
+    ) -> Result<Option<T>, CommandError> {
+        use std::io::BufRead;
+        let buffer = self
+            .inner
+            .fill_buf()
+            .map_err(|error| CommandError::io(format!("cannot read {}: {error}", self.label)))?;
+        let mut ranges = [(0, 0); 4];
+        let mut consumed = 0;
+        for range in &mut ranges {
+            let Some(relative) = memchr::memchr(b'\n', &buffer[consumed..]) else {
+                return Ok(None);
+            };
+            let newline = consumed + relative;
+            let end = newline - usize::from(newline > consumed && buffer[newline - 1] == b'\r');
+            *range = (consumed, end);
+            consumed = newline + 1;
+        }
+        let [header, sequence, plus, qualities] = ranges.map(|(start, end)| &buffer[start..end]);
+        if strict
+            && (!header.starts_with(b"@")
+                || !plus.starts_with(b"+")
+                || sequence.len() != qualities.len())
+        {
+            return Ok(None);
+        }
+        let name = match header.first() {
+            Some(b'@') | Some(b'>') => &header[1..],
+            _ => header,
+        };
+        let value = visit.take().expect("unconsumed visitor")(RecordView {
+            name,
+            raw_header: header,
+            sequence,
+            plus,
+            qualities,
+            has_quality_line: true,
+            index,
+        });
+        self.inner.consume(consumed);
+        self.line += 4;
+        Ok(Some(value))
     }
 
     /// The 1-based number of the most recently returned line.
@@ -629,6 +744,27 @@ impl LintReader {
             Ok(true) => Some(Ok(record)),
             Ok(false) => None,
             Err(error) => Some(Err(error)),
+        }
+    }
+
+    /// Visit complete groups without copying fields; retain incomplete groups
+    /// through the same lenient owned parser used by `read_record`.
+    pub fn visit_record<T>(
+        &mut self,
+        record: &mut OwnedRecord,
+        visit: impl FnOnce(RecordView<'_>) -> T,
+    ) -> Result<Option<T>, CommandError> {
+        let mut visit = Some(visit);
+        if let Some(value) = self.lines.visit_four(self.index + 1, false, &mut visit)? {
+            self.index += 1;
+            return Ok(Some(value));
+        }
+        if self.read_record(record)? {
+            Ok(Some(visit.take().expect("unconsumed visitor")(
+                record.borrowed(),
+            )))
+        } else {
+            Ok(None)
         }
     }
 
@@ -808,6 +944,90 @@ pub const MODE: Mode = Mode::Strict;
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn borrowed_records_preserve_owned_parser_at_every_buffer_boundary() {
+        fn copy(record: RecordView<'_>) -> OwnedRecord {
+            OwnedRecord {
+                name: record.name.to_vec(),
+                raw_header: record.raw_header.to_vec(),
+                sequence: record.sequence.to_vec(),
+                plus: record.plus.to_vec(),
+                qualities: record.qualities.to_vec(),
+                has_quality_line: record.has_quality_line,
+                index: record.index,
+            }
+        }
+        fn collect(
+            bytes: &[u8],
+            capacity: usize,
+            lenient: bool,
+            borrowed: bool,
+        ) -> (Vec<OwnedRecord>, Option<(i32, String)>) {
+            let lines = || LineReader {
+                inner: io::BufReader::with_capacity(
+                    capacity,
+                    Box::new(io::Cursor::new(bytes.to_vec())) as Box<dyn io::Read + Send>,
+                ),
+                line: 0,
+                label: "input".into(),
+            };
+            let mut strict = RecordReader {
+                lines: lines(),
+                format: InputFormat::Fastq,
+                wrapped_fastq: false,
+                peeked: None,
+                index: 0,
+                label: "input".into(),
+            };
+            let mut lint = LintReader {
+                lines: lines(),
+                index: 0,
+            };
+            let mut reusable = OwnedRecord::default();
+            let mut records = Vec::new();
+            loop {
+                let result = match (lenient, borrowed) {
+                    (false, false) => strict.next_record().transpose(),
+                    (false, true) => strict.visit_record(&mut reusable, copy),
+                    (true, false) => lint.next_record().transpose(),
+                    (true, true) => lint.visit_record(&mut reusable, copy),
+                };
+                match result {
+                    Ok(Some(record)) => records.push(record),
+                    Ok(None) => return (records, None),
+                    Err(error) => return (records, Some((error.exit_code(), error.message))),
+                }
+            }
+        }
+        let prefix = b"@first comment\r\nACGT\r\n+first\r\nIIII\r\n@empty\n\n+\n\n";
+        for tail in [
+            b"@last\nAC\n+\nII\n".as_slice(),
+            b"@last\nAC\n+\nII",
+            b"@last\nAC\n+\n",
+            b"@last\nAC\n",
+            b"@last",
+            b"\n\n\n",
+            b"\n@last\nAC\n+\nII\n",
+            b"bad\nAC\n+\nII\n",
+            b"@last\nAC\nbad\nII\n",
+            b"@last\nAC\n+\nI\n",
+            b"@\xff\r\r\nA\x00\r\r\n+\nIIJ\n",
+            b">fasta\nAC\n\n\n",
+        ] {
+            let bytes = [prefix.as_slice(), tail].concat();
+            for lenient in [false, true] {
+                let expected = collect(&bytes, 1, lenient, false);
+                for capacity in 1..=bytes.len() + 4 {
+                    assert_eq!(
+                        collect(&bytes, capacity, lenient, true),
+                        expected,
+                        "capacity={capacity} lenient={lenient} tail={tail:?}"
+                    );
+                }
+            }
+        }
+    }
     use std::io::Read;
 
     fn temp(name: &str) -> std::path::PathBuf {
@@ -992,7 +1212,7 @@ mod tests {
         }
         let mut reader = RecordReader {
             lines: LineReader {
-                inner: Box::new(io::BufReader::new(ErrorAtEof(io::Cursor::new(
+                inner: io::BufReader::new(Box::new(ErrorAtEof(io::Cursor::new(
                     b"AA\n>second\n".to_vec(),
                 )))),
                 line: 1,

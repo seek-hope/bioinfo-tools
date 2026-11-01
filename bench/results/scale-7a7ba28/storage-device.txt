@@ -1,0 +1,8 @@
+Command: lsblk -d -o NAME,MODEL,SIZE,ROTA,TRAN
+NAME    MODEL                   SIZE ROTA TRAN
+zram0                          31.1G    0
+nvme0n1 UMIS RPEYJ1T24MKN2QWY 953.9G    0 nvme
+
+Read-only supplementary host query during calibration1. Filesystem identity and
+mount options are recorded in each run's report. This identifies the device; it
+does not establish its NAND type, cache policy or sustained-write performance.

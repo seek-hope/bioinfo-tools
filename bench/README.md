@@ -1,5 +1,25 @@
 # Benchmarks
 
+## Larger inputs and physical core budgets
+
+The [scale protocol](SCALE-PROTOCOL.md) makes **upstream/current runtime** the
+primary comparison. It calibrates all arm/core combinations, repeats frozen
+source populations on NVMe, and requires a complete population with matching
+artifacts, runtimes, scripts, and full output checks. FastQC remains descriptive.
+The [completed scale report](SCALE.md) contains 28 conditions, 168 measured
+observations and 56 warm-ups; the shortest measured invocation was 14.76 s.
+See the [reproduction guide](SCALE-REPRODUCTION.md) and
+[archived evidence](results/scale-7a7ba28/README.md).
+
+The pipeline is [`scale_seal.py`](scale_seal.py) →
+[`scale_plan.py`](scale_plan.py) → [`scale_inputs.py`](scale_inputs.py) →
+[`scale_benchmark.py`](scale_benchmark.py) →
+[`summarize_scale.py`](summarize_scale.py). Plans use three measured blocks and
+one warm-up, with balanced arm orders. Calibration observations cannot enter a
+formal summary. Input preparation can reuse hash-verified populations from a
+completed earlier preparation when only some workloads need further scaling.
+The earlier protocols and results below remain separate evidence.
+
 ## Optimization after e125519
 
 The [same-input before/after report](OPTIMIZATION.md) covers six optimized

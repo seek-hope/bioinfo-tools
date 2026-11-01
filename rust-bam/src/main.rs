@@ -527,7 +527,7 @@ fn cli() -> Command {
                         .value_name("INT")
                         .value_parser(clap::value_parser!(usize))
                         .default_value("1")
-                        .help("sort is single-threaded; only 1 is accepted"),
+                        .help("worker threads for final BAM compression; sorting and SAM output remain serial"),
                 ),
         )
 }

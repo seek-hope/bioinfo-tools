@@ -212,7 +212,7 @@ fn threaded_bam_output_is_readable() {
 }
 
 #[test]
-fn sort_rejects_threads_above_one_explicitly() {
+fn sort_accepts_parallel_bam_compression() {
     let scratch = Scratch::new();
     let input = scratch.sam();
     let output = scratch.0.join("sorted.bam");
@@ -224,5 +224,14 @@ fn sort_rejects_threads_above_one_explicitly() {
         output.to_str().unwrap(),
         input.to_str().unwrap(),
     ]);
-    assert_eq!(result.status.code(), Some(2), "{result:?}");
+    assert!(result.status.success(), "{result:?}");
+    let serial = scratch.0.join("serial.bam");
+    let result = scratch.run(&[
+        "sort",
+        "-o",
+        serial.to_str().unwrap(),
+        input.to_str().unwrap(),
+    ]);
+    assert!(result.status.success(), "{result:?}");
+    assert_eq!(fs::read(output).unwrap(), fs::read(serial).unwrap());
 }

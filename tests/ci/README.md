@@ -32,6 +32,16 @@ controls; BAM-specific controls skip when the pinned local samtools is absent.
 Eight additional optimization-evidence controls reject missing/failed observations
 and pilot summaries, require summaries to be computed from raw samples, and
 prevent retries from discarding measurements or changing inputs/artifacts.
+The base gate also runs 11 scale-evidence/summary controls, five input-generation
+and reuse controls, five validator failure/timeout controls, and three standalone
+SAM canonicalization controls. The three BAM preparation integration controls
+require pinned samtools and are run separately:
+
+```bash
+python3 -W error::ResourceWarning bench/test_scale_bam_inputs.py \
+  --samtools /path/to/samtools-1.24
+```
+
 The optional FASTX/QC gate adds 22 independent/pinned SeqKit checks for inclusive
 Q20/Q30 and `fq2fa` line wrapping, using the freshly built native binary.
 

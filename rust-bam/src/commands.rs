@@ -1878,7 +1878,7 @@ pub struct SortOptions {
     pub max_memory: Option<u64>,
     /// Maximum number of run files opened during one merge pass.
     pub max_open_files: usize,
-    /// `-@`: only 1 is currently supported by sort.
+    /// `-@`: worker threads for final BAM compression; 0/1 use the serial writer.
     pub threads: usize,
 }
 
@@ -1947,6 +1947,15 @@ fn record_memory(record: &Record) -> u64 {
     (std::mem::size_of::<Record>() + name + sequence + qualities + 256) as u64
 }
 
+fn sorted_indices(chunk: &[(SortKey, Record)]) -> Vec<usize> {
+    let mut order: Vec<_> = (0..chunk.len()).collect();
+    // Keys include the unique input index, so unstable sorting of these small
+    // indices yields the same total order without moving large RecordBufs or
+    // allocating a stable-sort scratch array of records.
+    order.sort_unstable_by(|&a, &b| chunk[a].0.cmp(&chunk[b].0));
+    order
+}
+
 fn write_index(file: &mut impl Write, index: usize) -> Result<()> {
     let index = u64::try_from(index)
         .map_err(|_| Error::runtime("record index does not fit in u64".to_string()))?;
@@ -1968,8 +1977,7 @@ fn spill_run(
 ) -> Result<PathBuf> {
     let path = temp.run_path();
     let index_path = path.with_extension("idx");
-    let mut sorted = std::mem::take(chunk);
-    sorted.sort_by(|a, b| a.0.cmp(&b.0));
+    let order = sorted_indices(chunk);
 
     let file = File::create(&path)
         .map_err(|error| Error::io(format!("cannot create {}: {error}", path.display())))?;
@@ -1980,7 +1988,8 @@ fn spill_run(
     let mut index_file = BufWriter::with_capacity(64 * 1024, index_file);
     let mut writer = BamWriter::new_fast(file);
     writer.write_header(header)?;
-    for (key, record) in &sorted {
+    for position in order {
+        let (key, record) = &chunk[position];
         writer.write_record(header, record)?;
         write_index(&mut index_file, key.input_index)?;
     }
@@ -1988,12 +1997,84 @@ fn spill_run(
     file.sync_all()
         .map_err(|error| Error::io(format!("cannot sync {}: {error}", path.display())))?;
     flush_index(&mut index_file)?;
+    // Drop record storage, but keep the chunk's backing allocation for the
+    // next spill. Run boundaries and write/sync error order remain unchanged.
+    chunk.clear();
     Ok(path)
+}
+
+// Capture the exact bytes consumed by the full decoder. Internal runs were
+// serialized once by BamWriter, so validated frames can be forwarded without
+// repeating field encoding. This is deliberately confined to sort run readers:
+// public inputs (including flagstat) retain their existing reader and checks.
+const MAX_CACHED_SORT_FRAME: usize = 64 * 1024;
+
+struct CaptureReader<R> {
+    inner: R,
+    frame: Vec<u8>,
+    capture: bool,
+}
+
+impl<R: Read> Read for CaptureReader<R> {
+    fn read(&mut self, buffer: &mut [u8]) -> std::io::Result<usize> {
+        let count = self.inner.read(buffer)?;
+        if self.capture {
+            let prefix = (4usize.saturating_sub(self.frame.len())).min(count);
+            self.frame.extend_from_slice(&buffer[..prefix]);
+            if self.frame.len() >= 4 {
+                let size =
+                    u32::from_le_bytes(self.frame[..4].try_into().expect("four bytes")) as u64 + 4;
+                if size > MAX_CACHED_SORT_FRAME as u64
+                    || self.frame.len() + count - prefix > MAX_CACHED_SORT_FRAME
+                {
+                    self.capture = false;
+                    self.frame.clear();
+                }
+            }
+            if self.capture {
+                self.frame.extend_from_slice(&buffer[prefix..count]);
+            }
+        }
+        Ok(count)
+    }
+}
+
+type CapturedBamReader = noodles::bam::io::Reader<
+    CaptureReader<noodles::bgzf::io::Reader<BufReader<Box<dyn Read + Send>>>>,
+>;
+
+enum RunInput {
+    Bam(CapturedBamReader),
+    Other(AlignmentReader),
+}
+
+impl RunInput {
+    fn read_record(
+        &mut self,
+        header: &sam::Header,
+        record: &mut Record,
+        frame: &mut Vec<u8>,
+    ) -> Result<usize> {
+        frame.clear();
+        match self {
+            Self::Bam(reader) => {
+                std::mem::swap(frame, &mut reader.get_mut().frame);
+                reader.get_mut().frame.clear();
+                reader.get_mut().capture = true;
+                // Keep the full decoder, including auxiliary-tag duplicates,
+                // long-CIGAR validation, and diagnostic precedence.
+                let result = reader.read_record_buf(header, record);
+                std::mem::swap(frame, &mut reader.get_mut().frame);
+                result.map_err(|error| Error::runtime(format!("cannot read BAM record: {error}")))
+            }
+            Self::Other(reader) => reader.read_record(header, record),
+        }
+    }
 }
 
 struct RunReader {
     label: PathBuf,
-    reader: AlignmentReader,
+    reader: RunInput,
     header: sam::Header,
     indices: BufReader<File>,
 }
@@ -2001,6 +2082,16 @@ struct RunReader {
 fn open_run(path: &Path) -> Result<RunReader> {
     let mut reader = AlignmentReader::open(path)?;
     let header = reader.read_header()?;
+    let reader = match reader {
+        AlignmentReader::Bam(reader) => {
+            RunInput::Bam(noodles::bam::io::Reader::from(CaptureReader {
+                inner: reader.into_inner(),
+                frame: Vec::new(),
+                capture: true,
+            }))
+        }
+        other => RunInput::Other(other),
+    };
     let index_path = path.with_extension("idx");
     let file = File::open(&index_path)
         .map_err(|error| Error::io(format!("cannot open {}: {error}", index_path.display())))?;
@@ -2012,7 +2103,12 @@ fn open_run(path: &Path) -> Result<RunReader> {
     })
 }
 
-fn next_from_run(run: &mut RunReader) -> Result<Option<(SortKey, Record)>> {
+fn next_from_run(
+    run: &mut RunReader,
+    record: &mut Record,
+    key: &mut SortKey,
+    frame: &mut Vec<u8>,
+) -> Result<bool> {
     let mut bytes = [0u8; 8];
     let mut filled = 0;
     while filled < bytes.len() {
@@ -2029,7 +2125,7 @@ fn next_from_run(run: &mut RunReader) -> Result<Option<(SortKey, Record)>> {
         }
     }
     if filled == 0 {
-        return Ok(None);
+        return Ok(false);
     }
     if filled != bytes.len() {
         return Err(Error::runtime(format!(
@@ -2039,20 +2135,26 @@ fn next_from_run(run: &mut RunReader) -> Result<Option<(SortKey, Record)>> {
     }
     let index = usize::try_from(u64::from_le_bytes(bytes))
         .map_err(|_| Error::runtime("sort index does not fit in usize".to_string()))?;
-    let mut record = Record::default();
-    if run.reader.read_record(&run.header, &mut record)? == 0 {
+    if run.reader.read_record(&run.header, record, frame)? == 0 {
         return Err(Error::runtime(format!(
             "sort run {} ended before its index",
             run.label.display()
         )));
     }
-    let key = key_for(&record, index);
-    Ok(Some((key, record)))
+    key.update(
+        record.flags(),
+        tolerant_reference_id(record),
+        record.alignment_start().map(usize::from),
+        record.name().map(|name| name.as_ref()).unwrap_or(&[]),
+        index,
+    );
+    Ok(true)
 }
 
 struct MergeItem {
     key: SortKey,
     record: Record,
+    frame: Vec<u8>,
     run: usize,
 }
 
@@ -2085,8 +2187,16 @@ fn open_runs(paths: &[PathBuf]) -> Result<(Vec<RunReader>, BinaryHeap<MergeItem>
     let mut heap = BinaryHeap::new();
     for (run, path) in paths.iter().enumerate() {
         let mut reader = open_run(path)?;
-        if let Some((key, record)) = next_from_run(&mut reader)? {
-            heap.push(MergeItem { key, record, run });
+        let mut record = Record::default();
+        let mut key = key_for(&record, 0);
+        let mut frame = Vec::new();
+        if next_from_run(&mut reader, &mut record, &mut key, &mut frame)? {
+            heap.push(MergeItem {
+                key,
+                record,
+                frame,
+                run,
+            });
         }
         readers.push(reader);
     }
@@ -2104,15 +2214,25 @@ fn merge_to_run(temp: &mut TempDir, paths: &[PathBuf], header: &sam::Header) -> 
     let mut index_file = BufWriter::with_capacity(64 * 1024, index_file);
     let mut writer = BamWriter::new_fast(file);
     writer.write_header(header)?;
-    while let Some(item) = heap.pop() {
-        writer.write_record(header, &item.record)?;
+    while let Some(mut item) = heap.pop() {
+        if item.frame.is_empty() {
+            writer.write_record(header, &item.record)?;
+        } else {
+            writer.write_encoded_record(&item.frame)?;
+        }
         write_index(&mut index_file, item.key.input_index)?;
-        if let Some((key, record)) = next_from_run(&mut readers[item.run])? {
-            heap.push(MergeItem {
-                key,
-                record,
-                run: item.run,
-            });
+        if item.frame.is_empty() {
+            // Large records use the ordinary encoder; do not retain their
+            // allocations in run buffers after they have been written.
+            item.record = Record::default();
+        }
+        if next_from_run(
+            &mut readers[item.run],
+            &mut item.record,
+            &mut item.key,
+            &mut item.frame,
+        )? {
+            heap.push(item);
         }
     }
     let file = writer.finish()?;
@@ -2149,26 +2269,69 @@ fn reduce_runs(
 
 fn write_records<F>(options: &SortOptions, header: &sam::Header, mut next: F) -> Result<()>
 where
-    F: FnMut() -> Result<Option<Record>>,
+    F: FnMut(&mut Record, &mut Vec<u8>) -> Result<bool>,
 {
+    let mut record = Record::default();
+    let mut frame = Vec::new();
     if options.sam_output {
         let mut out = open_writer(options.output.as_deref())?;
         {
             let mut writer = SamWriter::new(&mut out);
             writer.write_header(header)?;
-            while let Some(record) = next()? {
+            while next(&mut record, &mut frame)? {
                 writer.write_record(header, &record)?;
+                if frame.is_empty() {
+                    record = Record::default();
+                }
             }
             writer.finish()?;
         }
+        out.flush()
+            .map_err(|error| Error::io(format!("cannot flush output: {error}")))?;
+    } else if options.threads > 1 {
+        let out = open_writer_send(options.output.as_deref())?;
+        let workers = NonZero::new(options.threads).expect("threads > 1");
+        let mt = noodles::bgzf::io::multithreaded_writer::Builder::default()
+            .set_worker_count(workers)
+            .build_from_writer(out);
+        let mut writer = noodles::bam::io::Writer::from(mt);
+        writer
+            .write_header(header)
+            .map_err(|error| Error::io(format!("cannot write BAM header: {error}")))?;
+        while next(&mut record, &mut frame)? {
+            if frame.is_empty() {
+                writer
+                    .write_alignment_record(header, &record)
+                    .map_err(|error| Error::io(format!("cannot write BAM record: {error}")))?;
+            } else {
+                writer
+                    .get_mut()
+                    .write_all(&frame)
+                    .map_err(|error| Error::io(format!("cannot write BAM record: {error}")))?;
+            }
+            if frame.is_empty() {
+                record = Record::default();
+            }
+        }
+        let mut mt = writer.into_inner();
+        let mut out = mt
+            .finish()
+            .map_err(|error| Error::io(format!("cannot finish BGZF stream: {error}")))?;
         out.flush()
             .map_err(|error| Error::io(format!("cannot flush output: {error}")))?;
     } else {
         let out = open_writer(options.output.as_deref())?;
         let mut writer = BamWriter::new(out);
         writer.write_header(header)?;
-        while let Some(record) = next()? {
-            writer.write_record(header, &record)?;
+        while next(&mut record, &mut frame)? {
+            if frame.is_empty() {
+                writer.write_record(header, &record)?;
+            } else {
+                writer.write_encoded_record(&frame)?;
+            }
+            if frame.is_empty() {
+                record = Record::default();
+            }
         }
         let mut out = writer.finish()?;
         out.flush()
@@ -2185,11 +2348,6 @@ where
 /// merged with a bounded number of open files. The sidecar preserves the
 /// documented final input-index tie-break exactly.
 pub fn sort(options: SortOptions) -> Result<u64> {
-    if options.threads > 1 {
-        return Err(Error::usage(
-            "sort currently supports -@ 1 only; BAM sort itself is single-threaded",
-        ));
-    }
     let mut reader = AlignmentReader::open(&options.input)?;
     let header = reader.read_header()?;
     let final_header = header_with_coordinate_sort(header.clone());
@@ -2210,7 +2368,7 @@ pub fn sort(options: SortOptions) -> Result<u64> {
         }
         let key = key_for(&record, index);
         chunk_bytes = chunk_bytes.saturating_add(record_memory(&record));
-        chunk.push((key, record.clone()));
+        chunk.push((key, std::mem::take(&mut record)));
         index += 1;
         if chunk_bytes >= budget {
             if temp.is_none() {
@@ -2224,9 +2382,15 @@ pub fn sort(options: SortOptions) -> Result<u64> {
 
     let total = index as u64;
     if runs.is_empty() {
-        chunk.sort_by(|a, b| a.0.cmp(&b.0));
-        let mut sorted = chunk.into_iter().map(|(_, record)| record);
-        write_records(&options, &final_header, || Ok(sorted.next()))?;
+        let mut order = sorted_indices(&chunk).into_iter();
+        write_records(&options, &final_header, |record, _frame| {
+            if let Some(position) = order.next() {
+                *record = std::mem::take(&mut chunk[position].1);
+                Ok(true)
+            } else {
+                Ok(false)
+            }
+        })?;
         return Ok(total);
     }
 
@@ -2234,6 +2398,9 @@ pub fn sort(options: SortOptions) -> Result<u64> {
         let workspace = temp.as_mut().expect("runs exist, so the workspace exists");
         runs.push(spill_run(workspace, &header, &mut chunk)?);
     }
+    // No further input chunks are needed; release their retained allocation
+    // before allocating merge buffers.
+    drop(chunk);
     let mut workspace = temp.expect("runs exist, so the workspace exists");
     let runs = reduce_runs(&mut workspace, runs, max_open, &header)?;
     merge_to_output(&options, &runs, &final_header)?;
@@ -2242,19 +2409,23 @@ pub fn sort(options: SortOptions) -> Result<u64> {
 
 fn merge_to_output(options: &SortOptions, paths: &[PathBuf], header: &sam::Header) -> Result<()> {
     let (mut readers, mut heap) = open_runs(paths)?;
-    write_records(options, header, || {
-        if let Some(item) = heap.pop() {
-            let record = item.record;
-            if let Some((key, next)) = next_from_run(&mut readers[item.run])? {
-                heap.push(MergeItem {
-                    key,
-                    record: next,
-                    run: item.run,
-                });
+    write_records(options, header, |record, frame| {
+        if let Some(mut item) = heap.pop() {
+            // Keep read-ahead before output: a malformed replacement must
+            // still prevent the popped record from being written.
+            std::mem::swap(record, &mut item.record);
+            std::mem::swap(frame, &mut item.frame);
+            if next_from_run(
+                &mut readers[item.run],
+                &mut item.record,
+                &mut item.key,
+                &mut item.frame,
+            )? {
+                heap.push(item);
             }
-            Ok(Some(record))
+            Ok(true)
         } else {
-            Ok(None)
+            Ok(false)
         }
     })
 }
@@ -2302,6 +2473,135 @@ fn header_with_coordinate_sort(header: sam::Header) -> sam::Header {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    fn run_with_extra_index() -> (TempDir, PathBuf, sam::Header) {
+        let mut temp = TempDir::new().unwrap();
+        let header = sam::Header::default();
+        let record = Record::builder().set_name(b"kept".to_vec()).build();
+        let mut chunk = vec![(key_for(&record, 0), record)];
+        let path = spill_run(&mut temp, &header, &mut chunk).unwrap();
+        File::options()
+            .append(true)
+            .open(path.with_extension("idx"))
+            .unwrap()
+            .write_all(&1u64.to_le_bytes())
+            .unwrap();
+        (temp, path, header)
+    }
+
+    #[test]
+    fn captured_frames_are_bounded_and_large_records_use_the_encoder() {
+        for payload_size in [
+            0usize,
+            1,
+            31,
+            MAX_CACHED_SORT_FRAME - 4,
+            MAX_CACHED_SORT_FRAME - 3,
+            1024 * 1024,
+        ] {
+            let mut bytes = (payload_size as u32).to_le_bytes().to_vec();
+            bytes.resize(payload_size + 4, 0x41);
+            let mut reader = CaptureReader {
+                inner: std::io::Cursor::new(bytes.clone()),
+                frame: Vec::new(),
+                capture: true,
+            };
+            // A single read can include both prefix and payload. Check the
+            // announced size before extending the capture with a large body.
+            let mut decoded = vec![0; bytes.len()];
+            reader.read_exact(&mut decoded).unwrap();
+            assert_eq!(decoded, bytes);
+            if bytes.len() <= MAX_CACHED_SORT_FRAME {
+                assert_eq!(reader.frame, bytes);
+            } else {
+                assert!(reader.frame.is_empty());
+                assert!(!reader.capture);
+            }
+            assert!(reader.frame.capacity() <= 2 * MAX_CACHED_SORT_FRAME);
+        }
+    }
+
+    #[test]
+    fn captured_frames_still_validate_every_auxiliary_field() {
+        for invalid in [
+            b"XXi\x01\x00\x00\x00XXi\x02\x00\x00\x00".as_slice(),
+            b"XXZunterminated",
+            b"XX?",
+        ] {
+            let (_temp, path, header) = run_with_extra_index();
+            let (_, mut heap) = open_runs(std::slice::from_ref(&path)).unwrap();
+            let mut frame = heap.pop().unwrap().frame;
+            frame.extend_from_slice(invalid);
+            let size = u32::try_from(frame.len() - 4).unwrap();
+            frame[..4].copy_from_slice(&size.to_le_bytes());
+            // Deliberately corrupt an internal run while retaining valid BGZF
+            // framing/CRC, so skipping the full decoder would miss this error.
+            let mut writer = BamWriter::new(File::create(&path).unwrap());
+            writer.write_header(&header).unwrap();
+            writer.write_encoded_record(&frame).unwrap();
+            writer.finish().unwrap();
+            std::fs::write(path.with_extension("idx"), 0u64.to_le_bytes()).unwrap();
+            let mut ordinary = AlignmentReader::open(&path).unwrap();
+            let ordinary_header = ordinary.read_header().unwrap();
+            let expected = ordinary
+                .read_record(&ordinary_header, &mut Record::default())
+                .unwrap_err();
+            let actual = open_runs(&[path])
+                .err()
+                .expect("malformed auxiliary data must fail");
+            assert_eq!(actual.message(), expected.message());
+            assert_eq!(actual.exit_code(), expected.exit_code());
+        }
+    }
+
+    #[test]
+    fn final_merge_retains_read_ahead_before_writing_popped_record() {
+        let (_temp, path, header) = run_with_extra_index();
+        let output = path.with_extension("sam");
+        let options = SortOptions {
+            input: path.clone(),
+            output: Some(output.clone()),
+            sam_output: true,
+            max_memory: None,
+            max_open_files: 2,
+            threads: 1,
+        };
+        let error = merge_to_output(&options, &[path], &header).unwrap_err();
+        assert!(error.message().contains("ended before its index"));
+        assert!(!std::fs::read(output)
+            .unwrap()
+            .windows(4)
+            .any(|w| w == b"kept"));
+    }
+
+    #[test]
+    fn intermediate_merge_writes_index_before_refilling_record() {
+        let (mut temp, path, header) = run_with_extra_index();
+        let error = merge_to_run(&mut temp, &[path], &header).unwrap_err();
+        assert!(error.message().contains("ended before its index"));
+        let written = std::fs::read(temp.path.join("run-1.idx")).unwrap();
+        assert_eq!(written, 0u64.to_le_bytes());
+    }
+
+    #[test]
+    fn reused_run_reader_preserves_partial_index_and_index_eof_policy() {
+        for count in 0..8 {
+            let (_temp, path, _) = run_with_extra_index();
+            std::fs::write(path.with_extension("idx"), vec![0; count]).unwrap();
+            let mut run = open_run(&path).unwrap();
+            let mut record = Record::default();
+            let mut key = key_for(&record, 0);
+            let result = next_from_run(&mut run, &mut record, &mut key, &mut Vec::new());
+            if count == 0 {
+                assert!(!result.unwrap());
+            } else {
+                assert!(result
+                    .unwrap_err()
+                    .message()
+                    .starts_with("truncated sort index"));
+            }
+        }
+    }
 
     #[test]
     fn buffered_sort_index_propagates_deferred_write_failure() {

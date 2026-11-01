@@ -15,7 +15,7 @@
 | `rust-cutadapt` | cutadapt 4.6 选项和报告矩阵、单双端、过滤与拆样 | cutadapt 5.x 不在目标内；压缩字节和已记录诊断存在差异 |
 | `rust-umitools` | extract、whitelist、dedup、group、count、count_tab；`--output-stats` 的五种聚类方法与 NumPy null 模型 | gene-map 代表 read 受上游 hash 顺序影响；`--representative=stable` 是项目扩展；CRAM 缓冲有已记录限制 |
 | `rust-fx` | FASTX 统计、变换、过滤、去重、排序、翻译和区间提取等已注册命令；全局 `--compress-level` | 未实现命令和剩余选项见矩阵；部分 two-pass、输入提交策略和上游错误路径仍为 experimental |
-| `rust-bam` | view、flagstat、idxstats、quickcheck、index、sort、depth、coverage、flags、head | depth/coverage 为子集；CRAM 不支持；sort 单线程；其余 samtools 命令未覆盖 |
+| `rust-bam` | view、flagstat、idxstats、quickcheck、index、sort、depth、coverage、flags、head | depth/coverage 为子集；CRAM 不支持；sort 的排序和临时归并串行，最终 BGZF 压缩可用多线程；其余 samtools 命令未覆盖 |
 | `rust-fastqc` | fastqc_data、summary、数据表 HTML 和 ZIP；12 个 QC 模块；自定义 limits/adapter/contaminant；MultiQC 消费路径 | HTML/ZIP 为 experimental；不生成完整图形和辅助资源；已证明的计算修正以 exception 登记 |
 
 发布工作流目前只打包 `rust-cutadapt` 和 `rust-umitools`。其余组件虽可从源码构建，
@@ -187,6 +187,18 @@ FastQC 的 150 bp GC 分布和百万 reads 重复度估计出现新的未归因�
 控制及两个完整质量门通过。中止候选、tmpfs 空间不足和三个千万级条件的重测均保留，
 详见 [优化报告](../bench/OPTIMIZATION.md)。仍慢于上游的条件继续列出，QC 未归因差异
 与图形缺口仍待后续批次处理。
+
+后续优化已实现 cutadapt 的拒绝型位并行预筛、FASTQ 借用视图、按文件准备的统计/校验配置，
+以及 BAM 排序的索引排序、缓冲复用、完整解码后的内部帧转发和最终压缩线程。
+可能匹配的接头仍交给原来的标量算法；BAM 记录仍完整解码。捕获帧的 64 KiB 阈值
+只限制附加副本，不能用来声称归并总内存固定。更大的 NVMe 输入和 1/2/4 物理核心预算
+按[规模测量方案](../bench/SCALE-PROTOCOL.md)校准，上游/当前耗时为主要比较，旧版/新版为辅助证据。
+正式测量已完成 28 个条件、168 次正式观测和 56 次预热，112 对结果按各自规则通过；
+最短正式耗时 14.76 秒，无低于 10 秒的观测。输入、程序和运行环境身份复核通过，
+完整结果和复现命令见[规模测量报告](../bench/SCALE.md)。gzip 剪切和 lint 更快；
+合成数据统计、flagstat、BAM 排序仍慢于参考软件。未压缩剪切和转换存在较大波动及
+较低 CPU 使用量，下一步需要剖析等待与 I/O 开销。BAM 优化继续保留完整解码和错误顺序。
+FastQC 的统计差异与图形缺口仍单独记录，性能改变本身不提升兼容矩阵状态。
 
 UMI 的 consensus/duplex 和新分析模块也不属于当前兼容性收尾；
 如需启动，应单独批准范围，而不是附带在某个小批次中实现。

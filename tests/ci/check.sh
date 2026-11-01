@@ -129,12 +129,16 @@ run python3 tests/ci/test_tile_proof.py
 run python3 tests/ci/test_kmer_proof.py
 run python3 bench/test_readme_benchmark.py
 run python3 -W error::ResourceWarning bench/test_optimization_benchmark.py
+run python3 -W error::ResourceWarning bench/test_scale_benchmark.py
+run python3 -W error::ResourceWarning bench/test_scale_inputs.py
+run python3 -W error::ResourceWarning bench/test_scale_validation.py
 run python3 tests/gate/test_acceptance.py
 run "${CARGO[@]}" fmt --all -- --check
 run "${CARGO[@]}" clippy --workspace --all-targets --locked "${cargo_offline[@]}" -- -D warnings
 RUSTDOCFLAGS="-D warnings" run "${CARGO[@]}" doc --workspace --no-deps --locked "${cargo_offline[@]}"
 run "${CARGO[@]}" test --workspace --release --locked "${cargo_offline[@]}"
 run "${CARGO[@]}" build --workspace --bins --release --locked "${cargo_offline[@]}"
+run python3 -W error::ResourceWarning bench/test_canonical_sam.py
 
 # Cargo metadata respects CARGO_TARGET_DIR and build.target-dir configuration.
 metadata=$("${CARGO[@]}" metadata --no-deps --format-version 1 --locked "${cargo_offline[@]}")

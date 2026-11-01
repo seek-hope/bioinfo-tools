@@ -1,0 +1,10 @@
+{
+  "input_upper_bound_bytes": 159466407711,
+  "generation_scratch_upper_bound_bytes": 21608046176,
+  "execution_outputs_and_runs_upper_bound_bytes": 100448214656,
+  "headroom_bytes": 11811160064,
+  "required_free_bytes": 271725782431,
+  "decoded_source_bytes": {
+    "synthetic-bam-1000000": 146000312
+  }
+}

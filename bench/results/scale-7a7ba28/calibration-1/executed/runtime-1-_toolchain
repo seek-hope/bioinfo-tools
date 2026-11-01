@@ -1,0 +1,13 @@
+#!/bin/sh
+base=$(CDPATH= cd -- "$(dirname "$0")" && pwd)
+root="${TMPDIR:-/tmp}/bioinfo-ci-toolchain"
+if [ ! -e "$root/.ready" ]; then
+    mkdir -p "$root"
+    /usr/bin/python3 - "$base/../toolchain.tar.xz" "$root" <<'PY'
+import sys, tarfile
+with tarfile.open(sys.argv[1], "r:xz") as archive:
+    archive.extractall(sys.argv[2])
+PY
+    : > "$root/.ready"
+fi
+printf '%s\n' "$root"

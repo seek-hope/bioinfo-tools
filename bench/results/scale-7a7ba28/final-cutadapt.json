@@ -1,0 +1,720 @@
+{
+  "oracle": "/home/rimuru/.conda/envs/ta-cutadapt/bin/cutadapt",
+  "rust": "target/scale-benchmark/sealed/rust-cutadapt",
+  "results": [
+    {
+      "name": "default_minimum_length",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "a3_regular",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "a3_anchored",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "g5_regular",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "g5_anchored",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "b_anywhere",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "a3_no_indels",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "a3_error_rate_0",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "a3_error_rate_int",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "a3_error_rate_02",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "a3_overlap_1",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "a3_overlap_10",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "a3_times_2",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "a3_times_3",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "multiple_adapters",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "anchored_and_regular",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "linked_adapter",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "wildcard_adapter",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "no_match_wildcards",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "match_read_wildcards",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "revcomp",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "file_adapter_list",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "file_adapter_list_names",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "file_adapter_list_messy",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "file_adapter_list_front",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "file_adapter_list_paired",
+      "category": "paired-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "file_adapter_missing",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "b_linked_rejected",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "overlap_zero_rejected",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "times_zero",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "paired_min_length_r2",
+      "category": "paired-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "paired_interleaved_output",
+      "category": "paired-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "paired_max_length_r2",
+      "category": "paired-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "paired_untrimmed_aux",
+      "category": "paired-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "paired_too_short_aux",
+      "category": "paired-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "paired_aux_mismatched",
+      "category": "paired-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "pair_filter_any",
+      "category": "paired-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "pair_filter_both",
+      "category": "paired-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "pair_filter_first",
+      "category": "paired-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "pair_adapters",
+      "category": "paired-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "pair_adapters_min",
+      "category": "paired-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "bzip2_input",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "xz_input",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "bzip2_output",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "xz_output",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "gzip_output",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "bzip2_output_fast",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "xz_output_fast",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "magic_bytes_unlabelled",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "bzip2_to_xz",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "xz_paired",
+      "category": "paired-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "named_adapter",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "named_adapter_anchored",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "named_adapter_linked",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "named_adapter_front",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "named_adapter_anywhere",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "named_adapters_multiple",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "named_adapter_empty_name",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "named_adapter_in_prefix",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "named_adapter_in_rename",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "demux_named",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "demux_unnamed",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "demux_discard_untrimmed",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "demux_paired",
+      "category": "paired-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "named_adapter_paired",
+      "category": "paired-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "action_trim",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "action_retain",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "action_mask",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "action_lowercase",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "action_none",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "cut_5prime",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "cut_3prime",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "cut_both",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "quality_3prime",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "quality_both",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "quality_base64",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "nextseq_trim",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "poly_a",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "length_shorten",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "length_negative",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "trim_n",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "zero_cap",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "strip_suffix",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "prefix",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "suffix",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "rename",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "length_tag",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "filter_min",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "filter_max",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "filter_max_n",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "filter_max_ee",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "filter_max_aer",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "discard_trimmed",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "discard_untrimmed",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "discard_casava",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "out_fasta",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "out_gzip",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "out_stdout",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "default_output",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "info_file",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "rest_file",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "wildcard_file",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "too_short_output",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "too_long_output",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "untrimmed_output",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "report_minimal",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "json_report",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "json_report_full",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "cores_2",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "compression_z",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "quiet",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "paired_basic",
+      "category": "paired-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "paired_interleaved",
+      "category": "paired-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "paired_min",
+      "category": "paired-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "err_missing_input",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "err_unknown_option",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "err_bad_adapter",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "err_both_stdin",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    },
+    {
+      "name": "err_no_adapter",
+      "category": "single-end",
+      "passed": true,
+      "problems": []
+    }
+  ]
+}

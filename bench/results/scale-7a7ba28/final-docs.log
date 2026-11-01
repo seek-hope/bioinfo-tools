@@ -1,0 +1,17 @@
+PASS documentation constraints (21 current files, 11 historical files)
+PASS rust-umitools protection documented (manifest generator exception recorded)
+PASS compatibility matrix: 266 rows, 5 tools, 36 upstream snapshots
+PASS links: README.md
+PASS links: README.zh-CN.md
+PASS links: bench/SCALE.md
+PASS links: bench/SCALE-REPRODUCTION.md
+PASS links: bench/README.md
+PASS links: bench/results/scale-7a7ba28/README.md
+PASS preserved Argon High sections and completed performance table: README.md
+PASS preserved Argon High sections and completed performance table: README.zh-CN.md
+PASS 6 identical bilingual Bash blocks; bash -n
+PASS 26 comparable rows + 2 descriptive QC rows: bilingual values identical
+PASS completed report and reproduction shell syntax
+PASS protected UMI, fixtures and comparison harnesses unchanged
+PASS README.md Mermaid 1: flowchart-v2
+PASS README.zh-CN.md Mermaid 1: flowchart-v2

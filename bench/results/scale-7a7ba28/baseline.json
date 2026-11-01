@@ -1,0 +1,10 @@
+{
+  "commit": "7a7ba282acaa96f453200164cae14ab8c12b436c",
+  "binaries": {
+    "rust-fx": "7cfb904772db0b806ff8f8965c6bf0a803fe224234334f3b291fb245332878cb",
+    "rust-bam": "bc1300432371e80ede2cef8e225c89b4bf923197ec3873fa22f62d4c5aef28c2",
+    "rust-fastqc": "b618708f0f5ce7b70794bfcc7688d78ec97743f43901db48fff10b317725bba7",
+    "rust-cutadapt": "1d764006aedfdf3a9efff03f7f632a842f857185adbd09915c133264253e615f",
+    "rust-umitools": "8ae59b6732ac93d69dd19bde403ebc9198e8cf8a3c9330f8cb5ef0672ca169c0"
+  }
+}

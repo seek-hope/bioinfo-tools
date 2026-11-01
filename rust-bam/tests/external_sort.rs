@@ -111,6 +111,112 @@ fn external_sort_is_byte_identical_to_in_memory_sort_and_cleans_temp() {
 }
 
 #[test]
+fn parallel_compression_is_byte_identical_across_spill_and_worker_counts() {
+    let scratch = Scratch::new();
+    let input = scratch.input(4000, None);
+    let expected = scratch.0.join("serial.bam");
+    let result = scratch.command(&[
+        "sort",
+        "-o",
+        expected.to_str().unwrap(),
+        input.to_str().unwrap(),
+    ]);
+    assert!(result.status.success(), "{result:?}");
+    let expected = fs::read(expected).unwrap();
+    for budget in ["8KiB", "32MiB"] {
+        for workers in ["0", "1", "2", "4"] {
+            let output = scratch.0.join(format!("out-{budget}-{workers}.bam"));
+            let result = scratch.command(&[
+                "sort",
+                "--max-memory",
+                budget,
+                "--max-open-files",
+                "2",
+                "-@",
+                workers,
+                "-o",
+                output.to_str().unwrap(),
+                input.to_str().unwrap(),
+            ]);
+            assert!(result.status.success(), "{result:?}");
+            assert_eq!(
+                fs::read(output).unwrap(),
+                expected,
+                "budget={budget} workers={workers}"
+            );
+            assert!(scratch.leftover_workdirs().is_empty());
+        }
+    }
+}
+
+#[test]
+fn encoded_runs_preserve_auxiliary_fields_long_cigar_and_buffer_clearing() {
+    let scratch = Scratch::new();
+    let input = scratch.0.join("fields.sam");
+    let mut sam = String::from("@HD\tVN:1.6\tSO:unsorted\n@SQ\tSN:c\tLN:1000000\n");
+    for i in 0..200 {
+        if i % 5 == 0 {
+            sam.push_str("*\t4\t*\t0\t0\t*\t*\t0\t0\t*\t*\n");
+        } else {
+            let len = i % 75 + 1;
+            let name = if i % 3 == 0 {
+                "name".repeat(60)
+            } else {
+                "same".into()
+            };
+            let tags = if i % 2 == 0 {
+                format!("\tAA:A:x\tAC:B:c,-1,2\tAS:B:s,-300,400\tAI:B:i,-100000,200000\tAU:B:C,0,255\tAV:B:S,0,65535\tAW:B:I,0,4294967295\tAF:B:f,1.5,-2.25\tZZ:Z:{i}\tHH:H:00FF\tNM:i:{i}\tFF:f:NaN")
+            } else {
+                String::new()
+            };
+            sam.push_str(&format!(
+                "{name}\t0\tc\t{}\t60\t{len}M\t*\t0\t0\t{}\t{}{tags}\n",
+                i % 10 + 1,
+                "A".repeat(len),
+                "I".repeat(len)
+            ));
+        }
+    }
+    // This requires BAM's CG representation and crosses BGZF block boundaries.
+    sam.push_str(&format!(
+        "long\t0\tc\t7\t60\t{}\t*\t0\t0\t{}\t{}\tZZ:Z:end\n",
+        "1M".repeat(65536),
+        "C".repeat(65536),
+        "I".repeat(65536)
+    ));
+    fs::write(&input, sam).unwrap();
+    let memory = scratch.0.join("memory.bam");
+    let result = scratch.command(&[
+        "sort",
+        "-o",
+        memory.to_str().unwrap(),
+        input.to_str().unwrap(),
+    ]);
+    assert!(result.status.success(), "{result:?}");
+    let expected = fs::read(&memory).unwrap();
+    for source in [&input, &memory] {
+        for threads in ["1", "4"] {
+            let output = scratch.0.join("external.bam");
+            let result = scratch.command(&[
+                "sort",
+                "--max-memory",
+                "8KiB",
+                "--max-open-files",
+                "2",
+                "-@",
+                threads,
+                "-o",
+                output.to_str().unwrap(),
+                source.to_str().unwrap(),
+            ]);
+            assert!(result.status.success(), "{result:?}");
+            assert_eq!(fs::read(output).unwrap(), expected);
+            assert!(scratch.leftover_workdirs().is_empty());
+        }
+    }
+}
+
+#[test]
 fn malformed_input_fails_without_output_or_temp_runs() {
     let scratch = Scratch::new();
     let input = scratch.input(100, Some("broken\t0\tchr1\n"));

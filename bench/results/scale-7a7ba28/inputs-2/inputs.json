@@ -1,0 +1,911 @@
+{
+  "schema_version": 1,
+  "passed": true,
+  "plan_sha256": "9b6827b94351fd1e9170c74f25807e82324a1be454a8d363327b11b7564ece59",
+  "plan": {
+    "schema_version": 1,
+    "seed": 20261102,
+    "repeats": 3,
+    "warmups": 1,
+    "target_fastest_seconds": 15,
+    "minimum_desired_seconds": 10,
+    "affinities": {
+      "1": "4",
+      "2": "4,6",
+      "4": "0,2,4,6"
+    },
+    "workloads": [
+      {
+        "id": "real-cutadapt",
+        "source_id": "real-1000000",
+        "case": "cutadapt_plain",
+        "cpu_budgets": [
+          1,
+          2,
+          4
+        ],
+        "multiplicity": 54
+      },
+      {
+        "id": "synthetic-cutadapt",
+        "source_id": "synthetic-1000000",
+        "case": "cutadapt_plain",
+        "cpu_budgets": [
+          1,
+          2,
+          4
+        ],
+        "multiplicity": 46
+      },
+      {
+        "id": "real-cutadapt-gzip",
+        "source_id": "real-1000000",
+        "case": "cutadapt_gzip",
+        "cpu_budgets": [
+          1,
+          2,
+          4
+        ],
+        "multiplicity": 8
+      },
+      {
+        "id": "real-stats",
+        "source_id": "real-1000000",
+        "case": "fx_stats",
+        "cpu_budgets": [
+          1,
+          2,
+          4
+        ],
+        "multiplicity": 30
+      },
+      {
+        "id": "synthetic-stats",
+        "source_id": "synthetic-1000000",
+        "case": "fx_stats",
+        "cpu_budgets": [
+          1,
+          2,
+          4
+        ],
+        "multiplicity": 41
+      },
+      {
+        "id": "synthetic-fq2fa",
+        "source_id": "synthetic-1000000",
+        "case": "fx_fq2fa",
+        "cpu_budgets": [
+          1,
+          4
+        ],
+        "multiplicity": 146
+      },
+      {
+        "id": "synthetic-lint",
+        "source_id": "synthetic-1000000",
+        "case": "fq_lint",
+        "cpu_budgets": [
+          1,
+          4
+        ],
+        "multiplicity": 102
+      },
+      {
+        "id": "bam-flagstat",
+        "source_id": "synthetic-bam-1000000",
+        "case": "bam_flagstat",
+        "cpu_budgets": [
+          1,
+          4
+        ],
+        "multiplicity": 755
+      },
+      {
+        "id": "bam-sort",
+        "source_id": "synthetic-bam-1000000",
+        "case": "bam_sort",
+        "cpu_budgets": [
+          1,
+          2,
+          4
+        ],
+        "multiplicity": 86
+      },
+      {
+        "id": "umi-dedup",
+        "source_id": "synthetic-bam-1000000",
+        "case": "umi_dedup",
+        "cpu_budgets": [
+          1,
+          4
+        ],
+        "multiplicity": 71
+      },
+      {
+        "id": "real-fastqc",
+        "source_id": "real-1000000",
+        "case": "fastqc",
+        "cpu_budgets": [
+          1,
+          4
+        ],
+        "multiplicity": 9
+      }
+    ],
+    "calibration_minima_seconds": {
+      "real-cutadapt": 66.35709500400117,
+      "synthetic-cutadapt": 63.51674080800149,
+      "real-cutadapt-gzip": 16.968929740978638,
+      "real-stats": 15.10396978200879,
+      "synthetic-stats": 15.620826805010438,
+      "synthetic-fq2fa": 136.20550363499206,
+      "synthetic-lint": 18.204949951992603,
+      "bam-flagstat": 15.109788292000303,
+      "bam-sort": 23.206571586983046,
+      "umi-dedup": 7.82055045600282,
+      "real-fastqc": 9.091747211001348
+    },
+    "frozen_for_formal_run": false,
+    "calibration_report": "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/scale-benchmark/calibration-1/report.json",
+    "calibration_report_sha256": "8023d8b4ba93a1cff3de36c097bd6855eacc18674ca7db758f9a9f023bfcab96"
+  },
+  "source_manifest_sha256": {
+    "/tmp/bioinfo-readme-benchmark/inputs.json": "c41fdcff7b6f48fcbb63137189e2240e5645eb49570a84a3dada4a48962dd112"
+  },
+  "generator_sha256": "765949eba82c911652c1a2483ead716dcb19ea6c84b2dd02a044ebac1240ea45",
+  "executed_script_sha256": {
+    "scale_inputs.py": "765949eba82c911652c1a2483ead716dcb19ea6c84b2dd02a044ebac1240ea45",
+    "scale_common.py": "a5817b170dd0f173ac9ee5b493896e611369f8bcae06ff9c752f2d64350ecf3a",
+    "readme_inputs.py": "4d0c3adbf82802235a451c52db8c621082a06893d659bc3b03faf036670f7544",
+    "readme_benchmark.py": "1f9b88fcf4c72e7976e6d7be60ed0771d2c88cc1296b04c93cc22fa7e7e378ff",
+    "run.py": "2f0eedb5961b9e2e179fc498a0369ac01ef294de37dd0e75c5beaf28428c287d",
+    "upstream.py": "dbc63a0f109a4a977fb365dfbe5d31075b8cfd31d0645f192bc938bbf40317bc"
+  },
+  "storage_preflight": {
+    "input_upper_bound_bytes": 171037661401,
+    "generation_scratch_upper_bound_bytes": 41464088608,
+    "execution_outputs_and_runs_upper_bound_bytes": 146642400000,
+    "headroom_bytes": 11811160064,
+    "new_input_upper_bound_bytes": 24402521410,
+    "reused_actual_input_bytes": 146522589791,
+    "required_free_bytes": 182856081474,
+    "decoded_source_bytes": {
+      "synthetic-bam-1000000": 146000312
+    },
+    "available_bytes_before_generation": 236834217984
+  },
+  "datasets": [
+    {
+      "id": "real-1000000-x54",
+      "kind": "fastq",
+      "path": "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/scale-benchmark/enlarged-inputs/real-1000000-x54.fastq",
+      "source": "SRR2584863",
+      "sampling": "seeded uniform record indices without replacement; retained source order",
+      "seed": 20261031,
+      "records": 54000000,
+      "bases": 8100000000,
+      "gc_bases": 4109268942,
+      "min_length": 150,
+      "max_length": 150,
+      "sha256": "0aa031927045988cad3e32e7776a569c7ce287bbf3e0b004d38e24a6b373dbad",
+      "bytes": 19859885262,
+      "independent_fastq_validation": true,
+      "validation": "independent full source FASTQ scan; exact repetition hash verified after fsync",
+      "source_population": "real-1000000",
+      "multiplicity": 54,
+      "source_metadata": {
+        "id": "real-1000000",
+        "kind": "fastq",
+        "path": "/tmp/bioinfo-readme-benchmark/real-1000000.fastq",
+        "source": "SRR2584863",
+        "sampling": "seeded uniform record indices without replacement; retained source order",
+        "seed": 20261031,
+        "records": 1000000,
+        "bases": 150000000,
+        "gc_bases": 76097573,
+        "min_length": 150,
+        "max_length": 150,
+        "sha256": "e118285a9688a73f43fb420237f5d236886cb8430a265176e4ffd6a132233d04",
+        "bytes": 367775653,
+        "independent_fastq_validation": true
+      },
+      "generator": {
+        "method": "exact frozen population repetition",
+        "multiplicity": 54,
+        "original_generator": null
+      },
+      "reused_from_manifest": {
+        "path": "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/scale-benchmark/enlarged-inputs/inputs.json",
+        "sha256": "5263164373b26e5a92c39ccc9258f71af867dced36036475b3b6b309326542f6"
+      }
+    },
+    {
+      "id": "synthetic-1000000-x46",
+      "kind": "fastq",
+      "path": "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/scale-benchmark/enlarged-inputs/synthetic-1000000-x46.fastq",
+      "source": "synthetic",
+      "seed": 20261031,
+      "records": 46000000,
+      "bases": 6900000000,
+      "gc_bases": 3453583630,
+      "min_length": 150,
+      "max_length": 150,
+      "sha256": "c743324588f219d8fe5f792a780258091e71cafd927da68217ece3977f3b665c",
+      "bytes": 14904000000,
+      "independent_fastq_validation": true,
+      "validation": "independent full source FASTQ scan; exact repetition hash verified after fsync",
+      "source_population": "synthetic-1000000",
+      "multiplicity": 46,
+      "source_metadata": {
+        "id": "synthetic-1000000",
+        "kind": "fastq",
+        "path": "/tmp/bioinfo-readme-benchmark/synthetic-1000000.fastq",
+        "source": "synthetic",
+        "seed": 20261031,
+        "records": 1000000,
+        "bases": 150000000,
+        "gc_bases": 75077905,
+        "min_length": 150,
+        "max_length": 150,
+        "sha256": "cf79538d0b08dd95b659bf1ca7d284c66a2cf9635e250cb975859ccdcb2f4b1f",
+        "bytes": 324000000,
+        "independent_fastq_validation": true
+      },
+      "generator": {
+        "method": "exact frozen population repetition",
+        "multiplicity": 46,
+        "original_generator": null
+      },
+      "reused_from_manifest": {
+        "path": "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/scale-benchmark/enlarged-inputs/inputs.json",
+        "sha256": "5263164373b26e5a92c39ccc9258f71af867dced36036475b3b6b309326542f6"
+      }
+    },
+    {
+      "id": "real-1000000-x8",
+      "kind": "fastq",
+      "path": "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/scale-benchmark/enlarged-inputs/real-1000000-x8.fastq",
+      "source": "SRR2584863",
+      "sampling": "seeded uniform record indices without replacement; retained source order",
+      "seed": 20261031,
+      "records": 8000000,
+      "bases": 1200000000,
+      "gc_bases": 608780584,
+      "min_length": 150,
+      "max_length": 150,
+      "sha256": "d29d082c5fe164219e34f888b7a10e9b7fa37e14cca156853a54aec58618c032",
+      "bytes": 2942205224,
+      "independent_fastq_validation": true,
+      "validation": "independent full source FASTQ scan; exact repetition hash verified after fsync",
+      "source_population": "real-1000000",
+      "multiplicity": 8,
+      "source_metadata": {
+        "id": "real-1000000",
+        "kind": "fastq",
+        "path": "/tmp/bioinfo-readme-benchmark/real-1000000.fastq",
+        "source": "SRR2584863",
+        "sampling": "seeded uniform record indices without replacement; retained source order",
+        "seed": 20261031,
+        "records": 1000000,
+        "bases": 150000000,
+        "gc_bases": 76097573,
+        "min_length": 150,
+        "max_length": 150,
+        "sha256": "e118285a9688a73f43fb420237f5d236886cb8430a265176e4ffd6a132233d04",
+        "bytes": 367775653,
+        "independent_fastq_validation": true
+      },
+      "generator": {
+        "method": "exact frozen population repetition",
+        "multiplicity": 8,
+        "original_generator": null
+      },
+      "reused_from_manifest": {
+        "path": "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/scale-benchmark/enlarged-inputs/inputs.json",
+        "sha256": "5263164373b26e5a92c39ccc9258f71af867dced36036475b3b6b309326542f6"
+      }
+    },
+    {
+      "id": "real-1000000-x30",
+      "kind": "fastq",
+      "path": "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/scale-benchmark/enlarged-inputs/real-1000000-x30.fastq",
+      "source": "SRR2584863",
+      "sampling": "seeded uniform record indices without replacement; retained source order",
+      "seed": 20261031,
+      "records": 30000000,
+      "bases": 4500000000,
+      "gc_bases": 2282927190,
+      "min_length": 150,
+      "max_length": 150,
+      "sha256": "14fbff7bdefd101e3eb742c8651c9f77e4b420d937876c80ce1dd5a3f311e29a",
+      "bytes": 11033269590,
+      "independent_fastq_validation": true,
+      "validation": "independent full source FASTQ scan; exact repetition hash verified after fsync",
+      "source_population": "real-1000000",
+      "multiplicity": 30,
+      "source_metadata": {
+        "id": "real-1000000",
+        "kind": "fastq",
+        "path": "/tmp/bioinfo-readme-benchmark/real-1000000.fastq",
+        "source": "SRR2584863",
+        "sampling": "seeded uniform record indices without replacement; retained source order",
+        "seed": 20261031,
+        "records": 1000000,
+        "bases": 150000000,
+        "gc_bases": 76097573,
+        "min_length": 150,
+        "max_length": 150,
+        "sha256": "e118285a9688a73f43fb420237f5d236886cb8430a265176e4ffd6a132233d04",
+        "bytes": 367775653,
+        "independent_fastq_validation": true
+      },
+      "generator": {
+        "method": "exact frozen population repetition",
+        "multiplicity": 30,
+        "original_generator": null
+      },
+      "reused_from_manifest": {
+        "path": "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/scale-benchmark/enlarged-inputs/inputs.json",
+        "sha256": "5263164373b26e5a92c39ccc9258f71af867dced36036475b3b6b309326542f6"
+      }
+    },
+    {
+      "id": "synthetic-1000000-x41",
+      "kind": "fastq",
+      "path": "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/scale-benchmark/enlarged-inputs/synthetic-1000000-x41.fastq",
+      "source": "synthetic",
+      "seed": 20261031,
+      "records": 41000000,
+      "bases": 6150000000,
+      "gc_bases": 3078194105,
+      "min_length": 150,
+      "max_length": 150,
+      "sha256": "09be7bd74fed98ed53e9ecda03e167dcb492504060c336b7e8e01c577f1f5b53",
+      "bytes": 13284000000,
+      "independent_fastq_validation": true,
+      "validation": "independent full source FASTQ scan; exact repetition hash verified after fsync",
+      "source_population": "synthetic-1000000",
+      "multiplicity": 41,
+      "source_metadata": {
+        "id": "synthetic-1000000",
+        "kind": "fastq",
+        "path": "/tmp/bioinfo-readme-benchmark/synthetic-1000000.fastq",
+        "source": "synthetic",
+        "seed": 20261031,
+        "records": 1000000,
+        "bases": 150000000,
+        "gc_bases": 75077905,
+        "min_length": 150,
+        "max_length": 150,
+        "sha256": "cf79538d0b08dd95b659bf1ca7d284c66a2cf9635e250cb975859ccdcb2f4b1f",
+        "bytes": 324000000,
+        "independent_fastq_validation": true
+      },
+      "generator": {
+        "method": "exact frozen population repetition",
+        "multiplicity": 41,
+        "original_generator": null
+      },
+      "reused_from_manifest": {
+        "path": "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/scale-benchmark/enlarged-inputs/inputs.json",
+        "sha256": "5263164373b26e5a92c39ccc9258f71af867dced36036475b3b6b309326542f6"
+      }
+    },
+    {
+      "id": "synthetic-1000000-x146",
+      "kind": "fastq",
+      "path": "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/scale-benchmark/enlarged-inputs/synthetic-1000000-x146.fastq",
+      "source": "synthetic",
+      "seed": 20261031,
+      "records": 146000000,
+      "bases": 21900000000,
+      "gc_bases": 10961374130,
+      "min_length": 150,
+      "max_length": 150,
+      "sha256": "fd0e4b99219e3a626fc0e6eb26f90c70071385876acba3932f6df820c3a3fca5",
+      "bytes": 47304000000,
+      "independent_fastq_validation": true,
+      "validation": "independent full source FASTQ scan; exact repetition hash verified after fsync",
+      "source_population": "synthetic-1000000",
+      "multiplicity": 146,
+      "source_metadata": {
+        "id": "synthetic-1000000",
+        "kind": "fastq",
+        "path": "/tmp/bioinfo-readme-benchmark/synthetic-1000000.fastq",
+        "source": "synthetic",
+        "seed": 20261031,
+        "records": 1000000,
+        "bases": 150000000,
+        "gc_bases": 75077905,
+        "min_length": 150,
+        "max_length": 150,
+        "sha256": "cf79538d0b08dd95b659bf1ca7d284c66a2cf9635e250cb975859ccdcb2f4b1f",
+        "bytes": 324000000,
+        "independent_fastq_validation": true
+      },
+      "generator": {
+        "method": "exact frozen population repetition",
+        "multiplicity": 146,
+        "original_generator": null
+      },
+      "reused_from_manifest": {
+        "path": "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/scale-benchmark/enlarged-inputs/inputs.json",
+        "sha256": "5263164373b26e5a92c39ccc9258f71af867dced36036475b3b6b309326542f6"
+      }
+    },
+    {
+      "id": "synthetic-1000000-x102",
+      "kind": "fastq",
+      "path": "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/scale-benchmark/enlarged-inputs/synthetic-1000000-x102.fastq",
+      "source": "synthetic",
+      "seed": 20261031,
+      "records": 102000000,
+      "bases": 15300000000,
+      "gc_bases": 7657946310,
+      "min_length": 150,
+      "max_length": 150,
+      "sha256": "b8403a30c47a407278012d9d59d1806b7f291918063871206e285a7152780a93",
+      "bytes": 33048000000,
+      "independent_fastq_validation": true,
+      "validation": "independent full source FASTQ scan; exact repetition hash verified after fsync",
+      "source_population": "synthetic-1000000",
+      "multiplicity": 102,
+      "source_metadata": {
+        "id": "synthetic-1000000",
+        "kind": "fastq",
+        "path": "/tmp/bioinfo-readme-benchmark/synthetic-1000000.fastq",
+        "source": "synthetic",
+        "seed": 20261031,
+        "records": 1000000,
+        "bases": 150000000,
+        "gc_bases": 75077905,
+        "min_length": 150,
+        "max_length": 150,
+        "sha256": "cf79538d0b08dd95b659bf1ca7d284c66a2cf9635e250cb975859ccdcb2f4b1f",
+        "bytes": 324000000,
+        "independent_fastq_validation": true
+      },
+      "generator": {
+        "method": "exact frozen population repetition",
+        "multiplicity": 102,
+        "original_generator": null
+      },
+      "reused_from_manifest": {
+        "path": "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/scale-benchmark/enlarged-inputs/inputs.json",
+        "sha256": "5263164373b26e5a92c39ccc9258f71af867dced36036475b3b6b309326542f6"
+      }
+    },
+    {
+      "id": "synthetic-bam-1000000-x755",
+      "kind": "bam",
+      "records": 755000000,
+      "bundles": 35701,
+      "expected_dedup_records": 71402,
+      "unsorted": "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/scale-benchmark/enlarged-inputs/synthetic-bam-1000000-x755/unsorted.bam",
+      "sha256": {
+        "unsorted.bam": "1c02edc4bafaa25781b55b9a50fb167e713fd3977281e5ed52a8c47320b48636"
+      },
+      "generator": {
+        "method": "exact frozen population repetition",
+        "multiplicity": 755,
+        "original_generator": {
+          "seed": 20261031,
+          "bundle_scales": [
+            1,
+            10,
+            100
+          ],
+          "umi_counts_per_scale": [
+            6,
+            2,
+            1,
+            1
+          ],
+          "umi_distance_from_major": [
+            0,
+            1,
+            2,
+            10
+          ],
+          "independent_representative": "unique highest MAPQ"
+        }
+      },
+      "bytes": 3723137049,
+      "source_decoded_bytes": 146000312,
+      "decoded_bytes_upper_bound": 110230235560,
+      "artifact_bytes": {
+        "unsorted.bam": 3723137049
+      },
+      "preparation_space_estimate": 3823344041,
+      "source_population": "synthetic-bam-1000000",
+      "multiplicity": 755,
+      "source_metadata": {
+        "id": "synthetic-bam-1000000",
+        "kind": "bam",
+        "records": 1000000,
+        "bundles": 35701,
+        "expected_dedup_records": 71402,
+        "unsorted": "/tmp/bioinfo-readme-benchmark/bam-1000000/unsorted.bam",
+        "sorted": "/tmp/bioinfo-readme-benchmark/bam-1000000/sorted.bam",
+        "expected_qnames": "/tmp/bioinfo-readme-benchmark/bam-1000000/dedup-qnames.txt",
+        "sha256": {
+          "unsorted.bam": "eaa0524018871f25422bba4faa9bef377483d7a8f8fcb8618a229e9fd842cc95",
+          "sorted.bam": "f321c734856a2f4adab1e4e2aa4dd99639eaa3cf6efc8e08cd77a4305e78695c",
+          "sorted.bam.bai": "6478d0044f84f3ca38c26ad83d6923a54f1a4b490e5d323e1e5f94396267b677",
+          "dedup-qnames.txt": "7165e621e4aa7950c30772062331447f0b46efbde834372d724542f28d790f11"
+        },
+        "generator": {
+          "seed": 20261031,
+          "bundle_scales": [
+            1,
+            10,
+            100
+          ],
+          "umi_counts_per_scale": [
+            6,
+            2,
+            1,
+            1
+          ],
+          "umi_distance_from_major": [
+            0,
+            1,
+            2,
+            10
+          ],
+          "independent_representative": "unique highest MAPQ"
+        }
+      },
+      "reused_from_manifest": {
+        "path": "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/scale-benchmark/enlarged-inputs/inputs.json",
+        "sha256": "5263164373b26e5a92c39ccc9258f71af867dced36036475b3b6b309326542f6"
+      }
+    },
+    {
+      "id": "synthetic-bam-1000000-x86",
+      "kind": "bam",
+      "records": 86000000,
+      "bundles": 35701,
+      "expected_dedup_records": 71402,
+      "unsorted": "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/scale-benchmark/enlarged-inputs/synthetic-bam-1000000-x86/unsorted.bam",
+      "sha256": {
+        "unsorted.bam": "1bf69ba64fdb7ddfd8c4ff57cb0685a61f6aeb22f244a343f759482d53fb5bbf"
+      },
+      "generator": {
+        "method": "exact frozen population repetition",
+        "multiplicity": 86,
+        "original_generator": {
+          "seed": 20261031,
+          "bundle_scales": [
+            1,
+            10,
+            100
+          ],
+          "umi_counts_per_scale": [
+            6,
+            2,
+            1,
+            1
+          ],
+          "umi_distance_from_major": [
+            0,
+            1,
+            2,
+            10
+          ],
+          "independent_representative": "unique highest MAPQ"
+        }
+      },
+      "bytes": 424092666,
+      "source_decoded_bytes": 146000312,
+      "decoded_bytes_upper_bound": 12556026832,
+      "artifact_bytes": {
+        "unsorted.bam": 424092666
+      },
+      "preparation_space_estimate": 436435874,
+      "source_population": "synthetic-bam-1000000",
+      "multiplicity": 86,
+      "source_metadata": {
+        "id": "synthetic-bam-1000000",
+        "kind": "bam",
+        "records": 1000000,
+        "bundles": 35701,
+        "expected_dedup_records": 71402,
+        "unsorted": "/tmp/bioinfo-readme-benchmark/bam-1000000/unsorted.bam",
+        "sorted": "/tmp/bioinfo-readme-benchmark/bam-1000000/sorted.bam",
+        "expected_qnames": "/tmp/bioinfo-readme-benchmark/bam-1000000/dedup-qnames.txt",
+        "sha256": {
+          "unsorted.bam": "eaa0524018871f25422bba4faa9bef377483d7a8f8fcb8618a229e9fd842cc95",
+          "sorted.bam": "f321c734856a2f4adab1e4e2aa4dd99639eaa3cf6efc8e08cd77a4305e78695c",
+          "sorted.bam.bai": "6478d0044f84f3ca38c26ad83d6923a54f1a4b490e5d323e1e5f94396267b677",
+          "dedup-qnames.txt": "7165e621e4aa7950c30772062331447f0b46efbde834372d724542f28d790f11"
+        },
+        "generator": {
+          "seed": 20261031,
+          "bundle_scales": [
+            1,
+            10,
+            100
+          ],
+          "umi_counts_per_scale": [
+            6,
+            2,
+            1,
+            1
+          ],
+          "umi_distance_from_major": [
+            0,
+            1,
+            2,
+            10
+          ],
+          "independent_representative": "unique highest MAPQ"
+        }
+      },
+      "reused_from_manifest": {
+        "path": "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/scale-benchmark/enlarged-inputs/inputs.json",
+        "sha256": "5263164373b26e5a92c39ccc9258f71af867dced36036475b3b6b309326542f6"
+      }
+    },
+    {
+      "id": "synthetic-bam-1000000-x71",
+      "kind": "bam",
+      "records": 71000000,
+      "bundles": 35701,
+      "expected_dedup_records": 71402,
+      "unsorted": "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/scale-benchmark/inputs-2/synthetic-bam-1000000-x71/unsorted.bam",
+      "sha256": {
+        "unsorted.bam": "f25e16b17d5f5a2201d41704818d6ed125cb0945cae414d07dda1e8cae766894",
+        "sorted.bam": "f950ceaf6cf1e1730705816fd94a7eeabf9e9043950434f6568aa4cb15427328",
+        "sorted.bam.bai": "e397d4efc08250e6643c144ff8e79247949a8f5d59f6ee2446d51ac06630df8b",
+        "dedup-qnames.txt": "7165e621e4aa7950c30772062331447f0b46efbde834372d724542f28d790f11"
+      },
+      "generator": {
+        "method": "exact frozen population repetition",
+        "multiplicity": 71,
+        "original_generator": {
+          "seed": 20261031,
+          "bundle_scales": [
+            1,
+            10,
+            100
+          ],
+          "umi_counts_per_scale": [
+            6,
+            2,
+            1,
+            1
+          ],
+          "umi_distance_from_major": [
+            0,
+            1,
+            2,
+            10
+          ],
+          "independent_representative": "unique highest MAPQ"
+        }
+      },
+      "bytes": 350123061,
+      "source_decoded_bytes": 146000312,
+      "decoded_bytes_upper_bound": 10366022152,
+      "artifact_bytes": {
+        "unsorted.bam": 350123061,
+        "sorted.bam": 172322246,
+        "sorted.bam.bai": 15960,
+        "dedup-qnames.txt": 1213834
+      },
+      "preparation_space_estimate": 41824584837,
+      "sorted": "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/scale-benchmark/inputs-2/synthetic-bam-1000000-x71/sorted.bam",
+      "expected_qnames": "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/scale-benchmark/inputs-2/synthetic-bam-1000000-x71/dedup-qnames.txt",
+      "representative_proof": "This frozen population has counts 6s/2s/s/s with s>=1 and pairwise Hamming distances 1,2,10 / 1,9 / 8. For any positive repetition m, the same two edges hold: 6ms>=2(2ms)-1 and 2ms>=2(ms)-1; both reverse inequalities remain false, and the distance-10 UMI stays isolated. This is specific to this population, not a general invariance of directional clustering. Copies of each unique highest-MAPQ representative are identical; the independent expected representative set therefore remains unchanged.",
+      "source_population": "synthetic-bam-1000000",
+      "multiplicity": 71,
+      "source_metadata": {
+        "id": "synthetic-bam-1000000",
+        "kind": "bam",
+        "records": 1000000,
+        "bundles": 35701,
+        "expected_dedup_records": 71402,
+        "unsorted": "/tmp/bioinfo-readme-benchmark/bam-1000000/unsorted.bam",
+        "sorted": "/tmp/bioinfo-readme-benchmark/bam-1000000/sorted.bam",
+        "expected_qnames": "/tmp/bioinfo-readme-benchmark/bam-1000000/dedup-qnames.txt",
+        "sha256": {
+          "unsorted.bam": "eaa0524018871f25422bba4faa9bef377483d7a8f8fcb8618a229e9fd842cc95",
+          "sorted.bam": "f321c734856a2f4adab1e4e2aa4dd99639eaa3cf6efc8e08cd77a4305e78695c",
+          "sorted.bam.bai": "6478d0044f84f3ca38c26ad83d6923a54f1a4b490e5d323e1e5f94396267b677",
+          "dedup-qnames.txt": "7165e621e4aa7950c30772062331447f0b46efbde834372d724542f28d790f11"
+        },
+        "generator": {
+          "seed": 20261031,
+          "bundle_scales": [
+            1,
+            10,
+            100
+          ],
+          "umi_counts_per_scale": [
+            6,
+            2,
+            1,
+            1
+          ],
+          "umi_distance_from_major": [
+            0,
+            1,
+            2,
+            10
+          ],
+          "independent_representative": "unique highest MAPQ"
+        }
+      }
+    },
+    {
+      "id": "real-1000000-x9",
+      "kind": "fastq",
+      "path": "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/scale-benchmark/inputs-2/real-1000000-x9.fastq",
+      "source": "SRR2584863",
+      "sampling": "seeded uniform record indices without replacement; retained source order",
+      "seed": 20261031,
+      "records": 9000000,
+      "bases": 1350000000,
+      "gc_bases": 684878157,
+      "min_length": 150,
+      "max_length": 150,
+      "sha256": "056ce6ead84abfb276fb50c11bec11018d538dee57281344182afad4f5db9478",
+      "bytes": 3309980877,
+      "independent_fastq_validation": true,
+      "validation": "independent full source FASTQ scan; exact repetition hash verified after fsync",
+      "source_population": "real-1000000",
+      "multiplicity": 9,
+      "source_metadata": {
+        "id": "real-1000000",
+        "kind": "fastq",
+        "path": "/tmp/bioinfo-readme-benchmark/real-1000000.fastq",
+        "source": "SRR2584863",
+        "sampling": "seeded uniform record indices without replacement; retained source order",
+        "seed": 20261031,
+        "records": 1000000,
+        "bases": 150000000,
+        "gc_bases": 76097573,
+        "min_length": 150,
+        "max_length": 150,
+        "sha256": "e118285a9688a73f43fb420237f5d236886cb8430a265176e4ffd6a132233d04",
+        "bytes": 367775653,
+        "independent_fastq_validation": true
+      },
+      "generator": {
+        "method": "exact frozen population repetition",
+        "multiplicity": 9,
+        "original_generator": null
+      }
+    }
+  ],
+  "workloads": [
+    {
+      "id": "real-cutadapt",
+      "source_id": "real-1000000",
+      "case": "cutadapt_plain",
+      "cpu_budgets": [
+        1,
+        2,
+        4
+      ],
+      "multiplicity": 54,
+      "dataset": "real-1000000-x54"
+    },
+    {
+      "id": "synthetic-cutadapt",
+      "source_id": "synthetic-1000000",
+      "case": "cutadapt_plain",
+      "cpu_budgets": [
+        1,
+        2,
+        4
+      ],
+      "multiplicity": 46,
+      "dataset": "synthetic-1000000-x46"
+    },
+    {
+      "id": "real-cutadapt-gzip",
+      "source_id": "real-1000000",
+      "case": "cutadapt_gzip",
+      "cpu_budgets": [
+        1,
+        2,
+        4
+      ],
+      "multiplicity": 8,
+      "dataset": "real-1000000-x8"
+    },
+    {
+      "id": "real-stats",
+      "source_id": "real-1000000",
+      "case": "fx_stats",
+      "cpu_budgets": [
+        1,
+        2,
+        4
+      ],
+      "multiplicity": 30,
+      "dataset": "real-1000000-x30"
+    },
+    {
+      "id": "synthetic-stats",
+      "source_id": "synthetic-1000000",
+      "case": "fx_stats",
+      "cpu_budgets": [
+        1,
+        2,
+        4
+      ],
+      "multiplicity": 41,
+      "dataset": "synthetic-1000000-x41"
+    },
+    {
+      "id": "synthetic-fq2fa",
+      "source_id": "synthetic-1000000",
+      "case": "fx_fq2fa",
+      "cpu_budgets": [
+        1,
+        4
+      ],
+      "multiplicity": 146,
+      "dataset": "synthetic-1000000-x146"
+    },
+    {
+      "id": "synthetic-lint",
+      "source_id": "synthetic-1000000",
+      "case": "fq_lint",
+      "cpu_budgets": [
+        1,
+        4
+      ],
+      "multiplicity": 102,
+      "dataset": "synthetic-1000000-x102"
+    },
+    {
+      "id": "bam-flagstat",
+      "source_id": "synthetic-bam-1000000",
+      "case": "bam_flagstat",
+      "cpu_budgets": [
+        1,
+        4
+      ],
+      "multiplicity": 755,
+      "dataset": "synthetic-bam-1000000-x755"
+    },
+    {
+      "id": "bam-sort",
+      "source_id": "synthetic-bam-1000000",
+      "case": "bam_sort",
+      "cpu_budgets": [
+        1,
+        2,
+        4
+      ],
+      "multiplicity": 86,
+      "dataset": "synthetic-bam-1000000-x86"
+    },
+    {
+      "id": "umi-dedup",
+      "source_id": "synthetic-bam-1000000",
+      "case": "umi_dedup",
+      "cpu_budgets": [
+        1,
+        4
+      ],
+      "multiplicity": 71,
+      "dataset": "synthetic-bam-1000000-x71"
+    },
+    {
+      "id": "real-fastqc",
+      "source_id": "real-1000000",
+      "case": "fastqc",
+      "cpu_budgets": [
+        1,
+        4
+      ],
+      "multiplicity": 9,
+      "dataset": "real-1000000-x9"
+    }
+  ]
+}

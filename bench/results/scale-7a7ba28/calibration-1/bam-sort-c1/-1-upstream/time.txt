@@ -1,0 +1,23 @@
+	Command being timed: "taskset -c 4 /tmp/bioinfo-readme-repro-oracles/bin/samtools sort -m 512M -@ 0 -l 6 -T /home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/scale-benchmark/calibration-1/bam-sort-c1/-1-upstream/tmp/sort -o /home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/scale-benchmark/calibration-1/bam-sort-c1/-1-upstream/out/sorted.bam /home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/scale-benchmark/enlarged-inputs/synthetic-bam-1000000-x86/unsorted.bam"
+	User time (seconds): 41.50
+	System time (seconds): 0.36
+	Percent of CPU this job got: 96%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:43.46
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 664628
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 0
+	Minor (reclaiming a frame) page faults: 52842
+	Voluntary context switches: 249
+	Involuntary context switches: 479
+	Swaps: 0
+	File system inputs: 0
+	File system outputs: 1103272
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0

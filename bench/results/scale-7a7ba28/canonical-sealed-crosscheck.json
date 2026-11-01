@@ -1,0 +1,27 @@
+{
+  "passed": true,
+  "source": "/tmp/bioinfo-readme-benchmark/bam-1000000/sorted.bam",
+  "python": {
+    "normalized_sha256": "c161bd2f974e59a3603b26fc03b533098d9ce2f0f843464cb0a4fcaf66eadff5",
+    "records": 1000000,
+    "coordinate_sorted": true,
+    "independent_representatives": null,
+    "decoder_stderr": ""
+  },
+  "rust": {
+    "records": 1000000,
+    "normalized_sha256": "c161bd2f974e59a3603b26fc03b533098d9ce2f0f843464cb0a4fcaf66eadff5",
+    "rule": "full SAM field tuples; only @PG omitted, coordinate ties sorted",
+    "bgzf_eof": true,
+    "samtools_stderr": ""
+  },
+  "sealed": {
+    "records": 1000000,
+    "normalized_sha256": "c161bd2f974e59a3603b26fc03b533098d9ce2f0f843464cb0a4fcaf66eadff5",
+    "rule": "full SAM field tuples; only @PG omitted, coordinate ties sorted",
+    "bgzf_eof": true,
+    "samtools_stderr": ""
+  },
+  "sealed_helper_sha256": "20120844e324d4f0a004606e13be000ce0f94615208dbf684ffcaf64d7929289",
+  "source_sha256": "dc025ac08331479982f79cb5db870435d2ff3a3758e8c44a69f5883935739f84"
+}

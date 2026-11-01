@@ -4,3 +4,5 @@ bench/results/optimization-e125519/*.patch -whitespace
 # Preserve alignment padding in the raw performance-counter output.
 bench/results/optimization-e125519/profiling/*.txt -whitespace
 bench/results/optimization-e125519/validation/fx-tests.log -whitespace
+# Keep scale snapshots, raw logs and their SHA-256 evidence byte-for-byte.
+bench/results/scale-7a7ba28/** -text -whitespace

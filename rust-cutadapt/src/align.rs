@@ -56,6 +56,77 @@ struct Best {
     query_stop: usize,
 }
 
+/// A rejection-only edit-distance screen. All scoring and tie decisions stay
+/// in the scalar aligner. Bit i encodes D(i+1,j)-D(i,j), with D(0,j)=0
+/// (a free read prefix). Full-adapter endpoints and final-column prefixes are
+/// the only possible BACK endpoints, so absence of both proves no match.
+#[derive(Clone, Debug)]
+struct BackFilter {
+    equality: [u64; 256],
+    allowed: Vec<i32>,
+    min_overlap: usize,
+}
+
+impl BackFilter {
+    fn new(reference: &[u8], rate: f64, min_overlap: usize) -> Option<Self> {
+        if !(1..=64).contains(&reference.len())
+            || min_overlap == 0
+            || !reference
+                .iter()
+                .all(|b| matches!(b, b'A' | b'C' | b'G' | b'T'))
+        {
+            return None;
+        }
+        let mut equality = [0; 256];
+        for (i, &base) in reference.iter().enumerate() {
+            equality[base as usize] |= 1 << i;
+            equality[base.to_ascii_lowercase() as usize] |= 1 << i;
+        }
+        Some(Self {
+            equality,
+            // Costs are nonnegative integers. Flooring the same binary64
+            // product is exactly equivalent to the original <= predicate.
+            allowed: (1..=reference.len())
+                .map(|i| (i as f64 * rate) as i32)
+                .collect(),
+            min_overlap,
+        })
+    }
+
+    fn may_match(&self, query: &[u8]) -> bool {
+        let m = self.allowed.len();
+        if self.min_overlap > m {
+            return false;
+        }
+        let high = 1u64 << (m - 1);
+        let mut positive = !0u64;
+        let mut negative = 0u64;
+        let mut distance = m as i32;
+        for &base in query {
+            let equal = self.equality[base as usize];
+            let vertical = equal | negative;
+            let horizontal = ((equal & positive).wrapping_add(positive) ^ positive) | equal;
+            let plus = negative | !(horizontal | positive);
+            let minus = positive & horizontal;
+            distance += i32::from(plus & high != 0) - i32::from(minus & high != 0);
+            if distance <= self.allowed[m - 1] {
+                return true;
+            }
+            // No low-bit injection: the free-prefix boundary remains zero.
+            positive = (minus << 1) | !(vertical | (plus << 1));
+            negative = (plus << 1) & vertical;
+        }
+        let mut prefix_distance = 0;
+        for (i, &allowed) in self.allowed.iter().enumerate() {
+            prefix_distance += ((positive >> i) & 1) as i32 - ((negative >> i) & 1) as i32;
+            if i + 1 >= self.min_overlap && prefix_distance <= allowed {
+                return true;
+            }
+        }
+        false
+    }
+}
+
 /// Semiglobal aligner with cutadapt-compatible scoring and tie-breaking.
 #[derive(Clone, Debug)]
 pub struct Aligner {
@@ -74,6 +145,7 @@ pub struct Aligner {
     deletion_cost: i32,
     min_overlap: usize,
     column: Vec<Entry>,
+    back_filter: Option<Box<BackFilter>>,
 }
 
 /// Effective maximum error rate used by cutadapt (`--error-rate` default).
@@ -98,8 +170,14 @@ impl Aligner {
         assert!(indel_cost >= 1);
         assert!((0.0..=1.0).contains(&max_error_rate));
         let m = reference.len();
+        let reference = reference.to_ascii_uppercase();
+        let back_filter = if flags == BACK && indel_cost == 1 {
+            BackFilter::new(&reference, max_error_rate, min_overlap).map(Box::new)
+        } else {
+            None
+        };
         Self {
-            reference: reference.to_ascii_uppercase(),
+            reference,
             m,
             max_error_rate,
             start_in_reference: flags & REFERENCE_START != 0,
@@ -112,6 +190,7 @@ impl Aligner {
             match_read_wildcards: false,
             adapter_wildcards_literal: false,
             column: vec![Entry::default(); m + 1],
+            back_filter,
         }
     }
 
@@ -143,6 +222,14 @@ impl Aligner {
     /// Find the query within the reference. Returns `None` if no alignment
     /// within the allowed error rate exists.
     pub fn locate(&mut self, query: &[u8]) -> Option<Alignment> {
+        if !self.match_read_wildcards
+            && self
+                .back_filter
+                .as_ref()
+                .is_some_and(|filter| !filter.may_match(query))
+        {
+            return None;
+        }
         let m = self.m;
         let n = query.len();
         // cutadapt compares uppercased query characters against the reference.
@@ -385,6 +472,81 @@ impl Aligner {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn rejection_filter_preserves_exhaustive_short_alignments() {
+        fn word(length: usize, bits: usize) -> Vec<u8> {
+            (0..length)
+                .map(|i| if bits & (1 << i) == 0 { b'A' } else { b'C' })
+                .collect()
+        }
+        for m in 1..=6 {
+            for bits in 0..(1 << m) {
+                let reference = word(m, bits);
+                for rate in [0.0, 0.1, 0.3333333333333333, 0.5, 1.0] {
+                    for overlap in [1, 3, m, m + 1] {
+                        let mut screened = Aligner::new(&reference, rate, BACK, 1, overlap);
+                        let mut scalar = screened.clone();
+                        scalar.back_filter = None;
+                        for n in 0..=8 {
+                            for query_bits in 0..(1 << n) {
+                                let query = word(n, query_bits);
+                                assert_eq!(screened.locate(&query), scalar.locate(&query),
+                                    "reference={reference:?} query={query:?} rate={rate} overlap={overlap}");
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn rejection_filter_preserves_long_words_and_fallbacks() {
+        let mut state = 20261101u64;
+        for m in [1, 8, 31, 32, 33, 63, 64, 65] {
+            let reference: Vec<_> = (0..m).map(|i| b"ACGT"[(i * 7 + i / 3) % 4]).collect();
+            for rate in [0.0, 0.099999999999, 0.1, 0.2, 0.5, 1.0] {
+                for flags in [BACK, QUERY_START | QUERY_STOP | REFERENCE_START] {
+                    let mut screened = Aligner::new(&reference, rate, flags, 1, 3);
+                    let mut scalar = screened.clone();
+                    scalar.back_filter = None;
+                    for iteration in 0..1000 {
+                        let n = iteration % 160;
+                        let mut query: Vec<_> = (0..n)
+                            .map(|_| {
+                                state ^= state << 13;
+                                state ^= state >> 7;
+                                state ^= state << 17;
+                                b"ACGTNacgtnU?"[state as usize % 12]
+                            })
+                            .collect();
+                        if iteration % 3 == 0 {
+                            query.extend_from_slice(&reference[..(iteration % m + 1)]);
+                        }
+                        if iteration % 5 == 0 {
+                            query.extend_from_slice(&reference);
+                            query.extend_from_slice(b"NNAC");
+                        }
+                        assert_eq!(screened.locate(&query), scalar.locate(&query));
+                    }
+                }
+            }
+        }
+        // Wildcard behavior remains the scalar implementation, including -N.
+        for reference in [b"ACNGT".as_slice(), b"ACGT".as_slice()] {
+            for literal in [true, false] {
+                let mut screened = Aligner::new(reference, 0.1, BACK, 1, 3)
+                    .with_read_wildcards(true)
+                    .with_literal_adapter(literal);
+                let mut scalar = screened.clone();
+                scalar.back_filter = None;
+                for query in [b"ACNGT".as_slice(), b"NNNN".as_slice(), b"ACGT".as_slice()] {
+                    assert_eq!(screened.locate(query), scalar.locate(query));
+                }
+            }
+        }
+    }
 
     fn locate(reference: &str, query: &str, rate: f64, flags: u32) -> Option<Alignment> {
         Aligner::new(reference.as_bytes(), rate, flags, 1, 1).locate(query.as_bytes())

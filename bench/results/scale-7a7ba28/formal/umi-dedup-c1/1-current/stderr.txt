@@ -1,0 +1,14 @@
+rust-umitools 0.2.0 dedup: threads=1 memory=9463MiB method=directional threshold=1 representative=upstream
+hardware            : logical_cpus=1 physical_cpus=14 cache=24MiB available_memory=18926MiB tmp_free=220368MiB chunk=192MiB threads=1
+container limits     : memory=unlimited cpu=unlimited
+reads in            : 71000000
+bundles             : 35701
+output reads        : 71402
+unmapped removed    : 0
+no-UMI skipped      : 0
+MAPQ ties sampled   : 26226738
+mates recovered     : 0
+events              : input=71000000 read2=0 unmapped=0 mate_unmapped=0 chimeric=0 unpaired=0 below_mapq=0 passthrough=0 subset_excluded=0
+parse+cluster       : 15.2s
+sort+commit         : 0.1s
+wall time           : 15.3s

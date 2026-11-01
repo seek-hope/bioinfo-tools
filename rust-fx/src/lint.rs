@@ -279,6 +279,7 @@ pub struct Linter {
     disabled: Vec<Validator>,
     single_ceiling: Level,
     paired_ceiling: Level,
+    enabled_single: u16,
     record: u64,
 }
 
@@ -286,12 +287,22 @@ impl Linter {
     /// A linter with the documented defaults (`high` for both levels, nothing
     /// disabled).
     pub fn new() -> Linter {
-        Linter {
+        let mut linter = Linter {
             disabled: Vec::new(),
             single_ceiling: Level::High,
             paired_ceiling: Level::High,
+            enabled_single: 0,
             record: 0,
-        }
+        };
+        linter.refresh_single();
+        linter
+    }
+
+    fn refresh_single(&mut self) {
+        self.enabled_single = Validator::SINGLE
+            .into_iter()
+            .filter(|v| v.is_enabled(&self.disabled, self.single_ceiling))
+            .fold(0, |mask, v| mask | (1 << v as u16));
     }
 
     /// Disable validators by code, as `--disable-validator` does.
@@ -310,12 +321,14 @@ impl Linter {
                 None => unknown.push(code.clone()),
             }
         }
+        self.refresh_single();
         unknown
     }
 
     /// Set the single-read validation level ceiling.
     pub fn with_single_level(mut self, level: Level) -> Linter {
         self.single_ceiling = level;
+        self.refresh_single();
         self
     }
 
@@ -349,7 +362,7 @@ impl Linter {
         self.record += 1;
         let index = self.record;
         let mut errors = Vec::new();
-        let enabled = |v: Validator| v.is_enabled(&self.disabled, self.single_ceiling);
+        let enabled = |v: Validator| self.enabled_single & (1 << v as u16) != 0;
 
         if enabled(Validator::Complete) && record.qualities.is_none() {
             errors.push(LintError {
@@ -391,11 +404,7 @@ impl Linter {
             });
         }
         if enabled(Validator::Alphabet) {
-            if let Some((offset, bad)) = record
-                .sequence
-                .iter()
-                .enumerate()
-                .find(|(_, byte)| !is_documented_alphabet_byte(**byte))
+            if let Some((offset, bad)) = first_invalid(record.sequence, is_documented_alphabet_byte)
             {
                 errors.push(LintError {
                     validator: Validator::Alphabet,
@@ -414,10 +423,8 @@ impl Linter {
         }
         if enabled(Validator::QualityString) {
             if let Some(qualities) = record.qualities {
-                if let Some((offset, bad)) = qualities
-                    .iter()
-                    .enumerate()
-                    .find(|(_, byte)| !(b'!'..=b'~').contains(byte))
+                if let Some((offset, bad)) =
+                    first_invalid(qualities, |byte| (b'!'..=b'~').contains(&byte))
                 {
                     errors.push(LintError {
                         validator: Validator::QualityString,
@@ -480,7 +487,7 @@ impl Linter {
         if !Validator::PairedNames.is_enabled(&self.disabled, self.paired_ceiling) {
             return Vec::new();
         }
-        if normalise_pair_name(first) == normalise_pair_name(second) {
+        if pair_name(first) == pair_name(second) {
             Vec::new()
         } else {
             vec![LintError {
@@ -519,40 +526,83 @@ impl Default for Linter {
     }
 }
 
+// Reduce validity over the full slice so the ordinary all-valid case can be
+// vectorized. Only malformed records need the second scan to locate the exact
+// first bad byte for the existing diagnostic.
+fn first_invalid(bytes: &[u8], valid: impl Fn(u8) -> bool) -> Option<(usize, &u8)> {
+    let invalid = bytes
+        .iter()
+        .fold(false, |invalid, &byte| invalid | !valid(byte));
+    if invalid {
+        bytes.iter().enumerate().find(|(_, byte)| !valid(**byte))
+    } else {
+        None
+    }
+}
+
 /// The documented S002 alphabet: `ACGTN`, case-insensitive.
-///
-/// An ambiguous IUPAC letter outside `N` therefore fails S002. DR-5 records that
-/// the documentation says "one of ACGTN" while real data often carries more
-/// codes, so this is faithful-to-the-text rather than permissive.
+/// Other IUPAC letters fail S002; DR-5 records the upstream boundary.
 fn is_documented_alphabet_byte(byte: u8) -> bool {
     matches!(byte.to_ascii_uppercase(), b'A' | b'C' | b'G' | b'T' | b'N')
 }
 
-/// Strip a trailing `/1`, `/2`, `_1`, `_2` or a CASAVA `N:` prefix, so a pair's
-/// two names compare equal.
+/// Strip the description after a literal space and a trailing `/1` or `/2`.
 pub fn normalise_pair_name(name: &[u8]) -> Vec<u8> {
-    let mut value = name.to_vec();
+    pair_name(name).to_vec()
+}
+
+fn pair_name(name: &[u8]) -> &[u8] {
+    let mut value = name;
     // CASAVAv1.8 writes `@instrument:... 1:N:0:INDEX`; the part before the first
     // space is shared by both mates.
     if let Some(space) = value.iter().position(|&b| b == b' ') {
-        value.truncate(space);
+        value = &value[..space];
     }
     // `name/1` and `name/2`.
     if value.len() > 2
         && value[value.len() - 2] == b'/'
         && matches!(value[value.len() - 1], b'1' | b'2')
     {
-        value.truncate(value.len() - 2);
-        return value;
+        return &value[..value.len() - 2];
     }
-    // `name_1` and `name_2` are NOT stripped: an underscore is a normal name
-    // character and stripping it would merge genuinely distinct names.
+    // Underscores remain significant.
     value
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn reduced_validation_keeps_the_first_invalid_byte() {
+        for len in [0, 1, 31, 32, 33, 150, 4097] {
+            let mut bytes = vec![b'A'; len];
+            assert_eq!(first_invalid(&bytes, is_documented_alphabet_byte), None);
+            if len == 0 {
+                continue;
+            }
+            for offset in [0, len / 2, len - 1] {
+                for byte in 0..=255 {
+                    bytes[offset] = byte;
+                    assert_eq!(
+                        first_invalid(&bytes, is_documented_alphabet_byte),
+                        bytes
+                            .iter()
+                            .enumerate()
+                            .find(|(_, b)| !is_documented_alphabet_byte(**b))
+                    );
+                    assert_eq!(
+                        first_invalid(&bytes, |b| (b'!'..=b'~').contains(&b)),
+                        bytes
+                            .iter()
+                            .enumerate()
+                            .find(|(_, b)| !(b'!'..=b'~').contains(*b))
+                    );
+                }
+                bytes[offset] = b'A';
+            }
+        }
+    }
 
     fn record<'a>(
         header: &'a [u8],

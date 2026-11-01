@@ -27,8 +27,8 @@
 //! ## Stability
 //!
 //! The comparator is a total order over records that carry distinct input
-//! indices, so `sort_by` cannot produce run-to-run variation. There is no
-//! parallelism and no hash iteration anywhere in the sort path.
+//! indices, so `sort_by` cannot produce run-to-run variation. Comparisons and
+//! tie resolution remain serial; final BGZF compression may use worker threads.
 
 use noodles::sam::alignment::record::Flags;
 
@@ -80,6 +80,22 @@ impl SortKey {
         }
     }
 
+    /// Replace key fields while retaining the name buffer's allocation.
+    pub fn update(
+        &mut self,
+        flags: Flags,
+        reference_id: Option<usize>,
+        start: Option<usize>,
+        name: &[u8],
+        input_index: usize,
+    ) {
+        let mut next = Self::new(flags, reference_id, start, &[], input_index);
+        std::mem::swap(&mut next.name, &mut self.name);
+        next.name.clear();
+        next.name.extend_from_slice(name);
+        *self = next;
+    }
+
     /// True when this record sorts after every placed record.
     pub fn is_unplaced(&self) -> bool {
         self.unmapped_rank == 1
@@ -121,6 +137,26 @@ mod tests {
             name.as_bytes(),
             index,
         )
+    }
+
+    #[test]
+    fn updating_a_key_preserves_all_fields_and_reuses_name_storage() {
+        let mut updated = key(0, Some(0), Some(1), &"long".repeat(1024), 0);
+        let capacity = updated.name.capacity();
+        for flags in [0, 4, 16, 20] {
+            for reference in [None, Some(0), Some(7)] {
+                for start in [None, Some(1), Some(100)] {
+                    for name in [b"".as_slice(), b"a", b"name/1"] {
+                        updated.update(Flags::from(flags), reference, start, name, 42);
+                        assert_eq!(
+                            updated,
+                            SortKey::new(Flags::from(flags), reference, start, name, 42)
+                        );
+                        assert_eq!(updated.name.capacity(), capacity);
+                    }
+                }
+            }
+        }
     }
 
     #[test]

@@ -1,0 +1,14 @@
+{
+  "paused_utc": "2026-11-01T13:41:34.253966+00:00",
+  "pgid": 1824844,
+  "runner_pid": 1950536,
+  "condition": "synthetic-cutadapt-c2",
+  "block": -1,
+  "stage": "both timed processes exited; output validation pending",
+  "children_after_stop": "",
+  "reason": "User requested immediate Gemini Argon README rewrite and push.",
+  "resumed_utc": "2026-11-01T14:10:26.228181+00:00",
+  "readme_commit": "dacff08c38860c5a3868c14e83d80fea1b71ef1d",
+  "observations_at_resume": 34,
+  "note": "Pause between timed invocations; elapsed experiment time includes this documentation interval. Native sources, sealed artifacts, inputs and measurement scripts were unchanged."
+}

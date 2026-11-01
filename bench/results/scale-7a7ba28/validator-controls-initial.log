@@ -1,0 +1,14 @@
+.F...
+======================================================================
+FAIL: test_malformed_count_is_rejected (__main__.ValidationFailures.test_malformed_count_is_rejected)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/bench/test_scale_validation.py", line 63, in test_malformed_count_is_rejected
+    with self.assertRaises(ValueError): bam_summary(self.input, *self.tools(count=count))
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.565s
+
+FAILED (failures=1)
