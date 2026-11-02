@@ -149,6 +149,42 @@ The second command runs checks against locally installed, pinned versions of the
 
 ## Performance Comparison with Reference Software
 
+### Statistics and BAM Sort: 2026-11-02
+
+This follow-up optimizes byte counting and merge selection, using the same host,
+NVMe storage, 1/2/4 physical P-core budgets and paired comparisons. References are
+SeqKit 2.14.0 and samtools 1.24. All 9 conditions completed: 54 measured observations,
+18 warm-ups and 36 output checks. The shortest measured invocation was 19.58 s.
+Times are median [minimum–maximum] across three blocks. Ratios are medians of
+within-block reference/current times; values above 1 mean the current implementation
+is faster. M denotes million records.
+
+<!-- README_BOTTLENECK_START -->
+| Operation | Input | CPU Budget | Reference Time (s) | Current Implementation Time (s) | Reference / Current |
+| --- | --- | ---: | ---: | ---: | ---: |
+| SeqKit stats -a -T | Real FASTQ, 120M | 1 | 60.36 [58.83–60.47] | 21.44 [21.42–21.44] | 2.82× |
+| SeqKit stats -a -T | Real FASTQ, 120M | 2 | 61.40 [61.06–64.68] | 21.47 [21.42–21.60] | 2.86× |
+| SeqKit stats -a -T | Real FASTQ, 120M | 4 | 61.86 [61.63–61.87] | 21.79 [21.70–21.79] | 2.84× |
+| SeqKit stats -a -T | Synthetic FASTQ, 120M | 1 | 45.52 [44.70–46.08] | 19.59 [19.58–19.60] | 2.32× |
+| SeqKit stats -a -T | Synthetic FASTQ, 120M | 2 | 46.32 [46.17–47.93] | 19.59 [19.58–19.73] | 2.36× |
+| SeqKit stats -a -T | Synthetic FASTQ, 120M | 4 | 46.50 [46.43–46.73] | 19.91 [19.90–19.91] | 2.34× |
+| samtools sort | Synthetic BAM, 86M | 1 | 49.14 [47.62–50.82] | 96.65 [92.94–100.80] | 0.51× |
+| samtools sort | Synthetic BAM, 86M | 2 | 53.51 [53.48–53.86] | 82.42 [81.59–82.98] | 0.65× |
+| samtools sort | Synthetic BAM, 86M | 4 | 23.35 [23.32–23.52] | 82.20 [82.00–82.40] | 0.28× |
+<!-- README_BOTTLENECK_END -->
+
+Statistics still process one file serially; BAM sort parallelizes final BAM
+compression only. The temporary-compression parallel candidate failed its timing
+screen and was withdrawn. Statistics were faster than SeqKit on these inputs;
+BAM sorting remained slower than samtools. Inputs repeat fixed million-record
+populations, adding work while retaining their sequence diversity.
+The [full report](bench/BOTTLENECK.md) includes resources, correctness evidence,
+instruction profiles and candidate decisions. The earlier binaries and input sizes
+remain below; absolute times from the two experiments do not establish a before/after
+speed ratio.
+
+### Earlier Comparison: 2026-11-01
+
 Measured on 2026-11-01 (UTC) on an i7-13700H laptop with 31.1 GiB RAM and NVMe storage.
 The table shows the median [minimum–maximum] of three runs after a warm-up.
 Ratios are the median of the paired reference/current times; values above 1
@@ -200,7 +236,7 @@ were faster in this run; synthetic statistics and the BAM operations remain
 optimization priorities. The UMI result applies to the specified synthetic
 four-UMI population.
 
-### FastQC Runtime
+### FastQC Runtime: 2026-11-01
 
 The implementations differ in GC and duplication statistics and report
 graphics, so these timings are listed without a speed ratio. The current

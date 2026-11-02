@@ -1,0 +1,5 @@
+PASS README non-performance prose, five-section order, shell/Mermaid blocks and historical table unchanged
+PASS all nine bilingual rows match the complete summary
+PASS local document links: 75
+PASS both complete 32-invocation screens; all output bytes match
+PASS final sealed source and archived integration test match; protected artifacts unchanged

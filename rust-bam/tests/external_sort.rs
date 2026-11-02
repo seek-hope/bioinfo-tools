@@ -217,6 +217,71 @@ fn encoded_runs_preserve_auxiliary_fields_long_cigar_and_buffer_clearing() {
 }
 
 #[test]
+fn merge_reuses_heads_across_cached_large_and_cached_records() {
+    let scratch = Scratch::new();
+    let input = scratch.0.join("transitions.sam");
+    let mut sam = String::from("@HD\tVN:1.6\tSO:unsorted\n@SQ\tSN:c\tLN:1000000\n");
+    // Runs have interleaved coordinates. The middle records exceed the capture
+    // threshold, while both neighbours use captured frames. Small budgets and
+    // fan-in 2 also exercise these transitions in intermediate merge passes.
+    for i in (0..18).rev() {
+        for (part, length) in [1, 70000, 2].into_iter().enumerate() {
+            let quality = char::from(b'!' + i as u8);
+            sam.push_str(&format!(
+                "r{i}-{part}\t0\tc\t{}\t60\t{length}M\t*\t0\t0\t{}\t{}\tZZ:Z:{i}-{part}\n",
+                part * 18 + i + 1,
+                "ACGT".chars().cycle().take(length).collect::<String>(),
+                quality.to_string().repeat(length),
+            ));
+        }
+    }
+    fs::write(&input, sam).unwrap();
+    for sam_output in [false, true] {
+        let memory = scratch.0.join("memory-output");
+        let mut args = vec![
+            "sort",
+            "-o",
+            memory.to_str().unwrap(),
+            input.to_str().unwrap(),
+        ];
+        if sam_output {
+            args.push("-O");
+        }
+        let result = scratch.command(&args);
+        assert!(result.status.success(), "{result:?}");
+        let expected = fs::read(memory).unwrap();
+        for (budget, fan_in) in [("128KiB", "2"), ("384KiB", "64")] {
+            for threads in ["1", "4"] {
+                let output = scratch.0.join("merged-output");
+                let mut args = vec![
+                    "sort",
+                    "--max-memory",
+                    budget,
+                    "--max-open-files",
+                    fan_in,
+                    "--threads",
+                    threads,
+                    "-o",
+                    output.to_str().unwrap(),
+                    input.to_str().unwrap(),
+                ];
+                if sam_output {
+                    args.push("-O");
+                }
+                let result = scratch.command(&args);
+                assert!(result.status.success(), "{result:?}");
+                assert_eq!(
+                    fs::read(output).unwrap(),
+                    expected,
+                    "sam={sam_output} budget={budget} threads={threads}"
+                );
+                assert!(scratch.leftover_workdirs().is_empty());
+            }
+        }
+    }
+}
+
+#[test]
 fn malformed_input_fails_without_output_or_temp_runs() {
     let scratch = Scratch::new();
     let input = scratch.input(100, Some("broken\t0\tchr1\n"));

@@ -1,0 +1,26 @@
+[
+  {
+    "name": "candidate-1-tests",
+    "command": [
+      "cargo",
+      "test",
+      "--release",
+      "--locked",
+      "-p",
+      "rust-fx",
+      "-p",
+      "rust-bam"
+    ],
+    "status": 0
+  },
+  {
+    "name": "candidate-1-seal",
+    "command": [
+      "python3",
+      "bench/scale_seal.py",
+      "--outdir",
+      "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/candidate-1"
+    ],
+    "status": 0
+  }
+]

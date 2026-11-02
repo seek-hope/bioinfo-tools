@@ -1,0 +1,16 @@
+[
+  {
+    "name": "candidate-2-tests",
+    "command": [
+      "cargo",
+      "test",
+      "--release",
+      "--locked",
+      "-p",
+      "rust-fx",
+      "-p",
+      "rust-bam"
+    ],
+    "status": 101
+  }
+]

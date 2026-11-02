@@ -1,0 +1,663 @@
+diff --git a/rust-bam/src/commands.rs b/rust-bam/src/commands.rs
+index 5618df1..a51a1fd 100644
+--- a/rust-bam/src/commands.rs
++++ b/rust-bam/src/commands.rs
+@@ -5,7 +5,7 @@
+ //! The counting and ordering logic lives in `crate::stats` and
+ //! `crate::sort_order` so it can be unit-tested without touching the filesystem.
+ 
+-use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap};
++use std::collections::{BTreeMap, BTreeSet, HashMap};
+ use std::fs::File;
+ use std::io::{BufReader, BufWriter, Read, Write};
+ use std::num::NonZero;
+@@ -2155,56 +2155,70 @@ struct MergeItem {
+     key: SortKey,
+     record: Record,
+     frame: Vec<u8>,
+-    run: usize,
+ }
+ 
+-impl PartialEq for MergeItem {
+-    fn eq(&self, other: &Self) -> bool {
+-        self.key == other.key
+-    }
++struct RunMerge {
++    readers: Vec<RunReader>,
++    heads: Vec<Option<MergeItem>>,
++    tree: crate::merge_tree::MergeTree,
+ }
+ 
+-impl Eq for MergeItem {}
+-
+-impl PartialOrd for MergeItem {
+-    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+-        Some(self.cmp(other))
+-    }
++fn compare_heads(heads: &[Option<MergeItem>], a: usize, b: usize) -> std::cmp::Ordering {
++    heads[a]
++        .as_ref()
++        .expect("active merge head")
++        .key
++        .cmp(&heads[b].as_ref().expect("active merge head").key)
+ }
+ 
+-impl Ord for MergeItem {
+-    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+-        // Reverse the key comparison: BinaryHeap is a max-heap, we need a min-heap.
+-        other
+-            .key
+-            .cmp(&self.key)
+-            .then_with(|| other.run.cmp(&self.run))
++impl RunMerge {
++    fn refill(&mut self, run: usize) -> Result<()> {
++        let item = self.heads[run].as_mut().expect("winning merge head");
++        if !next_from_run(
++            &mut self.readers[run],
++            &mut item.record,
++            &mut item.key,
++            &mut item.frame,
++        )? {
++            self.heads[run] = None;
++        }
++        self.tree.replace(run, self.heads[run].is_some(), |a, b| {
++            compare_heads(&self.heads, a, b)
++        });
++        Ok(())
+     }
+ }
+ 
+-fn open_runs(paths: &[PathBuf]) -> Result<(Vec<RunReader>, BinaryHeap<MergeItem>)> {
++fn open_runs(paths: &[PathBuf]) -> Result<RunMerge> {
+     let mut readers = Vec::with_capacity(paths.len());
+-    let mut heap = BinaryHeap::new();
+-    for (run, path) in paths.iter().enumerate() {
++    let mut heads = Vec::with_capacity(paths.len());
++    for path in paths {
+         let mut reader = open_run(path)?;
+         let mut record = Record::default();
+         let mut key = key_for(&record, 0);
+         let mut frame = Vec::new();
+-        if next_from_run(&mut reader, &mut record, &mut key, &mut frame)? {
+-            heap.push(MergeItem {
+-                key,
+-                record,
+-                frame,
+-                run,
+-            });
+-        }
++        let head = if next_from_run(&mut reader, &mut record, &mut key, &mut frame)? {
++            Some(MergeItem { key, record, frame })
++        } else {
++            None
++        };
++        heads.push(head);
+         readers.push(reader);
+     }
+-    Ok((readers, heap))
++    let tree = crate::merge_tree::MergeTree::new(
++        heads.len(),
++        |i| heads[i].is_some(),
++        |a, b| compare_heads(&heads, a, b),
++    );
++    Ok(RunMerge {
++        readers,
++        heads,
++        tree,
++    })
+ }
+ 
+ fn merge_to_run(temp: &mut TempDir, paths: &[PathBuf], header: &sam::Header) -> Result<PathBuf> {
+-    let (mut readers, mut heap) = open_runs(paths)?;
++    let mut merge = open_runs(paths)?;
+     let path = temp.run_path();
+     let index_path = path.with_extension("idx");
+     let file = File::create(&path)
+@@ -2214,7 +2228,8 @@ fn merge_to_run(temp: &mut TempDir, paths: &[PathBuf], header: &sam::Header) ->
+     let mut index_file = BufWriter::with_capacity(64 * 1024, index_file);
+     let mut writer = BamWriter::new_fast(file);
+     writer.write_header(header)?;
+-    while let Some(mut item) = heap.pop() {
++    while let Some(run) = merge.tree.winner() {
++        let item = merge.heads[run].as_mut().expect("winning merge head");
+         if item.frame.is_empty() {
+             writer.write_record(header, &item.record)?;
+         } else {
+@@ -2226,14 +2241,7 @@ fn merge_to_run(temp: &mut TempDir, paths: &[PathBuf], header: &sam::Header) ->
+             // allocations in run buffers after they have been written.
+             item.record = Record::default();
+         }
+-        if next_from_run(
+-            &mut readers[item.run],
+-            &mut item.record,
+-            &mut item.key,
+-            &mut item.frame,
+-        )? {
+-            heap.push(item);
+-        }
++        merge.refill(run)?;
+     }
+     let file = writer.finish()?;
+     file.sync_all()
+@@ -2408,21 +2416,15 @@ pub fn sort(options: SortOptions) -> Result<u64> {
+ }
+ 
+ fn merge_to_output(options: &SortOptions, paths: &[PathBuf], header: &sam::Header) -> Result<()> {
+-    let (mut readers, mut heap) = open_runs(paths)?;
++    let mut merge = open_runs(paths)?;
+     write_records(options, header, |record, frame| {
+-        if let Some(mut item) = heap.pop() {
++        if let Some(run) = merge.tree.winner() {
++            let item = merge.heads[run].as_mut().expect("winning merge head");
+             // Keep read-ahead before output: a malformed replacement must
+             // still prevent the popped record from being written.
+             std::mem::swap(record, &mut item.record);
+             std::mem::swap(frame, &mut item.frame);
+-            if next_from_run(
+-                &mut readers[item.run],
+-                &mut item.record,
+-                &mut item.key,
+-                &mut item.frame,
+-            )? {
+-                heap.push(item);
+-            }
++            merge.refill(run)?;
+             Ok(true)
+         } else {
+             Ok(false)
+@@ -2529,8 +2531,8 @@ mod tests {
+             b"XX?",
+         ] {
+             let (_temp, path, header) = run_with_extra_index();
+-            let (_, mut heap) = open_runs(std::slice::from_ref(&path)).unwrap();
+-            let mut frame = heap.pop().unwrap().frame;
++            let mut merge = open_runs(std::slice::from_ref(&path)).unwrap();
++            let mut frame = merge.heads[0].take().unwrap().frame;
+             frame.extend_from_slice(invalid);
+             let size = u32::try_from(frame.len() - 4).unwrap();
+             frame[..4].copy_from_slice(&size.to_le_bytes());
+diff --git a/rust-bam/src/lib.rs b/rust-bam/src/lib.rs
+index 3b4900a..a716875 100644
+--- a/rust-bam/src/lib.rs
++++ b/rust-bam/src/lib.rs
+@@ -35,6 +35,7 @@ pub mod error;
+ pub mod format;
+ pub mod index_util;
+ pub mod io_util;
++mod merge_tree;
+ pub mod sort_order;
+ pub mod stats;
+ 
+diff --git a/rust-bam/tests/external_sort.rs b/rust-bam/tests/external_sort.rs
+index 622989e..48d0257 100644
+--- a/rust-bam/tests/external_sort.rs
++++ b/rust-bam/tests/external_sort.rs
+@@ -216,6 +216,71 @@ fn encoded_runs_preserve_auxiliary_fields_long_cigar_and_buffer_clearing() {
+     }
+ }
+ 
++#[test]
++fn merge_reuses_heads_across_cached_large_and_cached_records() {
++    let scratch = Scratch::new();
++    let input = scratch.0.join("transitions.sam");
++    let mut sam = String::from("@HD\tVN:1.6\tSO:unsorted\n@SQ\tSN:c\tLN:1000000\n");
++    // Runs have interleaved coordinates. The middle records exceed the capture
++    // threshold, while both neighbours use captured frames. Small budgets and
++    // fan-in 2 also exercise these transitions in intermediate merge passes.
++    for i in (0..18).rev() {
++        for (part, length) in [1, 70000, 2].into_iter().enumerate() {
++            let quality = char::from(b'!' + i as u8);
++            sam.push_str(&format!(
++                "r{i}-{part}\t0\tc\t{}\t60\t{length}M\t*\t0\t0\t{}\t{}\tZZ:Z:{i}-{part}\n",
++                part * 18 + i + 1,
++                "ACGT".chars().cycle().take(length).collect::<String>(),
++                quality.to_string().repeat(length),
++            ));
++        }
++    }
++    fs::write(&input, sam).unwrap();
++    for sam_output in [false, true] {
++        let memory = scratch.0.join("memory-output");
++        let mut args = vec![
++            "sort",
++            "-o",
++            memory.to_str().unwrap(),
++            input.to_str().unwrap(),
++        ];
++        if sam_output {
++            args.push("-O");
++        }
++        let result = scratch.command(&args);
++        assert!(result.status.success(), "{result:?}");
++        let expected = fs::read(memory).unwrap();
++        for (budget, fan_in) in [("128KiB", "2"), ("384KiB", "64")] {
++            for threads in ["1", "4"] {
++                let output = scratch.0.join("merged-output");
++                let mut args = vec![
++                    "sort",
++                    "--max-memory",
++                    budget,
++                    "--max-open-files",
++                    fan_in,
++                    "--threads",
++                    threads,
++                    "-o",
++                    output.to_str().unwrap(),
++                    input.to_str().unwrap(),
++                ];
++                if sam_output {
++                    args.push("-O");
++                }
++                let result = scratch.command(&args);
++                assert!(result.status.success(), "{result:?}");
++                assert_eq!(
++                    fs::read(output).unwrap(),
++                    expected,
++                    "sam={sam_output} budget={budget} threads={threads}"
++                );
++                assert!(scratch.leftover_workdirs().is_empty());
++            }
++        }
++    }
++}
++
+ #[test]
+ fn malformed_input_fails_without_output_or_temp_runs() {
+     let scratch = Scratch::new();
+diff --git a/rust-fx/src/commands.rs b/rust-fx/src/commands.rs
+index ae6f44f..b1d9f03 100644
+--- a/rust-fx/src/commands.rs
++++ b/rust-fx/src/commands.rs
+@@ -11,7 +11,9 @@ use crate::io::{
+ use crate::lint::{Level, LintRecord, Linter};
+ use crate::sample::{Sampler, Strategy};
+ use crate::split::{self, SplitBy};
+-use crate::stats::{GcSkewCounts, Merge, QualStats, QualityDecoder, SeqStats, DEFAULT_GAP_LETTERS};
++use crate::stats::{
++    GcSkewCounts, Merge, QualStats, QualityDecoder, SeqStats, SequenceCounter, DEFAULT_GAP_LETTERS,
++};
+ use crate::table::{self, Layout as TableLayout, StatsRow};
+ use crate::transform::{self, Transforms};
+ use bioinfo_fastx::writer::Layout;
+@@ -43,7 +45,7 @@ impl InputStats {
+     fn absorb(
+         &mut self,
+         record: RecordView<'_>,
+-        gaps: &[bool; 256],
++        sequence_counter: &SequenceCounter,
+         quality: Option<&QualityDecoder>,
+     ) {
+         let length = record.sequence.len() as u64;
+@@ -58,7 +60,7 @@ impl InputStats {
+             return;
+         };
+         *self.lengths.entry(length).or_insert(0) += 1;
+-        let sequence = SeqStats::from_gap_table(record.sequence, gaps);
++        let sequence = sequence_counter.stats(record.sequence);
+         self.sum_gap += sequence.gap_count;
+         self.sum_n += sequence.n_count;
+         self.gc += sequence.gc;
+@@ -190,10 +192,7 @@ fn collect_stats(
+     let quality = options
+         .all
+         .then(|| QualityDecoder::new(options.quality_base));
+-    let mut gaps = [false; 256];
+-    for &byte in &options.gap_letters {
+-        gaps[byte as usize] = true;
+-    }
++    let sequence_counter = SequenceCounter::new(&options.gap_letters);
+     let mut record = OwnedRecord::default();
+     while reader
+         .visit_record(&mut record, |record| {
+@@ -201,7 +200,7 @@ fn collect_stats(
+                 seq_type = transform::guess_seq_type(record.sequence);
+                 first = false;
+             }
+-            stats.absorb(record, &gaps, quality.as_ref());
++            stats.absorb(record, &sequence_counter, quality.as_ref());
+         })?
+         .is_some()
+     {}
+diff --git a/rust-fx/src/stats.rs b/rust-fx/src/stats.rs
+index 005add9..932c5c9 100644
+--- a/rust-fx/src/stats.rs
++++ b/rust-fx/src/stats.rs
+@@ -126,6 +126,51 @@ impl SeqStats {
+     }
+ }
+ 
++// A lane contributes at most one per byte. Flush before any 16-bit lane can
++// carry into its neighbour, including for arbitrarily long wrapped records.
++const COUNT_CHUNK: usize = u16::MAX as usize;
++
++/// Per-file integer contributions, packed into four independent 16-bit lanes.
++/// Classification and arbitrary gap membership are computed once per byte value.
++pub(crate) struct SequenceCounter {
++    contributions: [u64; 256],
++}
++
++impl SequenceCounter {
++    pub(crate) fn new(gap_letters: &[u8]) -> Self {
++        let mut gaps = [false; 256];
++        for &byte in gap_letters {
++            gaps[byte as usize] = true;
++        }
++        Self {
++            contributions: std::array::from_fn(|i| {
++                let byte = i as u8;
++                u64::from(is_gc_base(byte))
++                    | (u64::from(is_at_base(byte)) << 16)
++                    | (u64::from(matches!(byte, b'N' | b'n' | b'X' | b'x')) << 32)
++                    | (u64::from(gaps[i]) << 48)
++            }),
++        }
++    }
++
++    pub(crate) fn stats(&self, sequence: &[u8]) -> SeqStats {
++        let mut stats = SeqStats {
++            length: sequence.len() as u64,
++            ..SeqStats::default()
++        };
++        for chunk in sequence.chunks(COUNT_CHUNK) {
++            let counts = chunk
++                .iter()
++                .fold(0u64, |sum, &byte| sum + self.contributions[byte as usize]);
++            stats.gc += counts & 0xffff;
++            stats.at += (counts >> 16) & 0xffff;
++            stats.n_count += (counts >> 32) & 0xffff;
++            stats.gap_count += counts >> 48;
++        }
++        stats
++    }
++}
++
+ /// Separate G and C counts, needed for GC-Skew.
+ #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+ pub struct GcSkewCounts {
+@@ -178,8 +223,7 @@ pub struct QualStats {
+ /// additions still occur in their original per-base, per-record order.
+ pub(crate) struct QualityDecoder {
+     probabilities: [f64; 256],
+-    q20: u16,
+-    q30: u16,
++    counts: [u32; 256],
+ }
+ 
+ impl QualityDecoder {
+@@ -189,27 +233,30 @@ impl QualityDecoder {
+             probabilities: std::array::from_fn(|byte| {
+                 probabilities[(byte as u8).saturating_sub(base) as usize]
+             }),
+-            q20: base as u16 + 20,
+-            q30: base as u16 + 30,
++            counts: std::array::from_fn(|byte| {
++                u32::from(byte as u16 >= base as u16 + 20)
++                    | (u32::from(byte as u16 >= base as u16 + 30) << 16)
++            }),
+         }
+     }
+ 
+     pub(crate) fn stats(&self, qualities: &[u8]) -> QualStats {
+-        let (q20, q30) = qualities.iter().fold((0, 0), |(q20, q30), &byte| {
+-            (
+-                q20 + u64::from(byte as u16 >= self.q20),
+-                q30 + u64::from(byte as u16 >= self.q30),
+-            )
+-        });
+-        let error_sum = qualities
+-            .iter()
+-            .fold(0.0, |sum, &byte| sum + self.probabilities[byte as usize]);
+-        QualStats {
++        let mut stats = QualStats {
+             bases: qualities.len() as u64,
+-            q20,
+-            q30,
+-            error_sum,
++            ..QualStats::default()
++        };
++        for chunk in qualities.chunks(COUNT_CHUNK) {
++            let mut counts = 0u32;
++            for &byte in chunk {
++                counts += self.counts[byte as usize];
++                // Keep a single accumulator across chunks: regrouping this sum
++                // (including using histograms or multiplication) changes bits.
++                stats.error_sum += self.probabilities[byte as usize];
++            }
++            stats.q20 += u64::from(counts & 0xffff);
++            stats.q30 += u64::from(counts >> 16);
+         }
++        stats
+     }
+ }
+ 
+@@ -297,6 +344,85 @@ impl Merge for QualStats {
+ mod tests {
+     use super::*;
+ 
++    #[test]
++    fn packed_sequence_counts_match_scalar_across_lane_boundaries() {
++        let all_bytes: Vec<u8> = (0..=255).collect();
++        for gaps in [DEFAULT_GAP_LETTERS, b"GgNnUU", b"\0\xffGG", &all_bytes] {
++            let counter = SequenceCounter::new(gaps);
++            for length in [
++                0,
++                1,
++                255,
++                COUNT_CHUNK - 1,
++                COUNT_CHUNK,
++                COUNT_CHUNK + 1,
++                2 * COUNT_CHUNK + 1,
++            ] {
++                let mixed: Vec<_> = (0..length).map(|i| i as u8).collect();
++                assert_eq!(counter.stats(&mixed), SeqStats::from_sequence(&mixed, gaps));
++                for byte in [b'G', b'n', b'U', 255] {
++                    let repeated = vec![byte; length];
++                    assert_eq!(
++                        counter.stats(&repeated),
++                        SeqStats::from_sequence(&repeated, gaps)
++                    );
++                }
++            }
++        }
++    }
++
++    #[test]
++    fn packed_quality_counts_preserve_sum_bits_across_lane_boundaries() {
++        for base in [0, 33, 64, 226, 236, 255] {
++            let decoder = QualityDecoder::new(base);
++            for length in [
++                COUNT_CHUNK - 1,
++                COUNT_CHUNK,
++                COUNT_CHUNK + 1,
++                2 * COUNT_CHUNK + 1,
++            ] {
++                for qualities in [
++                    (0..length).map(|i| i as u8).collect::<Vec<_>>(),
++                    vec![63; length],
++                    vec![255; length],
++                ] {
++                    let expected = QualStats::from_qualities(&qualities, base);
++                    let actual = decoder.stats(&qualities);
++                    assert_eq!(
++                        (actual.bases, actual.q20, actual.q30),
++                        (expected.bases, expected.q20, expected.q30)
++                    );
++                    assert_eq!(actual.error_sum.to_bits(), expected.error_sum.to_bits());
++                }
++            }
++        }
++    }
++
++    #[test]
++    fn packed_quality_aggregation_preserves_record_grouping() {
++        let records = [
++            vec![33],
++            vec![73; COUNT_CHUNK + 1],
++            vec![33],
++            (0..2 * COUNT_CHUNK + 1).map(|i| i as u8).collect(),
++            Vec::new(),
++        ];
++        for base in [0, 33, 64, 255] {
++            let decoder = QualityDecoder::new(base);
++            let mut actual = QualStats::default();
++            let mut expected = QualStats::default();
++            for qualities in &records {
++                actual.merge(&decoder.stats(qualities));
++                expected.merge(&QualStats::from_qualities(qualities, base));
++                assert_eq!(
++                    (actual.bases, actual.q20, actual.q30),
++                    (expected.bases, expected.q20, expected.q30)
++                );
++                assert_eq!(actual.error_sum.to_bits(), expected.error_sum.to_bits());
++            }
++        }
++    }
++
+     #[test]
+     fn sequence_counts_cover_all_bytes_and_overlapping_gap_symbols() {
+         let sequence: Vec<u8> = (0..=255).collect();
+diff --git a/rust-bam/src/merge_tree.rs b/rust-bam/src/merge_tree.rs
+new file mode 100644
+index 0000000..caa1fed
+--- /dev/null
++++ b/rust-bam/src/merge_tree.rs
+@@ -0,0 +1,139 @@
++//! Index-only selection for a multiway merge with fixed run heads.
++//!
++//! Building costs O(k) and replacing one leaf costs O(log k), with at most one
++//! key comparison per level. Only indices move through the tree; records and
++//! their allocations stay in the caller's slots. Storage is less than 4k indices
++//! for nonempty inputs. Equal keys select the earlier run.
++
++use std::cmp::Ordering;
++
++const EMPTY: usize = usize::MAX;
++
++pub(crate) struct MergeTree {
++    leaves: usize,
++    winners: Vec<usize>,
++}
++
++impl MergeTree {
++    pub(crate) fn new(
++        len: usize,
++        active: impl Fn(usize) -> bool,
++        mut compare: impl FnMut(usize, usize) -> Ordering,
++    ) -> Self {
++        let leaves = len.max(1).next_power_of_two();
++        let mut winners = vec![EMPTY; 2 * leaves];
++        for index in 0..len {
++            if active(index) {
++                winners[leaves + index] = index;
++            }
++        }
++        for node in (1..leaves).rev() {
++            winners[node] = Self::choose(winners[2 * node], winners[2 * node + 1], &mut compare);
++        }
++        Self { leaves, winners }
++    }
++
++    fn choose(
++        left: usize,
++        right: usize,
++        compare: &mut impl FnMut(usize, usize) -> Ordering,
++    ) -> usize {
++        if left == EMPTY {
++            right
++        } else if right == EMPTY || compare(left, right).then_with(|| left.cmp(&right)).is_le() {
++            left
++        } else {
++            right
++        }
++    }
++
++    pub(crate) fn winner(&self) -> Option<usize> {
++        (self.winners[1] != EMPTY).then_some(self.winners[1])
++    }
++
++    pub(crate) fn replace(
++        &mut self,
++        index: usize,
++        active: bool,
++        mut compare: impl FnMut(usize, usize) -> Ordering,
++    ) {
++        let mut node = self.leaves + index;
++        self.winners[node] = if active { index } else { EMPTY };
++        while node > 1 {
++            node /= 2;
++            self.winners[node] = Self::choose(
++                self.winners[2 * node],
++                self.winners[2 * node + 1],
++                &mut compare,
++            );
++        }
++    }
++}
++
++#[cfg(test)]
++mod tests {
++    use super::*;
++
++    #[test]
++    fn merge_matches_total_sort_with_ties_empty_runs_and_unequal_lengths() {
++        for count in [0usize, 1, 2, 3, 7, 8, 9, 31, 64, 65] {
++            let runs: Vec<Vec<usize>> = (0..count)
++                .map(|run| (0..(run * 7 % 19)).map(|i| (i / 3) * 5 + run % 4).collect())
++                .collect();
++            let mut offsets = vec![0; count];
++            let mut tree = MergeTree::new(
++                count,
++                |i| !runs[i].is_empty(),
++                |a, b| runs[a][0].cmp(&runs[b][0]),
++            );
++            let mut actual = Vec::new();
++            while let Some(run) = tree.winner() {
++                actual.push((runs[run][offsets[run]], run, offsets[run]));
++                offsets[run] += 1;
++                tree.replace(run, offsets[run] < runs[run].len(), |a, b| {
++                    runs[a][offsets[a]].cmp(&runs[b][offsets[b]])
++                });
++            }
++            let mut expected: Vec<_> = runs
++                .iter()
++                .enumerate()
++                .flat_map(|(run, values)| {
++                    values
++                        .iter()
++                        .enumerate()
++                        .map(move |(i, &value)| (value, run, i))
++                })
++                .collect();
++            expected.sort();
++            assert_eq!(actual, expected, "runs={count}");
++        }
++    }
++
++    #[test]
++    fn replacement_has_one_comparison_per_level_and_can_reactivate_a_slot() {
++        for len in [1usize, 2, 3, 8, 17, 64, 65] {
++            let mut keys: Vec<_> = (0..len).collect();
++            let mut tree = MergeTree::new(len, |_| true, |a, b| keys[a].cmp(&keys[b]));
++            let depth = len.next_power_of_two().trailing_zeros();
++            let capacity = tree.winners.capacity();
++            for step in 0..len * 3 {
++                let run = tree.winner().unwrap();
++                keys[run] = len + step;
++                let mut comparisons = 0;
++                tree.replace(run, true, |a, b| {
++                    comparisons += 1;
++                    keys[a].cmp(&keys[b])
++                });
++                assert!(comparisons <= depth);
++                assert_eq!(tree.winner(), (0..len).min_by_key(|&i| (keys[i], i)));
++                assert_eq!(tree.winners.capacity(), capacity);
++            }
++            for i in 0..len {
++                tree.replace(i, false, |a, b| keys[a].cmp(&keys[b]));
++            }
++            assert_eq!(tree.winner(), None);
++            tree.replace(len - 1, true, |a, b| keys[a].cmp(&keys[b]));
++            assert_eq!(tree.winner(), Some(len - 1));
++        }
++    }
++}

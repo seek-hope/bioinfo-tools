@@ -1,0 +1,63 @@
+rust-fx : /home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/sealed/rust-fx
+seqkit  : /home/rimuru/Projects/Code/for_fun/bioinfo-tools/tests/ci/env/bin/seqkit
+fq      : /home/rimuru/Projects/Code/for_fun/bioinfo-tools/tests/ci/env/bin/fq
+seqkit v2.14.0
+fq v0.12.0 (51779f50e 2024-07-08)
+
+rust-fx: /home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/sealed/rust-fx
+seqkit : /home/rimuru/Projects/Code/for_fun/bioinfo-tools/tests/ci/env/bin/seqkit
+fq     : /home/rimuru/Projects/Code/for_fun/bioinfo-tools/tests/ci/env/bin/fq
+cases  : 50
+
+PASS  stats    stats_default_fastq          the 8 documented columns, human layout
+PASS  stats    stats_default_fasta          FASTA detection and type
+PASS  stats    stats_tabular                -T: tabs, no digit grouping
+PASS  stats    stats_all                    -a adds quartiles/N50/quality columns
+PASS  stats    stats_all_tabular            every modelled metric in machine-readable form
+PASS  stats    stats_basename               -b prints only the base name
+PASS  stats    stats_multiple_inputs        several inputs in one table
+PASS  stats    stats_gap_letters            -G changes the gap set
+PASS  seq      seq_passthrough              identity output is byte-identical
+PASS  seq      seq_name                     -n prints full headers
+PASS  seq      seq_only_id                  -n -i prints IDs
+PASS  seq      seq_seq_only                 -s prints sequences only
+PASS  seq      seq_reverse_complement       -r -p: reverse then complement
+PASS  seq      seq_complement_only          -p alone: complement without reversing
+PASS  seq      seq_upper                    -u: uppercase output
+PASS  seq      seq_lower                    -l: lowercase output
+PASS  seq      seq_min_len                  -m inclusive length filter
+PASS  seq      seq_max_len                  -M inclusive length filter
+PASS  seq      seq_gap_removal              -g removes the -G gap set
+PASS  seq      seq_fasta_wrap               -w controls FASTA line width
+PASS  seq      seq_dna2rna                  --dna2rna: T becomes U
+PASS  fq2fa    fq2fa_default                @ becomes >, qualities dropped
+PASS  fq2fa    fq2fa_wrap                   -w wraps the FASTA sequence
+PASS  fq2fa    fq2fa_on_fasta               FASTA input is unchanged (idempotent)
+PASS  fx2tab   fx2tab_default               three fixed columns for either format
+PASS  fx2tab   fx2tab_fasta_empty_qual      FASTA still prints an empty quality column
+PASS  fx2tab   fx2tab_length_gc             -l and -g: length and (G+C)/(G+C+A+T)
+PASS  fx2tab   fx2tab_header                -H names the metrics
+PASS  fx2tab   fx2tab_avg_qual              -q mean-error average quality
+PASS  fx2tab   fx2tab_no_qual               -Q drops the quality column
+PASS  fx2tab   fx2tab_seq_hash              -s MD5 of the sequence
+PASS  fx2tab   fx2tab_base_content          -B and -C: base content and count columns
+PASS  fx2tab   fx2tab_alphabet              -a: the alphabet column
+PASS  sample   sample_proportion_bytes      output is a subset of the input, exit 0
+PASS  split    split_by_size                part naming, contents and order
+PASS  split    split_by_part                even partition into N parts
+PASS  split    split_by_size_fasta          FASTA split
+PASS  lint     lint_valid                   a valid file exits 0
+PASS  lint     lint_valid_pair              a valid pair exits 0 (P001 passes)
+PASS  lint     lint_pair_name_mismatch      P001 fires on a name mismatch
+PASS  lint     lint_S002                    S002: alphabet outside ACGTN
+PASS  lint     lint_S003                    S003: header does not start with @
+PASS  lint     lint_S005                    S005: sequence/quality length mismatch
+PASS  lint     lint_S006                    S006: quality outside !..~
+PASS  lint     lint_S007                    S007: duplicate name
+PASS  lint     lint_disable_s005            --disable-validator S005 suppresses it
+PASS  lint     lint_level_low               --single-read-validation-level low runs only S001/S004
+PASS  sample   sample_reproducible          the same seed reproduces the same selection
+PASS  sample   sample_seed_changes_selection a different seed changes the selection
+PASS  sample   sample_number                -n samples approximately N
+
+50/50 cases passed

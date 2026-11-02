@@ -1,0 +1,4 @@
+PASS independent audit: 9 timing medians/ranges, 9 paired ratios, 72 invocations, 36 checks
+PASS final identities: 152 files rehashed
+Minimum measured seconds: 19.57981705397833 ; below 10s: 0
+PASS profiled/final executable identity and final runtime routes

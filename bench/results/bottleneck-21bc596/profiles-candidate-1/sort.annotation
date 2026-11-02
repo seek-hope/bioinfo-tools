@@ -1,0 +1,80 @@
+--------------------------------------------------------------------------------
+Profile data file '/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/profiles-candidate-1/sort.callgrind' (creator: callgrind-3.25.1)
+--------------------------------------------------------------------------------
+I1 cache: 
+D1 cache: 
+LL cache: 
+Timerange: Basic block 0 - 677417051
+Trigger: Program termination
+Profiled target:  /home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/candidate-1/rust-bam sort --max-memory 1MiB --threads 1 -o /home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/profiles-candidate-1/sort.bam /tmp/bioinfo-readme-benchmark/bam-100000/unsorted.bam (PID 2325212, part 1)
+Events recorded:  Ir
+Events shown:     Ir
+Event sort order: Ir
+Thresholds:       95
+Include dirs:     
+User annotated:   
+Auto-annotation:  off
+
+--------------------------------------------------------------------------------
+Ir                     
+--------------------------------------------------------------------------------
+1,976,122,580 (100.0%)  PROGRAM TOTALS
+
+--------------------------------------------------------------------------------
+Ir                    file:function
+--------------------------------------------------------------------------------
+327,334,038 (16.56%)  ???:zlib_rs::deflate::algorithm::medium::deflate_medium [/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/candidate-1/rust-bam]
+275,729,305 (13.95%)  ???:__memset_avx2_unaligned_erms [/usr/lib/libc.so.6]
+ 99,747,012 ( 5.05%)  ???:__memcpy_avx_unaligned_erms [/usr/lib/libc.so.6]
+ 97,000,000 ( 4.91%)  ???:noodles_bam::record::codec::encoder::quality_scores::write_quality_scores [/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/candidate-1/rust-bam]
+ 79,367,362 ( 4.02%)  /usr/src/debug/glibc/glibc/malloc/malloc.c:_int_malloc [/usr/lib/libc.so.6]
+ 67,134,181 ( 3.40%)  ???:zlib_rs::deflate::longest_match::longest_match [/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/candidate-1/rust-bam]
+ 62,110,176 ( 3.14%)  /usr/src/debug/glibc/glibc/malloc/malloc.c:free [/usr/lib/libc.so.6]
+ 55,700,000 ( 2.82%)  ???:<core::iter::adapters::map::Map<core::iter::adapters::copied::Copied<core::slice::iter::Iter<i8>>, core::result::Result<i8, core::io::error::Error>::Ok> as core::iter::traits::iterator::Iterator>::next [/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/candidate-1/rust-bam]
+ 54,804,079 ( 2.77%)  ???:zlib_rs::inflate::inflate_fast_help_avx2 [/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/candidate-1/rust-bam]
+ 51,066,184 ( 2.58%)  /usr/src/debug/glibc/glibc/malloc/malloc.c:_int_free_merge_chunk [/usr/lib/libc.so.6]
+ 48,699,320 ( 2.46%)  /usr/src/debug/glibc/glibc/malloc/malloc.c:malloc [/usr/lib/libc.so.6]
+ 37,323,735 ( 1.89%)  ???:zlib_rs::deflate::algorithm::quick::deflate_quick [/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/candidate-1/rust-bam]
+ 35,400,540 ( 1.79%)  ???:noodles_bam::record::codec::decoder::sequence::read_sequence [/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/candidate-1/rust-bam]
+ 34,399,892 ( 1.74%)  ???:noodles_bam::record::codec::decoder::data::read_data [/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/candidate-1/rust-bam]
+ 33,400,000 ( 1.69%)  ???:noodles_bam::record::codec::decoder::decode [/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/candidate-1/rust-bam]
+ 28,179,288 ( 1.43%)  ???:core::slice::sort::unstable::quicksort::quicksort::<usize, <[usize]>::sort_unstable_by<rust_bam::commands::sorted_indices::{closure#0}>::{closure#0}>'2 [/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/candidate-1/rust-bam]
+ 27,601,130 ( 1.40%)  ???:noodles_bam::record::codec::encoder::encode::<dyn noodles_sam::alignment::record::Record> [/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/candidate-1/rust-bam]
+ 26,800,477 ( 1.36%)  ???:noodles_bam::record::codec::encoder::sequence::write_sequence [/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/candidate-1/rust-bam]
+ 26,010,962 ( 1.32%)  ???:rust_bam::commands::next_from_run [/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/candidate-1/rust-bam]
+ 24,283,062 ( 1.23%)  ???:<rust_bam::commands::RunMerge>::refill [/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/candidate-1/rust-bam]
+ 22,587,887 ( 1.14%)  ???:<alloc::raw_vec::RawVecInner>::finish_grow [/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/candidate-1/rust-bam]
+ 21,980,698 ( 1.11%)  ???:<zlib_rs::crc32::pclmulqdq::Accumulator>::fold_help::<false> [/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/candidate-1/rust-bam]
+ 19,500,424 ( 0.99%)  ???:noodles_bam::record::codec::encoder::data::write_data [/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/candidate-1/rust-bam]
+ 19,300,530 ( 0.98%)  ???:noodles_bam::record::codec::encoder::name::write_name [/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/candidate-1/rust-bam]
+ 16,559,509 ( 0.84%)  ???:core::slice::sort::shared::smallsort::swap_if_less::<usize, <[usize]>::sort_unstable_by<rust_bam::commands::sorted_indices::{closure#0}>::{closure#0}> [/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/candidate-1/rust-bam]
+ 15,595,846 ( 0.79%)  ???:zlib_rs::deflate::flush_block_only [/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/candidate-1/rust-bam]
+ 15,116,647 ( 0.76%)  ???:<rust_bam::commands::CaptureReader<noodles_bgzf::io::reader::Reader<alloc::io::buffered::bufreader::BufReader<alloc::boxed::Box<dyn alloc::io::read::Read + core::marker::Send>>>> as alloc::io::read::Read>::read [/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/candidate-1/rust-bam]
+ 14,929,903 ( 0.76%)  ???:__memcmp_avx2_movbe [/usr/lib/libc.so.6]
+ 14,730,235 ( 0.75%)  ???:<noodles_bgzf::io::reader::Reader<alloc::io::buffered::bufreader::BufReader<alloc::boxed::Box<dyn alloc::io::read::Read + core::marker::Send>>> as alloc::io::read::Read>::read [/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/candidate-1/rust-bam]
+ 14,388,478 ( 0.73%)  /usr/src/debug/glibc/glibc/malloc/malloc.c:unlink_chunk.isra.0 [/usr/lib/libc.so.6]
+ 14,019,864 ( 0.71%)  ???:memchr::arch::x86_64::memchr::memchr_raw::find_avx2 [/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/candidate-1/rust-bam]
+ 13,904,023 ( 0.70%)  ???:rust_bam::commands::sort [/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/candidate-1/rust-bam]
+ 13,901,242 ( 0.70%)  ???:noodles_bam::record::codec::decoder::name::read_name [/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/candidate-1/rust-bam]
+ 12,002,160 ( 0.61%)  ???:noodles_bam::record::codec::decoder::quality_scores::read_quality_scores [/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/candidate-1/rust-bam]
+ 11,600,432 ( 0.59%)  ???:noodles_bam::record::codec::decoder::cigar::read_cigar [/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/candidate-1/rust-bam]
+ 11,434,270 ( 0.58%)  ???:rust_bam::commands::compare_heads [/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/candidate-1/rust-bam]
+ 11,158,928 ( 0.56%)  /usr/src/debug/glibc/glibc/malloc/malloc.c:__libc_malloc2 [/usr/lib/libc.so.6]
+ 10,626,769 ( 0.54%)  ???:<noodles_bgzf::io::writer::Writer<std::fs::File> as core::io::write::Write>::write_all [/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/candidate-1/rust-bam]
+  9,937,998 ( 0.50%)  ???:zlib_rs::deflate::slide_hash::avx2::slide_hash_chain [/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/candidate-1/rust-bam]
+  9,647,029 ( 0.49%)  ???:<alloc::raw_vec::RawVecInner<_>>::reserve::do_reserve_and_handle::<alloc::alloc::Global> [/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/candidate-1/rust-bam]
+  9,113,580 ( 0.46%)  ???:zlib_rs::deflate::compare256::avx2::compare256 [/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/candidate-1/rust-bam]
+  8,800,065 ( 0.45%)  ???:<rust_bam::io_util::AlignmentReader>::read_record [/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/candidate-1/rust-bam]
+  8,403,516 ( 0.43%)  ???:core::slice::sort::unstable::quicksort::quicksort::<usize, <[usize]>::sort_unstable_by<rust_bam::commands::sorted_indices::{closure#0}>::{closure#0}> [/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/candidate-1/rust-bam]
+  8,400,018 ( 0.43%)  ???:rust_bam::commands::merge_to_output::{closure#0} [/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/candidate-1/rust-bam]
+  7,500,000 ( 0.38%)  ???:noodles_bam::record::codec::encoder::cigar::write_cigar [/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/candidate-1/rust-bam]
+  7,491,560 ( 0.38%)  ???:zlib_rs::deflate::compare256::compare256_slice [/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/candidate-1/rust-bam]
+  7,410,533 ( 0.38%)  ???:<zlib_rs::deflate::Heap>::pqdownheap [/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/candidate-1/rust-bam]
+  7,241,693 ( 0.37%)  ???:zlib_rs::inflate::inftrees::inflate_table [/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/candidate-1/rust-bam]
+  5,599,638 ( 0.28%)  /usr/src/debug/glibc/glibc/malloc/malloc.c:_int_free_chunk [/usr/lib/libc.so.6]
+  5,307,859 ( 0.27%)  ???:<noodles_bgzf::io::writer::Writer<alloc::boxed::Box<dyn core::io::write::Write>> as core::io::write::Write>::write_all [/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/candidate-1/rust-bam]
+  5,300,000 ( 0.27%)  ???:<alloc::boxed::Box<dyn noodles_sam::alignment::record::cigar::Cigar> as noodles_sam::alignment::record::cigar::Cigar>::alignment_span [/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/candidate-1/rust-bam]
+  4,752,027 ( 0.24%)  ???:<zlib_rs::deflate::BitWriter>::send_bits_overflow [/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/candidate-1/rust-bam]
+  4,500,000 ( 0.23%)  ???:<core::iter::adapters::map::Map<core::iter::adapters::map::Map<core::slice::iter::Iter<(noodles_sam::alignment::record::data::field::tag::Tag, noodles_sam::alignment::record_buf::data::field::value::Value)>, <noodles_sam::alignment::record_buf::data::Data>::iter::{closure#0}>, <&noodles_sam::alignment::record_buf::data::Data as noodles_sam::alignment::record::data::Data>::iter::{closure#0}> as core::iter::traits::iterator::Iterator>::next [/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/candidate-1/rust-bam]
+  4,102,236 ( 0.21%)  ???:core::ptr::drop_glue::<noodles_sam::alignment::record_buf::data::Data> [/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/candidate-1/rust-bam]
+

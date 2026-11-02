@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "seed": 20261103,
+  "repeats": 3,
+  "warmups": 1,
+  "target_fastest_seconds": 15,
+  "minimum_desired_seconds": 10,
+  "affinities": {
+    "1": "4",
+    "2": "4,6",
+    "4": "0,2,4,6"
+  },
+  "workloads": [
+    {
+      "id": "real-stats",
+      "source_id": "real-1000000",
+      "case": "fx_stats",
+      "cpu_budgets": [
+        1,
+        2,
+        4
+      ],
+      "multiplicity": 120
+    },
+    {
+      "id": "synthetic-stats",
+      "source_id": "synthetic-1000000",
+      "case": "fx_stats",
+      "cpu_budgets": [
+        1,
+        2,
+        4
+      ],
+      "multiplicity": 120
+    },
+    {
+      "id": "bam-sort",
+      "source_id": "synthetic-bam-1000000",
+      "case": "bam_sort",
+      "cpu_budgets": [
+        1,
+        2,
+        4
+      ],
+      "multiplicity": 86
+    }
+  ]
+}

@@ -1,0 +1,344 @@
+{
+  "rust_bam": "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/sealed/rust-bam",
+  "samtools": "/tmp/bioinfo-readme-repro-oracles/bin/samtools",
+  "samtools_version": "samtools 1.24",
+  "cases": [
+    {
+      "name": "view_basic",
+      "category": "view",
+      "guard": "SAM text exactly matches samtools view",
+      "compare": "view",
+      "argv": [
+        "view",
+        "basic.bam"
+      ],
+      "status": "PASS",
+      "problems": [],
+      "detail": {
+        "samtools_exit": 0,
+        "rust_exit": 0
+      }
+    },
+    {
+      "name": "view_header",
+      "category": "view",
+      "guard": "-h includes the header",
+      "compare": "view",
+      "argv": [
+        "view",
+        "-h",
+        "basic.bam"
+      ],
+      "status": "PASS",
+      "problems": [],
+      "detail": {
+        "samtools_exit": 0,
+        "rust_exit": 0
+      }
+    },
+    {
+      "name": "view_header_only",
+      "category": "view",
+      "guard": "-H prints only the header",
+      "compare": "view",
+      "argv": [
+        "view",
+        "-H",
+        "basic.bam"
+      ],
+      "status": "PASS",
+      "problems": [],
+      "detail": {
+        "samtools_exit": 0,
+        "rust_exit": 0
+      }
+    },
+    {
+      "name": "view_count",
+      "category": "view",
+      "guard": "-c prints the record count",
+      "compare": "view",
+      "argv": [
+        "view",
+        "-c",
+        "basic.bam"
+      ],
+      "status": "PASS",
+      "problems": [],
+      "detail": {
+        "samtools_exit": 0,
+        "rust_exit": 0
+      }
+    },
+    {
+      "name": "view_empty",
+      "category": "view",
+      "guard": "a header with no records",
+      "compare": "view",
+      "argv": [
+        "view",
+        "empty.bam"
+      ],
+      "status": "PASS",
+      "problems": [],
+      "detail": {
+        "samtools_exit": 0,
+        "rust_exit": 0
+      }
+    },
+    {
+      "name": "view_sample_text",
+      "category": "view",
+      "guard": "SAM input is accepted as well as BAM",
+      "compare": "view",
+      "argv": [
+        "view",
+        "basic.sam"
+      ],
+      "status": "PASS",
+      "problems": [],
+      "detail": {
+        "samtools_exit": 0,
+        "rust_exit": 0
+      }
+    },
+    {
+      "name": "view_no_header_input",
+      "category": "view",
+      "guard": "a headerless SAM record stream",
+      "compare": "view",
+      "argv": [
+        "view",
+        "noheader.sam"
+      ],
+      "status": "PASS",
+      "problems": [],
+      "detail": {
+        "samtools_exit": 1,
+        "rust_exit": 1
+      }
+    },
+    {
+      "name": "view_bam_roundtrip",
+      "category": "view",
+      "guard": "-b output re-read by samtools matches",
+      "compare": "bam_roundtrip",
+      "argv": [
+        "view",
+        "-b",
+        "basic.bam"
+      ],
+      "status": "PASS",
+      "problems": [],
+      "detail": {
+        "rust_exit": 0,
+        "samtools_can_read_our_bam": true,
+        "quickcheck_on_our_bam": 0
+      }
+    },
+    {
+      "name": "flagstat_basic",
+      "category": "flagstat",
+      "guard": "all 16 counters match",
+      "compare": "flagstat",
+      "argv": [
+        "flagstat",
+        "basic.bam"
+      ],
+      "status": "PASS",
+      "problems": [],
+      "detail": {
+        "samtools_exit": 0,
+        "rust_exit": 0
+      }
+    },
+    {
+      "name": "flagstat_empty",
+      "category": "flagstat",
+      "guard": "N/A percentages on an empty file",
+      "compare": "flagstat",
+      "argv": [
+        "flagstat",
+        "empty.bam"
+      ],
+      "status": "PASS",
+      "problems": [],
+      "detail": {
+        "samtools_exit": 0,
+        "rust_exit": 0
+      }
+    },
+    {
+      "name": "idxstats_basic",
+      "category": "idxstats",
+      "guard": "per-reference counts and the * row",
+      "compare": "idxstats",
+      "argv": [
+        "idxstats",
+        "basic.bam"
+      ],
+      "status": "PASS",
+      "problems": [],
+      "detail": {
+        "samtools_exit": 0,
+        "rust_exit": 0
+      }
+    },
+    {
+      "name": "idxstats_empty",
+      "category": "idxstats",
+      "guard": "zeros with no records",
+      "compare": "idxstats",
+      "argv": [
+        "idxstats",
+        "empty.bam"
+      ],
+      "status": "PASS",
+      "problems": [],
+      "detail": {
+        "samtools_exit": 0,
+        "rust_exit": 0
+      }
+    },
+    {
+      "name": "quickcheck_valid",
+      "category": "quickcheck",
+      "guard": "a valid BAM passes",
+      "compare": "quickcheck",
+      "argv": [
+        "quickcheck",
+        "basic.bam"
+      ],
+      "status": "PASS",
+      "problems": [],
+      "detail": {
+        "samtools_exit": 0,
+        "rust_exit": 0
+      }
+    },
+    {
+      "name": "quickcheck_empty_valid",
+      "category": "quickcheck",
+      "guard": "a header-only BAM passes",
+      "compare": "quickcheck",
+      "argv": [
+        "quickcheck",
+        "empty.bam"
+      ],
+      "status": "PASS",
+      "problems": [],
+      "detail": {
+        "samtools_exit": 0,
+        "rust_exit": 0
+      }
+    },
+    {
+      "name": "sort_unsorted",
+      "category": "sort",
+      "guard": "coordinates ordered as samtools does",
+      "compare": "sort",
+      "argv": [
+        "sort",
+        "unsorted.bam"
+      ],
+      "status": "PASS",
+      "problems": [],
+      "detail": {
+        "rust_exit": 0,
+        "samtools_exit": 0,
+        "samtools_can_read_our_sorted_bam": true,
+        "quickcheck_on_our_sorted_bam": 0
+      }
+    },
+    {
+      "name": "sort_ties",
+      "category": "sort",
+      "guard": "same-start records keep forward before reverse",
+      "compare": "sort",
+      "argv": [
+        "sort",
+        "tie.bam"
+      ],
+      "status": "PASS",
+      "problems": [],
+      "detail": {
+        "rust_exit": 0,
+        "samtools_exit": 0,
+        "samtools_can_read_our_sorted_bam": true,
+        "quickcheck_on_our_sorted_bam": 0
+      }
+    },
+    {
+      "name": "sort_basic_sorted",
+      "category": "sort",
+      "guard": "an already-sorted file is unchanged",
+      "compare": "sort",
+      "argv": [
+        "sort",
+        "basic.bam"
+      ],
+      "status": "PASS",
+      "problems": [],
+      "detail": {
+        "rust_exit": 0,
+        "samtools_exit": 0,
+        "samtools_can_read_our_sorted_bam": true,
+        "quickcheck_on_our_sorted_bam": 0
+      }
+    },
+    {
+      "name": "sort_empty",
+      "category": "sort",
+      "guard": "an empty file sorts to an empty file",
+      "compare": "sort",
+      "argv": [
+        "sort",
+        "empty.bam"
+      ],
+      "status": "PASS",
+      "problems": [],
+      "detail": {
+        "rust_exit": 0,
+        "samtools_exit": 0,
+        "samtools_can_read_our_sorted_bam": true,
+        "quickcheck_on_our_sorted_bam": 0
+      }
+    },
+    {
+      "name": "index_sorted",
+      "category": "index",
+      "guard": "BAI is byte-identical to samtools'",
+      "compare": "index",
+      "argv": [
+        "index",
+        "basic.bam"
+      ],
+      "status": "PASS",
+      "problems": [],
+      "detail": {
+        "rust_exit": 0,
+        "samtools_exit": 0,
+        "bai_bytes": 176,
+        "region_query_exit": 0,
+        "region_query_count": "8"
+      }
+    },
+    {
+      "name": "index_rejects_unsorted",
+      "category": "index",
+      "guard": "an unsorted file is refused with an input-precondition failure",
+      "compare": "index_unsorted",
+      "argv": [
+        "index",
+        "unsorted.bam"
+      ],
+      "status": "PASS",
+      "problems": [],
+      "detail": {
+        "rust_exit": 3
+      }
+    }
+  ],
+  "total": 20,
+  "passed": 20
+}

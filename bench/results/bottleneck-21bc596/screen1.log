@@ -1,0 +1,65 @@
+START stats-real -1 before
+DONE stats-real -1 before 0.565315
+START stats-real -1 current
+DONE stats-real -1 current 0.163979
+START stats-real 0 current
+DONE stats-real 0 current 0.164242
+START stats-real 0 before
+DONE stats-real 0 before 0.565017
+START stats-real 1 current
+DONE stats-real 1 current 0.164183
+START stats-real 1 before
+DONE stats-real 1 before 0.564695
+START stats-real 2 before
+DONE stats-real 2 before 0.565346
+START stats-real 2 current
+DONE stats-real 2 current 0.163975
+START stats-synthetic -1 before
+DONE stats-synthetic -1 before 0.564247
+START stats-synthetic -1 current
+DONE stats-synthetic -1 current 0.164023
+START stats-synthetic 0 current
+DONE stats-synthetic 0 current 0.164093
+START stats-synthetic 0 before
+DONE stats-synthetic 0 before 0.565016
+START stats-synthetic 1 current
+DONE stats-synthetic 1 current 0.164808
+START stats-synthetic 1 before
+DONE stats-synthetic 1 before 0.565538
+START stats-synthetic 2 before
+DONE stats-synthetic 2 before 0.563709
+START stats-synthetic 2 current
+DONE stats-synthetic 2 current 0.164412
+START sort-c1 -1 before
+DONE sort-c1 -1 before 11.091486
+START sort-c1 -1 current
+DONE sort-c1 -1 current 10.336823
+START sort-c1 0 before
+DONE sort-c1 0 before 10.687086
+START sort-c1 0 current
+DONE sort-c1 0 current 10.283869
+START sort-c1 1 current
+DONE sort-c1 1 current 10.327208
+START sort-c1 1 before
+DONE sort-c1 1 before 10.89134
+START sort-c1 2 current
+DONE sort-c1 2 current 10.185952
+START sort-c1 2 before
+DONE sort-c1 2 before 10.840645
+START sort-c4 -1 current
+DONE sort-c4 -1 current 7.828209
+START sort-c4 -1 before
+DONE sort-c4 -1 before 8.585508
+START sort-c4 0 before
+DONE sort-c4 0 before 8.582623
+START sort-c4 0 current
+DONE sort-c4 0 current 7.681821
+START sort-c4 1 before
+DONE sort-c4 1 before 8.534026
+START sort-c4 1 current
+DONE sort-c4 1 current 7.782582
+START sort-c4 2 current
+DONE sort-c4 2 current 7.878124
+START sort-c4 2 before
+DONE sort-c4 2 before 8.679935
+SCREENING COMPLETE; OUTPUTS IDENTICAL

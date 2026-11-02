@@ -11,7 +11,9 @@ use crate::io::{
 use crate::lint::{Level, LintRecord, Linter};
 use crate::sample::{Sampler, Strategy};
 use crate::split::{self, SplitBy};
-use crate::stats::{GcSkewCounts, Merge, QualStats, QualityDecoder, SeqStats, DEFAULT_GAP_LETTERS};
+use crate::stats::{
+    GcSkewCounts, Merge, QualStats, QualityDecoder, SeqStats, SequenceCounter, DEFAULT_GAP_LETTERS,
+};
 use crate::table::{self, Layout as TableLayout, StatsRow};
 use crate::transform::{self, Transforms};
 use bioinfo_fastx::writer::Layout;
@@ -43,7 +45,7 @@ impl InputStats {
     fn absorb(
         &mut self,
         record: RecordView<'_>,
-        gaps: &[bool; 256],
+        sequence_counter: &SequenceCounter,
         quality: Option<&QualityDecoder>,
     ) {
         let length = record.sequence.len() as u64;
@@ -58,7 +60,7 @@ impl InputStats {
             return;
         };
         *self.lengths.entry(length).or_insert(0) += 1;
-        let sequence = SeqStats::from_gap_table(record.sequence, gaps);
+        let sequence = sequence_counter.stats(record.sequence);
         self.sum_gap += sequence.gap_count;
         self.sum_n += sequence.n_count;
         self.gc += sequence.gc;
@@ -190,10 +192,7 @@ fn collect_stats(
     let quality = options
         .all
         .then(|| QualityDecoder::new(options.quality_base));
-    let mut gaps = [false; 256];
-    for &byte in &options.gap_letters {
-        gaps[byte as usize] = true;
-    }
+    let sequence_counter = SequenceCounter::new(&options.gap_letters);
     let mut record = OwnedRecord::default();
     while reader
         .visit_record(&mut record, |record| {
@@ -201,7 +200,7 @@ fn collect_stats(
                 seq_type = transform::guess_seq_type(record.sequence);
                 first = false;
             }
-            stats.absorb(record, &gaps, quality.as_ref());
+            stats.absorb(record, &sequence_counter, quality.as_ref());
         })?
         .is_some()
     {}

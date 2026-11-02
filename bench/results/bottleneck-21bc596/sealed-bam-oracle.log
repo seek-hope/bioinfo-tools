@@ -1,0 +1,27 @@
+rust-bam : /home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/sealed/rust-bam
+samtools : /tmp/bioinfo-readme-repro-oracles/bin/samtools
+samtools 1.24
+cases    : 20
+
+PASS  view       view_basic                 SAM text exactly matches samtools view
+PASS  view       view_header                -h includes the header
+PASS  view       view_header_only           -H prints only the header
+PASS  view       view_count                 -c prints the record count
+PASS  view       view_empty                 a header with no records
+PASS  view       view_sample_text           SAM input is accepted as well as BAM
+PASS  view       view_no_header_input       a headerless SAM record stream
+PASS  view       view_bam_roundtrip         -b output re-read by samtools matches
+PASS  flagstat   flagstat_basic             all 16 counters match
+PASS  flagstat   flagstat_empty             N/A percentages on an empty file
+PASS  idxstats   idxstats_basic             per-reference counts and the * row
+PASS  idxstats   idxstats_empty             zeros with no records
+PASS  quickcheck quickcheck_valid           a valid BAM passes
+PASS  quickcheck quickcheck_empty_valid     a header-only BAM passes
+PASS  sort       sort_unsorted              coordinates ordered as samtools does
+PASS  sort       sort_ties                  same-start records keep forward before reverse
+PASS  sort       sort_basic_sorted          an already-sorted file is unchanged
+PASS  sort       sort_empty                 an empty file sorts to an empty file
+PASS  index      index_sorted               BAI is byte-identical to samtools'
+PASS  index      index_rejects_unsorted     an unsorted file is refused with an input-precondition failure
+
+20/20 cases passed

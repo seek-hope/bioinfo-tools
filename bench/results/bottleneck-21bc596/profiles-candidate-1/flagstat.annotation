@@ -1,0 +1,44 @@
+--------------------------------------------------------------------------------
+Profile data file '/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/profiles-candidate-1/flagstat.callgrind' (creator: callgrind-3.25.1)
+--------------------------------------------------------------------------------
+I1 cache: 
+D1 cache: 
+LL cache: 
+Timerange: Basic block 0 - 37501573
+Trigger: Program termination
+Profiled target:  /home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/candidate-1/rust-bam flagstat /tmp/bioinfo-readme-benchmark/bam-100000/unsorted.bam (PID 2325173, part 1)
+Events recorded:  Ir
+Events shown:     Ir
+Event sort order: Ir
+Thresholds:       95
+Include dirs:     
+User annotated:   
+Auto-annotation:  off
+
+--------------------------------------------------------------------------------
+Ir                   
+--------------------------------------------------------------------------------
+164,865,740 (100.0%)  PROGRAM TOTALS
+
+--------------------------------------------------------------------------------
+Ir                   file:function
+--------------------------------------------------------------------------------
+24,150,483 (14.65%)  ???:zlib_rs::inflate::inflate_fast_help_avx2 [/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/candidate-1/rust-bam]
+17,299,998 (10.49%)  ???:noodles_bam::record::codec::decoder::data::read_data [/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/candidate-1/rust-bam]
+17,200,010 (10.43%)  ???:noodles_bam::record::codec::decoder::sequence::read_sequence [/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/candidate-1/rust-bam]
+16,700,000 (10.13%)  ???:noodles_bam::record::codec::decoder::decode [/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/candidate-1/rust-bam]
+15,553,546 ( 9.43%)  ???:__memcpy_avx_unaligned_erms [/usr/lib/libc.so.6]
+ 8,800,065 ( 5.34%)  ???:<rust_bam::io_util::AlignmentReader>::read_record [/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/candidate-1/rust-bam]
+ 7,241,693 ( 4.39%)  ???:zlib_rs::inflate::inftrees::inflate_table [/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/candidate-1/rust-bam]
+ 7,000,365 ( 4.25%)  ???:memchr::arch::x86_64::memchr::memchr_raw::find_avx2 [/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/candidate-1/rust-bam]
+ 5,800,023 ( 3.52%)  ???:noodles_bam::record::codec::decoder::name::read_name [/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/candidate-1/rust-bam]
+ 5,490,360 ( 3.33%)  ???:<zlib_rs::crc32::pclmulqdq::Accumulator>::fold_help::<false> [/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/candidate-1/rust-bam]
+ 5,400,008 ( 3.28%)  ???:noodles_bam::record::codec::decoder::cigar::read_cigar [/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/candidate-1/rust-bam]
+ 4,906,940 ( 2.98%)  ???:<noodles_bgzf::io::reader::Reader<alloc::io::buffered::bufreader::BufReader<alloc::boxed::Box<dyn alloc::io::read::Read + core::marker::Send>>> as alloc::io::read::Read>::read [/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/candidate-1/rust-bam]
+ 4,900,515 ( 2.97%)  ???:rust_bam::commands::flagstat [/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/candidate-1/rust-bam]
+ 4,000,040 ( 2.43%)  ???:noodles_bam::record::codec::decoder::quality_scores::read_quality_scores [/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/candidate-1/rust-bam]
+ 3,818,853 ( 2.32%)  ???:__memset_avx2_unaligned_erms [/usr/lib/libc.so.6]
+ 3,800,237 ( 2.31%)  ???:<noodles_bgzf::io::reader::Reader<alloc::io::buffered::bufreader::BufReader<alloc::boxed::Box<dyn alloc::io::read::Read + core::marker::Send>>> as alloc::io::read::Read>::read_exact [/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/candidate-1/rust-bam]
+ 3,312,038 ( 2.01%)  /usr/src/debug/glibc/glibc/malloc/malloc.c:free [/usr/lib/libc.so.6]
+ 3,005,926 ( 1.82%)  /usr/src/debug/glibc/glibc/malloc/malloc.c:malloc [/usr/lib/libc.so.6]
+

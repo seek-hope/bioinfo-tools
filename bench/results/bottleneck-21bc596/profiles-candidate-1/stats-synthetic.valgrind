@@ -1,0 +1,12 @@
+==2325119== Callgrind, a call-graph generating cache profiler
+==2325119== Copyright (C) 2002-2017, and GNU GPL'd, by Josef Weidendorfer et al.
+==2325119== Using Valgrind-3.25.1 and LibVEX; rerun with -h for copyright info
+==2325119== Command: /home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/candidate-1/rust-fx stats -a -T /tmp/bioinfo-readme-benchmark/synthetic-100000.fastq
+==2325119== Parent PID: 2325118
+==2325119== 
+==2325119== For interactive control, run 'callgrind_control -h'.
+==2325119== 
+==2325119== Events    : Ir
+==2325119== Collected : 150047438
+==2325119== 
+==2325119== I   refs:      150,047,438

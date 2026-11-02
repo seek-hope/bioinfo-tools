@@ -1,0 +1,206 @@
+{
+  "passed": true,
+  "kind": "callgrind-instruction-audit",
+  "cases": [
+    {
+      "name": "stats-real",
+      "observations": {
+        "before": {
+          "instructions": 563983731,
+          "input_sha256": "75c18153184ba1574b498a362cbdd3add53baf201a85afdd1022bf3e732bb03e",
+          "output_sha256": "43c2cc739046aecd37490ca60af1193387d2df674b87288f6002b44975e3f0f7",
+          "callgrind_sha256": "602fa2ea2c2a465f5f30d8fa4c6695d8aa0d39a5393840a651ae01ba7206f722",
+          "command": [
+            "taskset",
+            "-c",
+            "4",
+            "valgrind",
+            "--tool=callgrind",
+            "--error-exitcode=97",
+            "--callgrind-out-file=/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/profiles/stats-real.callgrind",
+            "--log-file=/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/profiles/stats-real.valgrind",
+            "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/before/rust-fx",
+            "stats",
+            "-a",
+            "-T",
+            "/tmp/bioinfo-readme-benchmark/real-100000.fastq"
+          ]
+        },
+        "current": {
+          "instructions": 153092893,
+          "input_sha256": "75c18153184ba1574b498a362cbdd3add53baf201a85afdd1022bf3e732bb03e",
+          "output_sha256": "43c2cc739046aecd37490ca60af1193387d2df674b87288f6002b44975e3f0f7",
+          "callgrind_sha256": "bfcd488cba60bdf2177a189ace63588eefcdc4df63882502065c5c072cd3b956",
+          "command": [
+            "taskset",
+            "-c",
+            "4",
+            "valgrind",
+            "--tool=callgrind",
+            "--error-exitcode=97",
+            "--callgrind-out-file=/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/profiles-candidate-1/stats-real.callgrind",
+            "--log-file=/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/profiles-candidate-1/stats-real.valgrind",
+            "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/candidate-1/rust-fx",
+            "stats",
+            "-a",
+            "-T",
+            "/tmp/bioinfo-readme-benchmark/real-100000.fastq"
+          ]
+        }
+      },
+      "instruction_reduction_fraction": 0.728550870202318
+    },
+    {
+      "name": "stats-synthetic",
+      "observations": {
+        "before": {
+          "instructions": 560938463,
+          "input_sha256": "5b5567c37911fbb90eeeee9ee4cf055a06ca37ada4f5752ac9e2f082e091cd5e",
+          "output_sha256": "d82bee04202a2845f3451e0ad8a2de3128a962c5db3ebdfd7a6c2268fe85f8a0",
+          "callgrind_sha256": "9c35329fe900cdf094286b1f4c4b7a5912c3217de0c591a473742eb9aadbfc71",
+          "command": [
+            "taskset",
+            "-c",
+            "4",
+            "valgrind",
+            "--tool=callgrind",
+            "--error-exitcode=97",
+            "--callgrind-out-file=/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/profiles/stats-synthetic.callgrind",
+            "--log-file=/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/profiles/stats-synthetic.valgrind",
+            "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/before/rust-fx",
+            "stats",
+            "-a",
+            "-T",
+            "/tmp/bioinfo-readme-benchmark/synthetic-100000.fastq"
+          ]
+        },
+        "current": {
+          "instructions": 150047438,
+          "input_sha256": "5b5567c37911fbb90eeeee9ee4cf055a06ca37ada4f5752ac9e2f082e091cd5e",
+          "output_sha256": "d82bee04202a2845f3451e0ad8a2de3128a962c5db3ebdfd7a6c2268fe85f8a0",
+          "callgrind_sha256": "f0ffaea5c82c5149a16b4825a9ec4c87a2ecc26cc2e6c09596078cf921a2f9b4",
+          "command": [
+            "taskset",
+            "-c",
+            "4",
+            "valgrind",
+            "--tool=callgrind",
+            "--error-exitcode=97",
+            "--callgrind-out-file=/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/profiles-candidate-1/stats-synthetic.callgrind",
+            "--log-file=/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/profiles-candidate-1/stats-synthetic.valgrind",
+            "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/candidate-1/rust-fx",
+            "stats",
+            "-a",
+            "-T",
+            "/tmp/bioinfo-readme-benchmark/synthetic-100000.fastq"
+          ]
+        }
+      },
+      "instruction_reduction_fraction": 0.7325064193360546
+    },
+    {
+      "name": "flagstat",
+      "observations": {
+        "before": {
+          "instructions": 164865213,
+          "input_sha256": "1f8aac0545db0eb0f65e94eaf2d7d165160216a467bc1317ff7bf439f969cadb",
+          "output_sha256": "fe4b9ea41d9734fc2732f07b549e61dc61290e3f746dbc1bf85660dbb18ca58a",
+          "callgrind_sha256": "13eb2389fa8fe4b249cf23a2aed5f711b5ec5e2a0e9f3f9b9d6393f5ba20f75f",
+          "command": [
+            "taskset",
+            "-c",
+            "4",
+            "valgrind",
+            "--tool=callgrind",
+            "--error-exitcode=97",
+            "--callgrind-out-file=/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/profiles/flagstat.callgrind",
+            "--log-file=/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/profiles/flagstat.valgrind",
+            "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/before/rust-bam",
+            "flagstat",
+            "/tmp/bioinfo-readme-benchmark/bam-100000/unsorted.bam"
+          ]
+        },
+        "current": {
+          "instructions": 164865740,
+          "input_sha256": "1f8aac0545db0eb0f65e94eaf2d7d165160216a467bc1317ff7bf439f969cadb",
+          "output_sha256": "fe4b9ea41d9734fc2732f07b549e61dc61290e3f746dbc1bf85660dbb18ca58a",
+          "callgrind_sha256": "d7d6e7e4c0fa408e8826bc001b3e614cf4a4e70e444c164350b9a04c88948d96",
+          "command": [
+            "taskset",
+            "-c",
+            "4",
+            "valgrind",
+            "--tool=callgrind",
+            "--error-exitcode=97",
+            "--callgrind-out-file=/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/profiles-candidate-1/flagstat.callgrind",
+            "--log-file=/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/profiles-candidate-1/flagstat.valgrind",
+            "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/candidate-1/rust-bam",
+            "flagstat",
+            "/tmp/bioinfo-readme-benchmark/bam-100000/unsorted.bam"
+          ]
+        }
+      },
+      "instruction_reduction_fraction": -3.1965506270825728e-06
+    },
+    {
+      "name": "sort",
+      "observations": {
+        "before": {
+          "instructions": 2103324121,
+          "input_sha256": "1f8aac0545db0eb0f65e94eaf2d7d165160216a467bc1317ff7bf439f969cadb",
+          "output_sha256": "f524db42e6ca7b9ff12aafb5f2a6ea6aa313b7f3440a74a082ef962bed053631",
+          "callgrind_sha256": "82a42798235ff327f1376f4b0ec58047f94ee01ce64dc28ac9797dc08020a717",
+          "command": [
+            "taskset",
+            "-c",
+            "4",
+            "valgrind",
+            "--tool=callgrind",
+            "--error-exitcode=97",
+            "--callgrind-out-file=/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/profiles/sort.callgrind",
+            "--log-file=/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/profiles/sort.valgrind",
+            "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/before/rust-bam",
+            "sort",
+            "--max-memory",
+            "1MiB",
+            "--threads",
+            "1",
+            "-o",
+            "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/profiles/sort.bam",
+            "/tmp/bioinfo-readme-benchmark/bam-100000/unsorted.bam"
+          ]
+        },
+        "current": {
+          "instructions": 1976122580,
+          "input_sha256": "1f8aac0545db0eb0f65e94eaf2d7d165160216a467bc1317ff7bf439f969cadb",
+          "output_sha256": "f524db42e6ca7b9ff12aafb5f2a6ea6aa313b7f3440a74a082ef962bed053631",
+          "callgrind_sha256": "31572a1e77cbba485611210afcf53868e828fa5034bbee253d09fd3f75897ef3",
+          "command": [
+            "taskset",
+            "-c",
+            "4",
+            "valgrind",
+            "--tool=callgrind",
+            "--error-exitcode=97",
+            "--callgrind-out-file=/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/profiles-candidate-1/sort.callgrind",
+            "--log-file=/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/profiles-candidate-1/sort.valgrind",
+            "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/candidate-1/rust-bam",
+            "sort",
+            "--max-memory",
+            "1MiB",
+            "--threads",
+            "1",
+            "-o",
+            "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/profiles-candidate-1/sort.bam",
+            "/tmp/bioinfo-readme-benchmark/bam-100000/unsorted.bam"
+          ]
+        }
+      },
+      "instruction_reduction_fraction": 0.06047643334186814
+    }
+  ],
+  "source_checks": {
+    "candidate-1": 123,
+    "candidate-2b": 124
+  }
+}

@@ -5,7 +5,7 @@
 //! The counting and ordering logic lives in `crate::stats` and
 //! `crate::sort_order` so it can be unit-tested without touching the filesystem.
 
-use std::collections::{BTreeMap, BTreeSet, BinaryHeap, HashMap};
+use std::collections::{BTreeMap, BTreeSet, HashMap};
 use std::fs::File;
 use std::io::{BufReader, BufWriter, Read, Write};
 use std::num::NonZero;
@@ -2155,56 +2155,70 @@ struct MergeItem {
     key: SortKey,
     record: Record,
     frame: Vec<u8>,
-    run: usize,
 }
 
-impl PartialEq for MergeItem {
-    fn eq(&self, other: &Self) -> bool {
-        self.key == other.key
+struct RunMerge {
+    readers: Vec<RunReader>,
+    heads: Vec<Option<MergeItem>>,
+    tree: crate::merge_tree::MergeTree,
+}
+
+fn compare_heads(heads: &[Option<MergeItem>], a: usize, b: usize) -> std::cmp::Ordering {
+    heads[a]
+        .as_ref()
+        .expect("active merge head")
+        .key
+        .cmp(&heads[b].as_ref().expect("active merge head").key)
+}
+
+impl RunMerge {
+    fn refill(&mut self, run: usize) -> Result<()> {
+        let item = self.heads[run].as_mut().expect("winning merge head");
+        if !next_from_run(
+            &mut self.readers[run],
+            &mut item.record,
+            &mut item.key,
+            &mut item.frame,
+        )? {
+            self.heads[run] = None;
+        }
+        self.tree.replace(run, self.heads[run].is_some(), |a, b| {
+            compare_heads(&self.heads, a, b)
+        });
+        Ok(())
     }
 }
 
-impl Eq for MergeItem {}
-
-impl PartialOrd for MergeItem {
-    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-        Some(self.cmp(other))
-    }
-}
-
-impl Ord for MergeItem {
-    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-        // Reverse the key comparison: BinaryHeap is a max-heap, we need a min-heap.
-        other
-            .key
-            .cmp(&self.key)
-            .then_with(|| other.run.cmp(&self.run))
-    }
-}
-
-fn open_runs(paths: &[PathBuf]) -> Result<(Vec<RunReader>, BinaryHeap<MergeItem>)> {
+fn open_runs(paths: &[PathBuf]) -> Result<RunMerge> {
     let mut readers = Vec::with_capacity(paths.len());
-    let mut heap = BinaryHeap::new();
-    for (run, path) in paths.iter().enumerate() {
+    let mut heads = Vec::with_capacity(paths.len());
+    for path in paths {
         let mut reader = open_run(path)?;
         let mut record = Record::default();
         let mut key = key_for(&record, 0);
         let mut frame = Vec::new();
-        if next_from_run(&mut reader, &mut record, &mut key, &mut frame)? {
-            heap.push(MergeItem {
-                key,
-                record,
-                frame,
-                run,
-            });
-        }
+        let head = if next_from_run(&mut reader, &mut record, &mut key, &mut frame)? {
+            Some(MergeItem { key, record, frame })
+        } else {
+            None
+        };
+        heads.push(head);
         readers.push(reader);
     }
-    Ok((readers, heap))
+    let tree = crate::merge_tree::MergeTree::new(
+        heads.len(),
+        |i| heads[i].is_some(),
+        |a, b| compare_heads(&heads, a, b),
+    );
+    Ok(RunMerge {
+        readers,
+        heads,
+        tree,
+    })
 }
 
 fn merge_to_run(temp: &mut TempDir, paths: &[PathBuf], header: &sam::Header) -> Result<PathBuf> {
-    let (mut readers, mut heap) = open_runs(paths)?;
+    let mut merge = open_runs(paths)?;
     let path = temp.run_path();
     let index_path = path.with_extension("idx");
     let file = File::create(&path)
@@ -2214,7 +2228,8 @@ fn merge_to_run(temp: &mut TempDir, paths: &[PathBuf], header: &sam::Header) -> 
     let mut index_file = BufWriter::with_capacity(64 * 1024, index_file);
     let mut writer = BamWriter::new_fast(file);
     writer.write_header(header)?;
-    while let Some(mut item) = heap.pop() {
+    while let Some(run) = merge.tree.winner() {
+        let item = merge.heads[run].as_mut().expect("winning merge head");
         if item.frame.is_empty() {
             writer.write_record(header, &item.record)?;
         } else {
@@ -2226,14 +2241,7 @@ fn merge_to_run(temp: &mut TempDir, paths: &[PathBuf], header: &sam::Header) -> 
             // allocations in run buffers after they have been written.
             item.record = Record::default();
         }
-        if next_from_run(
-            &mut readers[item.run],
-            &mut item.record,
-            &mut item.key,
-            &mut item.frame,
-        )? {
-            heap.push(item);
-        }
+        merge.refill(run)?;
     }
     let file = writer.finish()?;
     file.sync_all()
@@ -2408,21 +2416,15 @@ pub fn sort(options: SortOptions) -> Result<u64> {
 }
 
 fn merge_to_output(options: &SortOptions, paths: &[PathBuf], header: &sam::Header) -> Result<()> {
-    let (mut readers, mut heap) = open_runs(paths)?;
+    let mut merge = open_runs(paths)?;
     write_records(options, header, |record, frame| {
-        if let Some(mut item) = heap.pop() {
+        if let Some(run) = merge.tree.winner() {
+            let item = merge.heads[run].as_mut().expect("winning merge head");
             // Keep read-ahead before output: a malformed replacement must
             // still prevent the popped record from being written.
             std::mem::swap(record, &mut item.record);
             std::mem::swap(frame, &mut item.frame);
-            if next_from_run(
-                &mut readers[item.run],
-                &mut item.record,
-                &mut item.key,
-                &mut item.frame,
-            )? {
-                heap.push(item);
-            }
+            merge.refill(run)?;
             Ok(true)
         } else {
             Ok(false)
@@ -2529,8 +2531,8 @@ mod tests {
             b"XX?",
         ] {
             let (_temp, path, header) = run_with_extra_index();
-            let (_, mut heap) = open_runs(std::slice::from_ref(&path)).unwrap();
-            let mut frame = heap.pop().unwrap().frame;
+            let mut merge = open_runs(std::slice::from_ref(&path)).unwrap();
+            let mut frame = merge.heads[0].take().unwrap().frame;
             frame.extend_from_slice(invalid);
             let size = u32::try_from(frame.len() - 4).unwrap();
             frame[..4].copy_from_slice(&size.to_le_bytes());

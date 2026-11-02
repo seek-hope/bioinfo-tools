@@ -1,0 +1,72 @@
+{
+  "schema_version": 1,
+  "seed": 20261031,
+  "real_source": {
+    "run": "SRR2584863",
+    "organism": "Escherichia coli B str. REL606",
+    "instrument": "Illumina HiSeq 2500",
+    "mate": 1,
+    "url": "https://ftp.sra.ebi.ac.uk/vol1/fastq/SRR258/003/SRR2584863/SRR2584863_1.fastq.gz",
+    "md5": "4a1529a4165970302d6d8cb50b6e7a43",
+    "bytes": 183292913,
+    "records": 1553259,
+    "sha256": "c2b69fdbe3423a8ab9fb185cb57cff574874e32deb3cebd3396a0deb3eb2dcf9"
+  },
+  "parent_manifest_sha256": "c41fdcff7b6f48fcbb63137189e2240e5645eb49570a84a3dada4a48962dd112",
+  "generator_sha256": "9cc76c590ee219c8157b5f8237186f1950a52b2944fb3fcf1f406e4d3b0d828f",
+  "shared_generator_sha256": "ab13d23ffdc1f4df3c46b121b08566dd1a9adf846e60d5422750281e0417e7df",
+  "datasets": [
+    {
+      "id": "synthetic-10000000",
+      "kind": "fastq",
+      "path": "/tmp/bioinfo-readme-benchmark/synthetic-10000000.fastq",
+      "source": "synthetic",
+      "seed": 20261031,
+      "records": 10000000,
+      "bases": 1500000000,
+      "gc_bases": 750761556,
+      "min_length": 150,
+      "max_length": 150,
+      "sha256": "a6fb750732e992bbbe718aca2c461f6d92b8b468baf0f2054126f5132bd58f90",
+      "bytes": 3240000000,
+      "independent_fastq_validation": true
+    },
+    {
+      "id": "synthetic-bam-10000000",
+      "kind": "bam",
+      "records": 10000000,
+      "bundles": 357112,
+      "expected_dedup_records": 714224,
+      "unsorted": "/tmp/bioinfo-readme-benchmark/bam-10000000/unsorted.bam",
+      "sorted": "/tmp/bioinfo-readme-benchmark/bam-10000000/sorted.bam",
+      "expected_qnames": "/tmp/bioinfo-readme-benchmark/bam-10000000/dedup-qnames.txt",
+      "sha256": {
+        "unsorted.bam": "ac682bf424751f56f5f811d6ee008cc4558ef6dd1b871d408e54cf31068da5e8",
+        "sorted.bam": "9375e83d06000dd6b2bb6c8c8b67898ed9e74800bc645096986b407601cd5dd5",
+        "sorted.bam.bai": "d354e8f89be40fa2f32259da315a40cacd8972a6de5626aef13b3b4041499bc2",
+        "dedup-qnames.txt": "f721f8012edf0fc9ce009ef95651c98bae1d061f68d6b5985266c53d6af119bb"
+      },
+      "generator": {
+        "seed": 20261031,
+        "bundle_scales": [
+          1,
+          10,
+          100
+        ],
+        "umi_counts_per_scale": [
+          6,
+          2,
+          1,
+          1
+        ],
+        "umi_distance_from_major": [
+          0,
+          1,
+          2,
+          10
+        ],
+        "independent_representative": "unique highest MAPQ"
+      }
+    }
+  ]
+}

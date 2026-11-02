@@ -1,0 +1,44 @@
+[
+  {
+    "name": "candidate-2b-tests",
+    "command": [
+      "cargo",
+      "test",
+      "--release",
+      "--locked",
+      "-p",
+      "rust-fx",
+      "-p",
+      "rust-bam"
+    ],
+    "status": 0
+  },
+  {
+    "name": "candidate-2b-clippy",
+    "command": [
+      "cargo",
+      "clippy",
+      "--release",
+      "--locked",
+      "-p",
+      "rust-bam",
+      "-p",
+      "rust-fx",
+      "--all-targets",
+      "--",
+      "-D",
+      "warnings"
+    ],
+    "status": 0
+  },
+  {
+    "name": "candidate-2b-seal",
+    "command": [
+      "python3",
+      "bench/scale_seal.py",
+      "--outdir",
+      "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/candidate-2b"
+    ],
+    "status": 0
+  }
+]

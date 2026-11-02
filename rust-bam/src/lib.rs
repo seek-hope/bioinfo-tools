@@ -35,6 +35,7 @@ pub mod error;
 pub mod format;
 pub mod index_util;
 pub mod io_util;
+mod merge_tree;
 pub mod sort_order;
 pub mod stats;
 

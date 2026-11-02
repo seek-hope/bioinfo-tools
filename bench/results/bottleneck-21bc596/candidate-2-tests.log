@@ -1,0 +1,74 @@
+   Compiling rust-fx v0.1.0 (/home/rimuru/Projects/Code/for_fun/bioinfo-tools/rust-fx)
+   Compiling rust-bam v0.1.0 (/home/rimuru/Projects/Code/for_fun/bioinfo-tools/rust-bam)
+error[E0599]: no method named `write_alignment_record` found for mutable reference `&mut noodles::noodles_bam::io::Writer<noodles::noodles_bgzf::io::Writer<File>>` in the current scope
+  --> rust-bam/src/sort_run_writer.rs:43:44
+   |
+43 |             Self::Serial(writer) => writer.write_alignment_record(header, record),
+   |                                            ^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = help: items from traits can only be used if the trait is in scope
+help: trait `Write` which provides `write_alignment_record` is implemented but not in scope; perhaps you want to import it
+   |
+ 3 + use noodles::noodles_sam::alignment::io::Write;
+   |
+help: there is a method `write_record` with a similar name
+   |
+43 -             Self::Serial(writer) => writer.write_alignment_record(header, record),
+43 +             Self::Serial(writer) => writer.write_record(header, record),
+   |
+
+error[E0599]: no method named `write_alignment_record` found for mutable reference `&mut noodles::noodles_bam::io::Writer<MultithreadedWriter<File>>` in the current scope
+  --> rust-bam/src/sort_run_writer.rs:44:46
+   |
+44 |             Self::Parallel(writer) => writer.write_alignment_record(header, record),
+   |                                              ^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = help: items from traits can only be used if the trait is in scope
+help: trait `Write` which provides `write_alignment_record` is implemented but not in scope; perhaps you want to import it
+   |
+ 3 + use noodles::noodles_sam::alignment::io::Write;
+   |
+help: there is a method `write_record` with a similar name
+   |
+44 -             Self::Parallel(writer) => writer.write_alignment_record(header, record),
+44 +             Self::Parallel(writer) => writer.write_record(header, record),
+   |
+
+error[E0599]: no method named `write_alignment_record` found for mutable reference `&mut noodles::noodles_bam::io::Writer<noodles::noodles_bgzf::io::Writer<std::fs::File>>` in the current scope
+  --> rust-bam/src/sort_run_writer.rs:43:44
+   |
+43 |             Self::Serial(writer) => writer.write_alignment_record(header, record),
+   |                                            ^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = help: items from traits can only be used if the trait is in scope
+help: trait `Write` which provides `write_alignment_record` is implemented but not in scope; perhaps you want to import it
+   |
+ 3 + use noodles::noodles_sam::alignment::io::Write;
+   |
+help: there is a method `write_record` with a similar name
+   |
+43 -             Self::Serial(writer) => writer.write_alignment_record(header, record),
+43 +             Self::Serial(writer) => writer.write_record(header, record),
+   |
+
+error[E0599]: no method named `write_alignment_record` found for mutable reference `&mut noodles::noodles_bam::io::Writer<MultithreadedWriter<std::fs::File>>` in the current scope
+  --> rust-bam/src/sort_run_writer.rs:44:46
+   |
+44 |             Self::Parallel(writer) => writer.write_alignment_record(header, record),
+   |                                              ^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = help: items from traits can only be used if the trait is in scope
+help: trait `Write` which provides `write_alignment_record` is implemented but not in scope; perhaps you want to import it
+   |
+ 3 + use noodles::noodles_sam::alignment::io::Write;
+   |
+help: there is a method `write_record` with a similar name
+   |
+44 -             Self::Parallel(writer) => writer.write_alignment_record(header, record),
+44 +             Self::Parallel(writer) => writer.write_record(header, record),
+   |
+
+For more information about this error, try `rustc --explain E0599`.
+error: could not compile `rust-bam` (lib) due to 2 previous errors
+warning: build failed, waiting for other jobs to finish...
+error: could not compile `rust-bam` (lib test) due to 2 previous errors

@@ -126,6 +126,51 @@ impl SeqStats {
     }
 }
 
+// A lane contributes at most one per byte. Flush before any 16-bit lane can
+// carry into its neighbour, including for arbitrarily long wrapped records.
+const COUNT_CHUNK: usize = u16::MAX as usize;
+
+/// Per-file integer contributions, packed into four independent 16-bit lanes.
+/// Classification and arbitrary gap membership are computed once per byte value.
+pub(crate) struct SequenceCounter {
+    contributions: [u64; 256],
+}
+
+impl SequenceCounter {
+    pub(crate) fn new(gap_letters: &[u8]) -> Self {
+        let mut gaps = [false; 256];
+        for &byte in gap_letters {
+            gaps[byte as usize] = true;
+        }
+        Self {
+            contributions: std::array::from_fn(|i| {
+                let byte = i as u8;
+                u64::from(is_gc_base(byte))
+                    | (u64::from(is_at_base(byte)) << 16)
+                    | (u64::from(matches!(byte, b'N' | b'n' | b'X' | b'x')) << 32)
+                    | (u64::from(gaps[i]) << 48)
+            }),
+        }
+    }
+
+    pub(crate) fn stats(&self, sequence: &[u8]) -> SeqStats {
+        let mut stats = SeqStats {
+            length: sequence.len() as u64,
+            ..SeqStats::default()
+        };
+        for chunk in sequence.chunks(COUNT_CHUNK) {
+            let counts = chunk
+                .iter()
+                .fold(0u64, |sum, &byte| sum + self.contributions[byte as usize]);
+            stats.gc += counts & 0xffff;
+            stats.at += (counts >> 16) & 0xffff;
+            stats.n_count += (counts >> 32) & 0xffff;
+            stats.gap_count += counts >> 48;
+        }
+        stats
+    }
+}
+
 /// Separate G and C counts, needed for GC-Skew.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub struct GcSkewCounts {
@@ -178,8 +223,7 @@ pub struct QualStats {
 /// additions still occur in their original per-base, per-record order.
 pub(crate) struct QualityDecoder {
     probabilities: [f64; 256],
-    q20: u16,
-    q30: u16,
+    counts: [u32; 256],
 }
 
 impl QualityDecoder {
@@ -189,27 +233,30 @@ impl QualityDecoder {
             probabilities: std::array::from_fn(|byte| {
                 probabilities[(byte as u8).saturating_sub(base) as usize]
             }),
-            q20: base as u16 + 20,
-            q30: base as u16 + 30,
+            counts: std::array::from_fn(|byte| {
+                u32::from(byte as u16 >= base as u16 + 20)
+                    | (u32::from(byte as u16 >= base as u16 + 30) << 16)
+            }),
         }
     }
 
     pub(crate) fn stats(&self, qualities: &[u8]) -> QualStats {
-        let (q20, q30) = qualities.iter().fold((0, 0), |(q20, q30), &byte| {
-            (
-                q20 + u64::from(byte as u16 >= self.q20),
-                q30 + u64::from(byte as u16 >= self.q30),
-            )
-        });
-        let error_sum = qualities
-            .iter()
-            .fold(0.0, |sum, &byte| sum + self.probabilities[byte as usize]);
-        QualStats {
+        let mut stats = QualStats {
             bases: qualities.len() as u64,
-            q20,
-            q30,
-            error_sum,
+            ..QualStats::default()
+        };
+        for chunk in qualities.chunks(COUNT_CHUNK) {
+            let mut counts = 0u32;
+            for &byte in chunk {
+                counts += self.counts[byte as usize];
+                // Keep a single accumulator across chunks: regrouping this sum
+                // (including using histograms or multiplication) changes bits.
+                stats.error_sum += self.probabilities[byte as usize];
+            }
+            stats.q20 += u64::from(counts & 0xffff);
+            stats.q30 += u64::from(counts >> 16);
         }
+        stats
     }
 }
 
@@ -296,6 +343,85 @@ impl Merge for QualStats {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn packed_sequence_counts_match_scalar_across_lane_boundaries() {
+        let all_bytes: Vec<u8> = (0..=255).collect();
+        for gaps in [DEFAULT_GAP_LETTERS, b"GgNnUU", b"\0\xffGG", &all_bytes] {
+            let counter = SequenceCounter::new(gaps);
+            for length in [
+                0,
+                1,
+                255,
+                COUNT_CHUNK - 1,
+                COUNT_CHUNK,
+                COUNT_CHUNK + 1,
+                2 * COUNT_CHUNK + 1,
+            ] {
+                let mixed: Vec<_> = (0..length).map(|i| i as u8).collect();
+                assert_eq!(counter.stats(&mixed), SeqStats::from_sequence(&mixed, gaps));
+                for byte in [b'G', b'n', b'U', 255] {
+                    let repeated = vec![byte; length];
+                    assert_eq!(
+                        counter.stats(&repeated),
+                        SeqStats::from_sequence(&repeated, gaps)
+                    );
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn packed_quality_counts_preserve_sum_bits_across_lane_boundaries() {
+        for base in [0, 33, 64, 226, 236, 255] {
+            let decoder = QualityDecoder::new(base);
+            for length in [
+                COUNT_CHUNK - 1,
+                COUNT_CHUNK,
+                COUNT_CHUNK + 1,
+                2 * COUNT_CHUNK + 1,
+            ] {
+                for qualities in [
+                    (0..length).map(|i| i as u8).collect::<Vec<_>>(),
+                    vec![63; length],
+                    vec![255; length],
+                ] {
+                    let expected = QualStats::from_qualities(&qualities, base);
+                    let actual = decoder.stats(&qualities);
+                    assert_eq!(
+                        (actual.bases, actual.q20, actual.q30),
+                        (expected.bases, expected.q20, expected.q30)
+                    );
+                    assert_eq!(actual.error_sum.to_bits(), expected.error_sum.to_bits());
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn packed_quality_aggregation_preserves_record_grouping() {
+        let records = [
+            vec![33],
+            vec![73; COUNT_CHUNK + 1],
+            vec![33],
+            (0..2 * COUNT_CHUNK + 1).map(|i| i as u8).collect(),
+            Vec::new(),
+        ];
+        for base in [0, 33, 64, 255] {
+            let decoder = QualityDecoder::new(base);
+            let mut actual = QualStats::default();
+            let mut expected = QualStats::default();
+            for qualities in &records {
+                actual.merge(&decoder.stats(qualities));
+                expected.merge(&QualStats::from_qualities(qualities, base));
+                assert_eq!(
+                    (actual.bases, actual.q20, actual.q30),
+                    (expected.bases, expected.q20, expected.q30)
+                );
+                assert_eq!(actual.error_sum.to_bits(), expected.error_sum.to_bits());
+            }
+        }
+    }
 
     #[test]
     fn sequence_counts_cover_all_bytes_and_overlapping_gap_symbols() {

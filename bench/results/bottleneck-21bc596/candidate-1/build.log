@@ -1,0 +1,8 @@
+["cargo", "build", "--release", "--workspace", "--bins", "--locked"]
+   Compiling rust-fx v0.1.0 (/home/rimuru/Projects/Code/for_fun/bioinfo-tools/rust-fx)
+   Compiling rust-bam v0.1.0 (/home/rimuru/Projects/Code/for_fun/bioinfo-tools/rust-bam)
+    Finished `release` profile [optimized] target(s) in 17.18s
+["cargo", "build", "--release", "--locked", "-p", "rust-fx"]
+   Compiling rust-fx v0.1.0 (/home/rimuru/Projects/Code/for_fun/bioinfo-tools/rust-fx)
+    Finished `release` profile [optimized] target(s) in 17.00s
+["rustc", "--edition", "2021", "-O", "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/bench/canonical_sam.rs", "-o", "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/candidate-1/canonical-sam"]

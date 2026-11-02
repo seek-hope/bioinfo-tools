@@ -1,0 +1,8 @@
+{
+  "rust-bam/src/commands.rs": "6bfe44a9bb34c070122aa20a272a8627980bdc6ff4e90f40f1843c8ac6a36d5b",
+  "rust-bam/src/lib.rs": "31c30f53ee0af3976b2d2035b143d242cf14af6aebb24d8d7a28b8d6b1a6aced",
+  "rust-bam/src/merge_tree.rs": "4ae6b4a7f12050385804fa795a489ec60d716ebca88514dfbae9c296b4379e1b",
+  "rust-bam/tests/external_sort.rs": "6fa3379c515a19805643159639f9ef3178b8c0fe973029d2b8ba08a19f0b293f",
+  "rust-fx/src/commands.rs": "8e58f58e3e4eb458dae653886d4d9cbbc3b4a2704241ec1d1a2670705d3e4198",
+  "rust-fx/src/stats.rs": "78985b583d48983de1c0ea9c7af019623e5646de9b3d77774028d4e2f076854d"
+}

@@ -1,0 +1,18 @@
+{
+  "queried_utc": "2026-11-02T07:07:49.393495+00:00",
+  "routes": {
+    "umi": {
+      "staged": "/tmp/bioinfo-readme-repro-oracles/umi",
+      "resolved": "/tmp/bioinfo-ci-toolchain/umi",
+      "selected_cache": "/tmp/bioinfo-ci-toolchain/umi",
+      "same_directory": true
+    },
+    "fastqc": {
+      "staged": "/tmp/bioinfo-readme-repro-oracles/fastqc",
+      "resolved": "/tmp/bioinfo-ci-toolchain/fastqc",
+      "selected_cache": "/tmp/bioinfo-ci-toolchain/fastqc",
+      "same_directory": true
+    }
+  },
+  "matches_midrun_sample": true
+}

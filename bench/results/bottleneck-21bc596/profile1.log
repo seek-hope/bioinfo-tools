@@ -1,0 +1,9 @@
+START stats-synthetic
+DONE stats-synthetic
+START stats-real
+DONE stats-real
+START flagstat
+DONE flagstat
+START sort
+DONE sort
+PROFILE COMPLETE

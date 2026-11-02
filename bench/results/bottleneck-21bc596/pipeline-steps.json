@@ -1,0 +1,191 @@
+[
+  {
+    "name": "accept-base",
+    "command": [
+      "bash",
+      "tests/ci/check.sh"
+    ],
+    "pid": 2349269,
+    "started_utc": "2026-11-02T02:27:23.153727+00:00",
+    "returncode": 0,
+    "completed_utc": "2026-11-02T02:28:28.197760+00:00"
+  },
+  {
+    "name": "accept-oracles",
+    "command": [
+      "bash",
+      "tests/ci/check.sh",
+      "--with-fastx-qc-oracles"
+    ],
+    "pid": 2353777,
+    "started_utc": "2026-11-02T02:28:28.197949+00:00",
+    "returncode": 0,
+    "completed_utc": "2026-11-02T02:33:42.545395+00:00"
+  },
+  {
+    "name": "seal",
+    "command": [
+      "python3",
+      "bench/scale_seal.py",
+      "--outdir",
+      "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/sealed"
+    ],
+    "pid": 2389816,
+    "started_utc": "2026-11-02T02:33:42.545599+00:00",
+    "returncode": 0,
+    "completed_utc": "2026-11-02T02:33:42.995809+00:00"
+  },
+  {
+    "name": "sealed-fx-behavior",
+    "command": [
+      "python3",
+      "bench/check_optimization.py",
+      "--before",
+      "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/before/rust-fx",
+      "--after",
+      "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/sealed/rust-fx",
+      "--out",
+      "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/sealed-fx-behavior.json"
+    ],
+    "pid": 2389911,
+    "started_utc": "2026-11-02T02:33:42.996023+00:00",
+    "returncode": 0,
+    "completed_utc": "2026-11-02T02:33:43.224735+00:00"
+  },
+  {
+    "name": "sealed-fx-oracle",
+    "command": [
+      "bash",
+      "tests/oracle/run_w13_oracle.sh",
+      "--rust",
+      "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/sealed/rust-fx"
+    ],
+    "pid": 2390120,
+    "started_utc": "2026-11-02T02:33:43.224936+00:00",
+    "returncode": 0,
+    "completed_utc": "2026-11-02T02:33:43.760272+00:00"
+  },
+  {
+    "name": "sealed-bam-oracle",
+    "command": [
+      "python3",
+      "tests/oracle/w14_diff.py",
+      "--rust",
+      "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/sealed/rust-bam",
+      "--samtools",
+      "/tmp/bioinfo-readme-repro-oracles/bin/samtools",
+      "--json",
+      "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/sealed-bam-oracle.json"
+    ],
+    "pid": 2390633,
+    "started_utc": "2026-11-02T02:33:43.760501+00:00",
+    "returncode": 0,
+    "completed_utc": "2026-11-02T02:33:43.921114+00:00"
+  },
+  {
+    "name": "prepare-0",
+    "command": [
+      "python3",
+      "bench/scale_inputs.py",
+      "--plan",
+      "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/initial-plan.json",
+      "--sources",
+      "/tmp/bioinfo-readme-benchmark/inputs.json",
+      "--samtools",
+      "/tmp/bioinfo-readme-repro-oracles/bin/samtools",
+      "--reuse-manifest",
+      "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/scale-benchmark/inputs-2/inputs.json",
+      "--outdir",
+      "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/inputs-0"
+    ],
+    "pid": 2390710,
+    "started_utc": "2026-11-02T02:33:43.921392+00:00",
+    "returncode": 0,
+    "completed_utc": "2026-11-02T02:36:27.662911+00:00"
+  },
+  {
+    "name": "calibration-0",
+    "command": [
+      "python3",
+      "bench/scale_benchmark.py",
+      "--native-dir",
+      "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/sealed",
+      "--canonicalizer",
+      "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/sealed/canonical-sam",
+      "--oracle-dir",
+      "/tmp/bioinfo-readme-repro-oracles/bin",
+      "--toolchain-cache",
+      "/tmp/bioinfo-readme-repro-oracles",
+      "--cutadapt",
+      "/home/rimuru/.conda/envs/ta-cutadapt/bin/cutadapt",
+      "--calibration",
+      "--plan",
+      "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/initial-plan.json",
+      "--inputs",
+      "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/inputs-0/inputs.json",
+      "--outdir",
+      "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/calibration-0"
+    ],
+    "pid": 2391956,
+    "started_utc": "2026-11-02T02:36:27.663628+00:00",
+    "returncode": 0,
+    "completed_utc": "2026-11-02T03:01:41.913170+00:00"
+  },
+  {
+    "name": "freeze",
+    "command": [
+      "python3",
+      "bench/scale_plan.py",
+      "--calibration",
+      "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/calibration-0/report.json",
+      "--freeze",
+      "--out",
+      "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/formal-plan.json"
+    ],
+    "pid": 2403727,
+    "started_utc": "2026-11-02T03:01:41.917581+00:00",
+    "returncode": 0,
+    "completed_utc": "2026-11-02T03:01:41.963529+00:00"
+  },
+  {
+    "name": "formal",
+    "command": [
+      "python3",
+      "bench/scale_benchmark.py",
+      "--native-dir",
+      "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/sealed",
+      "--canonicalizer",
+      "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/sealed/canonical-sam",
+      "--oracle-dir",
+      "/tmp/bioinfo-readme-repro-oracles/bin",
+      "--toolchain-cache",
+      "/tmp/bioinfo-readme-repro-oracles",
+      "--cutadapt",
+      "/home/rimuru/.conda/envs/ta-cutadapt/bin/cutadapt",
+      "--plan",
+      "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/formal-plan.json",
+      "--inputs",
+      "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/inputs-0/inputs.json",
+      "--outdir",
+      "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/formal"
+    ],
+    "pid": 2403728,
+    "started_utc": "2026-11-02T03:01:41.963790+00:00",
+    "returncode": 0,
+    "completed_utc": "2026-11-02T04:35:02.155548+00:00"
+  },
+  {
+    "name": "summary",
+    "command": [
+      "python3",
+      "bench/summarize_scale.py",
+      "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/formal/report.json",
+      "--outdir",
+      "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/formal-summary"
+    ],
+    "pid": 2444769,
+    "started_utc": "2026-11-02T04:35:02.155802+00:00",
+    "returncode": 0,
+    "completed_utc": "2026-11-02T04:35:02.210484+00:00"
+  }
+]

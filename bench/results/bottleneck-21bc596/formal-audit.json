@@ -1,0 +1,15 @@
+{
+  "passed": true,
+  "conditions": 9,
+  "measured": 54,
+  "warmups": 18,
+  "pairs": 36,
+  "minimum_formal_seconds": 19.57981705397833,
+  "below_10_seconds": 0,
+  "independent_medians_ranges_and_paired_ratios": true,
+  "identity_files_rehashed": 152,
+  "profiled_and_final_binaries_identical": true,
+  "runtime_routes_match_midrun_sample": true,
+  "started_utc": "2026-11-02T03:02:52.762541+00:00",
+  "completed_utc": "2026-11-02T04:35:02.085050+00:00"
+}

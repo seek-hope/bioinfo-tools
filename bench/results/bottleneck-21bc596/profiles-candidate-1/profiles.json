@@ -1,0 +1,84 @@
+[
+  {
+    "name": "stats-synthetic",
+    "command": [
+      "taskset",
+      "-c",
+      "4",
+      "valgrind",
+      "--tool=callgrind",
+      "--error-exitcode=97",
+      "--callgrind-out-file=/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/profiles-candidate-1/stats-synthetic.callgrind",
+      "--log-file=/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/profiles-candidate-1/stats-synthetic.valgrind",
+      "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/candidate-1/rust-fx",
+      "stats",
+      "-a",
+      "-T",
+      "/tmp/bioinfo-readme-benchmark/synthetic-100000.fastq"
+    ],
+    "exit": 0,
+    "instrumented_elapsed_s": 4.224941526015755
+  },
+  {
+    "name": "stats-real",
+    "command": [
+      "taskset",
+      "-c",
+      "4",
+      "valgrind",
+      "--tool=callgrind",
+      "--error-exitcode=97",
+      "--callgrind-out-file=/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/profiles-candidate-1/stats-real.callgrind",
+      "--log-file=/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/profiles-candidate-1/stats-real.valgrind",
+      "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/candidate-1/rust-fx",
+      "stats",
+      "-a",
+      "-T",
+      "/tmp/bioinfo-readme-benchmark/real-100000.fastq"
+    ],
+    "exit": 0,
+    "instrumented_elapsed_s": 0.7151534380100202
+  },
+  {
+    "name": "flagstat",
+    "command": [
+      "taskset",
+      "-c",
+      "4",
+      "valgrind",
+      "--tool=callgrind",
+      "--error-exitcode=97",
+      "--callgrind-out-file=/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/profiles-candidate-1/flagstat.callgrind",
+      "--log-file=/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/profiles-candidate-1/flagstat.valgrind",
+      "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/candidate-1/rust-bam",
+      "flagstat",
+      "/tmp/bioinfo-readme-benchmark/bam-100000/unsorted.bam"
+    ],
+    "exit": 0,
+    "instrumented_elapsed_s": 2.623389821004821
+  },
+  {
+    "name": "sort",
+    "command": [
+      "taskset",
+      "-c",
+      "4",
+      "valgrind",
+      "--tool=callgrind",
+      "--error-exitcode=97",
+      "--callgrind-out-file=/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/profiles-candidate-1/sort.callgrind",
+      "--log-file=/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/profiles-candidate-1/sort.valgrind",
+      "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/candidate-1/rust-bam",
+      "sort",
+      "--max-memory",
+      "1MiB",
+      "--threads",
+      "1",
+      "-o",
+      "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/profiles-candidate-1/sort.bam",
+      "/tmp/bioinfo-readme-benchmark/bam-100000/unsorted.bam"
+    ],
+    "exit": 0,
+    "instrumented_elapsed_s": 9.690417510981206
+  }
+]

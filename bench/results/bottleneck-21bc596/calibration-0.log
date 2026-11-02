@@ -1,0 +1,9 @@
+real-stats-c1 block=-1 {'current': 20.418, 'upstream': 66.266} passed=True
+real-stats-c2 block=-1 {'current': 20.225, 'upstream': 62.63} passed=True
+real-stats-c4 block=-1 {'current': 20.674, 'upstream': 62.447} passed=True
+synthetic-stats-c1 block=-1 {'current': 19.257, 'upstream': 48.748} passed=True
+synthetic-stats-c2 block=-1 {'current': 19.317, 'upstream': 47.17} passed=True
+synthetic-stats-c4 block=-1 {'current': 19.829, 'upstream': 47.203} passed=True
+bam-sort-c1 block=-1 {'current': 90.847, 'upstream': 44.463} passed=True
+bam-sort-c2 block=-1 {'current': 84.764, 'upstream': 57.585} passed=True
+bam-sort-c4 block=-1 {'current': 82.418, 'upstream': 23.839} passed=True

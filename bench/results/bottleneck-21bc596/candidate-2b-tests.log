@@ -1,0 +1,631 @@
+   Compiling rust-fx v0.1.0 (/home/rimuru/Projects/Code/for_fun/bioinfo-tools/rust-fx)
+   Compiling rust-bam v0.1.0 (/home/rimuru/Projects/Code/for_fun/bioinfo-tools/rust-bam)
+    Finished `release` profile [optimized] target(s) in 51.07s
+     Running unittests src/lib.rs (target/release/deps/rust_bam-fa5679b128031ed3)
+
+running 56 tests
+test commands::tests::buffered_sort_index_propagates_deferred_write_failure ... ok
+test commands::tests::flagstat_renders_all_sixteen_lines_in_samtools_order ... ok
+test commands::tests::flagstat_percentages_use_two_decimals ... ok
+test commands::tests::flagstat_prints_na_when_the_denominator_is_zero ... ok
+test commands::tests::idxstats_numbers_appear_in_mapped_then_unmapped_order ... ok
+test commands::tests::idxstats_renders_a_trailing_star_line ... ok
+test error::tests::classes_map_to_the_shared_contract ... ok
+test error::tests::declared_codes_are_the_shared_ones ... ok
+test error::tests::malformed_input_is_a_data_error_but_a_missing_file_is_io ... ok
+test commands::tests::final_merge_retains_read_ahead_before_writing_popped_record ... ok
+test format::tests::empty_input_is_an_input_error ... ok
+test format::tests::a_bgzf_wrapped_bam_is_detected_as_bam ... ok
+test commands::tests::quickcheck_exit_code_is_16_on_failure_and_0_on_success ... ok
+test commands::tests::the_bgzf_eof_marker_is_the_28_byte_htslib_pattern ... ok
+test format::tests::cram_magic_is_detected_so_it_can_be_rejected_clearly ... ok
+test error::tests::the_message_survives_display ... ok
+test format::tests::format_names_match_the_diagnostics ... ok
+test format::tests::sam_header_is_detected ... ok
+test index_util::tests::the_bai_path_appends_to_the_bam_name ... ok
+test format::tests::sam_record_without_header_is_detected ... ok
+test io_util::tests::records_alias_is_the_sam_buffer_type ... ok
+test format::tests::bam_magic_is_detected ... ok
+test merge_tree::tests::merge_matches_total_sort_with_ties_empty_runs_and_unequal_lengths ... ok
+test sort_order::tests::a_record_missing_a_position_is_unplaced_even_without_the_flag ... ok
+test sort_order::tests::a_record_missing_a_reference_is_unplaced ... ok
+test sort_order::tests::a_single_record_and_an_empty_list_are_sorted ... ok
+test sort_order::tests::forward_strand_sorts_before_reverse_at_the_same_position ... ok
+test sort_order::tests::is_sorted_detects_a_permutation ... ok
+test merge_tree::tests::replacement_has_one_comparison_per_level_and_can_reactivate_a_slot ... ok
+test sort_order::tests::ordering_is_by_reference_then_start ... ok
+test sort_order::tests::placed_records_come_before_unmapped_ones ... ok
+test sort_order::tests::reference_order_follows_the_header_not_the_name ... ok
+test commands::tests::captured_frames_still_validate_every_auxiliary_field ... ok
+test sort_order::tests::sorting_is_stable_across_repeated_runs ... ok
+test sort_order::tests::the_order_is_total_so_output_is_reproducible ... ok
+test format::tests::gzip_that_is_not_bam_is_rejected ... ok
+test sort_order::tests::updating_a_key_preserves_all_fields_and_reuses_name_storage ... ok
+test stats::tests::a_plain_mapped_record_counts_as_mapped_and_nothing_else ... ok
+test stats::tests::a_secondary_duplicate_counts_toward_duplicates_but_not_primary_duplicates ... ok
+test stats::tests::an_unmapped_mate_is_not_mapped_to_a_different_chromosome ... ok
+test stats::tests::an_unmapped_record_is_not_mapped ... ok
+test stats::tests::duplicates_are_counted_for_both_columns ... ok
+test stats::tests::idxstats_counts_mapped_records_on_their_reference ... ok
+test stats::tests::idxstats_puts_a_mate_placed_unmapped_read_on_its_reference ... ok
+test stats::tests::idxstats_tracks_the_star_line_for_records_with_no_reference ... ok
+test stats::tests::mate_on_a_different_chromosome_does_not_require_proper_pairing ... ok
+test stats::tests::properly_paired_requires_paired_proper_and_mapped ... ok
+test stats::tests::read1_and_read2_require_the_paired_bit ... ok
+test stats::tests::references_keep_header_order ... ok
+test stats::tests::secondary_and_supplementary_are_counted_separately_from_primary ... ok
+test stats::tests::singletons_are_paired_mapped_reads_whose_mate_is_unmapped ... ok
+test stats::tests::the_mapq5_variant_excludes_low_quality_alignments ... ok
+test commands::tests::captured_frames_are_bounded_and_large_records_use_the_encoder ... ok
+test sort_run_writer::tests::finishing_a_temporary_run_reports_output_failure_with_any_worker_count ... ok
+test commands::tests::intermediate_merge_writes_index_before_refilling_record ... ok
+test commands::tests::reused_run_reader_preserves_partial_index_and_index_eof_policy ... ok
+
+test result: ok. 56 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/main.rs (target/release/deps/rust_bam-2ad034fe92294682)
+
+running 7 tests
+test tests::a_missing_subcommand_is_a_usage_error ... ok
+test tests::exit_codes_come_from_the_shared_contract ... ok
+test tests::sort_size_parser_accepts_binary_suffixes ... ok
+test tests::every_command_requires_an_input ... ok
+test tests::the_provenance_block_names_the_oracle_and_the_library ... ok
+test tests::verbose_version_is_detected_only_with_both_flags ... ok
+test tests::the_cli_declares_all_commands ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/coverage.rs (target/release/deps/coverage-84deae472b937c15)
+
+running 10 tests
+test default_coverage_matches_samtools_shape ... ok
+test histogram_keeps_region_tail_in_summary ... ok
+test region_is_restricted_and_formatted_like_samtools ... ok
+test output_file_contains_the_same_text ... ok
+test minimum_depth_is_applied_after_merging_inputs ... ok
+test depth_cap_is_per_alignment_start_not_final_depth ... ok
+test histogram_and_ascii_depth_plot_match_samtools ... ok
+test multiple_inputs_and_bam_list_merge_by_position ... ok
+test no_header_and_filters_match_samtools_shape ... ok
+test required_and_filter_flags_follow_coverage_semantics ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/depth.rs (target/release/deps/depth-6607dabf440262c9)
+
+running 10 tests
+test all_positions_and_header_match_samtools_shape ... ok
+test output_file_contains_the_same_text ... ok
+test bed_intervals_match_samtools_shape ... ok
+test default_depth_matches_samtools_shape ... ok
+test quality_mapq_and_read_length_filters ... ok
+test multiple_inputs_have_one_depth_column_each ... ok
+test overlap_removal_counts_one_mate_and_preserves_quality_filters ... ok
+test all_positions_distinguishes_used_and_unused_references ... ok
+test deletions_and_regions_match_samtools_shape ... ok
+test flag_filters_match_samtools ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/external_sort.rs (target/release/deps/external_sort-2ceefe7a1ad22151)
+
+running 6 tests
+test invalid_memory_size_is_rejected_before_opening_output ... ok
+test malformed_input_fails_without_output_or_temp_runs ... ok
+test external_sort_is_byte_identical_to_in_memory_sort_and_cleans_temp ... ok
+test encoded_runs_preserve_auxiliary_fields_long_cigar_and_buffer_clearing ... ok
+test parallel_compression_is_byte_identical_across_spill_and_worker_counts ... ok
+test merge_reuses_heads_across_cached_large_and_cached_records ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.21s
+
+     Running tests/flags.rs (target/release/deps/flags-71670f3c176257df)
+
+running 5 tests
+test numeric_flags_support_decimal_hex_octal_and_unknown_bits ... ok
+test named_flags_are_case_insensitive_deduplicated_and_bit_ordered ... ok
+test numeric_prefixes_and_an_empty_argument_match_samtools ... ok
+test no_arguments_prints_the_samtools_flags_usage ... ok
+test malformed_names_numbers_and_help_are_rejected ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/head.rs (target/release/deps/head-866eda7affd424b9)
+
+running 5 tests
+test explicit_stdin_path_supports_truncated_headers ... ok
+test limits_larger_than_the_input_emit_the_complete_sam ... ok
+test default_prints_all_sam_and_bam_headers_without_records ... ok
+test sam_and_bam_standard_input_are_streamed_without_reopening ... ok
+test header_and_record_limits_are_independent ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/view_filters.rs (target/release/deps/view_filters-deb2db8680a04c80)
+
+running 6 tests
+test filters_apply_to_bam_output_too ... ok
+test threaded_bam_output_is_readable ... ok
+test sort_accepts_parallel_bam_compression ... ok
+test csi_index_supports_region_queries ... ok
+test flag_and_mapq_filters_apply_to_counts ... ok
+test region_query_uses_bai_and_filters ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running unittests src/lib.rs (target/release/deps/rust_fx-ce088ff0938f94b3)
+
+running 187 tests
+test commands::tests::fx2tab_average_quality_is_blank_for_fasta ... ok
+test cli::tests::stats_has_the_documented_flags ... ok
+test commands::tests::fx2tab_base_content_and_count ... ok
+test cli::tests::fx2tab_has_the_documented_flags ... ok
+test commands::tests::fx2tab_name_only_drops_the_sequence_columns ... ok
+test commands::tests::lint_accepts_a_duplicate_name ... ok
+test commands::tests::lint_rejects_an_unknown_validator_code ... ok
+test commands::tests::fx2tab_sequence_hash_is_md5_of_the_sequence ... ok
+test commands::tests::fx2tab_header_line_lists_the_selected_metrics ... ok
+test cli::tests::seq_has_the_documented_flags ... ok
+test cli::tests::an_invalid_lint_mode_is_rejected ... ok
+test cli::tests::no_subcommand_is_an_error_rather_than_a_silent_no_op ... ok
+test commands::tests::fx2tab_emits_three_columns_by_default ... ok
+test cli::tests::sample_takes_a_seed_with_the_documented_default ... ok
+test commands::tests::fx2tab_length_and_gc ... ok
+test cli::tests::split_defaults_the_part_width_to_three ... ok
+test commands::tests::fx2tab_no_qual_drops_the_quality_column ... ok
+test cli::tests::lint_validates_the_three_enumerated_options ... ok
+test commands::tests::lint_rejects_fasta_input ... ok
+test commands::tests::fq2fa_converts_and_is_idempotent_on_fasta ... ok
+test commands::tests::sample_rejects_both_or_neither_selection ... ok
+test commands::tests::lint_rejects_a_length_mismatch_with_exit_1 ... ok
+test commands::tests::lint_can_disable_a_failing_validator ... ok
+test commands::tests::lint_accepts_a_valid_pair ... ok
+test commands::tests::lint_rejects_mismatched_pair_names ... ok
+test commands::tests::seq_length_filter_is_inclusive ... ok
+test commands::tests::seq_only_prints_sequences ... ok
+test commands::tests::seq_name_and_only_id ... ok
+test commands::tests::seq_rejects_both_case_flags ... ok
+test commands::tests::seq_passes_records_through_unchanged ... ok
+test commands::tests::seq_rejects_contradictory_output_selections ... ok
+test commands::tests::split_rejects_stdin ... ok
+test commands::tests::sample_is_reproducible_for_a_fixed_seed ... ok
+test commands::tests::seq_reverse_complement ... ok
+test commands::tests::seq_removes_gaps_and_uppercases ... ok
+test cli::tests::unimplemented_seqkit_flags_are_absent_not_ignored ... ok
+test commands::tests::stats_detects_rna_and_protein ... ok
+test commands::tests::split_dry_run_creates_nothing ... ok
+test commands::tests::split_by_size_writes_numbered_parts_in_order ... ok
+test grep::tests::iupac_and_hamming_matching_are_distinct ... ok
+test commands::tests::stats_all_adds_the_extra_columns ... ok
+test io::tests::an_empty_sequence_still_writes_a_line ... ok
+test commands::tests::stats_reports_the_documented_columns ... ok
+test commands::tests::split_by_part_distributes_evenly ... ok
+test io::tests::an_invalid_magic_is_rejected ... ok
+test io::tests::error_classes_map_to_the_shared_contract ... ok
+test io::tests::detects_fastq_and_fasta_from_the_first_line ... ok
+test io::tests::fasta_accepts_a_header_without_a_sequence ... ok
+test io::tests::fasta_wrapping_uses_the_line_width ... ok
+test io::tests::fasta_tolerates_blank_lines_between_records ... ok
+test io::tests::label_mapping ... ok
+test io::tests::malformed_input_is_an_input_error ... ok
+test io::tests::output_writes_and_finishes_a_plain_file ... ok
+test io::tests::owned_fallback_releases_previous_record_before_reading_next ... ok
+test commands::tests::sample_by_number_is_approximately_the_requested_count ... ok
+test io::tests::output_compresses_by_extension ... ok
+test io::tests::reads_multiline_fasta_records ... ok
+test io::tests::reads_records_from_a_plain_file ... ok
+test io::tests::writing_fasta_relabels_and_drops_qualities ... ok
+test io::tests::reusable_lint_reader_does_not_fill_truncated_records_from_previous_read ... ok
+test io::tests::writing_fastq_is_four_lines ... ok
+test lint::tests::a_valid_record_passes_every_validator ... ok
+test lint::tests::an_unknown_validator_code_is_reported_not_ignored ... ok
+test lint::tests::disabling_a_validator_suppresses_only_that_one ... ok
+test lint::tests::error_rendering_includes_code_name_and_record ... ok
+test lint::tests::level_parse_and_ordering ... ok
+test io::tests::reads_a_fasta_record_with_many_sequence_lines ... ok
+test lint::tests::every_code_round_trips ... ok
+test lint::tests::levels_gate_the_validators ... ok
+test lint::tests::normalise_pair_name_handles_every_documented_shape ... ok
+test io::tests::reusable_reader_keeps_long_empty_and_short_records_separate ... ok
+test lint::tests::p001_accepts_casava_pair_suffixes ... ok
+test lint::tests::p001_accepts_matching_pair_names ... ok
+test lint::tests::p001_accepts_slash_suffixes ... ok
+test lint::tests::p001_can_be_disabled ... ok
+test lint::tests::p001_does_not_strip_underscore_suffixes ... ok
+test lint::tests::p001_rejects_genuinely_different_names ... ok
+test lint::tests::records_are_numbered_from_one ... ok
+test lint::tests::s001_rejects_a_plus_line_without_plus ... ok
+test lint::tests::s002_accepts_lower_case_and_n ... ok
+test lint::tests::s002_rejects_a_base_outside_acgtn ... ok
+test lint::tests::s002_rejects_iupac_codes_beyond_n ... ok
+test lint::tests::s003_rejects_a_header_without_at ... ok
+test lint::tests::s004_rejects_a_truncated_record ... ok
+test lint::tests::s005_rejects_a_length_mismatch ... ok
+test io::tests::borrowed_records_preserve_owned_parser_at_every_buffer_boundary ... ok
+test lint::tests::s006_accepts_the_documented_boundaries ... ok
+test lint::tests::s006_rejects_a_quality_outside_the_printable_range ... ok
+test lint::tests::s007_compares_full_headers_not_just_ids ... ok
+test lint::tests::s007_does_not_run_by_default ... ok
+test lint::tests::several_failures_are_all_reported ... ok
+test lint::tests::validator_identity_matches_the_published_table ... ok
+test cli::tests::the_command_tree_parses_every_subcommand ... ok
+test md5::tests::block_boundary_lengths_are_padded_correctly ... ok
+test md5::tests::case_changes_the_digest ... ok
+test md5::tests::default_matches_new ... ok
+test md5::tests::digest_of_a_realistic_sequence_is_well_formed ... ok
+test md5::tests::rfc1321_test_vectors ... ok
+test md5::tests::update_with_empty_slices_is_a_no_op ... ok
+test sample::tests::a_fixed_seed_selects_a_pinned_set ... ok
+test md5::tests::streaming_matches_one_shot ... ok
+test sample::tests::a_probability_of_one_keeps_everything ... ok
+test sample::tests::a_probability_of_zero_keeps_nothing ... ok
+test sample::tests::a_zero_seed_still_produces_a_valid_stream ... ok
+test sample::tests::an_empty_input_yields_an_empty_sample_without_dividing_by_zero ... ok
+test sample::tests::decisions_do_not_depend_on_chunking ... ok
+test sample::tests::different_seeds_give_different_streams ... ok
+test sample::tests::floats_are_in_the_unit_interval ... ok
+test sample::tests::number_sampling_may_return_fewer_than_requested ... ok
+test sample::tests::out_of_range_probabilities_are_clamped ... ok
+test sample::tests::a_half_probability_keeps_about_half ... ok
+test sample::tests::proportion_and_number_agree_on_probability ... ok
+test sample::tests::requesting_more_records_than_exist_keeps_everything ... ok
+test sample::tests::sampling_is_reproducible_across_instances ... ok
+test sample::tests::selected_positions_are_unique_and_ordered ... ok
+test sample::tests::the_same_seed_gives_the_same_stream ... ok
+test sort::tests::natural_order_compares_numeric_runs_without_losing_leading_zero_ties ... ok
+test split::tests::a_larger_width_pads_further ... ok
+test split::tests::a_wider_counter_than_the_width_is_not_truncated ... ok
+test split::tests::an_explicit_extension_overrides_the_input_extension ... ok
+test split::tests::by_size_edge_cases ... ok
+test split::tests::by_size_matches_the_published_example ... ok
+test io::tests::reads_across_a_chunk_boundary ... ok
+test split::tests::default_out_dir_is_input_dot_split ... ok
+test split::tests::extension_keeps_both_suffixes ... ok
+test split::tests::part_numbers_are_zero_padded_to_the_width ... ok
+test split::tests::part_path_matches_the_published_naming ... ok
+test split::tests::partition_by_parts_edge_cases ... ok
+test split::tests::partition_by_parts_handles_more_parts_than_records ... ok
+test split::tests::partition_by_parts_is_even_and_ordered ... ok
+test split::tests::partition_covers_every_record_exactly_once ... ok
+test split::tests::stem_strips_compression_then_format ... ok
+test stats::tests::average_quality_is_the_mean_error_round_trip ... ok
+test stats::tests::empty_qualities_have_no_defined_averages ... ok
+test stats::tests::fx2tab_gc_uses_the_unambiguous_denominator ... ok
+test stats::tests::cached_error_probabilities_preserve_every_score_and_sum_bitwise ... ok
+test stats::tests::gap_letters_are_configurable ... ok
+test stats::tests::gaps_and_ambiguous_bases_are_disjoint ... ok
+test stats::tests::gc_is_case_insensitive ... ok
+test sample::tests::floats_are_reasonably_uniform ... ok
+test stats::tests::gc_skew_is_g_minus_c_over_g_plus_c ... ok
+test stats::tests::length_counts_every_byte_including_gaps ... ok
+test stats::tests::merging_is_associative_for_both_accumulators ... ok
+test stats::tests::phred64_shifts_the_scores ... ok
+test stats::tests::pinned_example_matches_a_hand_computation ... ok
+test stats::tests::quality_percentages_include_threshold_scores ... ok
+test stats::tests::rna_uracil_counts_toward_the_denominator ... ok
+test stats::tests::scores_below_the_base_do_not_underflow ... ok
+test stats::tests::sequence_counts_cover_all_bytes_and_overlapping_gap_symbols ... ok
+test stats::tests::stats_gc_is_defined_without_unambiguous_bases_but_fx2tab_gc_is_not ... ok
+test stats::tests::stats_gc_uses_the_length_denominator ... ok
+test table::tests::an_empty_row_set_still_renders_a_header ... ok
+test table::tests::cells_include_all_optionals_when_all_is_set ... ok
+test table::tests::header_has_eight_columns_by_default ... ok
+test table::tests::header_has_nineteen_columns_with_all ... ok
+test table::tests::histogram_statistics_match_the_sorted_path ... ok
+test table::tests::human_float_drops_an_integral_decimal ... ok
+test table::tests::human_layout_groups_digits_and_aligns ... ok
+test table::tests::human_layout_pads_columns_to_the_widest_cell ... ok
+test table::tests::n50_handles_one_dominant_sequence ... ok
+test table::tests::n50_matches_the_definition ... ok
+test table::tests::percentages_always_show_two_decimals ... ok
+test table::tests::quartiles_are_monotonic_and_bounded ... ok
+test table::tests::tabular_float_always_has_a_decimal ... ok
+test table::tests::tabular_layout_is_tab_separated_without_separators ... ok
+test table::tests::thousands_separators_group_by_three ... ok
+test stats::tests::prepared_quality_decoder_is_bitwise_identical_for_every_offset ... ok
+test transform::tests::case_conversion_and_transcription ... ok
+test transform::tests::complement_covers_the_iupac_set ... ok
+test transform::tests::complement_is_an_involution ... ok
+test transform::tests::empty_and_unknown_are_unlimit ... ok
+test transform::tests::gap_removal_happens_before_case_change ... ok
+test transform::tests::gap_removal_is_configurable ... ok
+test transform::tests::gap_removal_uses_the_documented_default_set ... ok
+test transform::tests::guanine_rich_dna_is_detected ... ok
+test transform::tests::lower_case_wins_over_upper_when_both_are_set ... ok
+test transform::tests::no_transforms_is_the_identity ... ok
+test transform::tests::protein_is_detected_from_non_nucleotide_letters ... ok
+test transform::tests::reverse_complement_is_reverse_after_complement ... ok
+test transform::tests::reverse_complement_matches_the_two_step_definition ... ok
+test transform::tests::reverse_is_its_own_inverse ... ok
+test transform::tests::rna_requires_uracil_and_no_thymine ... ok
+test transform::tests::sequence_id_is_the_leading_non_space_run ... ok
+test stats::tests::packed_quality_aggregation_preserves_record_grouping ... ok
+test lint::tests::reduced_validation_keeps_the_first_invalid_byte ... ok
+test stats::tests::packed_quality_counts_preserve_sum_bits_across_lane_boundaries ... ok
+test stats::tests::packed_sequence_counts_match_scalar_across_lane_boundaries ... ok
+
+test result: ok. 187 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running unittests src/main.rs (target/release/deps/rust_fx-3938c9654093f452)
+
+running 5 tests
+test tests::declared_classes_render_the_shared_line ... ok
+test tests::quality_encoding_maps_to_the_documented_bases ... ok
+test tests::verbose_version_detection ... ok
+test tests::provenance_lists_every_command ... ok
+test tests::provenance_records_the_unverified_status ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/benchmark_boundaries.rs (target/release/deps/benchmark_boundaries-10b197565a79ac8d)
+
+running 2 tests
+test fq2fa_default_is_unwrapped_and_explicit_width_is_respected ... ok
+test quality_thresholds_include_q20_and_q30 ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/common.rs (target/release/deps/common-dbd8379f2ecc38ff)
+
+running 8 tests
+test embedded_subsequence_uses_coordinates_and_comment ... ok
+test embedded_positive_only_does_not_match_reverse_complement ... ok
+test embedded_multiple_candidates_are_sorted_by_coordinate ... ok
+test sequence_intersection_is_empty_for_different_sequences ... ok
+test embedded_skips_shorter_common_sequences ... ok
+test embedded_three_files_uses_first_occurrence ... ok
+test embedded_requires_by_seq_and_rejects_by_name ... ok
+test id_and_name_intersection_match_seqkit ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/compression.rs (target/release/deps/compression-19ea2b7378b87c7e)
+
+running 3 tests
+test split_and_duplicate_reports_use_the_same_level ... ok
+test invalid_levels_use_seqkit_exit_code_and_leave_no_file ... ok
+test numeric_levels_cover_all_compression_formats ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/duplicate.rs (target/release/deps/duplicate-65bccf71d96a5b1b)
+
+running 2 tests
+test fastq_duplication_keeps_quality ... ok
+test default_and_explicit_duplication_match_seqkit ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/fa2fq.rs (target/release/deps/fa2fq-d843394205a5ffff)
+
+running 3 tests
+test fasta_names_select_fastq_records ... ok
+test only_positive_strand_flag_is_accepted ... ok
+test subsequence_and_reverse_complement_matches_include_quality_orientation ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/faidx.rs (target/release/deps/faidx-99fed01bd7fed901)
+
+running 4 tests
+test regexp_ids_extract_full_records_and_create_fai ... ok
+test full_head_uses_seqkit_index_and_update_rebuilds_a_stale_fai ... ok
+test full_header_and_case_insensitive_id_match_seqkit ... ok
+test positional_regions_and_region_file_match_seqkit ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/grep.rs (target/release/deps/grep-d252e5eb0fa86ba0)
+
+running 7 tests
+test missing_pattern_is_a_usage_error ... ok
+test id_regexp_requires_a_capture_group ... ok
+test duplicated_patterns_and_delete_matched_control_output_multiplicity ... ok
+test region_circular_and_empty_patterns_follow_seqkit ... ok
+test id_name_and_sequence_modes ... ok
+test invert_count_case_and_pattern_file ... ok
+test sequence_strands_mismatch_degenerate_and_regexp_work_together ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/head.rs (target/release/deps/head-d13e6b50d17e10a1)
+
+running 5 tests
+test fasta_width_zero_keeps_sequences_unwrapped ... ok
+test zero_number_uses_seqkits_exit_code ... ok
+test output_file_contains_the_same_text ... ok
+test infile_list_and_raw_output_global_flags_are_supported ... ok
+test number_and_length_limits_match_seqkit_shape ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/input_integrity.rs (target/release/deps/input_integrity-f95d4a3d20a2aede)
+
+running 5 tests
+test valid_empty_reads_and_multiple_records_are_not_mistaken_for_blank_headers ... ok
+test empty_input_and_existing_edge_padding_remain_supported ... ok
+test truncated_records_and_garbage_after_padding_are_not_clean_eof ... ok
+test interior_blanks_are_rejected_with_crlf_gzip_and_more_than_one_blank ... ok
+test shared_reader_commands_reject_an_interior_blank_instead_of_succeeding_with_a_prefix ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/range.rs (target/release/deps/range-49dd9b778b93727d)
+
+running 6 tests
+test mixed_files_never_reuse_another_records_quality ... ok
+test wrapped_fastq_and_explicit_output_width_match_seqkit ... ok
+test multiple_files_have_independent_ranges_and_bounded_negative_tails ... ok
+test positive_and_negative_record_ranges_match_seqkit ... ok
+test short_negative_ranges_follow_the_upstream_circular_tail ... ok
+test invalid_ranges_fail_before_output_is_created ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/rename.rs (target/release/deps/rename-5beeb6af9ab27dc1)
+
+running 3 tests
+test duplicate_ids_are_renamed_and_comments_preserved ... ok
+test first_record_separator_and_start_number_are_honored ... ok
+test multiple_outfiles_share_duplicate_counters_and_honor_force ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/replace.rs (target/release/deps/replace-ba7baef877b48fd4)
+
+running 4 tests
+test sequence_replacement_and_ignore_case_match_seqkit ... ok
+test name_replacement_and_capture_variables_match_seqkit ... ok
+test filters_are_applied_before_editing_and_sequence_kv_is_rejected ... ok
+test special_symbols_and_key_value_fallbacks_work ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/restart.rs (target/release/deps/restart-62c9e327ee3108eb)
+
+running 2 tests
+test start_with_searches_both_strands_and_rotates_qualities ... ok
+test positive_and_negative_starts_rotate_circularly ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/rmdup.rs (target/release/deps/rmdup-7a763e5fa522cc22)
+
+running 3 tests
+test duplicate_reports_preserve_first_occurrence_groups ... ok
+test sequence_mode_compares_both_strands_and_ignore_case ... ok
+test id_and_name_modes_keep_first_occurrence ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/seqkit_streaming.rs (target/release/deps/seqkit_streaming-320978f55c66482b)
+
+running 2 tests
+test tab2fx_streams_stdin_with_a_fixed_output_commit_buffer ... ok
+test range_start_to_end_streams_stdin_without_counting_or_spooling ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/sliding.rs (target/release/deps/sliding-cb4d3889cca0aa67)
+
+running 5 tests
+test sliding_fastq_slices_quality_with_sequence ... ok
+test greedy_emits_all_trailing_short_windows ... ok
+test infile_list_is_expanded_before_windowing ... ok
+test circular_windows_wrap_coordinates_and_preserve_quality ... ok
+test sliding_windows_and_coordinates_match_seqkit ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/sort.rs (target/release/deps/sort-2bfcb1ebe1e56d33)
+
+running 7 tests
+test conflicting_sort_modes_are_a_usage_error ... ok
+test reverse_reverses_the_result ... ok
+test two_pass_rejects_by_bases_before_output ... ok
+test natural_order_and_sequence_prefix_match_seqkit ... ok
+test two_pass_writes_seqkit_index_and_reuses_offsets ... ok
+test two_pass_rejects_multiple_inputs_and_fastq ... ok
+test sorts_by_id_name_length_and_sequence ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/streaming.rs (target/release/deps/streaming-5ef84823fd096da3)
+
+running 4 tests
+test empty_input_produces_no_parts_and_no_directory ... ok
+test stats_all_matches_exact_sorted_statistics_on_a_large_input ... ok
+test split_by_part_streams_every_record_in_order ... ok
+test split_by_size_streams_every_record_in_order ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/subseq.rs (target/release/deps/subseq-16ce39e37d1cd3fb)
+
+running 3 tests
+test fastq_sequence_and_quality_are_sliced_together ... ok
+test region_coord_appends_the_requested_bounds ... ok
+test positive_negative_and_full_regions_match_seqkit ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/subseq_bed.rs (target/release/deps/subseq_bed-3cec4dfbb29db361)
+
+running 2 tests
+test bed_interval_and_chromosome_filter ... ok
+test upstream_and_downstream_flanks_match_seqkit ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/subseq_gtf.rs (target/release/deps/subseq_gtf-ec1ac2c05bb31d8f)
+
+running 1 test
+test gtf_features_and_negative_strand_match_seqkit ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/subseq_gtf_flank.rs (target/release/deps/subseq_gtf_flank-6a3d1f23cae605fb)
+
+running 2 tests
+test gtf_up_and_down_flanks_are_transcript_aware ... ok
+test gtf_only_flank_and_negative_strand_are_supported ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/tab2fx.rs (target/release/deps/tab2fx-a7b1543ce79b6974)
+
+running 9 tests
+test custom_comment_prefixes_replace_the_defaults ... ok
+test byte_fields_extra_columns_and_per_file_fastq_state ... ok
+test csv_comment_prefixes_and_fractional_buffer_sizes ... ok
+test same_file_and_hardlink_outputs_are_rejected_before_truncation ... ok
+test comment_lines_and_unvalidated_quality_lengths_match_seqkit ... ok
+test two_and_three_column_tables_match_seqkit ... ok
+test scanner_limit_discards_uncommitted_output ... ok
+test fatal_input_keeps_committed_blocks_but_drops_pending_output ... ok
+test compression_roundtrips_and_early_failure_does_not_finalize ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/translate.rs (target/release/deps/translate-5cc1212b313a2ca3)
+
+running 7 tests
+test fastq_translation_is_fasta_and_appends_frame ... ok
+test skip_errors_writes_a_blank_record_with_a_trailing_space ... ok
+test unknown_codon_and_init_m_flags_are_accepted ... ok
+test ambiguous_codons_clean_orfs_and_error_output_match_seqkit ... ok
+test standard_frames_match_seqkit ... ok
+test genetic_code_tables_use_their_own_codon_mappings ... ok
+test table_specific_stops_and_listing_metadata_match_seqkit ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/translate_errors.rs (target/release/deps/translate_errors-47352d2f5f7c5cdc)
+
+running 10 tests
+test excess_wrapped_quality_is_rejected_before_committing_the_record ... ok
+test negative_frames_complement_rna_and_ambiguous_bases ... ok
+test short_sequences_can_all_be_skipped_successfully ... ok
+test orf_coordinates_include_frame_and_keep_description ... ok
+test wrapped_fastq_and_nonstandard_header_bytes_are_preserved ... ok
+test trim_preserves_internal_residues_and_init_m_uses_table_starts ... ok
+test fatal_input_discards_only_pending_output ... ok
+test repeated_header_separators_do_not_delete_description_letters ... ok
+test first_record_alphabet_check_is_distinct_from_codon_errors ... ok
+test frames_are_ordered_repeatable_and_validated_before_output ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests rust_bam
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests rust_fx
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

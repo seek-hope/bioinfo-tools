@@ -1,0 +1,38 @@
+[
+  {
+    "name": "documentation",
+    "command": [
+      "python3",
+      "/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/check-docs.py"
+    ],
+    "returncode": 0
+  },
+  {
+    "name": "repository-docs",
+    "command": [
+      "python3",
+      "tests/ci/check_docs.py"
+    ],
+    "returncode": 0
+  },
+  {
+    "name": "format",
+    "command": [
+      "cargo",
+      "fmt",
+      "--all",
+      "--",
+      "--check"
+    ],
+    "returncode": 0
+  },
+  {
+    "name": "whitespace",
+    "command": [
+      "git",
+      "diff",
+      "--check"
+    ],
+    "returncode": 0
+  }
+]

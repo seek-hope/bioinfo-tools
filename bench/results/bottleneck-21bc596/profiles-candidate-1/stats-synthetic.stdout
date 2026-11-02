@@ -1,0 +1,2 @@
+file	format	type	num_seqs	sum_len	min_len	avg_len	max_len	Q1	Q2	Q3	sum_gap	N50	N50_num	Q20(%)	Q30(%)	AvgQual	GC(%)	sum_n
+/tmp/bioinfo-readme-benchmark/synthetic-100000.fastq	FASTQ	DNA	100000	15000000	150	150.0	150	150	150	150	0	150	50000	100	67	23.35	50.06	0

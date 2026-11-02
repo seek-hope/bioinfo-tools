@@ -1,0 +1,28 @@
+--------------------------------------------------------------------------------
+Profile data file '/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/profiles/stats-real.callgrind' (creator: callgrind-3.25.1)
+--------------------------------------------------------------------------------
+I1 cache: 
+D1 cache: 
+LL cache: 
+Timerange: Basic block 0 - 58290853
+Trigger: Program termination
+Profiled target:  /home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/before/rust-fx stats -a -T /tmp/bioinfo-readme-benchmark/real-100000.fastq (PID 2309002, part 1)
+Events recorded:  Ir
+Events shown:     Ir
+Event sort order: Ir
+Thresholds:       95
+Include dirs:     
+User annotated:   
+Auto-annotation:  off
+
+--------------------------------------------------------------------------------
+Ir                   
+--------------------------------------------------------------------------------
+563,983,731 (100.0%)  PROGRAM TOTALS
+
+--------------------------------------------------------------------------------
+Ir                    file:function
+--------------------------------------------------------------------------------
+523,608,443 (92.84%)  ???:rust_fx::commands::collect_stats::{closure#1} [/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/before/rust-fx]
+ 20,254,104 ( 3.59%)  ???:rust_fx::commands::stats [/home/rimuru/Projects/Code/for_fun/bioinfo-tools/target/bottleneck-21bc596/before/rust-fx]
+

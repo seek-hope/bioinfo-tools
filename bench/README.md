@@ -1,5 +1,15 @@
 # Benchmarks
 
+## Statistics and merge selection after 21bc596
+
+The [follow-up report](BOTTLENECK.md) covers packed FASTX counters and an index-only
+BAM merge selector. All 9 calibrated upstream/current conditions completed:
+54 measured observations, 18 warm-ups and 36 paired checks. The minimum measured
+time was 19.58 s. Statistics were faster than SeqKit on these inputs; BAM sorting
+remained slower than samtools. Source profiles, supplementary before/after screens,
+and the rejected temporary-compression parallel prototype are preserved in the
+[fresh evidence archive](results/bottleneck-21bc596/README.md).
+
 ## Larger inputs and physical core budgets
 
 The [scale protocol](SCALE-PROTOCOL.md) makes **upstream/current runtime** the
