@@ -111,8 +111,8 @@ pub fn java_float(value: f32) -> String {
 /// 2. Convert both ends to percentages (`* 100 / L`) and round with
 ///    [`java_round`]; that inclusive range of bins is where `i` lands.
 /// 3. Count how many `i` land on each bin (a `101`-element array local to this
-///    length), then give each landing an increment of `1 / count` so every `i`
-///    contributes a total weight of exactly 1.0, spread over its bins.
+///    length), then give each landing an increment of `1 / count`. These
+///    per-bin weights are not normalized to a total weight of one per read.
 ///
 /// Verified exactly: a single `L=8` all-G read produces `94→0.5, 95..100→1.0`,
 /// which is what FastQC prints, and mixed `L=4`/`L=8` all-A reads sum correctly.
@@ -138,7 +138,7 @@ pub fn gc_model(read_length: usize) -> Vec<Vec<(usize, f64)>> {
         spans.push((start, end));
     }
 
-    // Step 3: each landing gets 1/count, so each integer GC count totals 1.0.
+    // Step 3: retain the upstream per-bin weights without per-read normalization.
     spans
         .into_iter()
         .map(|(start, end)| {
@@ -425,12 +425,26 @@ impl QcStats {
             }
         }
 
-        // Per-read GC content, spread over bins by FastQC's model.
+        // FastQC limits GC model lengths by using a leading whole hundred or
+        // thousand bases. Basic statistics and per-position counts above still
+        // use the complete read. See EVIDENCE-FASTQC-GC-DUPLICATION.md.
         if !sequence.is_empty() {
-            if self.gc_model_cache.length != sequence.len() {
+            let model_length = if sequence.len() > 1000 {
+                sequence.len() / 1000 * 1000
+            } else if sequence.len() > 100 {
+                sequence.len() / 100 * 100
+            } else {
+                sequence.len()
+            };
+            let tail_gc = sequence[model_length..]
+                .iter()
+                .filter(|byte| matches!(byte.to_ascii_uppercase(), b'G' | b'C'))
+                .count() as u64;
+            let model_gc = gc - tail_gc;
+            if self.gc_model_cache.length != model_length {
                 self.gc_model_cache = GcModelCache {
-                    length: sequence.len(),
-                    model: gc_model(sequence.len()),
+                    length: model_length,
+                    model: gc_model(model_length),
                 };
             }
             // Reuse model values, but still add each read in the original order.
@@ -438,7 +452,7 @@ impl QcStats {
             for (bin, increment) in self
                 .gc_model_cache
                 .model
-                .get(gc as usize)
+                .get(model_gc as usize)
                 .map(|values| values.as_slice())
                 .unwrap_or(&[])
             {
@@ -655,17 +669,40 @@ mod tests {
     fn cached_gc_model_preserves_mixed_length_distribution_bitwise() {
         let mut stats = QcStats::new("mixed.fastq");
         let mut expected = [0.0f64; 101];
-        for (seed, length) in [150, 150, 0, 1, 76, 76, 500, 75, 150, 151, 150]
-            .into_iter()
-            .enumerate()
+        // Explicit model lengths follow the pinned FastQC prefix contract.
+        // Keep every former input length and check the 100/1000 boundaries too.
+        for (seed, (length, model_length)) in [
+            (150, 100),
+            (150, 100),
+            (0, 0),
+            (1, 1),
+            (76, 76),
+            (76, 76),
+            (500, 500),
+            (75, 75),
+            (150, 100),
+            (151, 100),
+            (150, 100),
+            (100, 100),
+            (101, 100),
+            (199, 100),
+            (200, 200),
+            (999, 900),
+            (1000, 1000),
+            (1001, 1000),
+            (1999, 1000),
+            (2000, 2000),
+        ]
+        .into_iter()
+        .enumerate()
         {
             let sequence: Vec<u8> = (0..length).map(|i| b"AacCGGNt"[(i + seed) % 8]).collect();
             if length != 0 {
-                let gc = sequence
+                let gc = sequence[..model_length]
                     .iter()
                     .filter(|base| matches!(base.to_ascii_uppercase(), b'G' | b'C'))
                     .count();
-                for (bin, increment) in &gc_model(length)[gc] {
+                for (bin, increment) in &gc_model(model_length)[gc] {
                     expected[*bin] += increment;
                 }
             }
@@ -679,6 +716,20 @@ mod tests {
                 expected.map(f64::to_bits)
             );
         }
+    }
+
+    #[test]
+    fn gc_prefix_does_not_truncate_basic_or_position_statistics() {
+        let sequence = [vec![b'A'; 100], vec![b'G'; 50]].concat();
+        let mut stats = QcStats::new("gc-tail.fastq");
+        stats.add_read(&sequence, &[b'I'; 150], 33);
+        assert_eq!(stats.total_bases, 150);
+        assert_eq!(stats.gc_bases, 50);
+        assert_eq!(stats.length_range(), "150");
+        assert_eq!(stats.bases_by_position[149], [0, 0, 1, 0]);
+        assert_eq!(stats.gc_distribution[0], 1.0);
+        assert_eq!(stats.gc_distribution[1], 0.5);
+        assert!(stats.gc_distribution[2..].iter().all(|&count| count == 0.0));
     }
 
     #[test]

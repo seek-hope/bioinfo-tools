@@ -748,6 +748,7 @@ name = "rust-bam"
 version = "0.1.0"
 dependencies = [
  "bioinfo-common",
+ "bstr",
  "clap",
  "flate2",
  "noodles",

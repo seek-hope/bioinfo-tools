@@ -1,7 +1,7 @@
 //! `rust-bam` command-line entry point.
 //!
-//! Exit codes, diagnostics and the provenance block come from `bioinfo-common`
-//! so this binary follows the same contract as every other tool in the workspace.
+//! Normal failures use `bioinfo-common`; quickcheck returns its upstream failure
+//! mask directly, including multiple problems in one file or invocation.
 
 use std::path::PathBuf;
 use std::process::ExitCode;
@@ -45,7 +45,7 @@ fn main() -> ExitCode {
     };
 
     match run(&matches) {
-        Ok(()) => ExitCode::SUCCESS,
+        Ok(code) => code,
         Err(error) => {
             eprintln!("{}", bioinfo_common::error_line(error.message()));
             exit_code(error.exit_code())
@@ -70,6 +70,10 @@ fn provenance() -> bioinfo_common::Provenance {
         )
         .with_field("library", "noodles 0.118.0 (pure Rust; no htslib)")
         .with_field("commands", COMMANDS.join(", "))
+        .with_field(
+            "quickcheck-exit-codes",
+            "0=success; failure mask 2=open, 4=format, 8=header, 16=EOF, 32=close",
+        )
         .with_exit_codes(&EXIT_CLASSES)
 }
 
@@ -532,7 +536,23 @@ fn cli() -> Command {
         )
 }
 
-fn run(matches: &clap::ArgMatches) -> Result<(), Error> {
+fn run(matches: &clap::ArgMatches) -> Result<ExitCode, Error> {
+    if let Some(("quickcheck", sub)) = matches.subcommand() {
+        let inputs: Vec<PathBuf> = sub
+            .get_many::<String>("inputs")
+            .map(|values| values.map(PathBuf::from).collect())
+            .unwrap_or_default();
+        let result = commands::quickcheck(&inputs)?;
+        for (file, reason) in &result.failed {
+            eprintln!("{} {}", file.display(), reason);
+        }
+        return Ok(exit_code(result.exit_code()));
+    }
+    run_command(matches)?;
+    Ok(ExitCode::SUCCESS)
+}
+
+fn run_command(matches: &clap::ArgMatches) -> Result<(), Error> {
     match matches.subcommand() {
         Some(("view", sub)) => {
             if sub.get_flag("help") {
@@ -666,26 +686,6 @@ fn run(matches: &clap::ArgMatches) -> Result<(), Error> {
         Some(("idxstats", sub)) => {
             let text = commands::idxstats(&path(sub, "input")?)?;
             write_text(sub, &text)
-        }
-        Some(("quickcheck", sub)) => {
-            let inputs: Vec<PathBuf> = sub
-                .get_many::<String>("inputs")
-                .map(|values| values.map(PathBuf::from).collect())
-                .unwrap_or_default();
-            let result = commands::quickcheck(&inputs)?;
-            // samtools prints one line per failure to stderr and exits 16.
-            for (file, reason) in &result.failed {
-                eprintln!("{} {}", file.display(), reason);
-            }
-            if result.ok() {
-                Ok(())
-            } else {
-                // A distinct exit code, not one of the shared classes.
-                Err(Error::runtime(format!(
-                    "{} file(s) failed quickcheck",
-                    result.failed.len()
-                )))
-            }
         }
         Some(("index", sub)) => {
             let (written, count) = commands::index(

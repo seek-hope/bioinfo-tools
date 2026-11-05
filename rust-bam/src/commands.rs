@@ -20,7 +20,8 @@ use noodles::sam::alignment::record::Cigar as _;
 use crate::error::{Error, Result};
 use crate::format::{detect_path, Format};
 use crate::index_util;
-use crate::io_util::{AlignmentReader, BamWriter, Record, SamWriter};
+use crate::io_util::{AlignmentReader, BamWriter, Record, SamWriter, SortReader};
+use crate::sort_chunk::Chunk;
 use crate::sort_order::SortKey;
 use crate::stats::{FlagStat, IdxStats};
 
@@ -1726,104 +1727,7 @@ pub const BGZF_EOF_MARKER: [u8; 28] = [
     0x1b, 0x00, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 ];
 
-/// The result of a quickcheck run.
-#[derive(Clone, Debug, PartialEq, Eq)]
-pub struct QuickCheck {
-    /// Files that passed.
-    pub passed: Vec<PathBuf>,
-    /// `(file, reason)` for each failure.
-    pub failed: Vec<(PathBuf, String)>,
-}
-
-impl QuickCheck {
-    /// True when every file passed.
-    pub fn ok(&self) -> bool {
-        self.failed.is_empty()
-    }
-
-    /// `samtools quickcheck`'s exit code: 0 on success, 16 on any failure.
-    pub fn exit_code(&self) -> i32 {
-        if self.ok() {
-            0
-        } else {
-            16
-        }
-    }
-}
-
-/// `quickcheck`: cheap structural validation without decoding every record.
-///
-/// Mirrors what `samtools quickcheck` verifies:
-///
-/// * the file is non-empty;
-/// * a BAM has the BAM magic;
-/// * a BAM ends with the 28-byte BGZF EOF marker;
-/// * the header can be read and declares at least one reference sequence
-///   (samtools warns "has no targets" and fails).
-pub fn quickcheck(paths: &[PathBuf]) -> Result<QuickCheck> {
-    let mut result = QuickCheck {
-        passed: Vec::new(),
-        failed: Vec::new(),
-    };
-
-    for path in paths {
-        match quickcheck_one(path) {
-            Ok(()) => result.passed.push(path.clone()),
-            Err(reason) => result.failed.push((path.clone(), reason)),
-        }
-    }
-    Ok(result)
-}
-
-fn quickcheck_one(path: &Path) -> std::result::Result<(), String> {
-    let metadata = std::fs::metadata(path).map_err(|error| format!("{error}"))?;
-    if metadata.len() == 0 {
-        return Err("is empty".to_string());
-    }
-
-    let format = detect_path(path).map_err(|error| error.message().to_string())?;
-    if format == Format::Cram {
-        return Err("is CRAM, which this build does not support".to_string());
-    }
-
-    let mut reader = AlignmentReader::open(path).map_err(|error| error.message().to_string())?;
-    let header = reader
-        .read_header()
-        .map_err(|error| format!("cannot read header: {}", error.message()))?;
-
-    if header.reference_sequences().is_empty() {
-        return Err("has no targets in header".to_string());
-    }
-
-    // The EOF marker check applies to BAM only: it is a BGZF concept.
-    if format == Format::Bam {
-        check_bgzf_eof(path)?;
-    }
-
-    Ok(())
-}
-
-/// Verify the final 28 bytes are htslib's exact BGZF EOF marker.
-fn check_bgzf_eof(path: &Path) -> std::result::Result<(), String> {
-    use std::io::{Read, Seek, SeekFrom};
-
-    let mut file = File::open(path).map_err(|error| format!("{error}"))?;
-    let length = file
-        .seek(SeekFrom::End(0))
-        .map_err(|error| format!("{error}"))?;
-    if length < BGZF_EOF_MARKER.len() as u64 {
-        return Err("is truncated: shorter than a BGZF EOF block".to_string());
-    }
-    file.seek(SeekFrom::End(-(BGZF_EOF_MARKER.len() as i64)))
-        .map_err(|error| format!("{error}"))?;
-    let mut tail = [0u8; BGZF_EOF_MARKER.len()];
-    file.read_exact(&mut tail)
-        .map_err(|error| format!("{error}"))?;
-    if tail != BGZF_EOF_MARKER {
-        return Err("was missing EOF block when one should be present".to_string());
-    }
-    Ok(())
-}
+pub use crate::quickcheck::{check as quickcheck, QuickCheck};
 
 // --------------------------------------------------------------------------- //
 // index
@@ -1947,15 +1851,6 @@ fn record_memory(record: &Record) -> u64 {
     (std::mem::size_of::<Record>() + name + sequence + qualities + 256) as u64
 }
 
-fn sorted_indices(chunk: &[(SortKey, Record)]) -> Vec<usize> {
-    let mut order: Vec<_> = (0..chunk.len()).collect();
-    // Keys include the unique input index, so unstable sorting of these small
-    // indices yields the same total order without moving large RecordBufs or
-    // allocating a stable-sort scratch array of records.
-    order.sort_unstable_by(|&a, &b| chunk[a].0.cmp(&chunk[b].0));
-    order
-}
-
 fn write_index(file: &mut impl Write, index: usize) -> Result<()> {
     let index = u64::try_from(index)
         .map_err(|_| Error::runtime("record index does not fit in u64".to_string()))?;
@@ -1970,14 +1865,10 @@ fn flush_index(file: &mut impl Write) -> Result<()> {
         .map_err(|error| Error::io(format!("cannot write sort index: {error}")))
 }
 
-fn spill_run(
-    temp: &mut TempDir,
-    header: &sam::Header,
-    chunk: &mut Vec<(SortKey, Record)>,
-) -> Result<PathBuf> {
+fn spill_run(temp: &mut TempDir, header: &sam::Header, chunk: &mut impl Chunk) -> Result<PathBuf> {
     let path = temp.run_path();
     let index_path = path.with_extension("idx");
-    let order = sorted_indices(chunk);
+    let order = chunk.order();
 
     let file = File::create(&path)
         .map_err(|error| Error::io(format!("cannot create {}: {error}", path.display())))?;
@@ -1989,9 +1880,8 @@ fn spill_run(
     let mut writer = BamWriter::new_fast(file);
     writer.write_header(header)?;
     for position in order {
-        let (key, record) = &chunk[position];
-        writer.write_record(header, record)?;
-        write_index(&mut index_file, key.input_index)?;
+        let input_index = chunk.emit(position, header, &mut writer)?;
+        write_index(&mut index_file, input_index)?;
     }
     let file = writer.finish()?;
     file.sync_all()
@@ -2004,7 +1894,7 @@ fn spill_run(
 }
 
 // Capture the exact bytes consumed by the full decoder. Internal runs were
-// serialized once by BamWriter, so validated frames can be forwarded without
+// serialized once by the ordinary BAM encoder, so validated frames can be forwarded without
 // repeating field encoding. This is deliberately confined to sort run readers:
 // public inputs (including flagstat) retain their existing reader and checks.
 const MAX_CACHED_SORT_FRAME: usize = 64 * 1024;
@@ -2309,7 +2199,7 @@ where
         while next(&mut record, &mut frame)? {
             if frame.is_empty() {
                 writer
-                    .write_alignment_record(header, &record)
+                    .write_alignment_record(header, &crate::encoder_record::EncoderRecord(&record))
                     .map_err(|error| Error::io(format!("cannot write BAM record: {error}")))?;
             } else {
                 writer
@@ -2356,13 +2246,20 @@ where
 /// merged with a bounded number of open files. The sidecar preserves the
 /// documented final input-index tie-break exactly.
 pub fn sort(options: SortOptions) -> Result<u64> {
-    let mut reader = AlignmentReader::open(&options.input)?;
+    if options.sam_output {
+        sort_chunk(options, Vec::<(SortKey, Record)>::new())
+    } else {
+        sort_chunk(options, crate::sort_chunk::Compact::default())
+    }
+}
+
+fn sort_chunk<C: Chunk>(options: SortOptions, mut chunk: C) -> Result<u64> {
+    let mut reader = SortReader::open(&options.input, options.threads)?;
     let header = reader.read_header()?;
     let final_header = header_with_coordinate_sort(header.clone());
     let budget = options.max_memory.unwrap_or(DEFAULT_SORT_MEMORY).max(1);
     let max_open = options.max_open_files.max(2);
 
-    let mut chunk: Vec<(SortKey, Record)> = Vec::new();
     let mut chunk_bytes = 0u64;
     let mut runs: Vec<PathBuf> = Vec::new();
     let mut temp: Option<TempDir> = None;
@@ -2375,8 +2272,9 @@ pub fn sort(options: SortOptions) -> Result<u64> {
             break;
         }
         let key = key_for(&record, index);
-        chunk_bytes = chunk_bytes.saturating_add(record_memory(&record));
-        chunk.push((key, std::mem::take(&mut record)));
+        let estimate = record_memory(&record);
+        chunk_bytes = chunk_bytes.saturating_add(estimate);
+        chunk.push_record(&header, key, &mut record, estimate);
         index += 1;
         if chunk_bytes >= budget {
             if temp.is_none() {
@@ -2388,12 +2286,14 @@ pub fn sort(options: SortOptions) -> Result<u64> {
         }
     }
 
+    drop(record);
+    drop(reader);
     let total = index as u64;
     if runs.is_empty() {
-        let mut order = sorted_indices(&chunk).into_iter();
-        write_records(&options, &final_header, |record, _frame| {
+        let mut order = chunk.order().into_iter();
+        write_records(&options, &final_header, |record, frame| {
             if let Some(position) = order.next() {
-                *record = std::mem::take(&mut chunk[position].1);
+                chunk.take(position, record, frame);
                 Ok(true)
             } else {
                 Ok(false)
@@ -2402,7 +2302,7 @@ pub fn sort(options: SortOptions) -> Result<u64> {
         return Ok(total);
     }
 
-    if !chunk.is_empty() {
+    if chunk.len() != 0 {
         let workspace = temp.as_mut().expect("runs exist, so the workspace exists");
         runs.push(spill_run(workspace, &header, &mut chunk)?);
     }
@@ -2438,7 +2338,7 @@ fn merge_to_output(options: &SortOptions, paths: &[PathBuf], header: &sam::Heade
 /// `SO:unsorted` after sorting would be a false statement about the file. The
 /// sort order lives in the header map's *other fields* (`SO`), not in a typed
 /// accessor, so it is set through `other_fields_mut`.
-fn header_with_coordinate_sort(header: sam::Header) -> sam::Header {
+fn header_with_coordinate_sort(mut header: sam::Header) -> sam::Header {
     use noodles::sam::header::record::value::map::header::{sort_order, tag, Version};
     use noodles::sam::header::record::value::map::Header;
     use noodles::sam::header::record::value::Map;
@@ -2459,17 +2359,12 @@ fn header_with_coordinate_sort(header: sam::Header) -> sam::Header {
             .into(),
     );
 
-    let mut builder = sam::Header::builder().set_header(hd);
-    for (name, reference) in header.reference_sequences() {
-        builder = builder.add_reference_sequence(name.clone(), reference.clone());
-    }
-    for (name, read_group) in header.read_groups() {
-        builder = builder.add_read_group(name.clone(), read_group.clone());
-    }
-    for (id, program) in header.programs().as_ref() {
-        builder = builder.add_program(id.clone(), program.clone());
-    }
-    builder.build()
+    // A new coordinate sort invalidates prior grouping/subsort declarations.
+    hd.other_fields_mut().shift_remove(&tag::GROUP_ORDER);
+    hd.other_fields_mut().shift_remove(&tag::SUBSORT_ORDER);
+    // Update only @HD; reconstructing the header used to drop every @CO line.
+    *header.header_mut() = Some(hd);
+    header
 }
 
 #[cfg(test)]
@@ -2489,6 +2384,125 @@ mod tests {
             .write_all(&1u64.to_le_bytes())
             .unwrap();
         (temp, path, header)
+    }
+
+    #[test]
+    fn coordinate_header_preserves_comments_and_clears_stale_order_metadata() {
+        let source = b"@HD\tVN:1.6\tSO:queryname\tSS:queryname:natural\tGO:query\tZZ:keep\n@SQ\tSN:chr1\tLN:1000\n@RG\tID:rg\tSM:s\n@PG\tID:source\tPN:fixture\n@CO\tfirst comment\n@CO\tsecond\tcomment\n";
+        let mut reader = sam::io::Reader::new(&source[..]);
+        let header = reader.read_header().unwrap();
+        let updated = header_with_coordinate_sort(header.clone());
+        assert_eq!(updated.comments(), header.comments());
+        assert_eq!(updated.reference_sequences(), header.reference_sequences());
+        assert_eq!(updated.read_groups(), header.read_groups());
+        assert_eq!(updated.programs(), header.programs());
+        let mut writer = sam::io::Writer::new(Vec::new());
+        writer.write_header(&updated).unwrap();
+        let expected = b"@HD\tVN:1.6\tSO:coordinate\tZZ:keep\n@SQ\tSN:chr1\tLN:1000\n@RG\tID:rg\tSM:s\n@PG\tID:source\tPN:fixture\n@CO\tfirst comment\n@CO\tsecond\tcomment\n";
+        assert_eq!(writer.into_inner(), expected);
+    }
+
+    #[test]
+    fn compact_chunks_preserve_initial_runs_and_sidecars() {
+        let header = sam::Header::default();
+        let mut compact = crate::sort_chunk::Compact::default();
+        let mut owned = Vec::new();
+        let mut left = TempDir::new().unwrap();
+        let mut right = TempDir::new().unwrap();
+        for group in 0..3 {
+            for i in (0..513).rev() {
+                let record = Record::builder()
+                    .set_name(format!("r{}", i % 17))
+                    .set_sequence(vec![b'A'; i % 101 + 1].into())
+                    .build();
+                let index = group * 513 + i;
+                compact.push_record(
+                    &header,
+                    key_for(&record, index),
+                    &mut record.clone(),
+                    record_memory(&record),
+                );
+                owned.push((key_for(&record, index), record));
+            }
+            let a = spill_run(&mut left, &header, &mut compact).unwrap();
+            let b = spill_run(&mut right, &header, &mut owned).unwrap();
+            assert_eq!(std::fs::read(&a).unwrap(), std::fs::read(&b).unwrap());
+            assert_eq!(
+                std::fs::read(a.with_extension("idx")).unwrap(),
+                std::fs::read(b.with_extension("idx")).unwrap()
+            );
+            assert_eq!(compact.len(), 0);
+            assert!(owned.is_empty());
+        }
+    }
+
+    #[test]
+    fn compact_encoding_defers_errors_until_the_original_sort_stage() {
+        let temp = TempDir::new().unwrap();
+        let input = temp.path.join("input.sam");
+        let output = temp.path.join("output.bam");
+        let bad = format!("{}\t4\t*\t0\t0\t*\t*\t0\t0\tA\tI\n", "z".repeat(256));
+        let valid = "a\t4\t*\t0\t0\t*\t*\t0\t0\tA\tI\n";
+        let parse_error = "broken\t4\t*\t0\t0\t*\t*\t0\t0\tAA\tI\n";
+        let header = "@HD\tVN:1.6\tSO:unsorted\n";
+        for (case, text, budget, invalid_output) in [
+            (
+                "parse-before-encode",
+                format!("{header}{bad}{parse_error}"),
+                u64::MAX,
+                false,
+            ),
+            (
+                "spill-before-parse",
+                format!("{header}{bad}{parse_error}"),
+                1,
+                false,
+            ),
+            (
+                "sorted-prefix-before-encode",
+                format!("{header}{bad}{valid}"),
+                u64::MAX,
+                false,
+            ),
+            (
+                "create-before-encode",
+                format!("{header}{bad}{valid}"),
+                u64::MAX,
+                true,
+            ),
+        ] {
+            std::fs::write(&input, text).unwrap();
+            let make_options = || SortOptions {
+                input: input.clone(),
+                output: Some(if invalid_output {
+                    temp.path.clone()
+                } else {
+                    output.clone()
+                }),
+                sam_output: false,
+                max_memory: Some(budget),
+                max_open_files: 2,
+                threads: 1,
+            };
+            let old = sort_chunk(make_options(), Vec::<(SortKey, Record)>::new()).unwrap_err();
+            let old_bytes = std::fs::read(&output).ok();
+            let _ = std::fs::remove_file(&output);
+            let new =
+                sort_chunk(make_options(), crate::sort_chunk::Compact::default()).unwrap_err();
+            let new_bytes = std::fs::read(&output).ok();
+            let _ = std::fs::remove_file(&output);
+            assert_eq!(new, old, "{case}");
+            assert_eq!(new_bytes, old_bytes, "{case}");
+            match case {
+                "parse-before-encode" => {
+                    assert!(new.message().starts_with("cannot read SAM record:"))
+                }
+                "spill-before-parse" | "sorted-prefix-before-encode" => {
+                    assert_eq!(new.message(), "cannot write BAM record: invalid name")
+                }
+                _ => assert_eq!(new.exit_code(), 4),
+            }
+        }
     }
 
     #[test]
@@ -2700,22 +2714,5 @@ mod tests {
         stats.add(Some(0), true);
         let text = render_idxstats(&stats);
         assert_eq!(text.lines().next().unwrap(), "chr1\t1000\t2\t1");
-    }
-
-    #[test]
-    fn quickcheck_exit_code_is_16_on_failure_and_0_on_success() {
-        let ok = QuickCheck {
-            passed: vec![PathBuf::from("a.bam")],
-            failed: Vec::new(),
-        };
-        assert_eq!(ok.exit_code(), 0);
-        assert!(ok.ok());
-
-        let bad = QuickCheck {
-            passed: Vec::new(),
-            failed: vec![(PathBuf::from("b.bam"), "is empty".to_string())],
-        };
-        assert_eq!(bad.exit_code(), 16);
-        assert!(!bad.ok());
     }
 }

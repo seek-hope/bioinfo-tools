@@ -65,7 +65,8 @@ pub fn build_csi(input: &Path, output: &Path) -> Result<u64> {
 fn build_index(input: &Path, output: &Path, format: Format) -> Result<u64> {
     let file =
         File::open(input).map_err(|error| Error::io(format!("{}: {error}", input.display())))?;
-    let mut reader = bam::io::Reader::from(bgzf::io::Reader::new(std::io::BufReader::new(file)));
+    let source = crate::bgzf_source::BgzfSource::new(file);
+    let mut reader = bam::io::Reader::from(bgzf::io::Reader::new(std::io::BufReader::new(source)));
 
     let header = reader.read_header().map_err(|error| {
         Error::input(format!("{}: cannot read header: {error}", input.display()))

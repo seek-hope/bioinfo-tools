@@ -132,6 +132,7 @@ run python3 -W error::ResourceWarning bench/test_optimization_benchmark.py
 run python3 -W error::ResourceWarning bench/test_scale_benchmark.py
 run python3 -W error::ResourceWarning bench/test_scale_inputs.py
 run python3 -W error::ResourceWarning bench/test_scale_validation.py
+run python3 -W error::ResourceWarning -m unittest discover -s bench -p 'test_superiority_*.py'
 run python3 tests/gate/test_acceptance.py
 run "${CARGO[@]}" fmt --all -- --check
 run "${CARGO[@]}" clippy --workspace --all-targets --locked "${cargo_offline[@]}" -- -D warnings

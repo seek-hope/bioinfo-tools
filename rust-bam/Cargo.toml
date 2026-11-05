@@ -20,6 +20,9 @@ noodles = { version = "0.118.0", default-features = false, features = [
 # Shared exit-code classes, diagnostics and provenance block (W1-1).
 bioinfo-common = { path = "../bioinfo-common" }
 
+# Name the existing noodles record API type; see docs/ADR-BAM-QUALITY-SLICES.md.
+bstr = { version = "1.13.1", default-features = false, features = ["std"] }
+
 # Command-line parsing: already a declared workspace dependency.
 clap = { version = "4", features = ["derive"] }
 

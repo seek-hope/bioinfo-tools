@@ -14,6 +14,7 @@
 
 use std::fs::File;
 use std::io::{self, BufReader, Read, Write};
+use std::num::NonZero;
 use std::path::Path;
 
 use noodles::bam;
@@ -21,6 +22,7 @@ use noodles::bgzf;
 use noodles::sam;
 use noodles::sam::alignment::io::Write as AlignmentWrite;
 
+use crate::bgzf_source::BgzfSource;
 use crate::error::{Error, Result};
 use crate::format::{detect_reader, Format, GZIP_MAGIC};
 
@@ -41,8 +43,12 @@ impl AlignmentReader {
     /// The format is detected from content, as `samtools` does, not from the
     /// extension.
     pub fn open(path: &Path) -> Result<AlignmentReader> {
+        Self::open_with_regular_check(path, false).map(|(reader, _)| reader)
+    }
+
+    fn open_with_regular_check(path: &Path, inspect_regular: bool) -> Result<(Self, bool)> {
         if path.as_os_str() == "-" {
-            return Self::open_stdin();
+            return Self::open_stdin().map(|reader| (reader, false));
         }
         let source: Box<dyn Read + Send> = Box::new(
             File::open(path).map_err(|error| Error::io(format!("{}: {error}", path.display())))?,
@@ -67,15 +73,18 @@ impl AlignmentReader {
                     .map_err(|error| Error::io(format!("{}: {error}", path.display())))?;
                 let reader =
                     sam::io::Reader::new(BufReader::new(Box::new(file) as Box<dyn Read + Send>));
-                Ok(AlignmentReader::Sam(reader))
+                Ok((AlignmentReader::Sam(reader), false))
             }
             Format::Bam => {
                 let file = File::open(path)
                     .map_err(|error| Error::io(format!("{}: {error}", path.display())))?;
-                let bgzf_reader =
-                    bgzf::io::Reader::new(BufReader::new(Box::new(file) as Box<dyn Read + Send>));
+                let regular = inspect_regular && file.metadata().is_ok_and(|m| m.is_file());
+                let bgzf_reader = bgzf::io::Reader::new(BufReader::new(Box::new(BgzfSource::new(
+                    file,
+                ))
+                    as Box<dyn Read + Send>));
                 let reader = bam::io::Reader::from(bgzf_reader);
-                Ok(AlignmentReader::Bam(reader))
+                Ok((AlignmentReader::Bam(reader), regular))
             }
             Format::Cram => Err(Error::usage(
                 "CRAM is not supported by this build; convert it with `samtools view -b` first",
@@ -108,7 +117,12 @@ impl AlignmentReader {
             detect_reader(&mut io::Cursor::new(prefix.clone()))?
         };
         let chained = io::Cursor::new(prefix).chain(source);
-        let buffered = BufReader::new(Box::new(chained) as Box<dyn Read + Send>);
+        let source: Box<dyn Read + Send> = if format == Format::Bam {
+            Box::new(BgzfSource::new(chained))
+        } else {
+            Box::new(chained)
+        };
+        let buffered = BufReader::new(source);
         match format {
             Format::Sam => Ok(AlignmentReader::Sam(sam::io::Reader::new(buffered))),
             Format::Bam => Ok(AlignmentReader::Bam(bam::io::Reader::from(
@@ -185,6 +199,53 @@ impl AlignmentReader {
                 }
             }
         })
+    }
+}
+
+/// Sort-only input scheduling; public record decoding is identical in both arms.
+///
+/// Only a regular BAM file's actual open handle can use asynchronous reads.
+/// Stdin, pipes and SAM retain serial reads because joining a blocked input
+/// thread during an earlier output/record error could otherwise block the caller.
+pub(crate) enum SortReader {
+    Serial(AlignmentReader),
+    Parallel(bam::io::Reader<bgzf::io::MultithreadedReader<BufReader<Box<dyn Read + Send>>>>),
+}
+
+impl SortReader {
+    pub(crate) fn open(path: &Path, threads: usize) -> Result<Self> {
+        let (reader, regular) = AlignmentReader::open_with_regular_check(path, threads > 1)?;
+        match (reader, regular, NonZero::new(threads.saturating_sub(1))) {
+            (AlignmentReader::Bam(reader), true, Some(workers)) => {
+                // No header/record has been consumed from this reopened handle.
+                let input = reader.into_inner().into_inner();
+                let parallel = bgzf::io::MultithreadedReader::with_worker_count(workers, input);
+                Ok(Self::Parallel(bam::io::Reader::from(parallel)))
+            }
+            (reader, _, _) => Ok(Self::Serial(reader)),
+        }
+    }
+
+    pub(crate) fn read_header(&mut self) -> Result<sam::Header> {
+        match self {
+            Self::Serial(reader) => reader.read_header(),
+            Self::Parallel(reader) => reader
+                .read_header()
+                .map_err(|error| Error::runtime(format!("cannot read BAM header: {error}"))),
+        }
+    }
+
+    pub(crate) fn read_record(
+        &mut self,
+        header: &sam::Header,
+        record: &mut Record,
+    ) -> Result<usize> {
+        match self {
+            Self::Serial(reader) => reader.read_record(header, record),
+            Self::Parallel(reader) => reader
+                .read_record_buf(header, record)
+                .map_err(|error| Error::runtime(format!("cannot read BAM record: {error}"))),
+        }
     }
 }
 
@@ -275,12 +336,12 @@ impl<W: io::Write> BamWriter<W> {
     /// Write one record.
     pub fn write_record(&mut self, header: &sam::Header, record: &Record) -> Result<()> {
         self.inner
-            .write_alignment_record(header, record)
+            .write_alignment_record(header, &crate::encoder_record::EncoderRecord(record))
             .map_err(|error| Error::io(format!("cannot write BAM record: {error}")))
     }
 
     /// Write a complete, already validated uncompressed BAM frame from an
-    /// internal sort run, including its four-byte block-size prefix.
+    /// internal sort encoder or run, including its four-byte block-size prefix.
     pub(crate) fn write_encoded_record(&mut self, frame: &[u8]) -> Result<()> {
         self.inner
             .get_mut()
@@ -317,6 +378,170 @@ impl<W: io::Write> BamWriter<W> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    fn reader_result(mut reader: SortReader) -> (Result<sam::Header>, Vec<Record>, Option<Error>) {
+        let header = reader.read_header();
+        let mut records = Vec::new();
+        let mut error = None;
+        if let Ok(header) = &header {
+            let mut record = Record::default();
+            loop {
+                match reader.read_record(header, &mut record) {
+                    Ok(0) => break,
+                    Ok(_) => records.push(record.clone()),
+                    Err(e) => {
+                        error = Some(e);
+                        break;
+                    }
+                }
+            }
+        }
+        (header, records, error)
+    }
+
+    fn encoded_test_records() -> (Vec<u8>, usize) {
+        let header = sam::Header::default();
+        let mut writer = bam::io::Writer::from(Vec::new());
+        writer.write_header(&header).unwrap();
+        let first_record = writer.get_ref().len();
+        for index in 0..1024 {
+            let length = if index % 127 == 0 { 70000 } else { 150 };
+            let record = Record::builder()
+                .set_name(format!("r{index:04}"))
+                .set_sequence(vec![b'A'; length].into())
+                .set_quality_scores(vec![30; length].into())
+                .build();
+            writer
+                .write_alignment_record(&header, &crate::encoder_record::EncoderRecord(&record))
+                .unwrap();
+        }
+        (writer.into_inner(), first_record)
+    }
+
+    fn compress_blocks(raw: &[u8]) -> Vec<Vec<u8>> {
+        raw.chunks(32768)
+            .map(|chunk| {
+                let mut writer = bgzf::io::Writer::new(Vec::new());
+                writer.write_all(chunk).unwrap();
+                let mut bytes = writer.finish().unwrap();
+                bytes.truncate(bytes.len() - 28);
+                bytes
+            })
+            .collect()
+    }
+
+    #[test]
+    fn parallel_sort_reader_preserves_records_and_ordered_decoder_errors() {
+        let (raw, first) = encoded_test_records();
+        let blocks = compress_blocks(&raw);
+        assert!(blocks.len() > 4);
+        let eof = bgzf::io::Writer::new(Vec::new()).finish().unwrap();
+        let mut cases = vec![("valid", [blocks.concat(), eof.clone()].concat())];
+        for length in 1..18 {
+            cases.push((
+                "partial-final-frame-header",
+                [blocks.concat(), eof[..length].to_vec()].concat(),
+            ));
+        }
+        let mut interior_empty = blocks.clone();
+        interior_empty.insert(2, eof);
+        cases.push(("interior-empty", interior_empty.concat()));
+        let mut faults = blocks.clone();
+        let crc = faults[1].len() - 8;
+        faults[1][crc] ^= 1;
+        faults[2][0] ^= 1;
+        cases.push(("earlier-crc-before-later-header", faults.concat()));
+        let mut faults = blocks.clone();
+        let crc = faults[1].len() - 8;
+        faults[1][crc] ^= 1;
+        faults[2][16..18].copy_from_slice(&0u16.to_le_bytes());
+        cases.push(("earlier-crc-before-later-frame-read-error", faults.concat()));
+        let mut faults = blocks.clone();
+        let isize = faults[2].len() - 4;
+        faults[2][isize..].copy_from_slice(&65537u32.to_le_bytes());
+        cases.push(("oversized-isize", faults.concat()));
+        cases.push((
+            "truncated-body",
+            [
+                blocks[..2].concat(),
+                blocks[2][..blocks[2].len() - 7].to_vec(),
+            ]
+            .concat(),
+        ));
+        cases.push((
+            "partial-frame-header",
+            [blocks[..2].concat(), blocks[2][..17].to_vec()].concat(),
+        ));
+        let mut bad_header = raw.clone();
+        bad_header[0] = 0;
+        let mut bad_header = compress_blocks(&bad_header);
+        let crc = bad_header[1].len() - 8;
+        bad_header[1][crc] ^= 1;
+        cases.push(("bam-header-before-later-crc", bad_header.concat()));
+        let mut bad_record = raw;
+        // The first large record spans blocks. Append an invalid auxiliary type
+        // inside its frame, followed by a later independent BGZF failure.
+        let length = u32::from_le_bytes(bad_record[first..first + 4].try_into().unwrap());
+        let end = first + 4 + length as usize;
+        bad_record.splice(end..end, *b"XX?");
+        bad_record[first..first + 4].copy_from_slice(&(length + 3).to_le_bytes());
+        let mut bad_record = compress_blocks(&bad_record);
+        let last = bad_record.len() - 1;
+        let crc = bad_record[last].len() - 8;
+        bad_record[last][crc] ^= 1;
+        cases.push(("bam-record-before-later-crc", bad_record.concat()));
+
+        for (name, data) in cases {
+            let input = || {
+                BufReader::new(Box::new(BgzfSource::new(io::Cursor::new(data.clone())))
+                    as Box<dyn Read + Send>)
+            };
+            let expected = reader_result(SortReader::Serial(AlignmentReader::Bam(
+                bam::io::Reader::from(bgzf::io::Reader::new(input())),
+            )));
+            if name == "partial-final-frame-header" {
+                assert!(expected
+                    .2
+                    .as_ref()
+                    .is_some_and(|error| error.message().contains("truncated BGZF header")));
+            }
+            for workers in [1, 3] {
+                let actual = reader_result(SortReader::Parallel(bam::io::Reader::from(
+                    bgzf::io::MultithreadedReader::with_worker_count(
+                        NonZero::new(workers).unwrap(),
+                        input(),
+                    ),
+                )));
+                assert_eq!(actual, expected, "{name}, workers={workers}");
+            }
+        }
+    }
+
+    #[test]
+    fn only_regular_bam_files_with_multiple_sort_threads_select_parallel_input() {
+        let directory =
+            std::env::temp_dir().join(format!("rust-bam-sort-reader-{}", std::process::id()));
+        std::fs::create_dir(&directory).unwrap();
+        let path = directory.join("input");
+        let (raw, _) = encoded_test_records();
+        std::fs::write(&path, compress_blocks(&raw).concat()).unwrap();
+        for threads in [0, 1] {
+            assert!(matches!(
+                SortReader::open(&path, threads).unwrap(),
+                SortReader::Serial(_)
+            ));
+        }
+        assert!(matches!(
+            SortReader::open(&path, 4).unwrap(),
+            SortReader::Parallel(_)
+        ));
+        std::fs::write(&path, b"@HD\tVN:1.6\nq\t4\t*\t0\t0\t*\t*\t0\t0\tA\tI\n").unwrap();
+        assert!(matches!(
+            SortReader::open(&path, 4).unwrap(),
+            SortReader::Serial(_)
+        ));
+        std::fs::remove_dir_all(directory).unwrap();
+    }
 
     #[test]
     fn records_alias_is_the_sam_buffer_type() {

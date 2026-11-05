@@ -721,21 +721,12 @@ pub fn sequence_duplication(stats: &QcStats, thresholds: &Thresholds) -> ModuleR
             7 => 6,
             8 => 7,
             9 => 8,
-            // Bins are 1,2,3,4,5,6,7,8,9,>10,>50,>100,>500,>1k,>5k,>10k+.
-            //
-            // Each ">N" label is INCLUSIVE of N on its LOWER side and exclusive on
-            // the next label: measured against FastQC 0.13.0 by varying the
-            // occurrence count of one sequence in a 200-read file:
-            //
-            //   count  10 -> >10      count 100 -> >50
-            //   count  50 -> >10      count 101 -> >100
-            //   count 500 -> >100     count 501 -> >500
-            //
-            // So >10 covers 10..=49, >50 covers 50..=100, >100 covers 101..=500,
-            // and so on. The upper bound of each bucket is the next bucket's
-            // threshold, not the next threshold minus one.
-            10..=49 => 9,
-            50..=100 => 10,
+            // FastQC computes the slot from count - 1. Its legacy ">10"
+            // label covers 10..=50; ">50" begins at 51. The 50 boundary is
+            // confirmed by the pinned CLI and an independent single-prefix
+            // population (EVIDENCE-FASTQC-GC-DUPLICATION.md).
+            10..=50 => 9,
+            51..=100 => 10,
             101..=500 => 11,
             501..=1000 => 12,
             1001..=5000 => 13,
@@ -1126,6 +1117,45 @@ mod tests {
         assert_eq!(module.lines[0], "#Quality\tCount");
         // Both reads average quality 40, so one row with a floating count.
         assert_eq!(module.lines[1], "40\t2.0");
+    }
+
+    #[test]
+    fn duplication_bin_edges_match_the_pinned_count_minus_one_contract() {
+        for (count, label) in [
+            (9, "9"),
+            (10, ">10"),
+            (49, ">10"),
+            (50, ">10"),
+            (51, ">50"),
+            (100, ">50"),
+            (101, ">100"),
+            (500, ">100"),
+            (501, ">500"),
+            (1000, ">500"),
+            (1001, ">1k"),
+            (5000, ">1k"),
+            (5001, ">5k"),
+            (10000, ">5k"),
+            (10001, ">10k+"),
+        ] {
+            let mut stats = QcStats::new("duplication.fastq");
+            stats.total_sequences = count;
+            stats.sequences.insert(vec![b'A'; 50], count);
+            let result = sequence_duplication(&stats, &Thresholds::default());
+            for row in &result.lines[2..] {
+                let (actual_label, value) = row.split_once('\t').unwrap();
+                assert_eq!(
+                    value,
+                    if actual_label == label {
+                        "100.0"
+                    } else {
+                        "0.0"
+                    },
+                    "count={count}, row={row}"
+                );
+            }
+            assert!(result.lines.contains(&format!("{label}\t100.0")));
+        }
     }
 
     #[test]

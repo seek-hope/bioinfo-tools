@@ -30,12 +30,17 @@
 
 #![forbid(unsafe_code)]
 
+mod bgzf_source;
 pub mod commands;
+mod encoder_record;
 pub mod error;
 pub mod format;
 pub mod index_util;
 pub mod io_util;
 mod merge_tree;
+mod quickcheck;
+mod radix_sort;
+mod sort_chunk;
 pub mod sort_order;
 pub mod stats;
 
